@@ -39,7 +39,7 @@ def Tegridy_MIDI_Processor(MIDI_file):
 
     minimum_number_of_notes_per_chord = 2 # Must be 2 or more...
 
-#   debug = False
+    debug = False
 
 ###########
 
