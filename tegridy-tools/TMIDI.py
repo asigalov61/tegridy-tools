@@ -208,15 +208,17 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
 
   temp_chords_list.append([[song_name, 0, 0, 0, 0, 0]])
   melody_list_final.append([song_name, 0, 0, 0, 0, 0])
+  
   for note in melody_list:
     temp_chords_list.append([note])
-
+    melody_list_final.append(note)
     for chord in chords_list:
       if note[1] == chord[0][1]:
         temp_chords_list.append(chord[1:])
+  
   temp_chords_list.sort()
   chords_list_final = temp_chords_list
-  melody_list_final = melody
+
   return chords_list_final, melody_list_final
 
 ###################################################################################
