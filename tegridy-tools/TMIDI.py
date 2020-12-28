@@ -19,6 +19,8 @@
 
 import MIDI
 
+###################################################################################
+
 def Tegridy_MIDI_Processor(MIDI_file):
 
     '''Tegridy MIDI Processor
@@ -180,6 +182,90 @@ def Tegridy_MIDI_Processor(MIDI_file):
     melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
       
     return chords_list, melody
+
+###################################################################################
+
+def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
+  '''Tegridy Chords Coverter
+
+  Inputs: Tegridy MIDI chords_list (as is)
+
+          Tegridy MIDI melody_list (as is)
+
+          Name of the song as plain string
+
+
+  Outputs: Converted chords_list with melody_notes and song name
+
+           Converted melody_list with song name
+
+  Project Los Angeles
+  Tegridy Code 2020'''
+
+  temp_chords_list = []
+  chords_list_final = []
+  melody_list_final = []
+
+  temp_chords_list.append([[song_name, 0, 0, 0, 0, 0]])
+  melody_list_final.append([song_name, 0, 0, 0, 0, 0])
+  for note in melody_list:
+    temp_chords_list.append([note])
+
+    for chord in chords_list:
+      if note[1] == chord[0][1]:
+        temp_chords_list.append(chord[1:])
+  temp_chords_list.sort()
+  chords_list_final = temp_chords_list
+  melody_list_final = melody
+  return chords_list_final, melody_list_final
+
+###################################################################################
+
+def Tegridy_MIDI_TXT_Processor(converted_chords_list, converted_melody_list, simulate_velocity=False):
+    '''Tegridy MIDI to TXT Processor
+     
+     Input: Tegridy MIDI chords_list and melody_list (as is)
+     Output: TXT encoded MIDI events as plain txt/plain str
+
+     Project Los Angeles
+     Tegridy Code 2020'''
+
+    debug = False
+
+    number_of_chords_recorded = 0
+    number_of_bad_chords_recorded = 0
+    chord_start_time = 0
+
+    TXT_string = ''
+
+    for chord in converted_chords_list:
+      try:
+        chord_duration = chord[0][2]
+        if simulate_velocity:
+          chord_velocity = chord[0][4]
+        else:  
+          chord_velocity = chord[0][5]
+        chord_start_time = chord[0][1] 
+        if chord_duration == 0 and chord_velocity == 0:
+          TXT_string += 'SONG=' + str(chord[0][0]) + ' '
+        else:
+
+          TXT_string += 'C=' + str(chord_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
+
+          for note in chord:
+            TXT_string += '-' + str(note[4])
+          
+          TXT_string += ' '
+          
+          if debug: print(chord)
+
+          number_of_chords_recorded+=1
+      
+      except:
+        if debug: print('Bad chord. Skipping...')
+        number_of_bad_chords_recorded += 1
+        continue
+    return TXT_string, number_of_chords_recorded, number_of_bad_chords_recorded
 
 ###################################################################################
 ###################################################################################
