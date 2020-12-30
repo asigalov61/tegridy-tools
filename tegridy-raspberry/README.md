@@ -28,7 +28,7 @@ sudo pip3 install ipython
 
 ### #===Music-AI===#
 
-pudo pip3 install music21
+sudo pip3 install music21
 
 sudo pip3 install mido
 
