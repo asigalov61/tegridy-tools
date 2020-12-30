@@ -10,7 +10,7 @@
 
 ## Install instructions for other useful and required DL packages for Raspberry Pi
 
-===PyTorch-Keras-Tensorflow===
+### ===PyTorch-Keras-Tensorflow===
 
 pip3 install pandas
 
@@ -20,13 +20,13 @@ pip3 install --user secrets
 
 pip3 install tqdm
 
-===Plotting-Displaying===
+### ===Plotting-Displaying===
 
 pip3 install matplotlib
 
 pip3 install ipython
 
-===Music-AI===
+### ===Music-AI===
 
 pip3 install music21
 
