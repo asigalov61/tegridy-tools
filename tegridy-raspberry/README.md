@@ -2,7 +2,7 @@
 
 ***
 
-# Everything you need for DL on Raspberry Pi but were afraid to ask for :)
+## Everything you need for DL on Raspberry Pi but were afraid to ask for :)
 
 ***
 
