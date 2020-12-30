@@ -91,7 +91,7 @@ def main(): # Main is for multi-processing on Win...
 		# Main multi-processing loop for MIDIs
 
 		pool = multiprocessing.Pool(processes=number_of_parallel_threads)
-		chords = pool.map(TMIDI.Tegridy_MIDI_Processor, files)
+		chords = pool.map(TMIDI.Tegridy_MIDI_Processor, files, 0, 1)
 		chords_list_final = [chords[0][0]]
 		melody = chords[0][1]
 		pool.close()
@@ -101,7 +101,7 @@ def main(): # Main is for multi-processing on Win...
 		print('Processing files with multi-threading disabled. Please wait...')
 		for f in tqdm.auto.tqdm(files):
 			files_count += 1
-			chords_list, melody = TMIDI.Tegridy_MIDI_Processor(f)
+			chords_list, melody = TMIDI.Tegridy_MIDI_Processor(f, 0, 1)
 
 			chords_list_final.extend(chords_list)
 
