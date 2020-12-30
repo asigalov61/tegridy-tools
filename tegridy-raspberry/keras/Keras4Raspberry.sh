@@ -12,4 +12,4 @@ sudo apt-get update
 sudo apt-get upgrade
 
 sudo apt-get install python3-h5py
-pip3 install keras==2.3.0
+sudo pip3 install keras==2.3.0
