@@ -8,6 +8,8 @@
 
 ## Install instructions for other useful and required DL packages for Raspberry Pi
 
+### NOTE: You do not have to use sudo on most packages if you not going to run start-up scripts/do fancy stuff :)
+
 ### #===PyTorch-Keras-Tensorflow===#
 
 sudo pip3 install pandas
