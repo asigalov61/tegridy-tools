@@ -24,12 +24,14 @@ gdown https://drive.google.com/uc?id=1NAQ1nKvZmcun6isP1Bc8X434VLJJZu2J
 
 unzip pytorch.zip
 
-cd /pytorch/
+cd ./pytorch/
 
+sudo -E python3 setup.py install
+
+cd ..
 sudo apt-get install libopenblas-dev libblas-dev m4 cmake cython \
   python3-dev python3-yaml python3-setuptools
 
 sudo -E python3 setup.py install
 
 cd ../
-
