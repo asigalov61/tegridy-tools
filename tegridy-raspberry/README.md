@@ -2,43 +2,42 @@
 
 ***
 
-## Everything you need for DL on Raspberry Pi but were afraid to ask for :)
-
-
+# Everything you need for DL on Raspberry Pi but were afraid to ask for :)
 
 ***
 
-## Install instructions for other useful and required DL packages for Raspberry Pi
+# Install instructions for other useful and required DL packages for Raspberry Pi
 
-### ===PyTorch-Keras-Tensorflow===
+# #===PyTorch-Keras-Tensorflow===#
 
-pip3 install pandas
+sudo pip3 install pandas
 
-pip3 install dill
+sudo pip3 install dill
 
 pip3 install --user secrets
 
-pip3 install tqdm
+sudo pip3 install tqdm
 
-### ===Plotting-Displaying===
+# #===Plotting-Displaying===#
 
-pip3 install matplotlib
+sudo pip3 install matplotlib
 
-pip3 install ipython
+sudo pip3 install ipython
 
-### ===Music-AI===
+# #===Music-AI===#
 
-pip3 install music21
+pudo pip3 install music21
 
-pip3 install mido
+sudo pip3 install mido
 
-pip3 install pretty_midi
+sudo pip3 install pretty_midi
 
-pip3 install fluidsynth
+sudo pip3 install fluidsynth
 
-pip3 install pyfluidsynth
+sudo pip3 install pyfluidsynth
 
-pip3 install midi2audio
+sudo pip3 install midi2audio
+
 
 ***
 
