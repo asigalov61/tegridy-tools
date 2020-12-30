@@ -21,16 +21,21 @@ import MIDI
 
 ###################################################################################
 
-def Tegridy_MIDI_Processor(MIDI_file):
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
 
     '''Tegridy MIDI Processor
 
     Input: A single MIDI file.
+           Desired MIDI channel to process.
+           Notes/Chords timings divider (denominator).
+
     Output: A list of MIDI chords and a list of melody notes.
     MIDI Chords: Sorted by pitch (chord[0] == highest pitch).
     Melody Notes: Sorted by start time.
-    Format: MIDI.py Score Events format
-    Precision: 1 ms per note/chord
+
+    Format: MIDI.py Score Events format.
+
+    Default precision: 1 ms per note/chord.
 
     Enjoy! :)
 
@@ -66,6 +71,7 @@ def Tegridy_MIDI_Processor(MIDI_file):
     ev = 0
 
     score = []
+    rec_event = []
 
 ###########    
 
@@ -94,7 +100,11 @@ def Tegridy_MIDI_Processor(MIDI_file):
     midi_file.close()
 
     score1 = MIDI.to_millisecs(opus)
-    score = MIDI.opus2score(score1)
+    score2 = MIDI.opus2score(score1)
+    if MIDI_channel == -1:
+      score = score2
+    else:  
+      score = MIDI.grep(score2, [MIDI_channel])
     
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
@@ -103,10 +113,13 @@ def Tegridy_MIDI_Processor(MIDI_file):
         chords_list = []
         if event[0] == 'note':
           if len(event) == 6: # Checking for bad notes...
-              events_matrix.append(event)
+              rec_event = event
+              rec_event[1] = int(event[1] / time_denominator)
+              rec_event[2] = int(event[2] / time_denominator)
+              events_matrix.append(rec_event)
 
-              min_note = int(min(min_note, event[4]))
-              max_note = int(max(max_note, event[4]))          
+              min_note = int(min(min_note, rec_event[4]))
+              max_note = int(max(max_note, rec_event[4]))          
               
               ev += 1
       
@@ -227,7 +240,11 @@ def Tegridy_MIDI_TXT_Processor(converted_chords_list, converted_melody_list, sim
     '''Tegridy MIDI to TXT Processor
      
      Input: Tegridy MIDI chords_list and melody_list (as is)
+            Simulate velocity or not
+
      Output: TXT encoded MIDI events as plain txt/plain str
+             Number of processed chords
+             Number of bad/skipped chords (for whatever reason)
 
      Project Los Angeles
      Tegridy Code 2020'''
