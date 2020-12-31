@@ -4,10 +4,10 @@
 ###################################################################################
 ###################################################################################
 #
-#	Tegridy MIDI Module (TMIDI / tee-mi-di)
+#	Tegridy MIDI Module (TMIDI / tee-midi)
 #	Version 1.0
 #
-#	Based on and includes the amazing MIDI.py module v.6.7. by Peter Billam
+#	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
 #
 #	Project Los Angeles
@@ -236,11 +236,13 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
 
 ###################################################################################
 
-def Tegridy_MIDI_TXT_Processor(converted_chords_list, converted_melody_list, simulate_velocity=False):
+def Tegridy_MIDI_TXT_Processor(dataset_name, converted_chords_list, converted_melody_list, simulate_velocity=False, , line_by_line_output=False):
     '''Tegridy MIDI to TXT Processor
      
-     Input: Tegridy MIDI chords_list and melody_list (as is)
+     Input: Dataset name
+            Tegridy MIDI chords_list and melody_list (as is)
             Simulate velocity or not
+            Line-by-line output switch (useful for the AI models tokenizers and other specific purposes)
 
      Output: TXT encoded MIDI events as plain txt/plain str
              Number of processed chords
@@ -255,7 +257,15 @@ def Tegridy_MIDI_TXT_Processor(converted_chords_list, converted_melody_list, sim
     number_of_bad_chords_recorded = 0
     chord_start_time = 0
 
-    TXT_string = ''
+    if dataset_name != '':
+      TXT_string = str(dataset_name)
+    else:
+      TXT_string = ''
+    
+    if line_by_line_output:
+      TXT_string += '\n'
+    else:
+      TXT_string += ' '  
 
     for chord in converted_chords_list:
       try:
@@ -266,7 +276,12 @@ def Tegridy_MIDI_TXT_Processor(converted_chords_list, converted_melody_list, sim
           chord_velocity = chord[0][5]
         chord_start_time = chord[0][1] 
         if chord_duration == 0 and chord_velocity == 0:
-          TXT_string += 'SONG=' + str(chord[0][0]) + ' '
+          TXT_string += 'SONG=' + str(chord[0][0])
+        if line_by_line_output:
+          TXT_string += '\n'
+        else:
+          TXT_string += ' ' 
+        
         else:
 
           TXT_string += 'C=' + str(chord_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
@@ -274,7 +289,10 @@ def Tegridy_MIDI_TXT_Processor(converted_chords_list, converted_melody_list, sim
           for note in chord:
             TXT_string += '-' + str(note[4])
           
-          TXT_string += ' '
+          if line_by_line_output:
+            TXT_string += '\n'
+          else:  
+            TXT_string += ' '
           
           if debug: print(chord)
 
