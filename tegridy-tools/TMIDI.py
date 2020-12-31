@@ -236,13 +236,18 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
 
 ###################################################################################
 
-def Tegridy_MIDI_TXT_Processor(dataset_name, converted_chords_list, converted_melody_list, simulate_velocity=False, , line_by_line_output=False):
+def Tegridy_MIDI_TXT_Processor(dataset_name, 
+                              converted_chords_list, 
+                              converted_melody_list, 
+                              simulate_velocity=False, 
+                              line_by_line_output=False):
+
     '''Tegridy MIDI to TXT Processor
      
      Input: Dataset name
             Tegridy MIDI chords_list and melody_list (as is)
             Simulate velocity or not
-            Line-by-line output switch (useful for the AI models tokenizers and other specific purposes)
+            Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
 
      Output: TXT encoded MIDI events as plain txt/plain str
              Number of processed chords
@@ -277,11 +282,10 @@ def Tegridy_MIDI_TXT_Processor(dataset_name, converted_chords_list, converted_me
         chord_start_time = chord[0][1] 
         if chord_duration == 0 and chord_velocity == 0:
           TXT_string += 'SONG=' + str(chord[0][0])
-        if line_by_line_output:
-          TXT_string += '\n'
-        else:
-          TXT_string += ' ' 
-        
+          if line_by_line_output:
+            TXT_string += '\n'
+          else:  
+            TXT_string += ' '
         else:
 
           TXT_string += 'C=' + str(chord_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
@@ -303,6 +307,118 @@ def Tegridy_MIDI_TXT_Processor(dataset_name, converted_chords_list, converted_me
         number_of_bad_chords_recorded += 1
         continue
     return TXT_string, number_of_chords_recorded, number_of_bad_chords_recorded
+
+###################################################################################
+
+def Tegridy_TXT_MIDI_Processor(input_string, 
+                              line_by_line_dataset = False,
+                              dataset_MIDI_events_time_denominator = 4,
+                              number_of_ticks_per_quarter = 425,
+                              start_from_this_generated_event = 0,
+                              remove_generated_silence_if_needed = False,
+                              silence_offset_from_start = 75000,
+                              simulate_velocity = False,
+                              output_signature = 'TMIDI-TXT-MIDI'):
+
+    '''Tegridy TXT to MIDI Processor
+     
+     Input: Input TXT string in the TMIDI-TXT format
+            Input is line-by-line or one-line
+            Used dataset time denominator
+            Number of ticks per quater for output MIDI
+            Start from this input event (skip this many from start)
+            Is there a generated silence or not
+            Silence offset in MIDI ticks from start
+            Simulate velocity (V = max(Pitch))
+            Output MIDI signature):
+
+     Output: Raw/binary MIDI data that can be recorded to a file with standard python functions.
+             Detected number of input notes
+             Recorded number of output notes
+             Detailed created MIDI stats in the MIDI.py module format (MIDI.score2stats)
+
+     Project Los Angeles
+     Tegridy Code 2020'''
+
+    debug = False
+
+    if line_by_line_dataset:
+      input_string = input_string.split() # for new datasets
+    else:
+      input_string = input_string.split(' ') # for compatibility/legacy datasets
+    if debug: print(input_string)
+
+
+    i=0
+    z=1
+
+    notes_specs = []
+    song_name = ''
+    previous_chord_start_time = 0
+    number_of_notes_recorded = 0
+    zero_marker = True
+    song_header = []
+    song_score = []
+
+    print('Converting TXT to MIDI. Please wait...')
+    for i in range(len(input_string)): 
+      input_string_len = len(input_string[i])
+
+      if input_string[i].split('=')[0] == 'SONG':
+        try:
+          song_name = input_string[i].split('=')[1]
+          song_header.append(['track_name', 0, song_name,])
+        except:
+          print('Unknown Song name format', song_name)
+      if input_string[i].split('=')[0] == 'C':
+        try:
+          start_time = int(input_string[i].split('=')[1].split('-')[0]) * dataset_MIDI_events_time_denominator
+          duration = int(input_string[i].split('=')[1].split('-')[1]) * dataset_MIDI_events_time_denominator 
+          channel = int(input_string[i].split('=')[1].split('-')[2])
+          velocity = int(input_string[i].split('=')[1].split('-')[3])
+        except:
+          print('Unknown Chord:', input_string[i])
+
+      if str(input_string[i].split('=')[0]).split('-')[0] == 'N':    
+        try:
+          for x in range(len(str(input_string[i].split('=')[0]).split('-'))-1):
+            notes_specs = str(input_string[i].split('=')[0]).split('-')[x+1]
+            simulated_velocity = notes_specs        
+            if simulate_velocity:
+              song_score.append(['note', 
+                                  int(start_time), #Start Time
+                                  int(duration), #Duration
+                                  int(channel), #Channel
+                                  int(notes_specs), #Note
+                                  int(simulated_velocity)]) #Velocity              
+              number_of_notes_recorded += 1
+            else:  
+              song_score.append(['note', 
+                                  int(start_time), #Start Time
+                                  int(duration), #Duration
+                                  int(channel), #Channel
+                                  int(notes_specs), #Note
+                                  int(velocity)]) #Velocity              
+              number_of_notes_recorded += 1
+        except:
+          print("Unknown Notes: " + input_string[i])
+
+    if remove_generated_silence_if_needed:
+      song_score1 = []
+      for note in song_score[start_from_this_generated_event:]:
+        note1 = note
+        note1[1] = note[1] - silence_offset_from_start
+        song_score1.append(note1)
+      song_score = song_score1  
+
+    output_header = [number_of_ticks_per_quarter,[['track_name', 0, bytes(output_signature, 'utf-8')]]]
+    output_song = song_header + song_score[start_from_this_generated_event:]
+    output = output_header + [output_song]
+
+    midi_data = MIDI.score2midi(output)
+    detailed_MIDI_stats = MIDI.score2stats(output)
+
+    return midi_data, len(input_string), number_of_notes_recorded, detailed_MIDI_stats
 
 ###################################################################################
 ###################################################################################
