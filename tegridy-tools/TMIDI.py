@@ -5,7 +5,7 @@
 ###################################################################################
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.0
+#	Version 1.1
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
