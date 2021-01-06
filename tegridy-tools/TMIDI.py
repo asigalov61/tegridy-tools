@@ -21,7 +21,7 @@ import MIDI
 
 ###################################################################################
 
-def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
 
     '''Tegridy MIDI Processor
 
@@ -241,10 +241,10 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
 
 ###################################################################################
 
-def Tegridy_MIDI_TXT_Processor(dataset_name, 
-                              converted_chords_list, 
-                              converted_melody_list, 
-                              simulate_velocity=False, 
+def Tegridy_MIDI_TXT_Processor(dataset_name,
+                              converted_chords_list,
+                              converted_melody_list,
+                              simulate_velocity=False,
                               line_by_line_output=False):
 
     '''Tegridy MIDI to TXT Processor
@@ -339,7 +339,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
 def Tegridy_TXT_MIDI_Processor(input_string, 
                               line_by_line_dataset = False,
-                              dataset_MIDI_events_time_denominator = 4,
+                              dataset_MIDI_events_time_denominator = 100,
                               number_of_ticks_per_quarter = 425,
                               start_from_this_generated_event = 0,
                               remove_generated_silence_if_needed = False,
@@ -359,7 +359,8 @@ def Tegridy_TXT_MIDI_Processor(input_string,
             Simulate velocity (V = max(Pitch))
             Output MIDI signature):
 
-     Output: Raw/binary MIDI data that can be recorded to a file with standard python functions.
+     Output: NOTE: For now only 1st recorded TXT performance converted to MIDI.
+             Raw/binary MIDI data that can be recorded to a file with standard python functions.
              Detected number of input notes
              Recorded number of output notes
              Detailed created MIDI stats in the MIDI.py module format (MIDI.score2stats)
@@ -388,8 +389,10 @@ def Tegridy_TXT_MIDI_Processor(input_string,
     song_score = []
 
     print('Converting TXT to MIDI. Please wait...')
-    for i in range(len(input_string)): 
-      input_string_len = len(input_string[i])
+    for i in range(len(input_string)):
+      if input_string[i].split('_')[0] == 'SONG=END':
+        break
+        #TODO Record all perfomances (even incomplete ones) as separate tracks in output MIDI
 
       if input_string[i].split('=')[0] == 'SONG':
         try:
