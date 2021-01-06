@@ -218,26 +218,28 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
   temp_chords_list = []
   chords_list_final = []
   melody_list_final = []
+  chords_list_fin = []
+  melody_list_fin = []
 
-  temp_chords_list.append([[song_name, 0, 0, 0, 0, 0]])
-  melody_list_final.append([song_name, 0, 0, 0, 0, 0])
-  
+  chords_list_fin = [[song_name, 0, 0, 0, 0, 0]]
+  melody_list_fin = [song_name, 0, 0, 0, 0, 0]
+
   for note in melody_list:
     temp_chords_list.append([note])
     melody_list_final.append(note)
     for chord in chords_list:
       if note[1] == chord[0][1]:
-        temp_chords_list.append(chord[1:])
+        temp_chords_list.append(chord[1:])      
 
   temp_chords_list.append([['song_end', note[1], len(temp_chords_list), 0, 0, 0]])
   melody_list_final.append(['song_end', note[1], len(melody_list_final), 0, 0, 0]) 
 
+  temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)) + '_Chords', 0, 0, 0, 0, 0]]
+  melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)) + '_Notes', 0, 0, 0, 0, 0]
+
   temp_chords_list.sort()
-  chords_list_final = temp_chords_list
-
-
-
-  return chords_list_final, melody_list_final
+  
+  return temp_chords_list, melody_list_final
 
 ###################################################################################
 
@@ -263,7 +265,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
     debug = False
 
-    song_chords_count = 0
+    song_chords_count = 1
     number_of_chords_recorded = 0
     number_of_bad_chords_recorded = 0
     chord_start_time = 0
@@ -300,7 +302,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
               TXT_string += '\n'
             else:  
               TXT_string += ' '
-            song_chords_count = 0  
+            song_chords_count = 1  
           
           else:
             TXT_string += 'SONG=' + str(chord[0][0])
@@ -308,7 +310,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
               TXT_string += '\n'
             else:  
               TXT_string += ' '
-            song_chords_count = 0  
+            song_chords_count = 1  
             first_song = False     
         
         else:
