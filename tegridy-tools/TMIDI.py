@@ -231,11 +231,11 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
       if note[1] == chord[0][1]:
         temp_chords_list.append(chord[1:])      
 
-  temp_chords_list.append([['song_end', note[1], len(temp_chords_list), 0, 0, 0]])
-  melody_list_final.append(['song_end', note[1], len(melody_list_final), 0, 0, 0]) 
+  temp_chords_list.append([['song_end', note[1], 0, len(temp_chords_list), 0, 1]])
+  melody_list_final.append(['song_end', note[1], 0, len(melody_list_final), 0, 1]) 
 
-  temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)) + '_Chords', 0, 0, 0, 0, 0]]
-  melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)) + '_Notes', 0, 0, 0, 0, 0]
+  temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-2) + '_Chords', 0, 0, 0, 0, 0]]
+  melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-2) + '_Notes', 0, 0, 0, 0, 0]
 
   temp_chords_list.sort()
   
@@ -265,7 +265,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
     debug = False
 
-    song_chords_count = 1
+    song_chords_count = 0
     number_of_chords_recorded = 0
     number_of_bad_chords_recorded = 0
     chord_start_time = 0
@@ -290,28 +290,30 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
           chord_velocity = chord[0][5]
         chord_start_time = chord[0][1] 
         if chord_duration == 0 and chord_velocity == 0:
-          if not first_song:
-            TXT_string += 'SONG=END_' + str(song_chords_count) + '_Chords'
-            if line_by_line_output:
-              TXT_string += '\n'
-            else:  
-              TXT_string += ' '
+          if not str(chord[0][0]) == 'song_end':
+            if not first_song:
+              TXT_string += 'SONG=END_' + str(song_chords_count) + '_Chords'
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
 
-            TXT_string += 'SONG=' + str(chord[0][0])
-            if line_by_line_output:
-              TXT_string += '\n'
-            else:  
-              TXT_string += ' '
-            song_chords_count = 1  
-          
-          else:
-            TXT_string += 'SONG=' + str(chord[0][0])
-            if line_by_line_output:
-              TXT_string += '\n'
-            else:  
-              TXT_string += ' '
-            song_chords_count = 1  
-            first_song = False     
+              TXT_string += 'SONG=' + str(chord[0][0])
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
+              song_chords_count = 1  
+            
+            else:
+              if not str(chord[0][0]) == 'song_end':
+                TXT_string += 'SONG=' + str(chord[0][0])
+                if line_by_line_output:
+                  TXT_string += '\n'
+                else:  
+                  TXT_string += ' '
+                song_chords_count = 0  
+                first_song = False     
         
         else:
 
@@ -392,7 +394,7 @@ def Tegridy_TXT_MIDI_Processor(input_string,
 
     print('Converting TXT to MIDI. Please wait...')
     for i in range(len(input_string)):
-      if input_string[i].split('_')[0] == 'SONG=END':
+      if input_string[i][0:13] == 'SONG=END_with_':
         break
         #TODO Record all perfomances (even incomplete ones) as separate tracks in output MIDI
 
