@@ -219,8 +219,8 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
   chords_list_final = []
   melody_list_final = []
 
-  temp_chords_list.append([[song_name, 0, 0, 0, 0, 0]])
-  melody_list_final.append([song_name, 0, 0, 0, 0, 0])
+  temp_chords_list.append([[song_name, len(chords_list), 0, 0, 0, 0]])
+  melody_list_final.append([song_name, len(melody_list), 0, 0, 0, 0])
   
   for note in melody_list:
     temp_chords_list.append([note])
@@ -281,7 +281,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
           chord_velocity = chord[0][5]
         chord_start_time = chord[0][1] 
         if chord_duration == 0 and chord_velocity == 0:
-          TXT_string += 'SONG=' + str(chord[0][0])
+          TXT_string += 'SONG=' + str(chord[0][0]) + '_with_' + str(chord_start_time) + '_Chords'
           if line_by_line_output:
             TXT_string += '\n'
           else:  
@@ -300,12 +300,13 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
           
           if debug: print(chord)
 
-          number_of_chords_recorded+=1
-      
+          number_of_chords_recorded += 1
+          
       except:
         if debug: print('Bad chord. Skipping...')
         number_of_bad_chords_recorded += 1
-        continue
+        continue            
+
     return TXT_string, number_of_chords_recorded, number_of_bad_chords_recorded
 
 ###################################################################################
@@ -367,7 +368,7 @@ def Tegridy_TXT_MIDI_Processor(input_string,
       if input_string[i].split('=')[0] == 'SONG':
         try:
           song_name = input_string[i].split('=')[1]
-          song_header.append(['track_name', 0, song_name,])
+          song_header.append(['track_name', 0, song_name])
         except:
           print('Unknown Song name format', song_name)
       if input_string[i].split('=')[0] == 'C':
