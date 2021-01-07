@@ -218,35 +218,31 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
   temp_chords_list = []
   chords_list_final = []
   melody_list_final = []
-  chords_list_fin = []
-  melody_list_fin = []
   first_song = True
+  temp_chords_list = [[song_name, 0, 0, 0, 0, 0]]
+  melody_list_final = [song_name, 0, 0, 0, 0, 0]
 
-  chords_list_fin = [[song_name, 0, 0, 0, 0, 0]]
-  melody_list_fin = [song_name, 0, 0, 0, 0, 0]
-
-  for note in melody_list:
-    temp_chords_list.append([note])
-    melody_list_final.append(note)
+  for notez in melody_list:
+    temp_chords_list.append([notez])
+    melody_list_final.append(notez)
     for chord in chords_list:
-      if note[1] == chord[0][1]:
-        temp_chords_list.append(chord[1:])      
-
-
-
-  temp_chords_list.sort()
-
+      if notez[1] == chord[0][1]:
+        temp_chords_list.append(chord[1:]) 
+     
   if first_song:
     temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, 0, 0, 0]]
     melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, 0, 0, 0]
-    temp_chords_list.append([['song_end', note[1], 0, len(temp_chords_list)-1, 0, 1]])
-    melody_list_final.append(['song_end', note[1], 0, len(melody_list_final)-1, 0, 1])     
+    temp_chords_list.append([['song_end', notez[1], 0, len(temp_chords_list)-1, 0, 1]])
+    melody_list_final.append(['song_end', notez[1], 0, len(melody_list_final)-1, 0, 1])     
     first_song = False
   else:
     temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, 0, 0, 0]]
     melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, 0, 0, 0]
-    temp_chords_list.append([['song_end', note[1], 0, len(temp_chords_list)-1, 0, 1]])
-    melody_list_final.append(['song_end', note[1], 0, len(melody_list_final)-1, 0, 1])
+    temp_chords_list.append([['song_end', notez[1], 0, len(temp_chords_list)-1, 0, 1]])
+    melody_list_final.append(['song_end', notez[1], 0, len(melody_list_final)-1, 0, 1])
+    
+  temp_chords_list.sort()
+    
   return temp_chords_list, melody_list_final
 
 ###################################################################################
