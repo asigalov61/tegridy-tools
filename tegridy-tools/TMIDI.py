@@ -394,7 +394,7 @@ def Tegridy_TXT_MIDI_Processor(input_string,
 
     print('Converting TXT to MIDI. Please wait...')
     for i in range(len(input_string)):
-      if input_string[i][0:13] == 'SONG=END_with_':
+      if input_string[i].split('_with_')[0] == 'SONG=END':
         break
         #TODO Record all perfomances (even incomplete ones) as separate tracks in output MIDI
 
