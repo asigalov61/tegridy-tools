@@ -19,6 +19,8 @@
 
 import MIDI
 
+from collections import defaultdict
+
 ###################################################################################
 
 def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100, group_chords_every_number_of_steps=3):
@@ -28,7 +30,7 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100, grou
     Input: A single MIDI file.
            Desired MIDI channel to process.
            Notes/Chords timings divider (denominator).
-           Group chords every nth (start)step. This helps to create larger chords.
+           [Not used atm] Group chords every nth (start)step. This helps to create larger chords.
 
     Output: A list of MIDI chords and a list of melody notes.
     MIDI Chords: Sorted by pitch (chord[0] == highest pitch).
@@ -145,13 +147,13 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100, grou
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
 
     #print('Grouping by start time. This will take a while...')
-    #values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
-
-    #groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
-    
     values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
 
-    groups = [[y for y in events_matrix if y[1] in range(x, x+group_chords_every_number_of_steps) and len(y) == 6] for x in range(0, len(values), group_chords_every_number_of_steps)] # Grouping notes into chords while discarting bad notes...
+    groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+    
+    #values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
+
+    #groups = [[y for y in events_matrix if y[1] in range(x, x+group_chords_every_number_of_steps) and len(y) == 6] for x in range(0, len(values), group_chords_every_number_of_steps)] # Grouping notes into chords while discarting bad notes...
 
     chords_list1 = []
     #print('Removing single note/excessive events, sorting events by pitch, and creating a chords list...')
@@ -176,6 +178,14 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100, grou
 
     chords_list = []
     chords_list.extend(chords_list_track)
+
+    # Gonna use a dic here to join chords by start-time :)
+    record_dict = defaultdict(list)
+
+    for chords in chords_list:
+      record_dict[chords[0][1]].extend(chords)
+
+    chords_list = list(record_dict.values())
 
     '''new_chords_list = [] # Remove duplicates code for the future/just in case
     for elem in chords_list:
