@@ -209,7 +209,7 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100, grou
 
 ###################################################################################
 
-def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
+def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_in_chords=False):
   '''Tegridy Chords Coverter
 
   Inputs: Tegridy MIDI chords_list (as is)
@@ -217,6 +217,8 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
           Tegridy MIDI melody_list (as is)
 
           Name of the song as plain string
+
+          Include or exclude melody notes in each chord. Def. is to exclude.
 
 
   Outputs: Converted chords_list with melody_notes and song name
@@ -238,7 +240,10 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
     melody_list_final.append(notez)
     for chord in chords_list:
       if notez[1] == chord[0][1]:
-        temp_chords_list.append(chord[1:])
+        if melody_notes_in_chords:
+          temp_chords_list.append(chord[0:])
+        else:
+          temp_chords_list.append(chord[1:])
      
   if first_song:
     temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, 0, 0, 0]]
