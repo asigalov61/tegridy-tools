@@ -21,13 +21,14 @@ import MIDI
 
 ###################################################################################
 
-def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100, group_chords_every_number_of_steps=3):
 
     '''Tegridy MIDI Processor
 
     Input: A single MIDI file.
            Desired MIDI channel to process.
            Notes/Chords timings divider (denominator).
+           Group chords every nth (start)step. This helps to create larger chords.
 
     Output: A list of MIDI chords and a list of melody notes.
     MIDI Chords: Sorted by pitch (chord[0] == highest pitch).
@@ -144,10 +145,14 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
 
     #print('Grouping by start time. This will take a while...')
+    #values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
+
+    #groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+    
     values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
 
-    groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
-  
+    groups = [[y for y in events_matrix if y[1] in range(x, x+group_chords_every_number_of_steps) and len(y) == 6] for x in range(0, len(values), group_chords_every_number_of_steps)] # Grouping notes into chords while discarting bad notes...
+
     chords_list1 = []
     #print('Removing single note/excessive events, sorting events by pitch, and creating a chords list...')
     for items in groups: 
@@ -171,7 +176,13 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
 
     chords_list = []
     chords_list.extend(chords_list_track)
-    
+
+    '''new_chords_list = [] # Remove duplicates code for the future/just in case
+    for elem in chords_list:
+      if elem not in new_chords_list:
+          new_chords_list.append(elem)
+    chords_list = new_chords_list'''
+
     #print('Extracting melody...')
     melody_list = []
     
@@ -227,7 +238,7 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name):
     melody_list_final.append(notez)
     for chord in chords_list:
       if notez[1] == chord[0][1]:
-        temp_chords_list.append(chord[1:]) 
+        temp_chords_list.append(chord[1:])
      
   if first_song:
     temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, 0, 0, 0]]
