@@ -256,14 +256,14 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_i
           temp_chords_list.append(chord[1:])
      
   if first_song:
-    temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, 0, 0, 0]]
-    melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, 0, 0, 0]
+    temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, len(temp_chords_list)-1, 0, 0]]
+    melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
     temp_chords_list.append([['song_end', notez[1], 0, len(temp_chords_list)-1, 0, 1]])
     melody_list_final.append(['song_end', notez[1], 0, len(melody_list_final)-1, 0, 1])     
     first_song = False
   else:
-    temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, 0, 0, 0]]
-    melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, 0, 0, 0]
+    temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, len(temp_chords_list)-1, 0, 0]]
+    melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
     temp_chords_list.append([['song_end', notez[1], 0, len(temp_chords_list)-1, 0, 1]])
     melody_list_final.append(['song_end', notez[1], 0, len(melody_list_final)-1, 0, 1])
     
@@ -277,7 +277,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
                               converted_chords_list,
                               converted_melody_list,
                               simulate_velocity=False,
-                              line_by_line_output=False):
+                              line_by_line_output=False,
+                              represent_every_number_of_chords=0):
 
     '''Tegridy MIDI to TXT Processor
      
@@ -285,6 +286,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
             Tegridy MIDI chords_list and melody_list (as is)
             Simulate velocity or not
             Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
+            Represent events every so many steps. Def. is 0. == do not represent.
 
      Output: TXT encoded MIDI events as plain txt/plain str
              Number of processed chords
@@ -301,6 +303,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
     chord_start_time = 0
     first_song = True
 
+    rpz = 1
+
     if dataset_name != '':
       TXT_string = str(dataset_name)
     else:
@@ -313,6 +317,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
     for chord in converted_chords_list:
       try:
+        if chord[0][3] > 15:
+          song_dur = int(chord[0][3])        
         chord_duration = chord[0][2]
         if simulate_velocity:
           chord_velocity = chord[0][4]
@@ -357,6 +363,12 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
           for note in chord:
             TXT_string += '-' + str(note[4])
+	        
+          # Representation of events
+          if represent_every_number_of_chords > 0:
+            if rpz == represent_every_number_of_chords:
+              TXT_string += ' #' + str(song_dur)
+              rpz = 0    
           
           if line_by_line_output:
             TXT_string += '\n'
@@ -367,6 +379,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
           song_chords_count += 1
           number_of_chords_recorded += 1
+          rpz += 1
           
       except:
         if debug: print('Bad chord. Skipping...')
