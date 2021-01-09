@@ -222,9 +222,11 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_i
   temp_chords_list = []
   chords_list_final = []
   melody_list_final = []
-  first_song = True
+
   temp_chords_list = [[song_name, 0, 0, 0, 0, 0]]
   melody_list_final = [song_name, 0, 0, 0, 0, 0]
+
+  debug = False
 
   for notez in melody_list:
     if melody_notes_in_chords:
@@ -241,23 +243,24 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_i
     if len(chords) > 0:
       record_dict[chords[0][1]].extend(chords)
 
-  temp_chords_list = list(record_dict.values())       
-     
-  if first_song:
-    temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, len(temp_chords_list)-1, 0, 0]]
-    melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
-    temp_chords_list.append([['song_end', temp_chords_list[:-1][1], 0, len(temp_chords_list)-1, 0, 1]])
-    melody_list_final.append(['song_end', melody_list_final[:-1][1], 0, len(melody_list_final)-1, 0, 1])     
-    first_song = False
-  else:
-    temp_chords_list[0] = [[song_name + '_with_' + str(len(temp_chords_list)-1) + '_Chords', 0, 0, len(temp_chords_list)-1, 0, 0]]
-    melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
-    temp_chords_list.append([['song_end', temp_chords_list[:-1][1], 0, len(temp_chords_list)-1, 0, 1]])
-    melody_list_final.append(['song_end', melody_list_final[:-1][1], 0, len(melody_list_final)-1, 0, 1])
+  temp_chords_list = list(record_dict.values())
+
+  chords_list_final = []
+  #print('Sorting chords notes by pitch/removing empty chords if any...')
+  chords_list_final.append(temp_chords_list[0])
+  for chordz in temp_chords_list[1:]:
+    if len(chordz) > 0:
+      if debug: print(chordz)
+      chordz.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
+      chords_list_final.append(chordz) # Creating final chords list      
+
+  chords_list_final[0] = [[song_name + '_with_' + str(len(chords_list_final)-1) + '_Chords', 0, 0, len(chords_list_final)-1, 0, 0]]
+  melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
+  chords_list_final.append([['song_end', chords_list_final[:-1][1], 0, len(chords_list_final)-1, 0, 1]])
+  melody_list_final.append(['song_end', melody_list_final[:-1][1], 0, len(melody_list_final)-1, 0, 1])     
+  first_song = False
     
-  #temp_chords_list.sort()
-    
-  return temp_chords_list, melody_list_final
+  return chords_list_final, melody_list_final
 
 ###################################################################################
 
