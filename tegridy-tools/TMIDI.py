@@ -5,7 +5,7 @@
 ###################################################################################
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.1
+#	Version 1.2
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
@@ -270,7 +270,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
                               simulate_velocity=False,
                               line_by_line_output=False,
                               represent_every_number_of_chords = 0,
-                              chords_duration_multiplier = 1):
+                              chords_duration_multiplier = 1,
+                              pad_chords_with_stops=False):
 
     '''Tegridy MIDI to TXT Processor
      
@@ -360,6 +361,12 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
                 TXT_string += ' '             
         
         else:
+          if pad_chords_with_stops:
+            TXT_string += 'W=' + str(chord_start_time - previous_start_time - 1)
+            if line_by_line_output:
+              TXT_string += '\n'
+            else:  
+              TXT_string += ' '
 
           TXT_string += 'C=' + str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
           previous_start_time = chord_start_time
