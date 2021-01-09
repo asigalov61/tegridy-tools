@@ -269,7 +269,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
                               converted_melody_list,
                               simulate_velocity=False,
                               line_by_line_output=False,
-                              represent_every_number_of_chords=0):
+                              represent_every_number_of_chords = 0,
+                              chords_duration_multiplier = 1):
 
     '''Tegridy MIDI to TXT Processor
      
@@ -278,6 +279,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
             Simulate velocity or not
             Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
             Represent events every so many steps. Def. is 0. == do not represent.
+            Chords durations multiplier. Def. = 1
 
      Output: TXT encoded MIDI events as plain txt/plain str
              Number of processed chords
@@ -296,6 +298,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
     rpz = 1
 
+    previous_start_time = 0
+
     if dataset_name != '':
       TXT_string = str(dataset_name)
     else:
@@ -309,8 +313,15 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
     for chord in converted_chords_list:
       try:
         if chord[0][3] > 15:
-          song_dur = int(chord[0][3])        
-        chord_duration = chord[0][2]
+          song_dur = int(chord[0][3])
+        
+        if len(chord) > 1:
+          durs_chord = int(max(list(zip(*chord))[2]) * chords_duration_multiplier)
+          chord_duration = durs_chord
+        
+        else:      
+          chord_duration = int(chord[0][2] * chords_duration_multiplier)
+          
         if simulate_velocity:
           chord_velocity = chord[0][4]
         else:  
@@ -350,10 +361,10 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
         
         else:
 
-          TXT_string += 'C=' + str(chord_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
-
+          TXT_string += 'C=' + str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
+          previous_start_time = chord_start_time
           for note in chord:
-            TXT_string += '-' + str(note[4])
+            TXT_string += '-' + str(note[4]) + '/' + str(chord_duration - int(note[2] * chords_duration_multiplier))
 	        
           # Representation of events
           if represent_every_number_of_chords > 0:
@@ -432,6 +443,8 @@ def Tegridy_TXT_MIDI_Processor(input_string,
     song_header = []
     song_score = []
 
+    start_time = 0
+
     print('Converting TXT to MIDI. Please wait...')
     for i in range(len(input_string)):
       if input_string[i].split('=END_')[0] == 'SONG':
@@ -446,7 +459,7 @@ def Tegridy_TXT_MIDI_Processor(input_string,
           print('Unknown Song name format', song_name)
       if input_string[i].split('=')[0] == 'C':
         try:
-          start_time = int(input_string[i].split('=')[1].split('-')[0]) * dataset_MIDI_events_time_denominator
+          start_time += int(input_string[i].split('=')[1].split('-')[0]) * dataset_MIDI_events_time_denominator
           duration = int(input_string[i].split('=')[1].split('-')[1]) * dataset_MIDI_events_time_denominator 
           channel = int(input_string[i].split('=')[1].split('-')[2])
           velocity = int(input_string[i].split('=')[1].split('-')[3])
@@ -456,7 +469,8 @@ def Tegridy_TXT_MIDI_Processor(input_string,
       if str(input_string[i].split('=')[0]).split('-')[0] == 'N':    
         try:
           for x in range(len(str(input_string[i].split('=')[0]).split('-'))-1):
-            notes_specs = str(input_string[i].split('=')[0]).split('-')[x+1]
+            notes_specs, dur = str(input_string[i].split('=')[0]).split('-')[x+1].split('/')
+            duration = duration - int(dur)
             simulated_velocity = notes_specs        
             if simulate_velocity:
               song_score.append(['note', 
