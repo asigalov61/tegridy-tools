@@ -140,7 +140,8 @@ print('Loading complete. Enjoy! :)')
 
 full_path_to_output_dataset_to = "/content/Intelligent-Virtuoso-Music-MIDI-Dataset.data" #@param {type:"string"}
 desired_MIDI_channel_to_process = 0 #@param {type:"slider", min:-1, max:15, step:1}
-MIDI_events_time_denominator = 100 #@param {type:"slider", min:1, max:200, step:1}
+MIDI_events_time_denominator = 50 #@param {type:"slider", min:1, max:200, step:1}
+melody_notes_in_chords = True #@param {type:"boolean"}
 
 debug = False #@param {type:"boolean"}
 
@@ -208,7 +209,10 @@ for f in tqdm.auto.tqdm(filez):
   fn = os.path.basename(f)
   fno = fn.split('.')[0].replace(' ', '_')
 
-  chords_l, melody_l = TMIDI.Tegridy_Chords_Converter(chords_list, melody, fno)
+  chords_l, melody_l = TMIDI.Tegridy_Chords_Converter(chords_list, 
+                                                      melody, 
+                                                      fno, 
+                                                      melody_notes_in_chords)
   
   chords_list_f.extend(chords_l)
   melody_list_f.extend(melody_l)
@@ -247,7 +251,8 @@ print('Task complete. Enjoy! :)')
 #@markdown line_by_line_dataset option is for creating new types of IV datasets. Useful for AI BPE tokenizers.
 full_path_to_TXT_dataset = "/content/Intelligent-Virtuoso-Music-TXT-Dataset.txt" #@param {type:"string"}
 line_by_line_dataset = True #@param {type:"boolean"}
-represent_events_every_nth_chord = 2 #@param {type:"slider", min:0, max:100, step:1}
+represent_events_every_nth_chord = 0 #@param {type:"slider", min:0, max:100, step:1}
+chords_durations_multiplier = 1 #@param {type:"slider", min:0.1, max:2, step:0.1}
 simulate_velocity = True #@param {type:"boolean"}
 
 # MIDI Dataset to txt dataset converter 
@@ -272,7 +277,8 @@ TXT, number_of_chords, number_of_bad_chords = TMIDI.Tegridy_MIDI_TXT_Processor(d
                                                                                melody_list_f, 
                                                                                simulate_velocity, 
                                                                                line_by_line_dataset,
-                                                                               represent_events_every_nth_chord)
+                                                                               represent_events_every_nth_chord,
+                                                                               chords_durations_multiplier)
 file.write(TXT)
 file.close()
 print('Number of chords recorded: ', number_of_chords)
@@ -396,8 +402,8 @@ model.eval()
 
 print('Intelligent VIRTUOSO Model Generator')
 print('Starting up...')
-number_of_tokens_to_generate = 16768 #@param {type:"slider", min:0, max:32768, step:128}
-creativity_temperature = 1 #@param {type:"slider", min:0.05, max:4, step:0.05}
+number_of_tokens_to_generate = 16384 #@param {type:"slider", min:0, max:32768, step:128}
+creativity_temperature = 0.8 #@param {type:"slider", min:0.05, max:4, step:0.05}
 top_k_prob = 8 #@param {type:"slider", min:0, max:50, step:1}
 input_prompt = "SONG=Deep" #@param {type:"string"}
 debug = False #@param {type:"boolean"}
