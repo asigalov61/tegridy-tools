@@ -362,11 +362,12 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
         
         else:
           if pad_chords_with_stops:
-            TXT_string += 'W=' + str(chord_start_time - previous_start_time - 1)
-            if line_by_line_output:
-              TXT_string += '\n'
-            else:  
-              TXT_string += ' '
+            if (chord_start_time - previous_start_time - 1) > 0:
+              TXT_string += 'W=' + str(chord_start_time - previous_start_time - 1)
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
 
           TXT_string += 'C=' + str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
           previous_start_time = chord_start_time
