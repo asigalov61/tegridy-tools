@@ -363,13 +363,13 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
         else:
           if pad_chords_with_stops:
             if (chord_start_time - previous_start_time - 1) > 0:
-              TXT_string += 'W=' + str(chord_start_time - previous_start_time - 1)
+              TXT_string += str(chord_start_time - previous_start_time - 1)
               if line_by_line_output:
                 TXT_string += '\n'
               else:  
                 TXT_string += ' '
 
-          TXT_string += 'C=' + str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + ' N'
+          TXT_string += str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity)
           previous_start_time = chord_start_time
           for note in chord:
             TXT_string += '-' + str(note[4]) + '/' + str(chord_duration - int(note[2] * chords_duration_multiplier))
@@ -463,41 +463,43 @@ def Tegridy_TXT_MIDI_Processor(input_string,
         try:
           song_name = input_string[i].split('=')[1]
           song_header.append(['track_name', 0, song_name])
+          continue
         except:
           print('Unknown Song name format', song_name)
-      if input_string[i].split('=')[0] == 'C':
-        try:
-          start_time += int(input_string[i].split('=')[1].split('-')[0]) * dataset_MIDI_events_time_denominator
-          duration = int(input_string[i].split('=')[1].split('-')[1]) * dataset_MIDI_events_time_denominator 
-          channel = int(input_string[i].split('=')[1].split('-')[2])
-          velocity = int(input_string[i].split('=')[1].split('-')[3])
-        except:
-          print('Unknown Chord:', input_string[i])
+          continue
+        
 
-      if str(input_string[i].split('=')[0]).split('-')[0] == 'N':    
-        try:
-          for x in range(len(str(input_string[i].split('=')[0]).split('-'))-1):
-            notes_specs, dur = str(input_string[i].split('=')[0]).split('-')[x+1].split('/')
-            duration = duration - int(dur)
-            simulated_velocity = notes_specs        
-            if simulate_velocity:
-              song_score.append(['note', 
-                                  int(start_time), #Start Time
-                                  int(duration), #Duration
-                                  int(channel), #Channel
-                                  int(notes_specs), #Note
-                                  int(simulated_velocity)]) #Velocity              
-              number_of_notes_recorded += 1
-            else:  
-              song_score.append(['note', 
-                                  int(start_time), #Start Time
-                                  int(duration), #Duration
-                                  int(channel), #Channel
-                                  int(notes_specs), #Note
-                                  int(velocity)]) #Velocity              
-              number_of_notes_recorded += 1
-        except:
-          print("Unknown Notes: " + input_string[i])
+      try:
+        start_time += int(input_string[i].split('-')[0]) * dataset_MIDI_events_time_denominator
+        duration = int(input_string[i].split('-')[1]) * dataset_MIDI_events_time_denominator 
+        channel = int(input_string[i].split('-')[2])
+        velocity = int(input_string[i].split('-')[3])
+      except:
+        print('Unknown Chord:', input_string[i])
+      
+      try:
+        for x in range(len(str(input_string[i]).split('-'))-1):
+          notes_specs, dur = str(input_string[i]).split('-')[x+4].split('/')
+          duration = duration - int(dur)
+          simulated_velocity = notes_specs        
+          if simulate_velocity:
+            song_score.append(['note', 
+                                int(start_time), #Start Time
+                                int(duration), #Duration
+                                int(channel), #Channel
+                                int(notes_specs), #Note
+                                int(simulated_velocity)]) #Velocity              
+            number_of_notes_recorded += 1
+          else:  
+            song_score.append(['note', 
+                                int(start_time), #Start Time
+                                int(duration), #Duration
+                                int(channel), #Channel
+                                int(notes_specs), #Note
+                                int(velocity)]) #Velocity              
+            number_of_notes_recorded += 1
+      except:
+        print("Unknown Notes: " + input_string[i])
 
     if remove_generated_silence_if_needed:
       song_score1 = []
