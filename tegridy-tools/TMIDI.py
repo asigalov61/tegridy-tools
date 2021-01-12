@@ -236,14 +236,14 @@ def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_i
       if notez[1] == chord[0][1]:
         temp_chords_list.append(chord[1:])
   
-  # Gonna use a dic here to join chords by start-time :)
+  '''# Gonna use a dic here to join chords by start-time :)
   record_dict = defaultdict(list)
 
   for chords in temp_chords_list:
     if len(chords) > 0:
       record_dict[chords[0][1]].extend(chords)
 
-  temp_chords_list = list(record_dict.values())
+  temp_chords_list = list(record_dict.values())'''
 
   chords_list_final = []
   #print('Sorting chords notes by pitch/removing empty chords if any...')
