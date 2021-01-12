@@ -271,7 +271,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
                               line_by_line_output=False,
                               represent_every_number_of_chords = 0,
                               chords_duration_multiplier = 1,
-                              pad_chords_with_stops=False):
+                              pad_chords_with_stops=False,
+                              chords_beat_divider = 100):
 
     '''Tegridy MIDI to TXT Processor
      
@@ -281,6 +282,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
             Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
             Represent events every so many steps. Def. is 0. == do not represent.
             Chords durations multiplier. Def. = 1
+            Pad chords with timed rests or not. Helps with some NLP implementations
+            Chords beat divider/denominator. This essentially creates a beat for AI models to keep in mind. Default is 100 = 10 beats per second.
 
      Output: TXT encoded MIDI events as plain txt/plain str
              Number of processed chords
@@ -300,6 +303,8 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
     rpz = 1
 
     previous_start_time = 0
+
+    beat = 0
 
     if dataset_name != '':
       TXT_string = str(dataset_name)
@@ -369,11 +374,15 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
               else:  
                 TXT_string += ' '
 
-          TXT_string += str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity)
+          TXT_string += str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + '-' + str(beat)
+          
+          beat = int((chord_start_time - previous_start_time) / chords_beat_divider)
+          
           previous_start_time = chord_start_time
+          
           for note in chord:
             TXT_string += '-' + str(note[4]) + '/' + str(chord_duration - int(note[2] * chords_duration_multiplier))
-	        
+          
           # Representation of events
           if represent_every_number_of_chords > 0:
             if rpz == represent_every_number_of_chords:
@@ -478,8 +487,8 @@ def Tegridy_TXT_MIDI_Processor(input_string,
         print('Unknown Chord:', input_string[i])
       
       try:
-        for x in range(len(str(input_string[i]).split('-')[4:])):
-          notes_specs, dur = str(input_string[i].split('-')[4:][x]).split('/')
+        for x in range(len(str(input_string[i]).split('-')[5:])):
+          notes_specs, dur = str(input_string[i].split('-')[5:][x]).split('/')
           duration = duration - int(dur)
           simulated_velocity = int(notes_specs)
           if simulate_velocity:
