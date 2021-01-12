@@ -377,7 +377,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
           # Representation of events
           if represent_every_number_of_chords > 0:
             if rpz == represent_every_number_of_chords:
-              TXT_string += ' #' + str(song_dur)
+              TXT_string += '#' + str(song_dur)
               rpz = 0    
           
           if line_by_line_output:
@@ -478,10 +478,10 @@ def Tegridy_TXT_MIDI_Processor(input_string,
         print('Unknown Chord:', input_string[i])
       
       try:
-        for x in range(len(str(input_string[i]).split('-'))-1):
-          notes_specs, dur = str(input_string[i]).split('-')[x+4].split('/')
+        for x in range(len(str(input_string[i]).split('-')[4:])):
+          notes_specs, dur = str(input_string[i].split('-')[4:][x]).split('/')
           duration = duration - int(dur)
-          simulated_velocity = notes_specs        
+          simulated_velocity = int(notes_specs)
           if simulate_velocity:
             song_score.append(['note', 
                                 int(start_time), #Start Time
@@ -500,6 +500,7 @@ def Tegridy_TXT_MIDI_Processor(input_string,
             number_of_notes_recorded += 1
       except:
         print("Unknown Notes: " + input_string[i])
+        continue
 
     if remove_generated_silence_if_needed:
       song_score1 = []
