@@ -19,7 +19,7 @@
 
 import MIDI
 
-from collections import defaultdict
+# from collections import defaultdict
 
 ###################################################################################
 
@@ -417,7 +417,8 @@ def Tegridy_TXT_MIDI_Processor(input_string,
                               remove_generated_silence_if_needed = False,
                               silence_offset_from_start = 75000,
                               simulate_velocity = False,
-                              output_signature = 'TMIDI-TXT-MIDI'):
+                              output_signature = 'TMIDI-TXT-MIDI',
+                              list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0]):
 
     '''Tegridy TXT to MIDI Processor
      
@@ -429,7 +430,8 @@ def Tegridy_TXT_MIDI_Processor(input_string,
             Is there a generated silence or not
             Silence offset in MIDI ticks from start
             Simulate velocity (V = max(Pitch))
-            Output MIDI signature):
+            Output MIDI signature
+            List of 16 desired MIDI patch numbers for the output MIDI. Def. is MuseNet compatible patch list.
 
      Output: NOTE: For now only 1st recorded TXT performance converted to MIDI.
              Raw/binary MIDI data that can be recorded to a file with standard python functions.
@@ -519,9 +521,27 @@ def Tegridy_TXT_MIDI_Processor(input_string,
         song_score1.append(note1)
       song_score = song_score1  
 
-    output_header = [number_of_ticks_per_quarter,[['track_name', 0, bytes(output_signature, 'utf-8')]]]
+    output_header = [number_of_ticks_per_quarter, [['track_name', 0, bytes(output_signature, 'utf-8')]]] 
+                                                  
+    patch_list = [['patch_change', 0, 0, list_of_MIDI_patches[0]], 
+                ['patch_change', 0, 1, list_of_MIDI_patches[1]],
+                ['patch_change', 0, 2, list_of_MIDI_patches[2]],
+                ['patch_change', 0, 3, list_of_MIDI_patches[3]],
+                ['patch_change', 0, 4, list_of_MIDI_patches[4]],
+                ['patch_change', 0, 5, list_of_MIDI_patches[5]],
+                ['patch_change', 0, 6, list_of_MIDI_patches[6]],
+                ['patch_change', 0, 7, list_of_MIDI_patches[7]],
+                ['patch_change', 0, 8, list_of_MIDI_patches[8]],
+                ['patch_change', 0, 9, list_of_MIDI_patches[9]],
+                ['patch_change', 0, 10, list_of_MIDI_patches[10]],
+                ['patch_change', 0, 11, list_of_MIDI_patches[11]],
+                ['patch_change', 0, 12, list_of_MIDI_patches[12]],
+                ['patch_change', 0, 13, list_of_MIDI_patches[13]],
+                ['patch_change', 0, 14, list_of_MIDI_patches[14]],
+                ['patch_change', 0, 15, list_of_MIDI_patches[15]]]
+
     output_song = song_header + song_score[start_from_this_generated_event:]
-    output = output_header + [output_song]
+    output = output_header + [patch_list + output_song]
 
     midi_data = MIDI.score2midi(output)
     detailed_MIDI_stats = MIDI.score2stats(output)
