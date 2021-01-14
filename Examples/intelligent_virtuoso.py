@@ -138,9 +138,9 @@ print('Loading complete. Enjoy! :)')
 
 #@markdown 3) MIDI Channel = -1 means all MIDI channels. Otherwise, only single indicated MIDI channel will be processed.
 
-full_path_to_output_dataset_to = "/content/Intelligent-Virtuoso-Music-MIDI-Dataset.data" #@param {type:"string"}
+full_path_to_output_dataset_to = "/content/Intelligent-Virtuoso-Music-MIDI-Dataset.npy" #@param {type:"string"}
 desired_MIDI_channel_to_process = 0 #@param {type:"slider", min:-1, max:15, step:1}
-MIDI_events_time_denominator = 10 #@param {type:"slider", min:1, max:200, step:1}
+MIDI_events_time_denominator = 10 #@param {type:"slider", min:1, max:100, step:1}
 melody_notes_in_chords = True #@param {type:"boolean"}
 
 debug = False #@param {type:"boolean"}
@@ -200,6 +200,7 @@ for f in filez: # Based on input MIDI file names w/o the extension
 
 print('Processing MIDI files. Please wait...')
 for f in tqdm.auto.tqdm(filez):
+  #print(f)
   files_count += 1
   chords_list, melody = TMIDI.Tegridy_MIDI_Processor(f, 
                                                      desired_MIDI_channel_to_process, 
@@ -253,7 +254,8 @@ full_path_to_TXT_dataset = "/content/Intelligent-Virtuoso-Music-TXT-Dataset.txt"
 line_by_line_dataset = True #@param {type:"boolean"}
 represent_events_every_nth_chord = 0 #@param {type:"slider", min:0, max:100, step:1}
 chords_durations_multiplier = 1 #@param {type:"slider", min:0.1, max:2, step:0.1}
-pad_chords_with_rests = True #@param {type:"boolean"}
+chords_beat_divider = 10 #@param {type:"slider", min:1, max:100, step:1}
+pad_chords_with_rests = False #@param {type:"boolean"}
 simulate_velocity = True #@param {type:"boolean"}
 
 # MIDI Dataset to txt dataset converter 
@@ -280,7 +282,8 @@ TXT, number_of_chords, number_of_bad_chords = TMIDI.Tegridy_MIDI_TXT_Processor(d
                                                                                line_by_line_dataset,
                                                                                represent_events_every_nth_chord,
                                                                                chords_durations_multiplier,
-                                                                               pad_chords_with_rests)
+                                                                               pad_chords_with_rests,
+                                                                               chords_beat_divider)
 file.write(TXT)
 file.close()
 print('Number of chords recorded: ', number_of_chords)
@@ -346,7 +349,7 @@ mconf = GPTConfig(train_dataset.vocab_size,
 model = GPT(mconf)
 
 #@title Setup all training parameters
-number_of_training_epochs = 2 #@param {type:"slider", min:1, max:5, step:1}
+number_of_training_epochs = 3 #@param {type:"slider", min:1, max:5, step:1}
 training_batch_size = 24 #@param {type:"slider", min:0, max:160, step:4}
 model_learning_rate = 6e-4 #@param {type:"number"}
 # initialize a trainer instance and kick off training
@@ -407,7 +410,7 @@ print('Starting up...')
 number_of_tokens_to_generate = 16768 #@param {type:"slider", min:0, max:32768, step:128}
 creativity_temperature = 0.8 #@param {type:"slider", min:0.05, max:4, step:0.05}
 top_k_prob = 24 #@param {type:"slider", min:0, max:50, step:1}
-input_prompt = "SONG=Deep_Relax" #@param {type:"string"}
+input_prompt = "SONG=Deep" #@param {type:"string"}
 debug = False #@param {type:"boolean"}
 
 os.chdir('/content/')
@@ -466,7 +469,7 @@ files.download(fname + '.txt')
 
 line_by_line_dataset = True #@param {type:"boolean"}
 dataset_MIDI_events_time_denominator = 10 #@param {type:"slider", min:1, max:200, step:1}
-number_of_ticks_per_quarter = 425 #@param {type:"slider", min:1, max:1000, step:8}
+number_of_ticks_per_quarter = 420 #@param {type:"slider", min:10, max:1000, step:10}
 start_from_this_generated_event = 0 #@param {type:"slider", min:0, max:100, step:1}
 remove_generated_silence_if_needed = False #@param {type:"boolean"}
 silence_offset_from_start = 75000 #@param {type:"integer"}
