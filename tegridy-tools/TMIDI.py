@@ -17,624 +17,6 @@
 ###################################################################################
 ###################################################################################
 
-import MIDI
-
-# from collections import defaultdict
-
-###################################################################################
-
-def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
-
-    '''Tegridy MIDI Processor
-
-    Input: A single MIDI file.
-           Desired MIDI channel to process.
-           Notes/Chords timings divider (denominator).
-
-    Output: A list of MIDI chords and a list of melody notes.
-    MIDI Chords: Sorted by pitch (chord[0] == highest pitch).
-    Melody Notes: Sorted by start time.
-
-    Format: MIDI.py Score Events format.
-
-    Default precision: 1 ms per note/chord.
-
-    Enjoy! :)
-
-    Project Los Angeles
-    Tegridy Code 2020'''
-
-###########
-
-    minimum_number_of_notes_per_chord = 2 # Must be 2 or more...
-
-    debug = False
-
-###########
-
-    average_note_pitch = 0
-    min_note = 127
-    max_note = 0
-
-    files_count = 0
-
-    ev = 0
-
-    chords_list_final = []
-    chords_list = []
-    events_matrix = []
-    melody = []
-    melody1 = []
-
-    itrack = 1
-
-    min_note = 0
-    max_note = 0
-    ev = 0
-
-    score = []
-    rec_event = []
-
-###########    
-
-    def list_average(num):
-      sum_num = 0
-      for t in num:
-          sum_num = sum_num + t           
-
-      avg = sum_num / len(num)
-      return avg
-
-###########
-
-    #print('Loading MIDI file...')
-    midi_file = open(MIDI_file, 'rb')
-    if debug: print('Processing File:', file_address)
-    
-    try:
-      opus = MIDI.midi2opus(midi_file.read())
-    
-    except:
-      print('Bad file. Skipping...')
-      midi_file.close()
-      exit
-         
-    midi_file.close()
-
-    score1 = MIDI.to_millisecs(opus)
-    score2 = MIDI.opus2score(score1)
-    if MIDI_channel == -1:
-      score = score2
-    else:  
-      score = MIDI.grep(score2, [MIDI_channel])
-    
-    #print('Reading all MIDI events from the MIDI file...')
-    while itrack < len(score):
-      chords_list_track = []
-      for event in score[itrack]:
-        chords_list = []
-        if event[0] == 'note':
-          if len(event) == 6: # Checking for bad notes...
-              rec_event = event
-              rec_event[1] = int(event[1] / time_denominator)
-              rec_event[2] = int(event[2] / time_denominator)
-              events_matrix.append(rec_event)
-
-              min_note = int(min(min_note, rec_event[4]))
-              max_note = int(max(max_note, rec_event[4]))          
-              
-              ev += 1
-      
-      itrack +=1 # Going to next track...
-    
-    #print('Doing some heavy pythonic sorting...Please stand by...')
-
-    #print('Removing zero pitches and zero velocities events')
-    events_matrix1 = [i for i in events_matrix if i[4] > 0 and i[5] > 0] # removing zero pitches and zero velocities events
-    events_matrix = events_matrix1
-    events_matrix1 = []
-
-    for event in events_matrix:
-      seen = set()
-      event1 = [x for x in event if x not in seen and not seen.add(x)]
-      events_matrix1.append(event1)
-
-    events_matrix = []
-    events_matrix = events_matrix1 
-
-    #print('Sorting input by start time...')
-    events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
-
-    #print('Grouping by start time. This will take a while...')
-    values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
-
-    groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
-    
-    chords_list1 = []
-    #print('Removing single note/excessive events, sorting events by pitch, and creating a chords list...')
-    for items in groups: 
-      if len(items) >= minimum_number_of_notes_per_chord: # Removing single note events
-        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
-        chords_list1.append(items) # Creating final chords list
-
-    #print('Removing duplicate pitches from chords and creating a final chords list...')
-    chords_list = []
-    chord = []
-    chord1 = []
-    chord2 = []
-
-    for chord in chords_list1:
-      seen = set()
-      chord1 = [x for x in chord if x[4] not in seen and not seen.add(x[4])]
-      chord2 = [x for x in chord1 if len(x) == 6] # Removing bad note events from chords
-      chords_list.append(chord2)
-
-    chords_list_track = [i for i in chords_list if i != []]
-
-    chords_list = []
-    chords_list.extend(chords_list_track)
-
-    #print('Extracting melody...')
-    melody_list = []
-    
-    #print('Sorting events...')
-    for items in groups:
-        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
-        melody_list.append(items) # Creating final chords list
-    
-    #print('Removing duplicates if any...')
-    for item in melody_list:
-        seen = set()
-        mel = [x for x in item if x[1] not in seen and not seen.add(x[1])]
-        melody1.extend(mel)
-    
-    #print('Removing bad notes if any...')    
-    for item in melody1:
-        if len(item) == 6:
-          melody.append(item)
-    
-    #print('Final sorting by start time...')      
-    melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-      
-    return chords_list, melody
-
-###################################################################################
-
-def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_in_chords=True):
-  '''Tegridy Chords Coverter
-
-  Inputs: Tegridy MIDI chords_list (as is)
-
-          Tegridy MIDI melody_list (as is)
-
-          Name of the song as plain string
-
-          Include or exclude melody notes in each chord. Def. is to include.
-
-
-  Outputs: Converted chords_list with melody_notes and song name
-
-           Converted melody_list with song name
-
-  Project Los Angeles
-  Tegridy Code 2020'''
-
-  temp_chords_list = []
-  chords_list_final = []
-  melody_list_final = []
-
-  temp_chords_list = [[song_name, 0, 0, 0, 0, 0]]
-  melody_list_final = [song_name, 0, 0, 0, 0, 0]
-
-  debug = False
-
-  for notez in melody_list:
-    if melody_notes_in_chords:
-      temp_chords_list.append([notez])
-    melody_list_final.append(notez)
-    for chord in chords_list:
-      if notez[1] == chord[0][1]:
-        temp_chords_list.append(chord[1:])
-  
-  '''# Gonna use a dic here to join chords by start-time :)
-  record_dict = defaultdict(list)
-
-  for chords in temp_chords_list:
-    if len(chords) > 0:
-      record_dict[chords[0][1]].extend(chords)
-
-  temp_chords_list = list(record_dict.values())'''
-
-  chords_list_final = []
-  #print('Sorting chords notes by pitch/removing empty chords if any...')
-  chords_list_final.append(temp_chords_list[0])
-  for chordz in temp_chords_list[1:]:
-    if len(chordz) > 0:
-      if debug: print(chordz)
-      chordz.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
-      chords_list_final.append(chordz) # Creating final chords list      
-
-  chords_list_final[0] = [[song_name + '_with_' + str(len(chords_list_final)-1) + '_Chords', 0, 0, len(chords_list_final)-1, 0, 0]]
-  melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
-  chords_list_final.append([['song_end', chords_list_final[:-1][1], 0, len(chords_list_final)-1, 0, 1]])
-  melody_list_final.append(['song_end', melody_list_final[:-1][1], 0, len(melody_list_final)-1, 0, 1])     
-  first_song = False
-    
-  return chords_list_final, melody_list_final
-
-###################################################################################
-
-def Tegridy_MIDI_TXT_Processor(dataset_name,
-                              converted_chords_list,
-                              converted_melody_list,
-                              simulate_velocity=False,
-                              line_by_line_output=False,
-                              represent_every_number_of_chords = 0,
-                              chords_duration_multiplier = 1,
-                              pad_chords_with_stops=False,
-                              chords_beat_divider = 100):
-
-    '''Tegridy MIDI to TXT Processor
-     
-     Input: Dataset name
-            Tegridy MIDI chords_list and melody_list (as is)
-            Simulate velocity or not
-            Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
-            Represent events every so many steps. Def. is 0. == do not represent.
-            Chords durations multiplier. Def. = 1
-            Pad chords with timed rests or not. Helps with some NLP implementations
-            Chords beat divider/denominator. This essentially creates a beat for AI models to keep in mind. Default is 100 = 10 beats per second.
-
-     Output: TXT encoded MIDI events as plain txt/plain str
-             Number of processed chords
-             Number of bad/skipped chords (for whatever reason)
-
-     Project Los Angeles
-     Tegridy Code 2020'''
-
-    debug = False
-
-    song_chords_count = 0
-    number_of_chords_recorded = 0
-    number_of_bad_chords_recorded = 0
-    chord_start_time = 0
-    first_song = True
-
-    rpz = 1
-
-    previous_start_time = 0
-
-    beat = 0
-
-    if dataset_name != '':
-      TXT_string = str(dataset_name)
-    else:
-      TXT_string = ''
-    
-    if line_by_line_output:
-      TXT_string += '\n'
-    else:
-      TXT_string += ' '  
-
-    for chord in converted_chords_list:
-      try:
-        if chord[0][3] > 15:
-          song_dur = int(chord[0][3])
-        
-        if len(chord) > 1:
-          durs_chord = int(max(list(zip(*chord))[2]) * chords_duration_multiplier)
-          chord_duration = durs_chord
-        
-        else:      
-          chord_duration = int(chord[0][2] * chords_duration_multiplier)
-          
-        if simulate_velocity:
-          chord_velocity = chord[0][4]
-        else:  
-          chord_velocity = chord[0][5]
-        chord_start_time = chord[0][1] 
-        if chord_duration == 0 and chord_velocity == 0:
-          if not str(chord[0][0]) == 'song_end':
-            if not first_song:
-              TXT_string += 'SONG=END_' + str(song_chords_count) + '_Chords'
-              if line_by_line_output:
-                TXT_string += '\n'
-              else:  
-                TXT_string += ' '
-
-              TXT_string += 'SONG=' + str(chord[0][0])
-              if line_by_line_output:
-                TXT_string += '\n'
-              else:  
-                TXT_string += ' '
-              song_chords_count = 1 
-                          
-            else:  
-
-              TXT_string += 'SONG=' + str(chord[0][0])
-              if line_by_line_output:
-                TXT_string += '\n'
-              else:  
-                TXT_string += ' '
-              song_chords_count = 1  
-            
-          else:
-              TXT_string += 'SONG=END_' + str(song_chords_count-1) + '_Chords'
-              if line_by_line_output:
-                TXT_string += '\n'
-              else:  
-                TXT_string += ' '             
-        
-        else:
-          if pad_chords_with_stops:
-            if (chord_start_time - previous_start_time - 1) > 0:
-              TXT_string += str(chord_start_time - previous_start_time - 1)
-              if line_by_line_output:
-                TXT_string += '\n'
-              else:  
-                TXT_string += ' '
-
-          TXT_string += str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + '-' + str(beat)
-          
-          beat = int((chord_start_time - previous_start_time) / chords_beat_divider)
-          
-          previous_start_time = chord_start_time
-          
-          for note in chord:
-            TXT_string += '-' + str(note[4]) + '/' + str(chord_duration - int(note[2] * chords_duration_multiplier))
-          
-          # Representation of events
-          if represent_every_number_of_chords > 0:
-            if rpz == represent_every_number_of_chords:
-              TXT_string += '#' + str(song_dur)
-              rpz = 0    
-          
-          if line_by_line_output:
-            TXT_string += '\n'
-          else:  
-            TXT_string += ' '
-          
-          if debug: print(chord)
-
-          song_chords_count += 1
-          number_of_chords_recorded += 1
-          rpz += 1
-          
-      except:
-        if debug: print('Bad chord. Skipping...')
-        number_of_bad_chords_recorded += 1
-        continue            
-
-    return TXT_string, number_of_chords_recorded, number_of_bad_chords_recorded
-
-###################################################################################
-
-def Tegridy_TXT_MIDI_Processor(input_string, 
-                              line_by_line_dataset = False,
-                              dataset_MIDI_events_time_denominator = 100,
-                              number_of_ticks_per_quarter = 425,
-                              start_from_this_generated_event = 0,
-                              remove_generated_silence_if_needed = False,
-                              silence_offset_from_start = 75000,
-                              simulate_velocity = False,
-                              output_signature = 'TMIDI-TXT-MIDI',
-                              list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0]):
-
-    '''Tegridy TXT to MIDI Processor
-     
-     Input: Input TXT string in the TMIDI-TXT format
-            Input is line-by-line or one-line
-            Used dataset time denominator
-            Number of ticks per quater for output MIDI
-            Start from this input event (skip this many from start)
-            Is there a generated silence or not
-            Silence offset in MIDI ticks from start
-            Simulate velocity (V = max(Pitch))
-            Output MIDI signature
-            List of 16 desired MIDI patch numbers for the output MIDI. Def. is MuseNet compatible patch list.
-
-     Output: NOTE: For now only 1st recorded TXT performance converted to MIDI.
-             Raw/binary MIDI data that can be recorded to a file with standard python functions.
-             Detected number of input notes
-             Recorded number of output notes
-             Detailed created MIDI stats in the MIDI.py module format (MIDI.score2stats)
-
-     Project Los Angeles
-     Tegridy Code 2020'''
-
-    debug = False
-
-    if line_by_line_dataset:
-      input_string = input_string.split() # for new datasets
-    else:
-      input_string = input_string.split(' ') # for compatibility/legacy datasets
-    if debug: print(input_string)
-
-
-    i=0
-    z=1
-
-    notes_specs = []
-    song_name = ''
-    previous_chord_start_time = 0
-    number_of_notes_recorded = 0
-    zero_marker = True
-    song_header = []
-    song_score = []
-
-    start_time = 0
-
-    print('Converting TXT to MIDI. Please wait...')
-    for i in range(len(input_string)):
-      if input_string[i].split('=END_')[0] == 'SONG':
-        break
-        #TODO Record all perfomances (even incomplete ones) as separate tracks in output MIDI
-
-      if input_string[i].split('=')[0] == 'SONG':
-        try:
-          song_name = input_string[i].split('=')[1]
-          song_header.append(['track_name', 0, song_name])
-          continue
-        except:
-          print('Unknown Song name format', song_name)
-          continue
-        
-
-      try:
-        start_time += int(input_string[i].split('-')[0]) * dataset_MIDI_events_time_denominator
-        duration = int(input_string[i].split('-')[1]) * dataset_MIDI_events_time_denominator 
-        channel = int(input_string[i].split('-')[2])
-        velocity = int(input_string[i].split('-')[3])
-      except:
-        print('Unknown Chord:', input_string[i])
-      
-      try:
-        for x in range(len(str(input_string[i]).split('-')[5:])):
-          notes_specs, dur = str(input_string[i].split('-')[5:][x]).split('/')
-          duration = duration - int(dur)
-          simulated_velocity = int(notes_specs)
-          if simulate_velocity:
-            song_score.append(['note', 
-                                int(start_time), #Start Time
-                                int(duration), #Duration
-                                int(channel), #Channel
-                                int(notes_specs), #Note
-                                int(simulated_velocity)]) #Velocity              
-            number_of_notes_recorded += 1
-          else:  
-            song_score.append(['note', 
-                                int(start_time), #Start Time
-                                int(duration), #Duration
-                                int(channel), #Channel
-                                int(notes_specs), #Note
-                                int(velocity)]) #Velocity              
-            number_of_notes_recorded += 1
-      except:
-        print("Unknown Notes: " + input_string[i])
-        continue
-
-    if remove_generated_silence_if_needed:
-      song_score1 = []
-      for note in song_score[start_from_this_generated_event:]:
-        note1 = note
-        note1[1] = note[1] - silence_offset_from_start
-        song_score1.append(note1)
-      song_score = song_score1  
-
-    output_header = [number_of_ticks_per_quarter, [['track_name', 0, bytes(output_signature, 'utf-8')]]] 
-                                                  
-    patch_list = [['patch_change', 0, 0, list_of_MIDI_patches[0]], 
-                ['patch_change', 0, 1, list_of_MIDI_patches[1]],
-                ['patch_change', 0, 2, list_of_MIDI_patches[2]],
-                ['patch_change', 0, 3, list_of_MIDI_patches[3]],
-                ['patch_change', 0, 4, list_of_MIDI_patches[4]],
-                ['patch_change', 0, 5, list_of_MIDI_patches[5]],
-                ['patch_change', 0, 6, list_of_MIDI_patches[6]],
-                ['patch_change', 0, 7, list_of_MIDI_patches[7]],
-                ['patch_change', 0, 8, list_of_MIDI_patches[8]],
-                ['patch_change', 0, 9, list_of_MIDI_patches[9]],
-                ['patch_change', 0, 10, list_of_MIDI_patches[10]],
-                ['patch_change', 0, 11, list_of_MIDI_patches[11]],
-                ['patch_change', 0, 12, list_of_MIDI_patches[12]],
-                ['patch_change', 0, 13, list_of_MIDI_patches[13]],
-                ['patch_change', 0, 14, list_of_MIDI_patches[14]],
-                ['patch_change', 0, 15, list_of_MIDI_patches[15]]]
-
-    output_song = song_header + song_score[start_from_this_generated_event:]
-    output = output_header + [patch_list + output_song]
-
-    midi_data = MIDI.score2midi(output)
-    detailed_MIDI_stats = MIDI.score2stats(output)
-
-    return midi_data, len(input_string), number_of_notes_recorded, detailed_MIDI_stats
-
-###################################################################################
-
-def Tegridy_TXT_to_INT_Converter(input_TXT_string):
-
-    '''Tegridy TXT to Intergers Converter
-     
-     Input: Input TXT string in the TMIDI-TXT format
-
-     Output: List of pure intergers
-
-     Project Los Angeles
-     Tegridy Code 2020'''
-
-    output_INT_list = []
-
-    TXT_List = list(input_TXT_string)
-    for char in TXT_List:
-      output_INT_list.append(ord(char))
-    
-    return output_INT_list
-
-###################################################################################
-
-def Tegridy_INT_to_TXT_Converter(input_INT_list):
-
-    '''Tegridy Intergers to TXT Converter
-     
-     Input: List of intergers in TMIDI-TXT-INT format
-
-     Output: Decoded TXT string in TMIDI-TXT format
-
-     Project Los Angeles
-     Tegridy Code 2020'''
-
-    output_TXT_string = ''
-
-    for i in input_INT_list:
-      output_TXT_string += chr(i)
-    
-    return output_TXT_string
-
-###################################################################################
-
-def Tegridy_TXT_to_INT_Processor(input_TXT_string):
-
-    '''Tegridy TXT to Intergers Processor
-     
-    Input: Input TXT string in the TMIDI-TXT format
-
-    Output: List of intergers
-            Decoding dictionary
-
-
-    Project Los Angeles
-    Tegridy Code 2020'''
-
-    # get vocabulary set
-    words = sorted(tuple(set(input_TXT_string.split('\n'))))
-    n = len(words)
-
-    # create word-integer encoder/decoder
-    word2int = dict(zip(words, list(range(n))))
-    decoding_dictionary = dict(zip(list(range(n)), words))
-
-    # encode all words in the string into integers
-    output_INT_list = [word2int[word] for word in input_TXT_string.split('\n')]
-    
-    return output_INT_list, decoding_dictionary
-
-###################################################################################
-
-def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
-
-    '''Tegridy Intergers to TXT Processor
-     
-    Input: List of intergers in TMIDI-TXT-INT format
-          Decoding dictionary in TMIDI-TXT-INT format
-
-    Output: Decoded TXT string in TMIDI-TXT format
-
-    Project Los Angeles
-    Tegridy Code 2020'''
-
-    output_TXT_string = '\n'.join(decoding_dictionary[int_] for int_ in input_INT_list)
-    
-    return output_TXT_string
-
 ###################################################################################
 ###################################################################################
 ###################################################################################
@@ -2375,3 +1757,597 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
                 data.append(_ber_compressed_int(dtime)+event_data)
 
     return b''.join(data)
+
+###################################################################################
+###################################################################################
+###################################################################################
+#
+#	Tegridy MIDI Module (TMIDI / tee-midi)
+#	Version 1.2
+#
+#	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
+#	pjb.com.au
+#
+#	Project Los Angeles
+#	Tegridy Code 2020
+#
+###################################################################################
+###################################################################################
+###################################################################################
+
+# import MIDI
+
+# from collections import defaultdict
+
+###################################################################################
+
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
+
+    '''Tegridy MIDI Processor
+
+    Input: A single MIDI file.
+           Desired MIDI channel to process.
+           Notes/Chords timings divider (denominator).
+
+    Output: A list of MIDI chords and a list of melody notes.
+    MIDI Chords: Sorted by pitch (chord[0] == highest pitch).
+    Melody Notes: Sorted by start time.
+
+    Format: MIDI.py Score Events format.
+
+    Default precision: 1 ms per note/chord.
+
+    Enjoy! :)
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+###########
+
+    minimum_number_of_notes_per_chord = 2 # Must be 2 or more...
+
+    debug = False
+
+###########
+
+    average_note_pitch = 0
+    min_note = 127
+    max_note = 0
+
+    files_count = 0
+
+    ev = 0
+
+    chords_list_final = []
+    chords_list = []
+    events_matrix = []
+    melody = []
+    melody1 = []
+
+    itrack = 1
+
+    min_note = 0
+    max_note = 0
+    ev = 0
+
+    score = []
+    rec_event = []
+
+###########    
+
+    def list_average(num):
+      sum_num = 0
+      for t in num:
+          sum_num = sum_num + t           
+
+      avg = sum_num / len(num)
+      return avg
+
+###########
+
+    #print('Loading MIDI file...')
+    midi_file = open(MIDI_file, 'rb')
+    if debug: print('Processing File:', file_address)
+    
+    try:
+      opus = midi2opus(midi_file.read())
+    
+    except:
+      print('Bad file. Skipping...')
+      midi_file.close()
+      exit
+         
+    midi_file.close()
+
+    score1 = to_millisecs(opus)
+    score2 = opus2score(score1)
+    if MIDI_channel == -1:
+      score = score2
+    else:  
+      score = grep(score2, [MIDI_channel])
+    
+    #print('Reading all MIDI events from the MIDI file...')
+    while itrack < len(score):
+      chords_list_track = []
+      for event in score[itrack]:
+        chords_list = []
+        if event[0] == 'note':
+          if len(event) == 6: # Checking for bad notes...
+              rec_event = event
+              rec_event[1] = int(event[1] / time_denominator)
+              rec_event[2] = int(event[2] / time_denominator)
+              events_matrix.append(rec_event)
+
+              min_note = int(min(min_note, rec_event[4]))
+              max_note = int(max(max_note, rec_event[4]))          
+              
+              ev += 1
+      
+      itrack +=1 # Going to next track...
+    
+    #print('Doing some heavy pythonic sorting...Please stand by...')
+
+    #print('Removing zero pitches and zero velocities events')
+    events_matrix1 = [i for i in events_matrix if i[4] > 0 and i[5] > 0] # removing zero pitches and zero velocities events
+    events_matrix = events_matrix1
+    events_matrix1 = []
+
+    for event in events_matrix:
+      seen = set()
+      event1 = [x for x in event if x not in seen and not seen.add(x)]
+      events_matrix1.append(event1)
+
+    events_matrix = []
+    events_matrix = events_matrix1 
+
+    #print('Sorting input by start time...')
+    events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
+
+    #print('Grouping by start time. This will take a while...')
+    values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
+
+    groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+    
+    chords_list1 = []
+    #print('Removing single note/excessive events, sorting events by pitch, and creating a chords list...')
+    for items in groups: 
+      if len(items) >= minimum_number_of_notes_per_chord: # Removing single note events
+        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
+        chords_list1.append(items) # Creating final chords list
+
+    #print('Removing duplicate pitches from chords and creating a final chords list...')
+    chords_list = []
+    chord = []
+    chord1 = []
+    chord2 = []
+
+    for chord in chords_list1:
+      seen = set()
+      chord1 = [x for x in chord if x[4] not in seen and not seen.add(x[4])]
+      chord2 = [x for x in chord1 if len(x) == 6] # Removing bad note events from chords
+      chords_list.append(chord2)
+
+    chords_list_track = [i for i in chords_list if i != []]
+
+    chords_list = []
+    chords_list.extend(chords_list_track)
+
+    #print('Extracting melody...')
+    melody_list = []
+    
+    #print('Sorting events...')
+    for items in groups:
+        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
+        melody_list.append(items) # Creating final chords list
+    
+    #print('Removing duplicates if any...')
+    for item in melody_list:
+        seen = set()
+        mel = [x for x in item if x[1] not in seen and not seen.add(x[1])]
+        melody1.extend(mel)
+    
+    #print('Removing bad notes if any...')    
+    for item in melody1:
+        if len(item) == 6:
+          melody.append(item)
+    
+    #print('Final sorting by start time...')      
+    melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
+      
+    return chords_list, melody
+
+###################################################################################
+
+def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_in_chords=True):
+  '''Tegridy Chords Coverter
+
+  Inputs: Tegridy MIDI chords_list (as is)
+
+          Tegridy MIDI melody_list (as is)
+
+          Name of the song as plain string
+
+          Include or exclude melody notes in each chord. Def. is to include.
+
+
+  Outputs: Converted chords_list with melody_notes and song name
+
+           Converted melody_list with song name
+
+  Project Los Angeles
+  Tegridy Code 2020'''
+
+  temp_chords_list = []
+  chords_list_final = []
+  melody_list_final = []
+
+  temp_chords_list = [[song_name, 0, 0, 0, 0, 0]]
+  melody_list_final = [song_name, 0, 0, 0, 0, 0]
+
+  debug = False
+
+  for notez in melody_list:
+    if melody_notes_in_chords:
+      temp_chords_list.append([notez])
+    melody_list_final.append(notez)
+    for chord in chords_list:
+      if notez[1] == chord[0][1]:
+        temp_chords_list.append(chord[1:])
+  
+  '''# Gonna use a dic here to join chords by start-time :)
+  record_dict = defaultdict(list)
+
+  for chords in temp_chords_list:
+    if len(chords) > 0:
+      record_dict[chords[0][1]].extend(chords)
+
+  temp_chords_list = list(record_dict.values())'''
+
+  chords_list_final = []
+  #print('Sorting chords notes by pitch/removing empty chords if any...')
+  chords_list_final.append(temp_chords_list[0])
+  for chordz in temp_chords_list[1:]:
+    if len(chordz) > 0:
+      if debug: print(chordz)
+      chordz.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
+      chords_list_final.append(chordz) # Creating final chords list      
+
+  chords_list_final[0] = [[song_name + '_with_' + str(len(chords_list_final)-1) + '_Chords', 0, 0, len(chords_list_final)-1, 0, 0]]
+  melody_list_final[0] = [song_name + '_with_' + str(len(melody_list_final)-1) + '_Notes', 0, 0, len(melody_list_final)-1, 0, 0]
+  chords_list_final.append([['song_end', chords_list_final[:-1][1], 0, len(chords_list_final)-1, 0, 1]])
+  melody_list_final.append(['song_end', melody_list_final[:-1][1], 0, len(melody_list_final)-1, 0, 1])     
+  first_song = False
+    
+  return chords_list_final, melody_list_final
+
+###################################################################################
+
+def Tegridy_MIDI_TXT_Processor(dataset_name,
+                              converted_chords_list,
+                              converted_melody_list,
+                              simulate_velocity=False,
+                              line_by_line_output=False,
+                              represent_every_number_of_chords = 0,
+                              chords_duration_multiplier = 1,
+                              pad_chords_with_stops=False,
+                              chords_beat_divider = 100):
+
+    '''Tegridy MIDI to TXT Processor
+     
+     Input: Dataset name
+            Tegridy MIDI chords_list and melody_list (as is)
+            Simulate velocity or not
+            Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
+            Represent events every so many steps. Def. is 0. == do not represent.
+            Chords durations multiplier. Def. = 1
+            Pad chords with timed rests or not. Helps with some NLP implementations
+            Chords beat divider/denominator. This essentially creates a beat for AI models to keep in mind. Default is 100 = 10 beats per second.
+
+     Output: TXT encoded MIDI events as plain txt/plain str
+             Number of processed chords
+             Number of bad/skipped chords (for whatever reason)
+
+     Project Los Angeles
+     Tegridy Code 2020'''
+
+    debug = False
+
+    song_chords_count = 0
+    number_of_chords_recorded = 0
+    number_of_bad_chords_recorded = 0
+    chord_start_time = 0
+    first_song = True
+
+    rpz = 1
+
+    previous_start_time = 0
+
+    beat = 0
+
+    if dataset_name != '':
+      TXT_string = str(dataset_name)
+    else:
+      TXT_string = ''
+    
+    if line_by_line_output:
+      TXT_string += '\n'
+    else:
+      TXT_string += ' '  
+
+    for chord in converted_chords_list:
+      try:
+        if chord[0][3] > 15:
+          song_dur = int(chord[0][3])
+        
+        if len(chord) > 1:
+          durs_chord = int(max(list(zip(*chord))[2]) * chords_duration_multiplier)
+          chord_duration = durs_chord
+        
+        else:      
+          chord_duration = int(chord[0][2] * chords_duration_multiplier)
+          
+        if simulate_velocity:
+          chord_velocity = chord[0][4]
+        else:  
+          chord_velocity = chord[0][5]
+        chord_start_time = chord[0][1] 
+        if chord_duration == 0 and chord_velocity == 0:
+          if not str(chord[0][0]) == 'song_end':
+            if not first_song:
+              TXT_string += 'SONG=END_' + str(song_chords_count) + '_Chords'
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
+
+              TXT_string += 'SONG=' + str(chord[0][0])
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
+              song_chords_count = 1 
+                          
+            else:  
+
+              TXT_string += 'SONG=' + str(chord[0][0])
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
+              song_chords_count = 1  
+            
+          else:
+              TXT_string += 'SONG=END_' + str(song_chords_count-1) + '_Chords'
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '             
+        
+        else:
+          if pad_chords_with_stops:
+            if (chord_start_time - previous_start_time - 1) > 0:
+              TXT_string += str(chord_start_time - previous_start_time - 1)
+              if line_by_line_output:
+                TXT_string += '\n'
+              else:  
+                TXT_string += ' '
+
+          TXT_string += str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + '-' + str(beat)
+          
+          beat = int((chord_start_time - previous_start_time) / chords_beat_divider)
+          
+          previous_start_time = chord_start_time
+          
+          for note in chord:
+            TXT_string += '-' + str(note[4]) + '/' + str(chord_duration - int(note[2] * chords_duration_multiplier))
+          
+          # Representation of events
+          if represent_every_number_of_chords > 0:
+            if rpz == represent_every_number_of_chords:
+              TXT_string += '#' + str(song_dur)
+              rpz = 0    
+          
+          if line_by_line_output:
+            TXT_string += '\n'
+          else:  
+            TXT_string += ' '
+          
+          if debug: print(chord)
+
+          song_chords_count += 1
+          number_of_chords_recorded += 1
+          rpz += 1
+          
+      except:
+        if debug: print('Bad chord. Skipping...')
+        number_of_bad_chords_recorded += 1
+        continue            
+
+    return TXT_string, number_of_chords_recorded, number_of_bad_chords_recorded
+
+###################################################################################
+
+def Tegridy_TXT_MIDI_Processor(input_string, 
+                              line_by_line_dataset = False,
+                              dataset_MIDI_events_time_denominator = 100,
+                              number_of_ticks_per_quarter = 425,
+                              start_from_this_generated_event = 0,
+                              remove_generated_silence_if_needed = False,
+                              silence_offset_from_start = 75000,
+                              simulate_velocity = False,
+                              output_signature = 'TMIDI-TXT-MIDI',
+                              list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0]):
+
+    '''Tegridy TXT to MIDI Processor
+     
+     Input: Input TXT string in the TMIDI-TXT format
+            Input is line-by-line or one-line
+            Used dataset time denominator
+            Number of ticks per quater for output MIDI
+            Start from this input event (skip this many from start)
+            Is there a generated silence or not
+            Silence offset in MIDI ticks from start
+            Simulate velocity (V = max(Pitch))
+            Output MIDI signature
+            List of 16 desired MIDI patch numbers for the output MIDI. Def. is MuseNet compatible patch list.
+
+     Output: NOTE: For now only 1st recorded TXT performance converted to MIDI.
+             Raw/binary MIDI data that can be recorded to a file with standard python functions.
+             Detected number of input notes
+             Recorded number of output notes
+             Detailed created MIDI stats in the MIDI.py module format (MIDI.score2stats)
+
+     Project Los Angeles
+     Tegridy Code 2020'''
+
+    debug = False
+
+    if line_by_line_dataset:
+      input_string = input_string.split() # for new datasets
+    else:
+      input_string = input_string.split(' ') # for compatibility/legacy datasets
+    if debug: print(input_string)
+
+
+    i=0
+    z=1
+
+    notes_specs = []
+    song_name = ''
+    previous_chord_start_time = 0
+    number_of_notes_recorded = 0
+    zero_marker = True
+    song_header = []
+    song_score = []
+
+    start_time = 0
+
+    print('Converting TXT to MIDI. Please wait...')
+    for i in range(len(input_string)):
+      if input_string[i].split('=END_')[0] == 'SONG':
+        break
+        #TODO Record all perfomances (even incomplete ones) as separate tracks in output MIDI
+
+      if input_string[i].split('=')[0] == 'SONG':
+        try:
+          song_name = input_string[i].split('=')[1]
+          song_header.append(['track_name', 0, song_name])
+          continue
+        except:
+          print('Unknown Song name format', song_name)
+          continue
+        
+
+      try:
+        start_time += int(input_string[i].split('-')[0]) * dataset_MIDI_events_time_denominator
+        duration = int(input_string[i].split('-')[1]) * dataset_MIDI_events_time_denominator 
+        channel = int(input_string[i].split('-')[2])
+        velocity = int(input_string[i].split('-')[3])
+      except:
+        print('Unknown Chord:', input_string[i])
+      
+      try:
+        for x in range(len(str(input_string[i]).split('-')[5:])):
+          notes_specs, dur = str(input_string[i].split('-')[5:][x]).split('/')
+          duration = duration - int(dur)
+          simulated_velocity = int(notes_specs)
+          if simulate_velocity:
+            song_score.append(['note', 
+                                int(start_time), #Start Time
+                                int(duration), #Duration
+                                int(channel), #Channel
+                                int(notes_specs), #Note
+                                int(simulated_velocity)]) #Velocity              
+            number_of_notes_recorded += 1
+          else:  
+            song_score.append(['note', 
+                                int(start_time), #Start Time
+                                int(duration), #Duration
+                                int(channel), #Channel
+                                int(notes_specs), #Note
+                                int(velocity)]) #Velocity              
+            number_of_notes_recorded += 1
+      except:
+        print("Unknown Notes: " + input_string[i])
+        continue
+
+    if remove_generated_silence_if_needed:
+      song_score1 = []
+      for note in song_score[start_from_this_generated_event:]:
+        note1 = note
+        note1[1] = note[1] - silence_offset_from_start
+        song_score1.append(note1)
+      song_score = song_score1  
+
+    output_header = [number_of_ticks_per_quarter, [['track_name', 0, bytes(output_signature, 'utf-8')]]] 
+                                                  
+    patch_list = [['patch_change', 0, 0, list_of_MIDI_patches[0]], 
+                ['patch_change', 0, 1, list_of_MIDI_patches[1]],
+                ['patch_change', 0, 2, list_of_MIDI_patches[2]],
+                ['patch_change', 0, 3, list_of_MIDI_patches[3]],
+                ['patch_change', 0, 4, list_of_MIDI_patches[4]],
+                ['patch_change', 0, 5, list_of_MIDI_patches[5]],
+                ['patch_change', 0, 6, list_of_MIDI_patches[6]],
+                ['patch_change', 0, 7, list_of_MIDI_patches[7]],
+                ['patch_change', 0, 8, list_of_MIDI_patches[8]],
+                ['patch_change', 0, 9, list_of_MIDI_patches[9]],
+                ['patch_change', 0, 10, list_of_MIDI_patches[10]],
+                ['patch_change', 0, 11, list_of_MIDI_patches[11]],
+                ['patch_change', 0, 12, list_of_MIDI_patches[12]],
+                ['patch_change', 0, 13, list_of_MIDI_patches[13]],
+                ['patch_change', 0, 14, list_of_MIDI_patches[14]],
+                ['patch_change', 0, 15, list_of_MIDI_patches[15]]]
+
+    output_song = song_header + song_score[start_from_this_generated_event:]
+    output = output_header + [patch_list + output_song]
+
+    midi_data = score2midi(output)
+    detailed_MIDI_stats = score2stats(output)
+
+    return midi_data, len(input_string), number_of_notes_recorded, detailed_MIDI_stats
+
+###################################################################################
+
+def Tegridy_TXT_to_INT_Processor(input_TXT_string):
+
+    '''Tegridy TXT to Intergers Processor
+     
+    Input: Input TXT string in the TMIDI-TXT format
+
+    Output: List of intergers
+            Decoding dictionary
+
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    # get vocabulary set
+    words = sorted(tuple(set(input_TXT_string.split('\n'))))
+    n = len(words)
+
+    # create word-integer encoder/decoder
+    word2int = dict(zip(words, list(range(n))))
+    decoding_dictionary = dict(zip(list(range(n)), words))
+
+    # encode all words in the string into integers
+    output_INT_list = [word2int[word] for word in input_TXT_string.split('\n')]
+    
+    return output_INT_list, decoding_dictionary
+
+###################################################################################
+
+def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
+
+    '''Tegridy Intergers to TXT Processor
+     
+    Input: List of intergers in TMIDI-TXT-INT format
+          Decoding dictionary in TMIDI-TXT-INT format
+
+    Output: Decoded TXT string in TMIDI-TXT format
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    output_TXT_string = '\n'.join(decoding_dictionary[int_] for int_ in input_INT_list)
+    
+    return output_TXT_string
