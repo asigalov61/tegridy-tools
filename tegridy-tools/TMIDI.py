@@ -549,6 +549,47 @@ def Tegridy_TXT_MIDI_Processor(input_string,
     return midi_data, len(input_string), number_of_notes_recorded, detailed_MIDI_stats
 
 ###################################################################################
+
+def Tegridy_TXT_to_INT_Processor(input_TXT_string):
+
+    '''Tegridy TXT to Intergers Processor
+     
+     Input: Input TXT string in the TMIDI-TXT format
+
+     Output: List of pure intergers
+
+     Project Los Angeles
+     Tegridy Code 2020'''
+
+    output_INT_list = []
+
+    TXT_List = list(input_TXT_string)
+    for char in TXT_List:
+      output_INT_list.append(ord(char))
+    
+    return output_INT_list
+
+###################################################################################
+
+def Tegridy_INT_to_TXT_Processor(input_INT_list):
+
+    '''Tegridy Intergers to TXT Processor
+     
+     Input: List of intergers in TMIDI-TXT-INT format
+
+     Output: Decoded TXT string in TMIDI-TXT format
+
+     Project Los Angeles
+     Tegridy Code 2020'''
+
+    output_TXT_string = ''
+
+    for i in input_INT_list:
+      output_TXT_string += chr(i)
+    
+    return output_TXT_string
+
+###################################################################################
 ###################################################################################
 ###################################################################################
 #
