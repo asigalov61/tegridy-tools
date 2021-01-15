@@ -550,9 +550,9 @@ def Tegridy_TXT_MIDI_Processor(input_string,
 
 ###################################################################################
 
-def Tegridy_TXT_to_INT_Processor(input_TXT_string):
+def Tegridy_TXT_to_INT_Converter(input_TXT_string):
 
-    '''Tegridy TXT to Intergers Processor
+    '''Tegridy TXT to Intergers Converter
      
      Input: Input TXT string in the TMIDI-TXT format
 
@@ -571,9 +571,9 @@ def Tegridy_TXT_to_INT_Processor(input_TXT_string):
 
 ###################################################################################
 
-def Tegridy_INT_to_TXT_Processor(input_INT_list):
+def Tegridy_INT_to_TXT_Converter(input_INT_list):
 
-    '''Tegridy Intergers to TXT Processor
+    '''Tegridy Intergers to TXT Converter
      
      Input: List of intergers in TMIDI-TXT-INT format
 
@@ -586,6 +586,52 @@ def Tegridy_INT_to_TXT_Processor(input_INT_list):
 
     for i in input_INT_list:
       output_TXT_string += chr(i)
+    
+    return output_TXT_string
+
+###################################################################################
+
+def Tegridy_TXT_to_INT_Processor(input_TXT_string):
+
+    '''Tegridy TXT to Intergers Processor
+     
+    Input: Input TXT string in the TMIDI-TXT format
+
+    Output: List of intergers
+            Decoding dictionary
+
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    # get vocabulary set
+    words = sorted(tuple(set(input_TXT_string.split('\n'))))
+    n = len(words)
+
+    # create word-integer encoder/decoder
+    word2int = dict(zip(words, list(range(n))))
+    decoding_dictionary = dict(zip(list(range(n)), words))
+
+    # encode all words in the string into integers
+    output_INT_list = [word2int[word] for word in input_TXT_string.split('\n')]
+    
+    return output_INT_list, decoding_dictionary
+
+###################################################################################
+
+def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
+
+    '''Tegridy Intergers to TXT Processor
+     
+    Input: List of intergers in TMIDI-TXT-INT format
+          Decoding dictionary in TMIDI-TXT-INT format
+
+    Output: Decoded TXT string in TMIDI-TXT format
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    output_TXT_string = '\n'.join(decoding_dictionary[int_] for int_ in input_INT_list)
     
     return output_TXT_string
 
