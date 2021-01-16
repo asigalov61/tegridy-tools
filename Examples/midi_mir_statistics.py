@@ -642,7 +642,7 @@ def main():
 if __name__ == "__main__":
   main()
 
-#@title MIDI Stats 3
+#@title MIDI Stats 3 (Ground Truth)
 # https://github.com/mbereket/music-transcription
 
 # Comverts MIDI file pattern to representation of notes events in absolute time
@@ -1013,3 +1013,113 @@ def visitFilesRecursively(root_dir, extension, apply_func, verbose = True):
 				res = apply_func(file_path)
     
 printMidiFileStatistics('/content/')
+
+#@title Generate and plot MIDI file's Parson's code and contour.
+#!/usr/bin/env python
+
+# https://github.com/snus-kin/parsons-code
+
+"""
+    Take a midi file and convert it to parsons code, with a limit and offset
+"""
+
+def midi_to_parsons(midifile, limit=1600, offset=0):
+    """
+        Input: midifile (string) = A midi file path
+               limit    (int)    = How long is the parsons code
+               offset   (int)    = How many notes in do we start
+        Output: parsons (string) = A string containing a parsons code length
+                                   limit at an offset from the start of the file
+    """
+    count = 0
+    parsons = ""
+    for message in mido.MidiFile(midifile):
+        if "note_on" in str(message) and offset == 0:
+            if parsons == "":
+                # initialise list
+                prev = message.note
+                parsons += "*"
+
+            # simple comparison
+            elif message.note > prev:
+                parsons += "U"
+                prev = message.note
+            elif message.note < prev:
+                parsons += "D"
+                prev = message.note
+            elif message.note == prev:
+                parsons += "R"
+                prev = message.note
+
+            #increment count
+            count += 1
+            #if count >= limit:
+                #break
+        elif "note_on" in str(message):
+            offset -= 1
+
+    return parsons
+
+code = midi_to_parsons(MIDI_file_to_analyze)
+
+#print(code)
+
+""" Parsons code to contour plot """
+
+def contour(code):
+    print('Song Parson Code is:')
+    print(code)
+    print('')
+    if code[0] != "*":
+        raise ValueError("Parsons Code must start with '*'")
+
+    contour_dict = {}
+    pitch = 0
+    index = 0
+
+    maxp = 0
+    minp = 0
+
+    contour_dict[(pitch, index)] = "*"
+
+    for point in code:
+        if point == "R":
+            index += 1
+            contour_dict[(pitch, index)] = "-"
+
+            index += 1
+            contour_dict[(pitch, index)] = "*"
+        elif point == "U":
+            index += 1
+            pitch -= 1
+            contour_dict[(pitch, index)] = "/"
+
+            index += 1
+            pitch -= 1
+            contour_dict[(pitch, index)] = "*"
+
+            if pitch < maxp:
+                maxp = pitch
+        elif point == "D":
+            index += 1
+            pitch += 1
+            contour_dict[(pitch, index)] = "\\"
+
+            index += 1
+            pitch += 1
+            contour_dict[(pitch, index)] = "*"
+
+            if pitch > minp:
+                minp = pitch
+
+    for pitch in range(maxp, minp+1):
+        line = [" " for _ in range(index + 1)]
+        for pos in range(index + 1):
+            if (pitch, pos) in contour_dict:
+                line[pos] = contour_dict[(pitch, pos)]
+
+
+        print("".join(line))
+
+
+contour(code)
