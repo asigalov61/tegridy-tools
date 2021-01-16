@@ -1856,7 +1856,7 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=-1, time_denominator=1):
       print('Bad file. Skipping...')
       print('File name:', MIDI_file)
       midi_file.close()
-      return
+      return chords_list, melody
          
     midi_file.close()
 
