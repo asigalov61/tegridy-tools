@@ -1,3 +1,7 @@
+## tegridy-tools
+
+***
+
 ### Description of directories:
 
 #### 1) pretty_midi
@@ -36,6 +40,8 @@
 
 #### 1) MIDI_MIR_Statistics.ipynb
 ##### This is a notebook for MIDI MIR and statistics. For now it only works on individual MIDIs.
+
+***
 
 ##### Project Los Angeles
 
