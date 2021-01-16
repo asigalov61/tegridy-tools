@@ -10,6 +10,9 @@
 #### 2) noteseq
 ##### This is a modified and streamlined version of the original noteseq package that is stand-alone and independent of anything, including Tensorflow and the need to install any unique/fancy prerequisites.
 
+#### 3) python-midi
+##### This is the python-midi by @vishnubob for Python 3. Needs manual install but otherwise it works fine on the latest Python 3 versions.
+
 ***
 
 ### Description of modules:
