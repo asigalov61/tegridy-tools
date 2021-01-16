@@ -1869,8 +1869,8 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
     if MIDI_channel >= 0 and MIDI_channel <= 15: # Process only a selected single MIDI channel
       score = grep(score2, [MIDI_channel])
     
-    if MIDI_channel == -1: # Process all channels except drums (channel 9)
-      score = grep(score2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]   
+    if MIDI_channel == -1: # Process all channels except drums (except channel 9)
+      score = grep(score2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15])   
     
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
