@@ -1781,12 +1781,12 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 
 ###################################################################################
 
-def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=-1, time_denominator=1):
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
 
     '''Tegridy MIDI Processor
 
     Input: A single MIDI file.
-           Desired MIDI channel to process.
+           Desired MIDI channel to process. Def. = 0. All but drums = -1 and all channels = 16
            Notes/Chords timings divider (denominator).
 
     Output: A list of MIDI chords and a list of melody notes.
@@ -1862,10 +1862,15 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=-1, time_denominator=1):
 
     score1 = to_millisecs(opus)
     score2 = opus2score(score1)
-    if MIDI_channel == -1:
+    
+    if MIDI_channel == 16: # Process all MIDI channels
       score = score2
-    else:  
+    
+    if MIDI_channel >= 0 and MIDI_channel <= 15: # Process only a selected single MIDI channel
       score = grep(score2, [MIDI_channel])
+    
+    if MIDI_channel == -1: # Process all channels except drums (channel 9)
+      score = grep(score2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]   
     
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
