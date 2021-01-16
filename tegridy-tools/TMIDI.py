@@ -1781,7 +1781,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 
 ###################################################################################
 
-def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=-1, time_denominator=1):
 
     '''Tegridy MIDI Processor
 
@@ -1854,8 +1854,9 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=100):
     
     except:
       print('Bad file. Skipping...')
+      print('File name:', MIDI_file)
       midi_file.close()
-      exit
+      exit()
          
     midi_file.close()
 
