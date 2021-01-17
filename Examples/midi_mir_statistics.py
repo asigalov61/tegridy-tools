@@ -42,7 +42,7 @@ import midi
 from mido import MidiFile
 from operator import itemgetter
 
-#@title Default title text
+#@title Specify the input MIDI file to analyze
 MIDI_file_to_analyze = "/content/seed.mid" #@param {type:"string"}
 
 #@title MIDI Stats 1
@@ -1015,6 +1015,9 @@ def visitFilesRecursively(root_dir, extension, apply_func, verbose = True):
 printMidiFileStatistics('/content/')
 
 #@title Generate and plot MIDI file's Parson's code and contour.
+length_of_the_code_and_contour_in_notes = 120 #@param {type:"slider", min:10, max:2000, step:10}
+code_and_contour_start_offset_in_notes = 0 #@param {type:"slider", min:0, max:1000, step:10}
+
 #!/usr/bin/env python
 
 # https://github.com/snus-kin/parsons-code
@@ -1023,7 +1026,7 @@ printMidiFileStatistics('/content/')
     Take a midi file and convert it to parsons code, with a limit and offset
 """
 
-def midi_to_parsons(midifile, limit=1600, offset=0):
+def midi_to_parsons(midifile, limit=code_and_contour_start_offset_in_notes + length_of_the_code_and_contour_in_notes, offset=code_and_contour_start_offset_in_notes):
     """
         Input: midifile (string) = A midi file path
                limit    (int)    = How long is the parsons code
@@ -1053,8 +1056,8 @@ def midi_to_parsons(midifile, limit=1600, offset=0):
 
             #increment count
             count += 1
-            #if count >= limit:
-                #break
+            if count >= limit:
+                break
         elif "note_on" in str(message):
             offset -= 1
 
