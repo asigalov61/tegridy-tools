@@ -81,12 +81,12 @@ print('Loading complete. Enjoy! :)')
 #@title Download complete (large) pre-processed MIDI datasets
 # %cd /content/
 
-# POP909 Dataset (Complete)
+# POP909 dataset (Complete)
 # https://github.com/music-x-lab/POP909-Dataset
 !wget --no-check-certificate -O POP.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118362&authkey=AD3_7eDWpgUhcaw"
 !unzip POP.zip
 
-# groove2groove Dataset (Complete)
+# groove2groove dataset (Complete)
 # https://github.com/cifkao/groove2groove
 # https://doi.org/10.5281/zenodo.3957999
 !wget --no-check-certificate -O groove2groove.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118365&authkey=AHr0I_2k_AZ110E"
@@ -97,6 +97,16 @@ print('Loading complete. Enjoy! :)')
 # https://github.com/craffel/midi-dataset
 !wget --no-check-certificate -O clean_midi.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118368&authkey=AAFEzC5YBABk7rA"
 !unzip clean_midi.zip
+
+# Google Magenta Piano Transformer dataset (Complete)
+# https://github.com/asigalov61/Google-Magenta-Piano-Transformer-Colab
+!wget --no-check-certificate -O piano_transformer.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118369&authkey=AATJ2n_642HLGFI"
+!unzip piano_transformer.zip
+
+# Google MAESTRO Piano dataset (Complete)
+# https://magenta.tensorflow.org/datasets/maestro
+!wget --no-check-certificate -O MAESTRO.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118370&authkey=ABxzaWHKIeN1e3A"
+!unzip MAESTRO.zip
 
 # %cd /content/
 
@@ -150,7 +160,7 @@ chords, melody = TMIDI.Tegridy_MIDI_Processor(full_path_to_input_MIDI_file,
 print('MIDI file loaded. Enjoy :)')
 
 #@title Initial Search
-number_of_notes_to_match = 6 #@param {type:"slider", min:2, max:10, step:1}
+number_of_notes_to_match = 5 #@param {type:"slider", min:2, max:10, step:1}
 
 output_song = []
 pattern = []
@@ -205,7 +215,7 @@ else:
 
 """# Generate, download, and listen to the output"""
 
-#@title Convert to MIDI from TXT
+#@title Convert to MIDI
 import MIDI
 
 #@markdown Standard MIDI timings are 400/120(80)
