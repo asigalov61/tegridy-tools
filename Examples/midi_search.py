@@ -76,21 +76,21 @@ print('Loading complete. Enjoy! :)')
 !wget --no-check-certificate -O clean_midi.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118368&authkey=AAFEzC5YBABk7rA"
 !unzip clean_midi.zip
 
-# Google Magenta Piano Transformer dataset (Complete)
-# https://github.com/asigalov61/Google-Magenta-Piano-Transformer-Colab
-#!wget --no-check-certificate -O piano_transformer.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118369&authkey=AATJ2n_642HLGFI"
-#!unzip piano_transformer.zip
-
 # Google MAESTRO Piano dataset (Complete)
 # https://magenta.tensorflow.org/datasets/maestro
-#!wget --no-check-certificate -O MAESTRO.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118370&authkey=ABxzaWHKIeN1e3A"
-#!unzip MAESTRO.zip
+!wget --no-check-certificate -O MAESTRO.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118370&authkey=ABxzaWHKIeN1e3A"
+!unzip MAESTRO.zip
+
+# Reddit 30000 MIDIs subset (aka Melody Kit 1.0 by Melody Man)
+# All channels except the drums
+!wget --no-check-certificate -O 30000.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118372&authkey=AFwTJaVZyiVuetY"
+!unzip 30000.zip
 
 # %cd /content/
 
 #@title Load/Merge and parse the dataset
 
-full_path_to_the_dataset = "/content/clean_midi.pkl" #@param {type:"string"}
+full_path_to_the_dataset = "/content/30000.pkl" #@param {type:"string"}
 merge_several_datasets = False #@param {type:"boolean"}
 
 print('Loading the dataset...Please wait...')
