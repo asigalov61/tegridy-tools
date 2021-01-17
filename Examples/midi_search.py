@@ -59,21 +59,26 @@ print('Loading complete. Enjoy! :)')
 #@title Download partial (small) pre-processed MIDI datasets
 # %cd /content/
 
-# POP909 Dataset (Channel 0)
+# POP909 dataset (Channel 0)
 # https://github.com/music-x-lab/POP909-Dataset
 !wget --no-check-certificate -O POP.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118359&authkey=AAYhmJhE0o8AM4g"
 !unzip POP.zip
 
-# groove2groove Dataset (Channel 2)
+# groove2groove dataset (Channel 2)
 # https://github.com/cifkao/groove2groove
 # https://doi.org/10.5281/zenodo.3957999
 !wget --no-check-certificate -O groove2groove.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118367&authkey=AHJ48GG8uGoOb5Y"
 !unzip groove2groove.zip
 
-# Reddit 130000 MIDIs Dataset (aka Melody Kit 1.0 by Melody Man)
+# Reddit 130000 MIDIs dataset (aka Melody Kit 1.0 by Melody Man)
 # Channel 0 only
 !wget --no-check-certificate -O 130000.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118363&authkey=AITWpblsg68d9VI"
 !unzip 130000.zip
+
+# Reddit 30000 MIDIs subset (aka Melody Kit 1.0 by Melody Man)
+# All channels except the drums
+!wget --no-check-certificate -O 30000.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118371&authkey=AKqo-iUgbU4Z6Y8"
+!unzip 30000.zip
 
 # %cd /content/
 
