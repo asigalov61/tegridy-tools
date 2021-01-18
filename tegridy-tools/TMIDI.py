@@ -2439,8 +2439,13 @@ def Tegridy_TXT_Reducer(input_string,
 
     print('Reducing TXT. Please wait...')
     for i in range(len(input_string)):
+      
+      if input_string[i].split('=')[0] == 'DATASET':
+        Output_TXT_string += input_string[i] + '\n'
+        continue
 
       if input_string[i].split('=')[0] == 'SONG':
+        Output_TXT_string += input_string[i] + '\n'
         continue
         
 
