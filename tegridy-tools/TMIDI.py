@@ -2474,7 +2474,9 @@ def Tegridy_TXT_Reducer(input_string,
       except:
         print("Unknown Notes: " + input_string[i])
         continue
-        
+
+    print('Task complete! Enjoy :)')
+       
     return Output_TXT_string, number_of_notes_recorded
 
 ###################################################################################
