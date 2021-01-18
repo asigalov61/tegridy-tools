@@ -5,7 +5,8 @@
 ###################################################################################
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.2
+#
+#	Version 1.3
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
@@ -13,10 +14,6 @@
 #	Project Los Angeles
 #	Tegridy Code 2020
 #
-###################################################################################
-###################################################################################
-###################################################################################
-
 ###################################################################################
 ###################################################################################
 ###################################################################################
@@ -1779,6 +1776,8 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 
 # from collections import defaultdict
 
+from itertools import zip_longest 
+
 ###################################################################################
 
 def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
@@ -2357,3 +2356,213 @@ def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
     output_TXT_string = '\n'.join(decoding_dictionary[int_] for int_ in input_INT_list)
     
     return output_TXT_string
+
+###################################################################################
+
+def Tegridy_TXT_to_INT_Converter(input_TXT_string):
+
+    '''Tegridy TXT to Intergers Converter
+     
+    Input: Input TXT string in the TMIDI-TXT format
+    Output: List of pure intergers
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    output_INT_list = []
+
+    TXT_List = list(input_TXT_string)
+    for char in TXT_List:
+      output_INT_list.append(ord(char))
+    
+    return output_INT_list
+
+###################################################################################
+
+def Tegridy_INT_to_TXT_Converter(input_INT_list):
+
+    '''Tegridy Intergers to TXT Converter
+     
+    Input: List of intergers in TMIDI-TXT-INT format
+    Output: Decoded TXT string in TMIDI-TXT format
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    output_TXT_string = ''
+
+    for i in input_INT_list:
+      output_TXT_string += chr(i)
+    
+    return output_TXT_string
+
+###################################################################################
+
+def Tegridy_TXT_Reducer(input_string, 
+                        line_by_line_input_dataset = True,
+                        line_by_line_output_dataset = True,
+                        dataset_MIDI_events_time_denominator = 10):
+
+    '''Tegridy TXT Reducer
+     
+    Input: Input TXT string in the TMIDI-TXT format
+           Input dataset type
+           Output dataset type
+           Dataset MIDI events time divider/denominator
+
+    Output: Reduced TXT string in UTF-8 format
+            Number of recorded notes
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    debug = False
+
+    if line_by_line_input_dataset:
+      input_string = input_string.split('\n') # for general use
+    else:
+      input_string = input_string.split(' ') # for some specific purposes
+    if debug: print(input_string)
+
+
+    i=0
+    z=1
+
+    notes_specs = []
+    song_name = ''
+    previous_chord_start_time = 0
+    number_of_notes_recorded = 0
+    zero_marker = True
+    song_header = []
+    song_score = []
+
+    start_time = 0
+
+    Output_TXT_string = ''
+
+    print('Converting TXT to INTs. Please wait...')
+    for i in range(len(input_string)):
+
+      if input_string[i].split('=')[0] == 'SONG':
+        continue
+        
+
+      try:
+        start_time += int(input_string[i].split('-')[0])
+        duration = int(input_string[i].split('-')[1])
+        channel = int(input_string[i].split('-')[2])
+        velocity = int(input_string[i].split('-')[3])
+      except:
+        print('Unknown Chord:', input_string[i])
+      
+      try:
+        for x in range(len(str(input_string[i]).split('-')[5:])):
+          notes_specs, dur = str(input_string[i].split('-')[5:][x]).split('/')
+          dura = duration - int(dur)
+          chars = ''
+          chars += chr(int(start_time)) #Start Time
+          chars += chr(int(dura)) #Duration
+          chars += chr(int(channel)) #Channel
+          chars += chr(int(notes_specs)) #Note
+          chars += chr(int(velocity)) #Velocity             
+          Output_TXT_string += chars
+          if line_by_line_output_dataset:
+            Output_TXT_string += '\n'  
+          number_of_notes_recorded += 1
+      except:
+        print("Unknown Notes: " + input_string[i])
+        continue
+        
+    return Output_TXT_string, number_of_notes_recorded
+
+###################################################################################
+
+def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
+                                          line_by_line_dataset = True):
+                                                            
+
+    '''Tegridy TXT to Notes Converter
+     
+    Input: Input TXT string in the Reduced TMIDI-TXT format
+           Input dataset type
+
+    Output: List of notes in MIDI.py Score format (TMIDI SONG format)
+
+    Project Los Angeles
+    Tegridy Code 2020'''
+
+    if line_by_line_dataset
+      input_string = Reduced_TXT_String.split('\n')
+    else:
+      input_string = Reduced_TXT_String.split(' ')
+
+    output_list = []
+
+    for i in range(len(input_string)):
+      istring = input_string[i]
+      if len(istring) == 5:
+            out = []       
+            out.append('note') 
+            out.append(ord(istring[0])) 
+            out.append(ord(istring[1]))
+            out.append(ord(istring[2]))
+            out.append(ord(istring[3]))
+            out.append(ord(istring[4]))
+            output_list.append(out)
+
+    return output_list
+
+###################################################################################
+
+def Tegridy_SONG_to_MIDI_Converter(SONG,
+                                  output_signature = 'Tegridy TMIDI Module', 
+                                  track_name = 'Composition Track',
+                                  number_of_ticks_per_quarter = 425,
+                                  list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0],
+                                  output_file_name = 'TMIDI-Composition'):
+
+    '''Tegridy SONG to MIDI Converter
+     
+    Input: Input SONG in TMIDI SONG/MIDI.py Score format
+           Output MIDI Track 0 name / MIDI Signature
+           Output MIDI Track 1 name / Composition track name
+           Number of ticks per quarter for the output MIDI
+           List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.
+           Output file name w/o .mid extension.
+
+    Output: MIDI File
+
+    Project Los Angeles
+    Tegridy Code 2020'''                                  
+
+    output_header = [number_of_ticks_per_quarter, [['track_name', 0, bytes(output_signature, 'utf-8')]]] 
+
+                                                      
+
+    patch_list = [['patch_change', 0, 0, list_of_MIDI_patches[0]], 
+                    ['patch_change', 0, 1, list_of_MIDI_patches[1]],
+                    ['patch_change', 0, 2, list_of_MIDI_patches[2]],
+                    ['patch_change', 0, 3, list_of_MIDI_patches[3]],
+                    ['patch_change', 0, 4, list_of_MIDI_patches[4]],
+                    ['patch_change', 0, 5, list_of_MIDI_patches[5]],
+                    ['patch_change', 0, 6, list_of_MIDI_patches[6]],
+                    ['patch_change', 0, 7, list_of_MIDI_patches[7]],
+                    ['patch_change', 0, 8, list_of_MIDI_patches[8]],
+                    ['patch_change', 0, 9, list_of_MIDI_patches[9]],
+                    ['patch_change', 0, 10, list_of_MIDI_patches[10]],
+                    ['patch_change', 0, 11, list_of_MIDI_patches[11]],
+                    ['patch_change', 0, 12, list_of_MIDI_patches[12]],
+                    ['patch_change', 0, 13, list_of_MIDI_patches[13]],
+                    ['patch_change', 0, 14, list_of_MIDI_patches[14]],
+                    ['patch_change', 0, 15, list_of_MIDI_patches[15]],
+                    ['track_name', 0, bytes(track_name, 'utf-8')]]
+
+
+    output = output_header + [patch_list + SONG]
+
+    midi_data = score2midi(output)
+    detailed_MIDI_stats = score2stats(output)
+
+    with open(output_file_name + '.mid', 'wb') as midi_file:
+        midi_file.write(midi_data)
+        midi_file.close()
+    print('Done!')
+    print(detailed_MIDI_stats)
