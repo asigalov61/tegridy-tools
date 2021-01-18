@@ -2541,13 +2541,15 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
            Output file name w/o .mid extension.
 
     Output: MIDI File
+            Detailed MIDI stats
 
     Project Los Angeles
     Tegridy Code 2020'''                                  
 
-    output_header = [number_of_ticks_per_quarter, [['track_name', 0, bytes(output_signature, 'utf-8')]]] 
-
-                                                      
+    print('Converting to MIDI. Please stand-by...')
+    
+    output_header = [number_of_ticks_per_quarter, 
+                    [['track_name', 0, bytes(output_signature, 'utf-8')]]]                                                    
 
     patch_list = [['patch_change', 0, 0, list_of_MIDI_patches[0]], 
                     ['patch_change', 0, 1, list_of_MIDI_patches[1]],
@@ -2567,7 +2569,6 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
                     ['patch_change', 0, 15, list_of_MIDI_patches[15]],
                     ['track_name', 0, bytes(track_name, 'utf-8')]]
 
-
     output = output_header + [patch_list + SONG]
 
     midi_data = score2midi(output)
@@ -2577,4 +2578,5 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
         midi_file.write(midi_data)
         midi_file.close()
     print('Done!')
-    print(detailed_MIDI_stats)
+    #print(detailed_MIDI_stats)
+    return detailed_MIDI_stats
