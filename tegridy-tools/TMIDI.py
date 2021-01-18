@@ -2489,7 +2489,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
     Project Los Angeles
     Tegridy Code 2020'''
 
-    if line_by_line_dataset
+    if line_by_line_dataset:
       input_string = Reduced_TXT_String.split('\n')
     else:
       input_string = Reduced_TXT_String.split(' ')
