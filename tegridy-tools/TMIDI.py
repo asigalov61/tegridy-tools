@@ -1772,11 +1772,17 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 ###################################################################################
 ###################################################################################
 
-# import MIDI
+import os
+
+import datetime
+
+from datetime import datetime
+
+import pickle
+
+from itertools import zip_longest
 
 # from collections import defaultdict
-
-from itertools import zip_longest 
 
 ###################################################################################
 
@@ -2582,3 +2588,96 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
     print('Done!')
     #print(detailed_MIDI_stats)
     return detailed_MIDI_stats
+
+###################################################################################
+#
+# Tegridy helper functions
+#
+###################################################################################
+
+def Tegridy_File_Time_Stamp(input_file_name='File_Created_on_', ext = ''):
+
+  '''Tegridy File Time Stamp
+     
+  Input: Full path and file name without extention
+         File extension
+          
+  Output: File name string with time-stamp and extension (time-stamped file name)
+
+  Project Los Angeles
+  Tegridy Code 2021'''       
+
+  now = ''
+  now_n = str(datetime.now())
+  now_n = now_n.replace(' ', '_')
+  now_n = now_n.replace(':', '_')
+  now = now_n.replace('.', '_')
+      
+  fname = input_file_name + str(now) + ext
+
+  return(fname)
+
+###################################################################################
+
+def Tegridy_TXT_Dataset_File_Writer(input_file_name='TMIDI_TXT_Dataset', 
+                                    ext = '', 
+                                    TXT_String = ''):
+
+  '''Tegridy TXT Dataset File Writer
+     
+  Input: Full path and file name without extention
+         File extension
+         Dataset as TXT string
+          
+  Output: Named TXT Dataset File
+
+  Project Los Angeles
+  Tegridy Code 2021'''
+
+  print('Tegridy TXT Dataset File Writer')
+
+  full_path_to_TXT_dataset = input_file_name + ext
+  
+  if os.path.exists(full_path_to_TXT_dataset):
+    os.remove(full_path_to_TXT_dataset)
+    print('Removing old Dataset...')
+  else:
+    print("Creating new Dataset file...")
+
+  print('Writing dataset to a file...Please wait...')
+  f = open(full_path_to_TXT_dataset, 'a')
+  f.write(TXT_String)
+  f.close()
+  print('Dataset was saved as:', full_path_to_TXT_dataset)
+  print('Task complete! Enjoy :)')
+
+###################################################################################
+
+def Tegridy_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
+
+  '''Tegridy Pickle File Writer
+     
+  Input: Data to write (I.e. a list)
+         Full path and file name without extention
+         
+  Output: Named Pickle file
+
+  Project Los Angeles
+  Tegridy Code 2021'''
+
+  print('Tegridy Pickle File Writer')
+
+  full_path_to_output_dataset_to = input_file_name + '.pickle'
+
+  if os.path.exists(full_path_to_output_dataset_to):
+    os.remove(full_path_to_output_dataset_to)
+    print('Removing old Dataset...')
+  else:
+    print("Creating new Dataset file...")
+
+  with open(full_path_to_output_dataset_to, 'wb') as filehandle:
+    # store the data as binary data stream
+    pickle.dump(Data, filehandle)
+
+  print('Dataset was saved as:', full_path_to_output_dataset_to)
+  print('Task complete. Enjoy! :)')
