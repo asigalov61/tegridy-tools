@@ -2489,6 +2489,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
            Input dataset type
 
     Output: List of notes in MIDI.py Score format (TMIDI SONG format)
+            First SONG= occurence (song name usually)
 
     Project Los Angeles
     Tegridy Code 2020'''
@@ -2498,11 +2499,16 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
     else:
       input_string = Reduced_TXT_String.split(' ')
 
+    name_string = Reduced_TXT_String.split('\n')[0].split('=')
+    if name_string[0] == 'SONG':
+      song_name = name_string[1]
+
     output_list = []
     st = 0
 
     for i in range(len(input_string)):
       istring = input_string[i]
+      
       if len(istring) == 5:
             out = []       
             out.append('note')
@@ -2514,7 +2520,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
             out.append(ord(istring[4]))
             output_list.append(out)
 
-    return output_list
+    return output_list, song_name
 
 ###################################################################################
 
