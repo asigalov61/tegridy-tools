@@ -2398,8 +2398,7 @@ def Tegridy_INT_to_TXT_Converter(input_INT_list):
 
 def Tegridy_TXT_Reducer(input_string, 
                         line_by_line_input_dataset = True,
-                        line_by_line_output_dataset = True,
-                        dataset_MIDI_events_time_denominator = 10):
+                        line_by_line_output_dataset = True):
 
     '''Tegridy TXT Reducer
      
@@ -2438,7 +2437,7 @@ def Tegridy_TXT_Reducer(input_string,
 
     Output_TXT_string = ''
 
-    print('Converting TXT to INTs. Please wait...')
+    print('Reducing TXT. Please wait...')
     for i in range(len(input_string)):
 
       if input_string[i].split('=')[0] == 'SONG':
@@ -2446,7 +2445,7 @@ def Tegridy_TXT_Reducer(input_string,
         
 
       try:
-        start_time += int(input_string[i].split('-')[0])
+        start_time = int(input_string[i].split('-')[0])
         duration = int(input_string[i].split('-')[1])
         channel = int(input_string[i].split('-')[2])
         velocity = int(input_string[i].split('-')[3])
@@ -2495,13 +2494,15 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
       input_string = Reduced_TXT_String.split(' ')
 
     output_list = []
+    st = 0
 
     for i in range(len(input_string)):
       istring = input_string[i]
       if len(istring) == 5:
             out = []       
-            out.append('note') 
-            out.append(ord(istring[0])) 
+            out.append('note')
+            st += ord(istring[0]) 
+            out.append(st)
             out.append(ord(istring[1]))
             out.append(ord(istring[2]))
             out.append(ord(istring[3]))
