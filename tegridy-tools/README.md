@@ -13,6 +13,9 @@
 #### 3) python-midi
 ##### This is the python-midi by @vishnubob for Python 3. Needs manual install but otherwise it works fine on the latest Python 3 versions.
 
+#### 4) mido
+##### Mirror copy of the latest release (as of 1-19-2021) and the source files.
+
 ***
 
 ### Description of modules:
