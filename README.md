@@ -13,7 +13,9 @@
 
 ### Main tegridy-tools repository for large packages/modules is located here:
 
-### https://drive.google.com/drive/folders/1_AKKN4o358LQ_U4qU-mlmzm5hWtt5diE?usp=sharing
+### https://drive.google.com/drive/folders/1wVmgFD49YFRoSrkD0WUp3PdRVLxiDHqG?usp=sharing
+
+### https://1drv.ms/u/s!Ao9gnMkvUA2KgY9Ftz4xsTyiCa4TGA?e=29eMZw
 
 
 
