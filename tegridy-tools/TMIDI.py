@@ -2741,3 +2741,38 @@ def Tegridy_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
 
   print('Dataset was saved as:', full_path_to_output_dataset_to)
   print('Task complete. Enjoy! :)')
+
+###################################################################################
+
+def Tegridy_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle'):
+
+  '''Tegridy Pickle File Loader
+     
+  Input: Full path and file name without extention
+         File extension if different from default .pickle
+       
+  Output: Chords list in TMIDI MIDI Processor format
+          Melody list in TMIDI MIDI Processor format
+
+  Project Los Angeles
+  Tegridy Code 2021'''
+
+  print('Tegridy Pickle File Loader')
+  print('Loading the pickle file. Please wait...')
+
+  dataset = open(input_file_name + ext, "rb")
+
+  chords_list_f, melody_list_f = pickle.load(dataset)
+
+  dataset.close()
+
+  print('Loading complete.')
+  print('Number of MIDI chords recorded:', len(chords_list_f))
+  print('The longest chord:', len(max(chords_list_f, key=len)), 'notes') 
+  print(max(chords_list_f, key=len))
+  print('Number of recorded melody events:', len(melody_list_f))
+  print('First melody event:', melody_list_f[0], 'Last Melody event:', melody_list_f[-1])
+  print('Total number of MIDI events recorded:', len(chords_list_f))
+  print('Task complete. Enjoy! :)')
+
+  return chords_list_f, melody_list_f
