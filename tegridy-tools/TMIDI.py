@@ -6,7 +6,7 @@
 #
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.3
+#	Version 1.4
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
@@ -1762,7 +1762,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 ###################################################################################
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.3
+#	Version 1.4
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
@@ -1784,6 +1784,9 @@ from datetime import datetime
 import pickle
 
 from itertools import zip_longest
+from itertools import groupby
+
+from operator import itemgetter
 
 # from collections import defaultdict
 
@@ -2666,6 +2669,189 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
     print('Done!')
     #print(detailed_MIDI_stats)
     return detailed_MIDI_stats
+
+###################################################################################
+
+def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file, 
+                                                  karaoke_language_encoding = 'ISO-8859-1',
+                                                  char_encoding_offset = 30):
+
+    '''Tegridy Karaoke MIDI to Reduced TXT Processor
+     
+    Input: Karaoke MIDI file. Must be a Karaoke MIDI or the processor will not work properly.
+           
+           Karaoke language encoding. Please see official encoding list for your language. 
+           https://docs.python.org/3/library/codecs.html#standard-encodings
+           Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+           
+           Char encoding offset to prevent ambiguity with sys chars like \n. 
+           This may need to be adjusted for languages other than English.
+
+    Output: Line-by-line reduced TXT string
+            Number of processed MIDI events from the Karaoke MIDI file
+            Number of recorded Karaoke events in the TXT string
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    events_list = []
+    events_matrix = []
+
+    MIDI_ev = 0
+    KAR_ev = 0
+
+    itrack = 1
+
+    tst = 0
+
+    output_string = ''
+
+    midi_file = open(Karaoke_MIDI_file, 'rb')
+    
+    try:
+      opus = midi2opus(midi_file.read())
+    
+    except:
+      print('Bad file. Skipping...')
+      print('File name:', Karaoke_MIDI_file)
+      midi_file.close()
+      return output_string, MIDI_ev, KAR_ev
+          
+    midi_file.close()
+
+    score1 = to_millisecs(opus)
+    score = opus2score(score1)
+
+    #print('Reading all MIDI events from the MIDI file...')
+    while itrack < len(score):
+      for event in score[itrack]:
+        if event[0] == 'text_event':
+          tst = 0
+          txt = ''
+          tst = event[1]
+          txt = event[2]
+          
+        if event[0] == 'note' and event[1] == tst:
+          evt = copy.deepcopy(event)
+          evt.extend([''])
+          evt[6] = txt
+          events_list.append(evt)       
+        
+        MIDI_ev += 1
+      
+      itrack +=1 # Going to next track...
+
+    evt = sorted(events_list, key=itemgetter(1)) # Sorting by start time
+    groups = [list(g) for _,g in groupby(evt,itemgetter(1))] # Grouping by start time
+
+    events_matrix.extend(groups)
+
+    f_matrix = []
+    final_matrix = []
+    for items in events_matrix: 
+      if len(items) > 0: # Removing single note events
+        it = []
+        
+        it.extend(items)
+        it.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
+        f_matrix.append(it[0]) 
+
+    ptime = 0
+    time = 0
+    delta = 0
+    output_song = []
+
+    for n in range(len(f_matrix)-1):
+      no = copy.deepcopy(f_matrix[n])
+
+      no[1] = int(delta / 10)
+      no[2] = int(no[2] / 10)
+      no[5] = no[4]
+
+      ptime = f_matrix[n][1]
+      time = f_matrix[n+1][1]
+
+      delta = abs(time-ptime)    
+
+      output_song.append(no)
+
+    output_string = ''
+
+    for note in output_song:
+      if note[1] < 250 and note[2] < 250:
+        if note[1] >= 0 and len(note[6]) > 0: 
+          output_string += chr(note[1] + char_encoding_offset)
+          output_string += chr(note[2] + char_encoding_offset)
+          output_string += chr(note[4] + char_encoding_offset)
+          output_string += '='
+          output_string += str(note[6].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '')
+          output_string += '\n'
+          KAR_ev += 1
+
+    return output_string, MIDI_ev, KAR_ev
+
+###################################################################################
+
+def Tegridy_Karaoke_TXT_to_MIDI_Processor(Karaoke_TXT_String,
+                                          text_encoding='ISO-8859-1',
+                                          char_encoding_offset = 30):
+
+    '''Tegridy Karaoke TXT to MIDI Processor
+        
+    Input: Karaoke Reduced TXT String in TMIDI Karaoke Reduced TXT format
+            
+           Karaoke language encoding. Please see official encoding list for your language. 
+           https://docs.python.org/3/library/codecs.html#standard-encodings
+           Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+            
+           Char encoding offset to prevent ambiguity with sys chars like \n. 
+           This may need to be adjusted for languages other than English.
+
+    Output: Inferred song name (from the first line of the input TXT string)
+            Song (notes list in MIDI.py score format) that you can write to MIDI file with TMIDI Song to MIDI converter.
+            All song's lyrics as one TXT string (this is for eval/display purposes mostly)
+            Number of recorded Karaoke events in the output song
+
+    Project Los Angeles
+    Tegridy Code 2021'''    
+    
+    o_str = Karaoke_TXT_String.split('\n')
+
+    song_name = o_str[0]
+
+    song = []
+
+    lyrics_text = ''
+
+    ptime = 0
+
+    KAR_ev = 0
+
+    for st in o_str:
+
+      note = ['note', 0, 0, 0, 0, 0]
+      text = ['text_event', 0, '']
+
+      if len(st.split('=')[0]) == 3 and len(st) > 4:
+
+        note[1] = ptime * 10
+        note[2] = (ord(st.split('=')[0][1]) - char_encoding_offset) * 10
+        note[4] = (ord(st.split('=')[0][2]) - char_encoding_offset)
+        note[5] = (ord(st.split('=')[0][2]) - char_encoding_offset)
+
+        text[1] = ptime * 10
+        text[2] = str(st.split('=')[1])
+
+        ptime += ord(st.split('=')[0][0]) - char_encoding_offset
+
+        song.append(note)
+        song.append(text)
+
+        lyrics_text += str(st.split('=')[1]) + ' '
+
+        KAR_ev += 1
+    
+    return song_name, song, lyrics_text, KAR_ev   
 
 ###################################################################################
 #
