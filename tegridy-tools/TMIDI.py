@@ -2146,9 +2146,9 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
               else:  
                 TXT_string += ' '
 
-          TXT_string += str(chord_start_time - previous_start_time) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + '-' + str(beat)
+          TXT_string += str(abs(int(chord_start_time - previous_start_time))) + '-' + str(chord_duration) + '-' + str(chord[0][3]) + '-' + str(chord_velocity) + '-' + str(beat)
           
-          beat = int((chord_start_time - previous_start_time) / chords_beat_divider)
+          beat = int((abs(int(chord_start_time - previous_start_time))) / chords_beat_divider)
           
           previous_start_time = chord_start_time
           
