@@ -2594,7 +2594,7 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
                                   number_of_ticks_per_quarter = 425,
                                   list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0],
                                   output_file_name = 'TMIDI-Composition',
-                                  text_encoding='utf_8'):
+                                  text_encoding='ISO-8859-1'):
 
     '''Tegridy SONG to MIDI Converter
      
@@ -2604,7 +2604,7 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
            Number of ticks per quarter for the output MIDI
            List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.
            Output file name w/o .mid extension.
-           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke.
+           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
 
     Output: MIDI File
             Detailed MIDI stats
