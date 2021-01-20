@@ -213,6 +213,8 @@ time = 0
 delta = 0
 output_song = []
 
+char_encoding_offset = 30
+
 for n in range(len(f_matrix)-1):
   no = copy.deepcopy(f_matrix[n])
 
@@ -230,11 +232,11 @@ for n in range(len(f_matrix)-1):
 output_string = ''
 
 for note in output_song:
- if note[1] < 256 and note[2] < 256:
-   if note[1] >= 0 and len(note[6]) > 0: 
-    output_string += chr(note[1])
-    output_string += chr(note[2])
-    output_string += chr(note[4])
+ if note[1] < 250 and note[2] < 250:
+  if note[1] >= 0 and len(note[6]) > 0: 
+    output_string += chr(note[1] + char_encoding_offset)
+    output_string += chr(note[2] + char_encoding_offset)
+    output_string += chr(note[4] + char_encoding_offset)
     output_string += '='
     output_string += str(note[6].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '')
     output_string += '\n'
@@ -357,7 +359,7 @@ print('Starting up...')
 number_of_tokens_to_generate = 2048 #@param {type:"slider", min:0, max:32768, step:128}
 creativity_temperature = 0.8 #@param {type:"slider", min:0.05, max:4, step:0.05}
 top_k_prob = 4 #@param {type:"slider", min:0, max:50, step:1}
-input_prompt = "Joy" #@param {type:"string"}
+input_prompt = "Love" #@param {type:"string"}
 
 debug = False 
 
@@ -399,17 +401,19 @@ show_text = ''
 
 ptime = 0
 
+char_encoding_offset = 30
+
 for st in o_str:
   note = ['note', 0, 0, 0, 0, 0]
   text = ['text_event', 0, '']
   if len(st.split('=')[0]) == 3 and len(st) > 4:
     note[1] = ptime * 10
-    note[2] = ord(st.split('=')[0][1]) * 10
-    note[4] = ord(st.split('=')[0][2])
-    note[5] = ord(st.split('=')[0][2])
+    note[2] = (ord(st.split('=')[0][1]) - char_encoding_offset) * 10
+    note[4] = (ord(st.split('=')[0][2]) - char_encoding_offset)
+    note[5] = (ord(st.split('=')[0][2]) - char_encoding_offset)
     text[1] = ptime * 10
     text[2] = str(st.split('=')[1])
-    ptime += ord(st.split('=')[0][0])
+    ptime += ord(st.split('=')[0][0]) - char_encoding_offset
     song.append(note)
     song.append(text)
     show_text += str(st.split('=')[1]) + ' '
