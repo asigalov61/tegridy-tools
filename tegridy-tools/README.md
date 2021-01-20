@@ -31,9 +31,14 @@
 ##### Fun and exciting things you might want to try:
 
 ##### 0) Stay on top of things with Reformer and now - Performer. Thanks to @lucidrains and TMIDI you can now try the latest and the greatest in SOTA transformers.
+
 ##### https://github.com/lucidrains/performer-pytorch
+##### https://github.com/asigalov61/SuperPiano/blob/master/Super_Piano_6_Performer_GPU.ipynb
+
 ##### https://github.com/lucidrains/reformer-pytorch
 ##### https://github.com/asigalov61/SuperPiano/blob/master/SuperPiano5_(Reformer_TPU).ipynb
+
+***
 
 ##### https://github.com/huggingface/transformers/tree/master/notebooks#community-notebooks
 
