@@ -2371,7 +2371,7 @@ def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
 
 ###################################################################################
 
-def Tegridy_TXT_to_INT_Converter(input_TXT_string):
+def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_string=True):
 
     '''Tegridy TXT to Intergers Converter
      
@@ -2386,7 +2386,13 @@ def Tegridy_TXT_to_INT_Converter(input_TXT_string):
     for char in TXT_List:
       output_INT_list.append(ord(char))
     
-    return output_INT_list
+    if line_by_line_string:
+      output_INT_string = '\n'.join([str(elem) for elem in output_INT_list])
+    else:
+      output_INT_string = ' '.join([str(elem) for elem in output_INT_list])  
+
+    
+    return output_INT_list, output_INT_string
 
 ###################################################################################
 
@@ -2403,6 +2409,29 @@ def Tegridy_INT_to_TXT_Converter(input_INT_list):
 
     for i in input_INT_list:
       output_TXT_string += chr(i)
+    
+    return output_TXT_string
+
+###################################################################################
+
+def Tegridy_INT_String_to_TXT_Converter(input_INT_String, line_by_line_input=True):
+
+    '''Tegridy Intergers String to TXT Converter
+     
+    Input: List of intergers in TMIDI-TXT-INT-String format
+    Output: Decoded TXT string in TMIDI-TXT format
+    Project Los Angeles
+    Tegridy Code 2020'''
+    
+    if line_by_line_input:
+      input_string = input_INT_String.split('\n')
+    else:
+      input_string = input_INT_String.split(' ')  
+
+    output_TXT_string = ''
+
+    for i in input_string:
+      output_TXT_string += chr(int(i))
     
     return output_TXT_string
 
