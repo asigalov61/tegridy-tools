@@ -239,13 +239,13 @@ sys.stdout.buffer.write(my_midi)
 
     my_midi = b"MThd\x00\x00\x00\x06"+struct.pack('>HHH',format,ntracks,ticks)
     for track in tracks:
-        events = _encode(track, text_encoding)
+        events = _encode(track, text_encoding=text_encoding)
         my_midi += b'MTrk' + struct.pack('>I',len(events)) + events
     _clean_up_warnings()
     return my_midi
 
 
-def score2opus(score=None):
+def score2opus(score=None, text_encoding='ISO-8859-1'):
     r'''
 The argument is a list: the first item in the list is the "ticks"
 parameter, the others are the tracks. Each track is a list
@@ -318,7 +318,7 @@ def score2midi(score=None, text_encoding='ISO-8859-1'):
     r'''
 Translates a "score" into MIDI, using score2opus() then opus2midi()
 '''
-    return opus2midi(score2opus(score), text_encoding)
+    return opus2midi(score2opus(score, text_encoding), text_encoding)
 
 #--------------------------- Decoding stuff ------------------------
 
@@ -2593,7 +2593,8 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
                                   track_name = 'Composition Track',
                                   number_of_ticks_per_quarter = 425,
                                   list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0],
-                                  output_file_name = 'TMIDI-Composition'):
+                                  output_file_name = 'TMIDI-Composition',
+                                  text_encoding='utf_8'):
 
     '''Tegridy SONG to MIDI Converter
      
@@ -2603,6 +2604,7 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
            Number of ticks per quarter for the output MIDI
            List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.
            Output file name w/o .mid extension.
+           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke.
 
     Output: MIDI File
             Detailed MIDI stats
@@ -2613,7 +2615,7 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
     print('Converting to MIDI. Please stand-by...')
     
     output_header = [number_of_ticks_per_quarter, 
-                    [['track_name', 0, bytes(output_signature, 'utf-8')]]]                                                    
+                    [['track_name', 0, bytes(output_signature, text_encoding)]]]                                                    
 
     patch_list = [['patch_change', 0, 0, list_of_MIDI_patches[0]], 
                     ['patch_change', 0, 1, list_of_MIDI_patches[1]],
@@ -2631,11 +2633,11 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
                     ['patch_change', 0, 13, list_of_MIDI_patches[13]],
                     ['patch_change', 0, 14, list_of_MIDI_patches[14]],
                     ['patch_change', 0, 15, list_of_MIDI_patches[15]],
-                    ['track_name', 0, bytes(track_name, 'utf-8')]]
+                    ['track_name', 0, bytes(track_name, text_encoding)]]
 
     output = output_header + [patch_list + SONG]
 
-    midi_data = score2midi(output)
+    midi_data = score2midi(output, text_encoding)
     detailed_MIDI_stats = score2stats(output)
 
     with open(output_file_name + '.mid', 'wb') as midi_file:
