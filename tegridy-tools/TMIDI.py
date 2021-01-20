@@ -5,14 +5,14 @@
 ###################################################################################
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#
 #	Version 1.3
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
 #
 #	Project Los Angeles
-#	Tegridy Code 2020
+#	Tegridy Code 2021
+# https://github.com/Tegridy-Code/Project-Los-Angeles
 #
 ###################################################################################
 ###################################################################################
@@ -206,7 +206,7 @@ _previous_warning = ''  # 5.4
 _previous_times = 0     # 5.4
 #------------------------------- Encoding stuff --------------------------
 
-def opus2midi(opus=[]):
+def opus2midi(opus=[], text_encoding='ISO-8859-1'):
     r'''The argument is a list: the first item in the list is the "ticks"
 parameter, the others are the tracks. Each track is a list
 of midi-events, and each event is itself a list; see above.
@@ -239,7 +239,7 @@ sys.stdout.buffer.write(my_midi)
 
     my_midi = b"MThd\x00\x00\x00\x06"+struct.pack('>HHH',format,ntracks,ticks)
     for track in tracks:
-        events = _encode(track)
+        events = _encode(track, text_encoding)
         my_midi += b'MTrk' + struct.pack('>I',len(events)) + events
     _clean_up_warnings()
     return my_midi
@@ -314,11 +314,11 @@ my_opus = score2opus(my_score)
     _clean_up_warnings()
     return opus_tracks
 
-def score2midi(score=None):
+def score2midi(score=None, text_encoding='ISO-8859-1'):
     r'''
 Translates a "score" into MIDI, using score2opus() then opus2midi()
 '''
-    return opus2midi(score2opus(score))
+    return opus2midi(score2opus(score), text_encoding)
 
 #--------------------------- Decoding stuff ------------------------
 
@@ -1219,9 +1219,9 @@ def _warn(s=''):
         sys.stderr.write(str(s)+"\n")
         _previous_warning = s
 
-def _some_text_event(which_kind=0x01, text=b'some_text'):
+def _some_text_event(which_kind=0x01, text=b'some_text', text_encoding='ISO-8859-1'):
     if str(type(text)).find("'str'") >= 0:   # 6.4 test for back-compatibility
-        data = bytes(text, encoding='ISO-8859-1')
+        data = bytes(text, encoding=text_encoding)
     else:
         data = bytes(text)
     return b'\xFF'+bytes((which_kind,))+_ber_compressed_int(len(data))+data
@@ -1543,7 +1543,7 @@ The options:
 
 ###########################################################################
 def _encode(events_lol, unknown_callback=None, never_add_eot=False,
-  no_eot_magic=False, no_running_status=False):
+  no_eot_magic=False, no_running_status=False, text_encoding='ISO-8859-1'):
     # encode an event structure, presumably for writing to a file
     # Calling format:
     #   $data_r = MIDI::Event::encode( \@event_lol, { options } );
@@ -1655,42 +1655,42 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
             last_status = -1
 
             if event == 'raw_meta_event':
-                event_data = _some_text_event(int(E[0]), E[1])
+                event_data = _some_text_event(int(E[0]), E[1], text_encoding)
             elif (event == 'set_sequence_number'):  # 3.9
                 event_data = b'\xFF\x00\x02'+_int2twobytes(E[0])
 
             # Text meta-events...
             # a case for a dict, I think (pjb) ...
             elif (event == 'text_event'):
-                event_data = _some_text_event(0x01, E[0])
+                event_data = _some_text_event(0x01, E[0], text_encoding)
             elif (event == 'copyright_text_event'):
-                event_data = _some_text_event(0x02, E[0])
+                event_data = _some_text_event(0x02, E[0], text_encoding)
             elif (event == 'track_name'):
-                event_data = _some_text_event(0x03, E[0])
+                event_data = _some_text_event(0x03, E[0], text_encoding)
             elif (event == 'instrument_name'):
-                event_data = _some_text_event(0x04, E[0])
+                event_data = _some_text_event(0x04, E[0], text_encoding)
             elif (event == 'lyric'):
-                event_data = _some_text_event(0x05, E[0])
+                event_data = _some_text_event(0x05, E[0], text_encoding)
             elif (event == 'marker'):
-                event_data = _some_text_event(0x06, E[0])
+                event_data = _some_text_event(0x06, E[0], text_encoding)
             elif (event == 'cue_point'):
-                event_data = _some_text_event(0x07, E[0])
+                event_data = _some_text_event(0x07, E[0], text_encoding)
             elif (event == 'text_event_08'):
-                event_data = _some_text_event(0x08, E[0])
+                event_data = _some_text_event(0x08, E[0], text_encoding)
             elif (event == 'text_event_09'):
-                event_data = _some_text_event(0x09, E[0])
+                event_data = _some_text_event(0x09, E[0], text_encoding)
             elif (event == 'text_event_0a'):
-                event_data = _some_text_event(0x0A, E[0])
+                event_data = _some_text_event(0x0A, E[0], text_encoding)
             elif (event == 'text_event_0b'):
-                event_data = _some_text_event(0x0B, E[0])
+                event_data = _some_text_event(0x0B, E[0], text_encoding)
             elif (event == 'text_event_0c'):
-                event_data = _some_text_event(0x0C, E[0])
+                event_data = _some_text_event(0x0C, E[0], text_encoding)
             elif (event == 'text_event_0d'):
-                event_data = _some_text_event(0x0D, E[0])
+                event_data = _some_text_event(0x0D, E[0], text_encoding)
             elif (event == 'text_event_0e'):
-                event_data = _some_text_event(0x0E, E[0])
+                event_data = _some_text_event(0x0E, E[0], text_encoding)
             elif (event == 'text_event_0f'):
-                event_data = _some_text_event(0x0F, E[0])
+                event_data = _some_text_event(0x0F, E[0], text_encoding)
             # End of text meta-events
 
             elif (event == 'end_track'):
@@ -1710,7 +1710,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
                 event_data = struct.pack(">BBBbB", 0xFF, 0x59, 0x02, E[0],E[1])
             elif (event == 'sequencer_specific'):
                 # event_data = struct.pack(">BBwa*", 0xFF,0x7F, len(E[0]), E[0])
-                event_data = _some_text_event(0x7F, E[0])
+                event_data = _some_text_event(0x7F, E[0], text_encoding)
             # End of Meta-events
 
             # Other Things...
@@ -1760,13 +1760,14 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 ###################################################################################
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.2
+#	Version 1.3
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
 #
 #	Project Los Angeles
-#	Tegridy Code 2020
+#	Tegridy Code 2021
+# https://github.com/Tegridy-Code/Project-Los-Angeles
 #
 ###################################################################################
 ###################################################################################
@@ -2404,7 +2405,9 @@ def Tegridy_INT_to_TXT_Converter(input_INT_list):
 
 def Tegridy_TXT_Reducer(input_string, 
                         line_by_line_input_dataset = True,
-                        line_by_line_output_dataset = True):
+                        line_by_line_output_dataset = True,
+                        include_MIDI_channels=True,
+                        include_notes_velocities=True):
 
     '''Tegridy TXT Reducer
      
@@ -2412,6 +2415,8 @@ def Tegridy_TXT_Reducer(input_string,
            Input dataset type
            Output dataset type
            Dataset MIDI events time divider/denominator
+           Reduce MIDI channels or not (False = savings on AI token memory)
+           Reduce Note's velocities or not (False = savings on AI token memory)
 
     Output: Reduced TXT string in UTF-8 format
             Number of recorded notes
@@ -2470,9 +2475,15 @@ def Tegridy_TXT_Reducer(input_string,
           chars = ''
           chars += chr(int(start_time)) #Start Time
           chars += chr(int(dura)) #Duration
-          chars += chr(int(channel)) #Channel
+
+          if include_MIDI_channels:
+            chars += chr(int(channel)) #Channel
+
           chars += chr(int(notes_specs)) #Note
-          chars += chr(int(velocity)) #Velocity             
+
+          if include_notes_velocities:
+            chars += chr(int(velocity)) #Velocity
+
           Output_TXT_string += chars
           if line_by_line_output_dataset:
             Output_TXT_string += '\n'  
@@ -2488,13 +2499,16 @@ def Tegridy_TXT_Reducer(input_string,
 ###################################################################################
 
 def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
-                                          line_by_line_dataset = True):
+                                          line_by_line_dataset = True,
+                                          has_MIDI_channels=True,
+                                          has_velocities=True):
                                                             
-
     '''Tegridy TXT to Notes Converter
      
     Input: Input TXT string in the Reduced TMIDI-TXT format
            Input dataset type
+           Dataset was encoded with MIDI channels info or not
+           Dataset was encoded with note's velocities info or not
 
     Output: List of notes in MIDI.py Score format (TMIDI SONG format)
             First SONG= occurence (song name usually)
@@ -2516,17 +2530,59 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
     for i in range(len(input_string)):
       istring = input_string[i]
+
+      if has_MIDI_channels and has_velocities:
+        if len(istring) == 5:
+              out = []       
+              out.append('note')
+              st += ord(istring[0]) 
+              out.append(st) # Start time
+
+              out.append(ord(istring[1])) # Duration
+              out.append(ord(istring[2])) # Channel
+              out.append(ord(istring[3])) # Pitch
+              out.append(ord(istring[4])) # Velocity
+
+              output_list.append(out)
       
-      if len(istring) == 5:
-            out = []       
-            out.append('note')
-            st += ord(istring[0]) 
-            out.append(st)
-            out.append(ord(istring[1]))
-            out.append(ord(istring[2]))
-            out.append(ord(istring[3]))
-            out.append(ord(istring[4]))
-            output_list.append(out)
+      if has_MIDI_channels:
+        if len(istring) == 4:
+              out = []       
+              out.append('note')
+              st += ord(istring[0]) 
+
+              out.append(st) # Start time
+              out.append(ord(istring[1])) # Duration
+              out.append(ord(istring[2])) # Channel
+              out.append(ord(istring[3])) # Pitch
+              out.append(ord(istring[3])) # Simulated Velocity (= note's pitch)
+              output_list.append(out)
+
+      if has_velocities:
+        if len(istring) == 4:
+              out = []       
+              out.append('note')
+              st += ord(istring[0]) 
+              
+              out.append(st) # Start time
+              out.append(ord(istring[1])) # Duration
+              out.append(int(0)) # Simulated Channel (Defaulting to Channel 0)
+              out.append(ord(istring[2])) # Pitch
+              out.append(ord(istring[3])) # Velocity
+
+              output_list.append(out)
+
+      if not has_MIDI_channels and not has_velocities:
+        if len(istring) == 3:
+              out = []       
+              out.append('note')
+              st += ord(istring[0]) 
+              out.append(st) # Start time
+              out.append(ord(istring[1])) # Duration
+              out.append(0) # Simulated Channel (Defaulting to Channel 0)
+              out.append(ord(istring[2])) # Pitch
+              out.append(ord(istring[2])) # Simulated Velocity (= note's pitch)
+              output_list.append(out)        
 
     return output_list, song_name
 
