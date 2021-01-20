@@ -2409,7 +2409,8 @@ def Tegridy_TXT_Reducer(input_string,
                         line_by_line_input_dataset = True,
                         line_by_line_output_dataset = True,
                         include_MIDI_channels=True,
-                        include_notes_velocities=True):
+                        include_notes_velocities=True,
+                        char_encoding_offset = 30):
 
     '''Tegridy TXT Reducer
      
@@ -2476,16 +2477,16 @@ def Tegridy_TXT_Reducer(input_string,
           notes_specs, dur = str(input_string[i].split('-')[5:][x]).split('/')
           dura = duration - int(dur)
           
-          chars += chr(int(start_time)) #Start Time
-          chars += chr(int(dura)) #Duration
+          chars += chr(int(start_time)+char_encoding_offset) #Start Time
+          chars += chr(int(dura)+char_encoding_offset) #Duration
 
           if include_MIDI_channels:
-            chars += chr(int(channel)) #Channel
+            chars += chr(int(channel)+char_encoding_offset) #Channel
 
-          chars += chr(int(notes_specs)) #Note
+          chars += chr(int(notes_specs)+char_encoding_offset) #Note
 
           if include_notes_velocities:
-            chars += chr(int(velocity)) #Velocity
+            chars += chr(int(velocity)+char_encoding_offset) #Velocity
  
           number_of_notes_recorded += 1
       except:
@@ -2504,9 +2505,10 @@ def Tegridy_TXT_Reducer(input_string,
 
 def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                                           line_by_line_dataset = True,
-                                          has_MIDI_channels=True,
-                                          has_velocities=True,
-                                          dataset_MIDI_events_time_denominator = 10):
+                                          has_MIDI_channels = True,
+                                          has_velocities = True,
+                                          dataset_MIDI_events_time_denominator = 10,
+                                          char_encoding_offset = 30):
                                                             
     '''Tegridy TXT to Notes Converter
      
@@ -2534,8 +2536,8 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
     output_list = []
     st = 0
-    
-    for i in range(len(input_string)):
+
+    for i in range(2, len(input_string)):
 
       istring = input_string[i]
 
@@ -2545,61 +2547,60 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
         step = 4
       if not has_MIDI_channels and not has_velocities:
         step = 3
-
+      
+      
+      st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
       for s in range(0, len(istring), step):
+          if has_MIDI_channels and has_velocities:
+            if step == 5 and len(istring) > 4:
+                  out = []       
+                  out.append('note')
 
-        if has_MIDI_channels and has_velocities:
-          if len(istring) == 5:
-                out = []       
-                out.append('note')
+                  out.append(st) # Start time
+                  out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                  out.append(ord(istring[s+2]) - char_encoding_offset) # Channel
+                  out.append(ord(istring[s+3]) - char_encoding_offset) # Pitch
+                  out.append(ord(istring[s+4]) - char_encoding_offset) # Velocity
 
-                out.append(st) # Start time
-                out.append(ord(istring[s+1]) * dataset_MIDI_events_time_denominator) # Duration
-                out.append(ord(istring[s+2])) # Channel
-                out.append(ord(istring[s+3])) # Pitch
-                out.append(ord(istring[s+4])) # Velocity
+                  output_list.append(out)
+          
+          if has_MIDI_channels:
+            if step == 4 and len(istring) > 3:
+                  out = []       
+                  out.append('note')
 
-                output_list.append(out)
-        
-        if has_MIDI_channels:
-          if len(istring) == 4:
-                out = []       
-                out.append('note')
+                  out.append(st) # Start time
+                  out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                  out.append(ord(istring[s+2]) - char_encoding_offset) # Channel
+                  out.append(ord(istring[s+3]) - char_encoding_offset) # Pitch
+                  out.append(ord(istring[s+3]) - char_encoding_offset) # Simulated Velocity (= note's pitch)
+                  output_list.append(out)
 
-                out.append(st) # Start time
-                out.append(ord(istring[s+1]) * dataset_MIDI_events_time_denominator) # Duration
-                out.append(ord(istring[s+2])) # Channel
-                out.append(ord(istring[s+3])) # Pitch
-                out.append(ord(istring[s+3])) # Simulated Velocity (= note's pitch)
-                output_list.append(out)
+          if has_velocities:
+            if step == 4 and len(istring) > 3:
+                  out = []       
+                  out.append('note')
+                  
+                  out.append(st) # Start time
+                  out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                  out.append(int(0)) # Simulated Channel (Defaulting to Channel 0)
+                  out.append(ord(istring[s+2]) - char_encoding_offset) # Pitch
+                  out.append(ord(istring[s+3]) - char_encoding_offset) # Velocity
 
-        if has_velocities:
-          if len(istring) == 4:
-                out = []       
-                out.append('note')
-                 
-                out.append(st) # Start time
-                out.append(ord(istring[s+1]) * dataset_MIDI_events_time_denominator) # Duration
-                out.append(int(0)) # Simulated Channel (Defaulting to Channel 0)
-                out.append(ord(istring[s+2])) # Pitch
-                out.append(ord(istring[s+3])) # Velocity
+                  output_list.append(out)
 
-                output_list.append(out)
+          if not has_MIDI_channels and not has_velocities:
+            if step == 3 and len(istring) > 2:
+                  out = []       
+                  out.append('note')
 
-        if not has_MIDI_channels and not has_velocities:
-          if len(istring) == 3:
-                out = []       
-                out.append('note')
+                  out.append(st) # Start time
+                  out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                  out.append(int(0)) # Simulated Channel (Defaulting to Channel 0)
+                  out.append(ord(istring[s+2]) - char_encoding_offset) # Pitch
+                  out.append(ord(istring[s+2]) - char_encoding_offset) # Simulated Velocity (= note's pitch)
+                  output_list.append(out)
 
-                out.append(st) # Start time
-                out.append(ord(istring[s+1]) * dataset_MIDI_events_time_denominator) # Duration
-                out.append(0) # Simulated Channel (Defaulting to Channel 0)
-                out.append(ord(istring[s+2])) # Pitch
-                out.append(ord(istring[s+2])) # Simulated Velocity (= note's pitch)
-                output_list.append(out)
-      if len(istring) > 2:
-        st += ord(istring[0]) * dataset_MIDI_events_time_denominator
-       
     return output_list, song_name
 
 ###################################################################################
