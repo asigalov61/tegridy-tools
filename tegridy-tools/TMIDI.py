@@ -2429,7 +2429,7 @@ def Tegridy_TXT_Reducer(input_string,
     debug = False
 
     if line_by_line_input_dataset:
-      input_string = input_string.split('\n') # for general use
+      input_string = input_string.split() # for general use
     else:
       input_string = input_string.split(' ') # for some specific purposes
     if debug: print(input_string)
@@ -2471,10 +2471,11 @@ def Tegridy_TXT_Reducer(input_string,
         print('Unknown Chord:', input_string[i])
       
       try:
+        chars = ''
         for x in range(len(str(input_string[i]).split('-')[5:])):
           notes_specs, dur = str(input_string[i].split('-')[5:][x]).split('/')
           dura = duration - int(dur)
-          chars = ''
+          
           chars += chr(int(start_time)) #Start Time
           chars += chr(int(dura)) #Duration
 
@@ -2485,14 +2486,15 @@ def Tegridy_TXT_Reducer(input_string,
 
           if include_notes_velocities:
             chars += chr(int(velocity)) #Velocity
-
-          Output_TXT_string += chars
-          if line_by_line_output_dataset:
-            Output_TXT_string += '\n'  
+ 
           number_of_notes_recorded += 1
       except:
         print("Unknown Notes: " + input_string[i])
         continue
+      if len(chars) > 0:
+        Output_TXT_string += chars
+        if line_by_line_output_dataset:
+          Output_TXT_string += '\n'
 
     print('Task complete! Enjoy :)')
        
