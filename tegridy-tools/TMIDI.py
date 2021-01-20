@@ -2183,7 +2183,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
 
 def Tegridy_TXT_MIDI_Processor(input_string, 
                               line_by_line_dataset = False,
-                              dataset_MIDI_events_time_denominator = 100,
+                              dataset_MIDI_events_time_denominator = 10,
                               number_of_ticks_per_quarter = 425,
                               start_from_this_generated_event = 0,
                               remove_generated_silence_if_needed = False,
@@ -2420,6 +2420,7 @@ def Tegridy_TXT_Reducer(input_string,
            Dataset MIDI events time divider/denominator
            Reduce MIDI channels or not (False = savings on AI token memory)
            Reduce Note's velocities or not (False = savings on AI token memory)
+           Char encoding offset. This is to prevent ambiguity with sys chars like \n.
 
     Output: Reduced TXT string in UTF-8 format
             Number of recorded notes
@@ -2516,6 +2517,8 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
            Input dataset type
            Dataset was encoded with MIDI channels info or not
            Dataset was encoded with note's velocities info or not
+           Used dataset time denominator/divider. It must match or the timings will be off.
+           Char encoding offset. This is to prevent ambiguity with sys chars like \n.
 
     Output: List of notes in MIDI.py Score format (TMIDI SONG format)
             First SONG= occurence (song name usually)
