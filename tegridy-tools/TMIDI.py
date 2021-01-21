@@ -2580,13 +2580,15 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
       try:
         istring = input_string[i]
 
-        if has_MIDI_channels and has_velocities:
-          step = 5
-        if has_MIDI_channels or has_velocities:
-          step = 4
         if not has_MIDI_channels and not has_velocities:
           step = 3
+
+        if has_MIDI_channels and has_velocities:
+          step = 5
         
+        else:
+          step = 4  
+
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
         for s in range(0, len(istring), step):
             if has_MIDI_channels and has_velocities:
@@ -2641,6 +2643,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
       except:
         print('Bad note string:', istring)
         continue
+        
     return output_list, song_name
 
 ###################################################################################
