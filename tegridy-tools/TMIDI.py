@@ -2613,7 +2613,9 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                     out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
                     out.append(ord(istring[s+2]) - char_encoding_offset) # Channel
                     out.append(ord(istring[s+3]) - char_encoding_offset) # Pitch
-                    out.append(ord(istring[s+3]) - char_encoding_offset) # Simulated Velocity (= note's pitch)
+                    if s == 0:
+                      sim_vel = ord(istring[s+3]) - char_encoding_offset
+                    out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
                     output_list.append(out)
 
             if has_velocities:
@@ -2638,7 +2640,9 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                     out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
                     out.append(int(0)) # Simulated Channel (Defaulting to Channel 0)
                     out.append(ord(istring[s+2]) - char_encoding_offset) # Pitch
-                    out.append(ord(istring[s+2]) - char_encoding_offset) # Simulated Velocity (= note's pitch)
+                    if s == 0:
+                      sim_vel = ord(istring[s+2]) - char_encoding_offset
+                    out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
                     output_list.append(out)
       except:
         print('Bad note string:', istring)
