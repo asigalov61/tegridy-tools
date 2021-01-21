@@ -2588,7 +2588,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
           step = 3
         
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
-        for s in range(0, len(istring)-step, step):
+        for s in range(0, len(istring), step):
             if has_MIDI_channels and has_velocities:
               if step == 5 and len(istring) > 4:
                     out = []       
