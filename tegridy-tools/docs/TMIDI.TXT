@@ -1,0 +1,332 @@
+###################################################################################
+###################################################################################
+###################################################################################
+#
+#
+#	Tegridy MIDI Module (TMIDI / tee-midi)
+#	Version 1.4
+#
+#	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
+#	pjb.com.au
+#
+#	Project Los Angeles
+#	Tegridy Code 2021
+#       https://github.com/Tegridy-Code/Project-Los-Angeles
+#
+#
+###################################################################################
+###################################################################################
+###################################################################################
+
+Complete and comprehensive examples/use of TMIDI module can found at the link below:
+https://github.com/asigalov61/tegridy-tools/tree/main/Examples
+
+###################################################################################
+
+TMIDI Python module offers the following functions:
+
+###################################################################################
+
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
+
+    Tegridy MIDI Processor
+    
+    Input: A single MIDI file.
+           Desired MIDI channel to process. Def. = 0. All but drums = -1 and all channels = 16
+           Notes/Chords timings divider (denominator).
+    
+    Output: A list of MIDI chords and a list of melody notes.
+    MIDI Chords: Sorted by pitch (chord[0] == highest pitch).
+    Melody Notes: Sorted by start time.
+    Format: MIDI.py Score Events format.
+    Default precision: 1 ms per note/chord.
+
+###################################################################################
+
+def Tegridy_Chords_Converter(chords_list, melody_list, song_name, melody_notes_in_chords=True):
+  
+  Tegridy Chords Coverter
+  
+  Inputs: Tegridy MIDI chords_list (as is)
+          Tegridy MIDI melody_list (as is)
+          Name of the song as plain string
+          Include or exclude melody notes in each chord. Def. is to include.
+  
+  Outputs: Converted chords_list with melody_notes and song name
+           Converted melody_list with song name
+
+
+###################################################################################
+
+def Tegridy_MIDI_TXT_Processor(dataset_name,
+                              converted_chords_list,
+                              converted_melody_list,
+                              simulate_velocity=False,
+                              line_by_line_output=False,
+                              represent_every_number_of_chords = 0,
+                              chords_duration_multiplier = 1,
+                              pad_chords_with_stops=False,
+                              chords_beat_divider = 100):
+
+    Tegridy MIDI to TXT Processor
+     
+     Input: Dataset name
+            Tegridy MIDI chords_list and melody_list (as is)
+            Simulate velocity or not
+            Line-by-line switch (useful for the AI models tokenizers and other specific purposes)
+            Represent events every so many steps. Def. is 0. == do not represent.
+            Chords durations multiplier. Def. = 1
+            Pad chords with timed rests or not. Helps with some NLP implementations
+            Chords beat divider/denominator. This essentially creates a beat for AI models to keep in mind. Default is 100 = 10 beats per second.
+     
+     Output: TXT encoded MIDI events as plain txt/plain str
+             Number of processed chords
+             Number of bad/skipped chords (for whatever reason)
+
+###################################################################################
+
+def Tegridy_TXT_MIDI_Processor(input_string, 
+                              line_by_line_dataset = False,
+                              dataset_MIDI_events_time_denominator = 10,
+                              number_of_ticks_per_quarter = 425,
+                              start_from_this_generated_event = 0,
+                              remove_generated_silence_if_needed = False,
+                              silence_offset_from_start = 75000,
+                              simulate_velocity = False,
+                              output_signature = 'TMIDI-TXT-MIDI',
+                              list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0]):
+
+    Tegridy TXT to MIDI Processor
+     
+     Input: Input TXT string in the TMIDI-TXT format
+            Input is line-by-line or one-line
+            Used dataset time denominator
+            Number of ticks per quater for output MIDI
+            Start from this input event (skip this many from start)
+            Is there a generated silence or not
+            Silence offset in MIDI ticks from start
+            Simulate velocity (V = max(Pitch))
+            Output MIDI signature
+            List of 16 desired MIDI patch numbers for the output MIDI. Def. is MuseNet compatible patch list.
+     
+     Output: NOTE: For now only 1st recorded TXT performance converted to MIDI.
+             Raw/binary MIDI data that can be recorded to a file with standard python functions.
+             Detected number of input notes
+             Recorded number of output notes
+             Detailed created MIDI stats in the MIDI.py module format (MIDI.score2stats)
+
+###################################################################################
+
+def Tegridy_TXT_to_INT_Processor(input_TXT_string):
+
+    Tegridy TXT to Intergers Processor
+     
+    Input: Input TXT string in the TMIDI-TXT format
+    
+    Output: List of intergers
+            Decoding dictionary
+
+###################################################################################
+
+def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
+
+    Tegridy Intergers to TXT Processor
+     
+    Input: List of intergers in TMIDI-TXT-INT format
+          Decoding dictionary in TMIDI-TXT-INT format
+    
+    Output: Decoded TXT string in TMIDI-TXT format
+
+###################################################################################
+
+def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_string=True):
+
+    Tegridy TXT to Intergers Converter
+     
+    Input: Input TXT string in the TMIDI-TXT format
+    
+    Output: List of pure intergers
+
+###################################################################################
+
+def Tegridy_INT_to_TXT_Converter(input_INT_list):
+
+    Tegridy Intergers to TXT Converter
+     
+    Input: List of intergers in TMIDI-TXT-INT format
+    
+    Output: Decoded TXT string in TMIDI-TXT format
+
+###################################################################################
+
+def Tegridy_INT_String_to_TXT_Converter(input_INT_String, line_by_line_input=True):
+
+    Tegridy Intergers String to TXT Converter
+     
+    Input: List of intergers in TMIDI-TXT-INT-String format
+    
+    Output: Decoded TXT string in TMIDI-TXT format
+
+###################################################################################
+
+def Tegridy_TXT_Reducer(input_string, 
+                        line_by_line_input_dataset = True,
+                        line_by_line_output_dataset = True,
+                        include_MIDI_channels=True,
+                        include_notes_velocities=True,
+                        char_encoding_offset = 30):
+
+    Tegridy TXT Reducer
+     
+    Input: Input TXT string in the TMIDI-TXT format
+           Input dataset type
+           Output dataset type
+           Dataset MIDI events time divider/denominator
+           Reduce MIDI channels or not (False = savings on AI token memory)
+           Reduce Note's velocities or not (False = savings on AI token memory)
+           Char encoding offset. This is to prevent ambiguity with sys chars like \n.
+    
+    Output: Reduced TXT string in UTF-8 format
+            Number of recorded notes
+
+###################################################################################
+
+def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
+                                          line_by_line_dataset = True,
+                                          has_MIDI_channels = True,
+                                          has_velocities = True,
+                                          dataset_MIDI_events_time_denominator = 10,
+                                          char_encoding_offset = 30):
+                                                            
+    Tegridy TXT to Notes Converter
+     
+    Input: Input TXT string in the Reduced TMIDI-TXT format
+           Input dataset type
+           Dataset was encoded with MIDI channels info or not
+           Dataset was encoded with note's velocities info or not
+           Used dataset time denominator/divider. It must match or the timings will be off.
+           Char encoding offset. This is to prevent ambiguity with sys chars like \n.
+    
+    Output: List of notes in MIDI.py Score format (TMIDI SONG format)
+            First SONG= occurence (song name usually)
+
+###################################################################################
+
+def Tegridy_SONG_to_MIDI_Converter(SONG,
+                                  output_signature = 'Tegridy TMIDI Module', 
+                                  track_name = 'Composition Track',
+                                  number_of_ticks_per_quarter = 425,
+                                  list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0],
+                                  output_file_name = 'TMIDI-Composition',
+                                  text_encoding='ISO-8859-1'):
+
+    Tegridy SONG to MIDI Converter
+     
+    Input: Input SONG in TMIDI SONG/MIDI.py Score format
+           Output MIDI Track 0 name / MIDI Signature
+           Output MIDI Track 1 name / Composition track name
+           Number of ticks per quarter for the output MIDI
+           List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.
+           Output file name w/o .mid extension.
+           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+    
+    Output: MIDI File
+            Detailed MIDI stats
+
+###################################################################################
+
+def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file, 
+                                                  karaoke_language_encoding = 'ISO-8859-1',
+                                                  char_encoding_offset = 30):
+
+    Tegridy Karaoke MIDI to Reduced TXT Processor
+     
+    Input: Karaoke MIDI file. Must be a Karaoke MIDI or the processor will not work properly.
+           
+           Karaoke language encoding. Please see official encoding list for your language. 
+           https://docs.python.org/3/library/codecs.html#standard-encodings
+           Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+           
+           Char encoding offset to prevent ambiguity with sys chars like \n. 
+           This may need to be adjusted for languages other than English.
+    
+     Output: Line-by-line reduced TXT string
+            Number of processed MIDI events from the Karaoke MIDI file
+            Number of recorded Karaoke events in the TXT string
+
+###################################################################################
+
+def Tegridy_Karaoke_TXT_to_MIDI_Processor(Karaoke_TXT_String,
+                                          text_encoding='ISO-8859-1',
+                                          char_encoding_offset = 30):
+
+    Tegridy Karaoke TXT to MIDI Processor
+        
+    Input: Karaoke Reduced TXT String in TMIDI Karaoke Reduced TXT format
+            
+           Karaoke language encoding. Please see official encoding list for your language. 
+           https://docs.python.org/3/library/codecs.html#standard-encodings
+           Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+            
+           Char encoding offset to prevent ambiguity with sys chars like \n. 
+           This may need to be adjusted for languages other than English.
+    
+    Output: Inferred song name (from the first line of the input TXT string)
+            Song (notes list in MIDI.py score format) that you can write to MIDI file with TMIDI Song to MIDI converter.
+            All song's lyrics as one TXT string (this is for eval/display purposes mostly)
+            Number of recorded Karaoke events in the output song 
+    
+
+###################################################################################
+#
+# Tegridy helper functions
+#
+###################################################################################
+
+def Tegridy_File_Time_Stamp(input_file_name='File_Created_on_', ext = ''):
+
+  Tegridy File Time Stamp
+     
+  Input: Full path and file name without extention
+         File extension
+          
+  Output: File name string with time-stamp and extension (time-stamped file name)   
+
+###################################################################################
+
+def Tegridy_TXT_Dataset_File_Writer(input_file_name='TMIDI_TXT_Dataset', 
+                                    ext = '', 
+                                    TXT_String = ''):
+
+  Tegridy TXT Dataset File Writer
+     
+  Input: Full path and file name without extention
+         File extension
+         Dataset as TXT string
+          
+  Output: Named TXT Dataset File
+
+
+###################################################################################
+
+def Tegridy_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
+
+  Tegridy Pickle File Writer
+     
+  Input: Data to write (I.e. a list)
+         Full path and file name without extention
+         
+  Output: Named Pickle file
+
+
+###################################################################################
+
+def Tegridy_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle'):
+
+  Tegridy Pickle File Loader
+     
+  Input: Full path and file name without extention
+         File extension if different from default .pickle
+       
+  Output: Chords list in TMIDI MIDI Processor format
+          Melody list in TMIDI MIDI Processor format
