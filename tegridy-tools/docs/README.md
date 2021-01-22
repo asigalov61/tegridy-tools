@@ -3,5 +3,11 @@
 
 ***
 
+## Description of docs:
+
+### TMIDI.TXT - TMIDI Module documentation
+
+***
+
 ### Project Los Angeles
-### Tegridy Code 2020
+### Tegridy Code 2021
