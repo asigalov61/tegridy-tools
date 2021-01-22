@@ -36,7 +36,7 @@ WARNING: This complete implementation is a functioning model of the Artificial I
 """
 
 #@title Install all dependencies (run only once per session)
-#!git clone https://github.com/asigalov61/minGPT
+
 !git clone https://github.com/asigalov61/tegridy-tools
 !apt install fluidsynth #Pip does not work for some reason. Only apt works
 !pip install midi2audio
@@ -60,7 +60,6 @@ from IPython.display import display, Javascript, HTML, Audio
 
 from google.colab import output, drive
 
-
 os.chdir('/content/')
 print('Loading complete. Enjoy! :)')
 
@@ -71,16 +70,15 @@ print('Loading complete. Enjoy! :)')
 
 #@markdown Works best stand-alone/as-is for the optimal results
 # %cd /content/Dataset/
-!rm *.mid 
-!rm *.midi
+
 !wget 'https://github.com/asigalov61/Tegridy-MIDI-Dataset/raw/master/Tegridy-Piano-CC-BY-NC-SA.zip'
 !unzip -j '/content/Dataset/Tegridy-Piano-CC-BY-NC-SA.zip'
 !rm '/content/Dataset/Tegridy-Piano-CC-BY-NC-SA.zip'
+
 # %cd /content/
 
 """# If you are not sure where to start or what settings to select, please use original defaults"""
 
-# Commented out IPython magic to ensure Python compatibility.
 #@title Process MIDIs to special MIDI dataset with Tegridy MIDI Processor
 #@markdown NOTES:
 
@@ -90,17 +88,13 @@ print('Loading complete. Enjoy! :)')
 
 #@markdown 3) MIDI Channel = -1 means all MIDI channels. MIDI Channel = 16 means all channels will be processed. Otherwise, only single indicated MIDI channel will be processed.
 
-full_path_to_output_dataset_to = "/content/Efficient-Virtuoso-Music-MIDI-Dataset.pkl" #@param {type:"string"}
+file_name_to_output_dataset_to = "/content/Efficient-Virtuoso-Music-MIDI-Dataset" #@param {type:"string"}
 desired_MIDI_channel_to_process = 0 #@param {type:"slider", min:-1, max:15, step:1}
 MIDI_events_time_denominator = 10 #@param {type:"slider", min:1, max:100, step:1}
 melody_notes_in_chords = True #@param {type:"boolean"}
 
-debug = False #@param {type:"boolean"}
-
 print('TMIDI Processor')
 print('Starting up...')
-
-chords_list = []
 
 ###########
 
@@ -121,34 +115,14 @@ chords_count = 0
 melody_chords = []
 melody_count = 0
 
-song_names = []
-
-###########
-
-def list_average(num):
-  sum_num = 0
-  for t in num:
-      sum_num = sum_num + t           
-
-  avg = sum_num / len(num)
-  return avg
-
 ###########
 
 print('Loading MIDI files...')
 print('This may take a while on a large dataset in particular.')
 
-
-# %cd /content/
 dataset_addr = "/content/Dataset/"
 os.chdir(dataset_addr)
 filez = os.listdir(dataset_addr)
-
-print('Creating list of songs from MIDI file names...')
-for f in filez: # Based on input MIDI file names w/o the extension
-  fn = os.path.basename(f)
-  fno = fn.split('.')[0]
-  song_names.append(fno)
 
 print('Processing MIDI files. Please wait...')
 for f in tqdm.auto.tqdm(filez):
@@ -169,8 +143,9 @@ for f in tqdm.auto.tqdm(filez):
     
     chords_list_f.extend(chords_l)
     melody_list_f.extend(melody_l)
-    chords_count += len(chords_l)
+    chords_count += len(chords_list)
     melody_count += len(melody_l)
+  
   except:
     print('Bad MIDI:', f)
     continue
@@ -190,17 +165,12 @@ print(max(chords_list_f, key=len))
 print('Number of recorded melody events:', len(melody_list_f))
 print('First melody event:', melody_list_f[0], 'Last Melody event:', melody_list_f[-1])
 print('Total number of MIDI events recorded:', len(chords_list_f))
+
 # Dataset
 MusicDataset = [chords_list_f, melody_list_f]
 
-with open(full_path_to_output_dataset_to, 'wb') as filehandle:
-    # store the data as binary data stream
-    pickle.dump(MusicDataset, filehandle)
-print('Dataset was saved at:', full_path_to_output_dataset_to)
-
-# MIDI/files stats code from the previous version.
-
-print('Task complete. Enjoy! :)')
+# Writing dataset to pickle file
+TMIDI.Tegridy_Pickle_File_Writer(MusicDataset, file_name_to_output_dataset_to)
 
 #@title Process MIDI Dataset to TXT Dataset (w/Tegridy MIDI-TXT Processor)
 full_path_to_TXT_dataset = "/content/Efficient-Virtuoso-Music-TXT-Dataset.txt" #@param {type:"string"}
@@ -213,11 +183,14 @@ reduce_notes_velocities = False #@param {type:"boolean"}
 # MIDI Dataset to txt dataset converter 
 print('TMIDI-TXT Processor')
 print('Starting up...')
+
 if os.path.exists(full_path_to_TXT_dataset):
   os.remove(full_path_to_TXT_dataset)
   print('Removing old Dataset...')
+
 else:
   print("Creating new Dataset file...")
+
 if simulate_velocity:
   print('Simulated velocity mode is enabled.')
 
