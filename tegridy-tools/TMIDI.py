@@ -2580,18 +2580,21 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
       try:
         istring = input_string[i]
 
-        if not has_MIDI_channels and not has_velocities:
+        if has_MIDI_channels==False and has_velocities==False:
           step = 3
 
-        if has_MIDI_channels and has_velocities:
-          step = 5
+        if has_MIDI_channels==True and has_velocities==False:
+          step = 4          
         
-        else:
+        if has_MIDI_channels==False and has_velocities==True:
           step = 4  
+        
+        if has_MIDI_channels==True and has_velocities==True:
+          step = 5
 
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
         for s in range(0, len(istring), step):
-            if has_MIDI_channels and has_velocities:
+            if has_MIDI_channels==True and has_velocities==True:
               if step == 5 and len(istring) > 4:
                     out = []       
                     out.append('note')
@@ -2604,7 +2607,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
                     output_list.append(out)
             
-            if has_MIDI_channels:
+            if has_MIDI_channels==True and has_velocities==False:
               if step == 4 and len(istring) > 3:
                     out = []       
                     out.append('note')
@@ -2618,7 +2621,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                     out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
                     output_list.append(out)
 
-            if has_velocities:
+            if has_velocities==True and has_MIDI_channels==False:
               if step == 4 and len(istring) > 3:
                     out = []       
                     out.append('note')
@@ -2631,7 +2634,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
                     output_list.append(out)
 
-            if not has_MIDI_channels and not has_velocities:
+            if has_MIDI_channels==False and has_velocities==False:
               if step == 3 and len(istring) > 2:
                     out = []       
                     out.append('note')
