@@ -330,3 +330,17 @@ def Tegridy_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle
        
   Output: Chords list in TMIDI MIDI Processor format
           Melody list in TMIDI MIDI Processor format
+ 
+ ###################################################################################
+ 
+ def Tegridy_Karaoke_Pitches_Words_List_to_CSV_Writer(pitches_words_list, file_name='pitches_words.csv'):
+    
+   Tegridy Karaoke Pitches Words List to CSV Writer
+
+   Input: Pitches/Words list in TMIDI Karaoke MIDI to TXT Converter format
+          Desired full output CSV file name with extension
+
+   Output: CSV file with all Pitches/Words that were in the input pitches/words list
+   
+   Project Los Angeles
+   Tegridy Code 2021         
