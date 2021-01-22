@@ -239,20 +239,20 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
                                                   karaoke_language_encoding = 'ISO-8859-1',
                                                   char_encoding_offset = 30):
 
-    Tegridy Karaoke MIDI to Reduced TXT Processor
-     
-    Input: Karaoke MIDI file. Must be a Karaoke MIDI or the processor will not work properly.
+  Input: Karaoke MIDI file. Must be a Karaoke MIDI or the processor will not work properly.
            
-           Karaoke language encoding. Please see official encoding list for your language. 
-           https://docs.python.org/3/library/codecs.html#standard-encodings
-           Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+         Karaoke language encoding. Please see official encoding list for your language. 
+         https://docs.python.org/3/library/codecs.html#standard-encodings
+         Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
            
-           Char encoding offset to prevent ambiguity with sys chars like \n. 
-           This may need to be adjusted for languages other than English.
-    
-     Output: Line-by-line reduced TXT string
-            Number of processed MIDI events from the Karaoke MIDI file
-            Number of recorded Karaoke events in the TXT string
+         Char encoding offset to prevent ambiguity with sys chars like \n. 
+         This may need to be adjusted for languages other than English.
+
+  Output: Line-by-line reduced TXT string
+          Number of processed MIDI events from the Karaoke MIDI file
+          Number of recorded Karaoke events in the TXT string
+          All recorded Pitches/Words of the given KarMIDI file as a list
+          All recorded words of the given KarMIDI file as a string
 
 ###################################################################################
 
@@ -276,7 +276,6 @@ def Tegridy_Karaoke_TXT_to_MIDI_Processor(Karaoke_TXT_String,
             All song's lyrics as one TXT string (this is for eval/display purposes mostly)
             Number of recorded Karaoke events in the output song 
     
-
 ###################################################################################
 #
 # Tegridy helper functions
@@ -306,7 +305,6 @@ def Tegridy_TXT_Dataset_File_Writer(input_file_name='TMIDI_TXT_Dataset',
           
   Output: Named TXT Dataset File
 
-
 ###################################################################################
 
 def Tegridy_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
@@ -317,7 +315,6 @@ def Tegridy_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
          Full path and file name without extention
          
   Output: Named Pickle file
-
 
 ###################################################################################
 
@@ -340,7 +337,6 @@ def Tegridy_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle
    Input: Pitches/Words list in TMIDI Karaoke MIDI to TXT Converter format
           Desired full output CSV file name with extension
 
-   Output: CSV file with all Pitches/Words that were in the input pitches/words list
-   
-   Project Los Angeles
-   Tegridy Code 2021         
+   Output: CSV file with all Pitches/Words that were in the input pitches/words list  
+
+###################################################################################
