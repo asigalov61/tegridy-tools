@@ -1783,6 +1783,8 @@ from datetime import datetime
 
 import pickle
 
+import csv
+
 from itertools import zip_longest
 from itertools import groupby
 
@@ -2423,6 +2425,8 @@ def Tegridy_INT_String_to_TXT_Converter(input_INT_String, line_by_line_input=Tru
     Project Los Angeles
     Tegridy Code 2020'''
     
+    print('Tegridy Intergers String to TXT Converter')
+
     if line_by_line_input:
       input_string = input_INT_String.split('\n')
     else:
@@ -2437,6 +2441,8 @@ def Tegridy_INT_String_to_TXT_Converter(input_INT_String, line_by_line_input=Tru
         print('Bad note:', i)
         continue  
     
+    print('Done!')
+
     return output_TXT_string
 
 ###################################################################################
@@ -2547,7 +2553,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                                           dataset_MIDI_events_time_denominator = 10,
                                           char_encoding_offset = 30):
                                                             
-    '''Tegridy TXT to Notes Converter
+    '''Tegridy Reduced TXT to Notes Converter
      
     Input: Input TXT string in the Reduced TMIDI-TXT format
            Input dataset type
@@ -2561,6 +2567,9 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
     Project Los Angeles
     Tegridy Code 2020'''
+
+    print('Tegridy Reduced TXT to Notes Converter')
+    print('Converting Reduced TXT to Notes list...Please wait...')
 
     song_name = ''
 
@@ -2650,7 +2659,9 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
       except:
         print('Bad note string:', istring)
         continue
-        
+
+    print('Task complete! Enjoy! :)')
+
     return output_list, song_name
 
 ###################################################################################
@@ -2710,8 +2721,9 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
     with open(output_file_name + '.mid', 'wb') as midi_file:
         midi_file.write(midi_data)
         midi_file.close()
-    print('Done!')
-    #print(detailed_MIDI_stats)
+    
+    print('Done! Enjoy! :)')
+    
     return detailed_MIDI_stats
 
 ###################################################################################
@@ -2734,6 +2746,8 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
     Output: Line-by-line reduced TXT string
             Number of processed MIDI events from the Karaoke MIDI file
             Number of recorded Karaoke events in the TXT string
+            All recorded Pitches/Words of the given KarMIDI file as a list
+            All recorded words of the given KarMIDI file as a string
 
     Project Los Angeles
     Tegridy Code 2021'''
@@ -2756,8 +2770,8 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
       opus = midi2opus(midi_file.read())
     
     except:
-      print('Bad file. Skipping...')
-      print('File name:', Karaoke_MIDI_file)
+      print('Problematic file. Skipping...')
+      print('Skipped file name:', Karaoke_MIDI_file)
       midi_file.close()
       return output_string, MIDI_ev, KAR_ev
           
@@ -2820,6 +2834,8 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
       output_song.append(no)
 
     output_string = ''
+    all_words = ''
+    pitches_words_list = []
 
     for note in output_song:
       if note[1] < 250 and note[2] < 250:
@@ -2828,11 +2844,14 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
           output_string += chr(note[2] + char_encoding_offset)
           output_string += chr(note[4] + char_encoding_offset)
           output_string += '='
-          output_string += str(note[6].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '')
+          word = str(note[6].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '')
+          output_string += word
           output_string += '\n'
+          all_words += word + ' '
+          pitches_words_list.append([note[4], word])
           KAR_ev += 1
 
-    return output_string, MIDI_ev, KAR_ev
+    return output_string, MIDI_ev, KAR_ev, pitches_words_list, all_words  
 
 ###################################################################################
 
@@ -2859,6 +2878,9 @@ def Tegridy_Karaoke_TXT_to_MIDI_Processor(Karaoke_TXT_String,
     Project Los Angeles
     Tegridy Code 2021'''    
     
+    print('Tegridy Karaoke TXT to MIDI Processor')
+    print('Converting Karaoke TXT to MIDI. Please wait...')
+
     o_str = Karaoke_TXT_String.split('\n')
 
     song_name = o_str[0]
@@ -2894,8 +2916,10 @@ def Tegridy_Karaoke_TXT_to_MIDI_Processor(Karaoke_TXT_String,
         lyrics_text += str(st.split('=')[1]) + ' '
 
         KAR_ev += 1
-    
-    return song_name, song, lyrics_text, KAR_ev   
+
+    print('Task complete! Enjoy! :)')
+
+    return song_name, song, lyrics_text, KAR_ev
 
 ###################################################################################
 #
@@ -2914,6 +2938,8 @@ def Tegridy_File_Time_Stamp(input_file_name='File_Created_on_', ext = ''):
 
   Project Los Angeles
   Tegridy Code 2021'''       
+
+  print('Time-stamping output file...')
 
   now = ''
   now_n = str(datetime.now())
@@ -3024,3 +3050,45 @@ def Tegridy_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle
   print('Task complete. Enjoy! :)')
 
   return chords_list_f, melody_list_f
+
+###################################################################################
+
+def Tegridy_Karaoke_Pitches_Words_List_to_CSV_Writer(pitches_words_list, file_name='pitches_words.csv'):
+    
+    '''Tegridy Karaoke Pitches Words List to CSV Writer
+      
+    Input: Pitches/Words list in TMIDI Karaoke MIDI to TXT Converter format
+           Desired full output CSV file name with extension
+        
+    Output: CSV file with all Pitches/Words that were in the input pitches/words list
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+    
+    print('Tegridy Karaoke Pitches/Words CSV Writer')
+    print('Starting up...')
+    print('Grouping input pitches/words list...Please stand by...')
+    values = set(map(lambda x:x[0], pitches_words_list))
+
+    groups = [[y for y in pitches_words_list if y[0]==x] for x in values]
+    
+    print('Preparing final CSV list...')
+
+    final_list = {}
+
+    for g in groups:
+      pitch = g[0][0]
+      f_list = []
+      for value in g:
+        if value[1] not in f_list:
+          f_list.append(value[1])
+      final_list[pitch] = f_list
+
+    print('Writing CSV file to disk...')
+    with open(file_name,'w',newline='') as f:
+      w = csv.writer(f)
+      w.writerow(['pitch','words'])
+      for key,items in final_list.items():
+        w.writerow([key, ' '.join(sorted(items))])
+
+    print('Task complete! Enjoy :)')    
