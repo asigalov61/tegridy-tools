@@ -115,10 +115,13 @@ filez = os.listdir(dataset_addr)
 
 print('Processing MIDI files. Please wait...')
 for f in tqdm.auto.tqdm(filez):
-  files_count += 1
-
-  events_matrix, mev, kev = TMIDI.Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(f, karaoke_language_encoding)
-  TXT += events_matrix
+  try:
+    events_matrix, mev, kev = TMIDI.Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(f, karaoke_language_encoding)
+    TXT += events_matrix
+    files_count += 1
+  except:
+    print('Problematic MIDI:', f)
+    continue  
 
 TMIDI.Tegridy_TXT_Dataset_File_Writer(full_path_to_TXT_dataset, '', dataset_name + '\n' + TXT)
 
