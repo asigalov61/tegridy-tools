@@ -15,6 +15,8 @@
 
 #######################################################
 
+print('Loading minGPT modules...')
+
 import math
 import random
 import numpy as np
@@ -27,19 +29,25 @@ from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data import Dataset
 
+dtype = torch.float
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# Assume that we are on a CUDA machine, then this should print a CUDA device:
+print('Available Processing Device is:', device)
+
 import matplotlib.pyplot as plt
 # %matplotlib inline
 
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
         level=logging.INFO,
 )
+import tqdm
+from tqdm import auto
 
-import tqdm.auto
-from tqdm import tqdm
+print('Done!')
 
 ######################################################################
 
@@ -103,12 +111,12 @@ class CausalSelfAttention(nn.Module):
         v = self.value(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs)
 
         # causal self-attention; Self-attend: (B, nh, T, hs) x (B, nh, hs, T) -> (B, nh, T, T)
-        att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
+        # att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
 
         # https://github.com/karpathy/minGPT/pull/55/commits/a492a389014cc4262d8011edeffdedebcec0dc57
         # perform sqrt(d) scaling on (B, nh, T, hs) instead of (B, nh, T, T).
-        # q = q * (1.0 / math.sqrt(k.size(-1)))
-        # att = (q @ k.transpose(-2, -1))
+        q = q * (1.0 / math.sqrt(k.size(-1)))
+        att = (q @ k.transpose(-2, -1))
 
         att = att.masked_fill(self.mask[:,:,:T,:T] == 0, float('-inf'))
         att = F.softmax(att, dim=-1)
@@ -294,7 +302,7 @@ class Trainer:
                                 num_workers=config.num_workers)
 
             losses = []
-            pbar = tqdm(enumerate(loader), total=len(loader)) if is_train else enumerate(loader)
+            pbar = tqdm.auto.tqdm(enumerate(loader), total=len(loader)) if is_train else enumerate(loader)
             for it, (x, y) in pbar:
 
                 # place data on the correct device
@@ -408,7 +416,7 @@ class CharDataset(Dataset):
     def __init__(self, data, block_size):
         chars = sorted(list(set(data)))
         data_size, vocab_size = len(data), len(chars)
-        print('data has %d characters, %d unique.' % (data_size, vocab_size))
+        print('Dataset has %d characters, %d unique.' % (data_size, vocab_size))
         
         self.stoi = { ch:i for i,ch in enumerate(chars) }
         self.itos = { i:ch for i,ch in enumerate(chars) }
@@ -431,7 +439,48 @@ class CharDataset(Dataset):
 
 #############################################################################
 
-def Generate(model, number_of_tokens_to_generate = 2048, 
+def MainLoader(full_path_to_training_text_file,
+               full_path_to_validation_text_file = None,
+               number_of_dataloader_workers = 4,
+               model_attention_span_in_tokens = 512,
+               model_embed_size = 256,
+               number_of_heads = 16, 
+               number_of_layers = 4,
+               number_of_training_epochs = 2,
+               training_batch_size = 48,
+               model_learning_rate = 6e-4):
+
+    text = open(full_path_to_training_text_file, 'r').read() # don't worry we won't run out of file handles
+
+    train_dataset = CharDataset(text, model_attention_span_in_tokens) # one line of poem is roughly 50 characters
+
+    if full_path_to_validation_text_file is not None:
+      text_val = open(full_path_to_validation_text_file, 'r').read()
+      val_dataset = CharDataset(text_val, model_attention_span_in_tokens)
+
+    mconf = GPTConfig(train_dataset.vocab_size, 
+                      train_dataset.block_size,
+                      n_layer=number_of_layers, 
+                      n_head=number_of_heads, 
+                      n_embd=model_embed_size)
+
+    model = GPT(mconf)
+
+    tconf = TrainerConfig(max_epochs=number_of_training_epochs, 
+                          batch_size=training_batch_size, 
+                          learning_rate=model_learning_rate,
+                          num_workers=number_of_dataloader_workers)
+
+    trainer = Trainer(model, train_dataset, full_path_to_validation_text_file, tconf)
+
+    return trainer, model, train_dataset
+
+#############################################################################
+
+def Generate(model,
+             train_dataset,
+             trainer,
+             number_of_tokens_to_generate = 2048, 
              creativity_temperature = 0.8,
              top_k_prob = 4,
              input_prompt = "Some text"):
@@ -441,15 +490,17 @@ def Generate(model, number_of_tokens_to_generate = 2048,
     context = input_prompt
     x = torch.tensor([train_dataset.stoi[s] for s in context], dtype=torch.long)[None,...].to(trainer.device)
     y = sample(model, x, number_of_tokens_to_generate, temperature=creativity_temperature, sample=True, top_k=top_k_prob)[0]
-    completion = ''.join([train_dataset.itos[int(i)] for i in y])        
+    completion = ''.join([train_dataset.itos[int(i)] for i in y])
+
+    return completion      
 
 ############################################################################
 
-def PlotPositionalEmbeddings(model):
+def PlotPositionalEmbeddings(model, attention_span):
 
   # visualize some of the learned positional embeddings, maybe they contain structure
   plt.figure(figsize=(18, 1))  
   ci = model.pos_emb.data[0, :, 0].cpu()
   zci = torch.cat((torch.tensor([0.0]), ci)) # pre-cat a zero
-  plt.imshow(zci.view(1, block_size+1).numpy())
+  plt.imshow(zci.view(1, attention_span+1).numpy())
   plt.axis('off')
