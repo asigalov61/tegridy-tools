@@ -306,7 +306,7 @@ completion = Generate(model,
                       input_prompt)
 
 # Stuff for datetime stamp
-filename = '/content/Efficient-VIRTUOSO-Composition-' + 'generated-on-' + str(now) 
+filename = '/content/Efficient-VIRTUOSO-Composition-' + 'generated-on-' 
 fname = TMIDI.Tegridy_File_Time_Stamp(filename)
 
 print('Done!')
