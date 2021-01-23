@@ -139,13 +139,21 @@ def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
 
 ###################################################################################
 
-def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_string=True):
+def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_INT_string=True, max_INT = 0):
 
-    Tegridy TXT to Intergers Converter
+  Tegridy TXT to Intergers Converter
      
-    Input: Input TXT string in the TMIDI-TXT format
-    
-    Output: List of pure intergers
+  Input: Input TXT string in the TMIDI-TXT format
+
+         Type of output TXT INT string: line-by-line or one long string
+
+         Maximum absolute integer to process. Maximum is inclusive 
+         Default = process all integers. This helps to remove outliers/unwanted ints
+
+  Output: List of pure intergers
+          String of intergers in the specified format: line-by-line or one long string
+          Number of processed integers
+          Number of skipped integers
 
 ###################################################################################
 
