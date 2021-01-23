@@ -2373,28 +2373,52 @@ def Tegridy_INT_to_TXT_Processor(input_INT_list, decoding_dictionary):
 
 ###################################################################################
 
-def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_string=True):
+def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_INT_string=True, max_INT = 0):
 
     '''Tegridy TXT to Intergers Converter
      
     Input: Input TXT string in the TMIDI-TXT format
+
+           Type of output TXT INT string: line-by-line or one long string
+
+           Maximum absolute integer to process. Maximum is inclusive 
+           Default = process all integers. This helps to remove outliers/unwanted ints
+
     Output: List of pure intergers
+            String of intergers in the specified format: line-by-line or one long string
+            Number of processed integers
+            Number of skipped integers
+    
     Project Los Angeles
-    Tegridy Code 2020'''
+    Tegridy Code 2021'''
+
+    print('Tegridy TXT to Intergers Converter')
 
     output_INT_list = []
 
+    npi = 0
+    nsi = 0
+
     TXT_List = list(input_TXT_string)
     for char in TXT_List:
-      output_INT_list.append(ord(char))
+      if max_INT != 0:
+        if abs(ord(char)) <= max_INT:
+          output_INT_list.append(ord(char))
+          npi += 1
+        else:
+          nsi += 1  
+      else:
+        output_INT_list.append(ord(char))
+        npi += 1    
     
     if line_by_line_string:
       output_INT_string = '\n'.join([str(elem) for elem in output_INT_list])
     else:
       output_INT_string = ' '.join([str(elem) for elem in output_INT_list])  
 
-    
-    return output_INT_list, output_INT_string
+    print('Converted TXT to INTs:', npi, ' / ', nsi)
+
+    return output_INT_list, output_INT_string, npi, nsi
 
 ###################################################################################
 
