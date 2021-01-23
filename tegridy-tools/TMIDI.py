@@ -2411,7 +2411,7 @@ def Tegridy_TXT_to_INT_Converter(input_TXT_string, line_by_line_INT_string=True,
         output_INT_list.append(ord(char))
         npi += 1    
     
-    if line_by_line_string:
+    if line_by_line_INT_string:
       output_INT_string = '\n'.join([str(elem) for elem in output_INT_list])
     else:
       output_INT_string = ' '.join([str(elem) for elem in output_INT_list])  
