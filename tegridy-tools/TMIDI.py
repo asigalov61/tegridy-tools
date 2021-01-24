@@ -349,7 +349,8 @@ def midi2opus(midi=b''):
     while len(my_midi) >= 8:
         track_type   = bytes(my_midi[0:4])
         if track_type != b'MTrk':
-            _warn('midi2opus: Warning: track #'+str(track_num)+' type is '+str(track_type)+" instead of b'MTrk'")
+            #_warn('midi2opus: Warning: track #'+str(track_num)+' type is '+str(track_type)+" instead of b'MTrk'")
+            pass
         [track_length] = struct.unpack('>I', my_midi[4:8])
         my_midi = my_midi[8:]
         if track_length > len(my_midi):
@@ -3035,7 +3036,7 @@ def Tegridy_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
 
   with open(full_path_to_output_dataset_to, 'wb') as filehandle:
     # store the data as binary data stream
-    pickle.dump(Data, filehandle)
+    pickle.dump(Data, filehandle, protocol=pickle.HIGHEST_PROTOCOL)
 
   print('Dataset was saved as:', full_path_to_output_dataset_to)
   print('Task complete. Enjoy! :)')
