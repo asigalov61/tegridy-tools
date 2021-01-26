@@ -147,7 +147,7 @@ for f in tqdm.auto.tqdm(filez):
     melody_count += len(melody_l)
   
   except:
-    print('Bad MIDI:', f)
+    print('Problematic MIDI:', f)
     continue
 
 average_note_pitch = int((min_note + max_note) / 2)
@@ -215,7 +215,7 @@ print('Done!')
 
 TXT1, n = TMIDI.Tegridy_TXT_Reducer(TXT, include_MIDI_channels=reduce_MIDI_channels, include_notes_velocities=reduce_notes_velocities)
 
-file.write(TXT1)
+file.write(TXT1.encode('utf-8', 'replace'))
 file.close()
 
 """# Setup and Intialize the Model
