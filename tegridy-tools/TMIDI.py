@@ -1786,6 +1786,8 @@ import pickle
 
 import csv
 
+import tqdm
+
 from itertools import zip_longest
 from itertools import groupby
 
@@ -2094,7 +2096,7 @@ def Tegridy_MIDI_TXT_Processor(dataset_name,
     else:
       TXT_string += ' '  
 
-    for chord in converted_chords_list:
+    for chord in tqdm.auto.tqdm(converted_chords_list):
       try:
         if chord[0][3] > 15:
           song_dur = int(chord[0][3])
@@ -2520,7 +2522,7 @@ def Tegridy_TXT_Reducer(input_string,
     Output_TXT_string = ''
 
     print('Reducing TXT. Please wait...')
-    for i in range(len(input_string)):
+    for i in tqdm.auto.tqdm(range(len(input_string))):
       
       if input_string[i].split('=')[0] == 'DATASET':
         Output_TXT_string += input_string[i] + '\n'
