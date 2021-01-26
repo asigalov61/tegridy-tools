@@ -7,7 +7,9 @@
 ***
 ### Install:
 
-### git clone https://github.com/asigalov61/tegridy-tools
+### Recommended: git clone https://github.com/asigalov61/tegridy-tools 
+
+### Hassle-free: pip install tegridy-tools
 
 ***
 
