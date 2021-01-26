@@ -197,6 +197,7 @@ uritemplate==3.0.1
 urllib3==1.26.2
 verboselogs==1.7
 virtualenv==20.4.0
+Visual-MIDI==1.1.0
 wcwidth==0.2.5
 webencodings==0.5.1
 Werkzeug==1.0.1
