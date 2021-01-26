@@ -1,0 +1,8 @@
+#include LICENSE
+#include README.md
+#include Requirements.txt
+
+include *.*
+recursive-include examples *.*
+recursive-include tegridy_tools *.*
+recursive-include tegridy_raspberry *.*
