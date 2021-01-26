@@ -111,12 +111,12 @@ class CausalSelfAttention(nn.Module):
         v = self.value(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs)
 
         # causal self-attention; Self-attend: (B, nh, T, hs) x (B, nh, hs, T) -> (B, nh, T, T)
-        # att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
+        att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
 
         # https://github.com/karpathy/minGPT/pull/55/commits/a492a389014cc4262d8011edeffdedebcec0dc57
         # perform sqrt(d) scaling on (B, nh, T, hs) instead of (B, nh, T, T).
-        q = q * (1.0 / math.sqrt(k.size(-1)))
-        att = (q @ k.transpose(-2, -1))
+        # q = q * (1.0 / math.sqrt(k.size(-1)))
+        # att = (q @ k.transpose(-2, -1))
 
         att = att.masked_fill(self.mask[:,:,:T,:T] == 0, float('-inf'))
         att = F.softmax(att, dim=-1)
