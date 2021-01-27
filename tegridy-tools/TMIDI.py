@@ -8,6 +8,8 @@
 #	Tegridy MIDI Module (TMIDI / tee-midi)
 #	Version 1.4
 #
+# NOTE: TMIDI Module start from line 1760 of this file
+#
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
 #
@@ -2529,10 +2531,17 @@ def Tegridy_TXT_Reducer(input_string,
         continue
 
       if input_string[i].split('=')[0] == 'SONG':
-        Output_TXT_string += input_string[i] + '\n'
-        continue
+        if input_string[i].split('=')[1][0:4] != 'END_':
+          if line_by_line_output_dataset:
+            Output_TXT_string += input_string[i] + '\n'
+            continue
+          else:
+            Output_TXT_string += input_string[i] + ' '  
+            continue
+        else:
+          Output_TXT_string += input_string[i] + '\n'
+          continue
         
-
       try:
         start_time = int(input_string[i].split('-')[0])
         duration = int(input_string[i].split('-')[1])
@@ -2566,6 +2575,8 @@ def Tegridy_TXT_Reducer(input_string,
         Output_TXT_string += chars
         if line_by_line_output_dataset:
           Output_TXT_string += '\n'
+        else:
+          Output_TXT_string += ' '  
 
     print('Task complete! Enjoy :)')
        
@@ -3006,8 +3017,8 @@ def Tegridy_TXT_Dataset_File_Writer(input_file_name='TMIDI_TXT_Dataset',
     print("Creating new Dataset file...")
 
   print('Writing dataset to a file...Please wait...')
-  f = open(full_path_to_TXT_dataset, 'a')
-  f.write(TXT_String)
+  f = open(full_path_to_TXT_dataset, 'wb')
+  f.write(TXT_String.encode('utf-8', 'replace'))
   f.close()
   print('Dataset was saved as:', full_path_to_TXT_dataset)
   print('Task complete! Enjoy :)')
