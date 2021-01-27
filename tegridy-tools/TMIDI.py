@@ -2615,10 +2615,17 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
       input_string = Reduced_TXT_String.split('\n')
     else:
       input_string = Reduced_TXT_String.split(' ')
-
-    name_string = Reduced_TXT_String.split('\n')[0].split('=')
+    
+    if line_by_line_dataset:
+      name_string = Reduced_TXT_String.split('\n')[0].split('=')
+    else:
+      name_string = Reduced_TXT_String.split(' ')[0].split('=')
+        
     if name_string[0] == 'SONG':
-      song_name = name_string[1]
+      if name_string[1][0:4] != 'END_' :
+        song_name = name_string[1]
+      else:
+        return output_list, song_name  
 
     output_list = []
     st = 0
