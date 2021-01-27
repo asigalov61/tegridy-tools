@@ -22,6 +22,7 @@
 ################################################################################
 
 import random
+import secrets
 import operator
 import bisect
 import json
@@ -140,7 +141,8 @@ class Chain(object):
         else:
             choices, weights = zip(*self.model[state].items())
             cumdist = list(accumulate(weights))
-        r = random.random() * cumdist[-1]
+        # r = random.random() * cumdist[-1]
+        r = secrets.choice([random.random(), random.random()]) * cumdist[-1]
         selection = choices[bisect.bisect(cumdist, r)]
         return selection
 
@@ -484,7 +486,7 @@ class Text(object):
         Tries making a sentence that begins with `beginning` string,
         which should be a string of one to `self.state` words known
         to exist in the corpus.
-        
+
         If strict == True, then markovify will draw its initial inspiration
         only from sentences that start with the specified word/phrase.
         If strict == False, then markovify will draw its initial inspiration
@@ -506,7 +508,8 @@ class Text(object):
                     # check for starting with begin as well ordered lists
                     if tuple(filter(lambda x: x != BEGIN, key))[:word_count] == split ]
 
-                random.shuffle(init_states)
+                for i in range(secrets.choice([1, 2])):
+                  random.shuffle(init_states)
         else:
             err_msg = "`make_sentence_with_start` for this model requires a string containing 1 to {0} words. Yours has {1}: {2}".format(self.state_size, word_count, str(split))
             raise ParamError(err_msg)
