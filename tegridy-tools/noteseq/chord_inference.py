@@ -40,8 +40,14 @@ _CHORD_KIND_PITCHES = {
     '7': [0, 4, 7, 10],
     'maj7': [0, 4, 7, 11],
     'm7': [0, 3, 7, 10],
-    'm7b5': [0, 3, 6, 10],
+    'm7b5': [0, 3, 6, 10], # Old
+    '6': [0, 4, 7, 9],
+    'm6': [0, 3, 7, 9],
+    'dim6': [0, 3, 6, 9],
+    'mM7': [0, 3, 7, 11]
+  
 }
+
 _CHORD_KINDS = _CHORD_KIND_PITCHES.keys()
 
 # All usable chords, including no-chord.
