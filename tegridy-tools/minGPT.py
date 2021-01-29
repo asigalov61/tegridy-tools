@@ -17,6 +17,8 @@
 
 print('Loading minGPT modules...')
 
+import copy
+
 import math
 import random
 import numpy as np
@@ -270,17 +272,32 @@ class TrainerConfig:
 
 class Trainer:
 
-    def __init__(self, model, train_dataset, test_dataset, config):
+    def __init__(self, model, train_dataset, test_dataset, config, ckpt_path):
         self.model = model
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.config = config
+        self.config.ckpt_path = ckpt_path
+        self.ckpt_path = ckpt_path
 
         # take over whatever gpus are on the system
         self.device = 'cpu'
         if torch.cuda.is_available():
             self.device = torch.cuda.current_device()
             self.model = torch.nn.DataParallel(self.model).to(self.device)
+
+    def load_checkpoint(self):
+        if self.config.ckpt_path is not None:
+          ckpt_model = self.model.module if hasattr(self.model, "module") else self.model
+          logger.info("loading %s", self.config.ckpt_path)
+          print('Loading checkpoint...')
+          ck = torch.load(self.config.ckpt_path, device)
+          ckpt_model.load_state_dict(copy.deepcopy(ck))
+          print('Checkpoint loaded!')
+        # Print model's state_dict
+          print("Model's state_dict:")
+          for param_tensor in ckpt_model.state_dict():
+              print(param_tensor, "\t", ckpt_model.state_dict()[param_tensor].size())  
 
     def save_checkpoint(self):
         # DataParallel wrappers keep raw model object in .module attribute
@@ -349,6 +366,8 @@ class Trainer:
 
         best_loss = float('inf')
         self.tokens = 0 # counter used for learning rate decay
+
+        self.load_checkpoint()
         for epoch in range(config.max_epochs):
 
             run_epoch('train')
@@ -448,7 +467,8 @@ def MainLoader(full_path_to_training_text_file,
                number_of_layers = 4,
                number_of_training_epochs = 2,
                training_batch_size = 48,
-               model_learning_rate = 6e-4):
+               model_learning_rate = 6e-4,
+               ckpt_path = None):
 
     text = open(full_path_to_training_text_file, 'r').read() # don't worry we won't run out of file handles
 
@@ -471,7 +491,8 @@ def MainLoader(full_path_to_training_text_file,
                           learning_rate=model_learning_rate,
                           num_workers=number_of_dataloader_workers)
 
-    trainer = Trainer(model, train_dataset, full_path_to_validation_text_file, tconf)
+    trainer = Trainer(model, train_dataset, full_path_to_validation_text_file, tconf, ckpt_path)
+    print('Checkpoint =', ckpt_path)
 
     return trainer, model, train_dataset
 
