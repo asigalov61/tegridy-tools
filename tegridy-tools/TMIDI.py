@@ -2648,7 +2648,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
             song_name = name_string[1]
             continue
           else:
-          break
+            break
 
       try:
         istring = input_string[i]
