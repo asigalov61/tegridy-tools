@@ -1799,7 +1799,7 @@ from operator import itemgetter
 
 ###################################################################################
 
-def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
+def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1, transpose_all_notes_by_this_many_pitches = 0):
 
     '''Tegridy MIDI Processor
 
@@ -1900,6 +1900,7 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
               rec_event = event
               rec_event[1] = int(event[1] / time_denominator)
               rec_event[2] = int(event[2] / time_denominator)
+              rec_event[4] = int(event[4] + transpose_all_notes_by_this_many_pitches)
               events_matrix.append(rec_event)
 
               min_note = int(min(min_note, rec_event[4]))
@@ -1908,7 +1909,7 @@ def Tegridy_MIDI_Processor(MIDI_file, MIDI_channel=0, time_denominator=1):
               ev += 1
       
       itrack +=1 # Going to next track...
-    
+  
     #print('Doing some heavy pythonic sorting...Please stand by...')
 
     #print('Removing zero pitches and zero velocities events')
