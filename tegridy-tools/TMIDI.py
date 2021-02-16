@@ -1807,7 +1807,9 @@ def Tegridy_MIDI_Processor(MIDI_file,
                           transpose_all_notes_by_this_many_pitches = 0,
                           flip_notes=0,
                           randomize_notes=0,
-                          randremove_notes=0):
+                          randremove_notes=0,
+                          MIDI_patch=[0, 24, 32, 40, 42, 46, 56, 71, 73],
+                          voble=0):
 
     '''Tegridy MIDI Processor
 
@@ -1903,11 +1905,14 @@ def Tegridy_MIDI_Processor(MIDI_file,
       chords_list_track = []
       for event in score[itrack]:
         chords_list = []
-        if event[0] == 'note':
+        if event[0] == 'patch_change':
+          patch = event[3] 
+        if event[0] == 'note' and patch in MIDI_patch:
           if len(event) == 6: # Checking for bad notes...
               rec_event = event
-              rec_event[1] = int(event[1] / time_denominator)
-              rec_event[2] = int(event[2] / time_denominator)
+              rec_event[1] = int((event[1] + voble) / time_denominator)
+              rec_event[2] = int((event[2] + voble) / time_denominator)
+              rec_event[5] = int(event[5] + voble)
 
               if transpose_all_notes_by_this_many_pitches != 0:
                 rec_event[4] = abs(int(event[4] + transpose_all_notes_by_this_many_pitches))
