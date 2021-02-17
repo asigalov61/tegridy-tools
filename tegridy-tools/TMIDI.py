@@ -1857,6 +1857,7 @@ def Tegridy_MIDI_Processor(MIDI_file,
     min_note = 0
     max_note = 0
     ev = 0
+    patch = 0
 
     score = []
     rec_event = []
