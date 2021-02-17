@@ -2476,7 +2476,7 @@ def Tegridy_INT_to_TXT_Converter(input_INT_list):
     output_TXT_string = ''
 
     for i in input_INT_list:
-      output_TXT_string += chr(i)
+      output_TXT_string += chr(int(i))
     
     return output_TXT_string
 
@@ -2696,7 +2696,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
         if has_MIDI_channels==True and has_velocities==True:
           step = 6
 
-        if dataset_includes_beat:
+        if not dataset_includes_beat:
           step = step - 1
 
         dur = (ord(istring[1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
@@ -2714,9 +2714,9 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
                       out.append(st) # Start time
                       out.append((ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-                      out.append(ord(istring[s+3]) - char_encoding_offset) # Channel
-                      out.append(ord(istring[s+4]) - char_encoding_offset) # Pitch
-                      out.append(ord(istring[s+5]) - char_encoding_offset) # Velocity
+                      out.append(ord(istring[s+2]) - char_encoding_offset) # Channel
+                      out.append(ord(istring[s+3]) - char_encoding_offset) # Pitch
+                      out.append(ord(istring[s+4]) - char_encoding_offset) # Velocity
 
                       output_list.append(out)
               
@@ -2748,7 +2748,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
 
               if has_MIDI_channels==False and has_velocities==False:
-                if step == 4 and len(istring) > 2:
+                if step == 3 and len(istring) > 2:
                       out = []       
                       out.append('note')
 
