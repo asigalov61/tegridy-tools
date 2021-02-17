@@ -2685,16 +2685,16 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
         istring = input_string[i]
 
         if has_MIDI_channels==False and has_velocities==False:
-          step = 4
+          step = 3
 
         if has_MIDI_channels==True and has_velocities==False:
-          step = 5          
+          step = 4          
         
         if has_MIDI_channels==False and has_velocities==True:
-          step = 5  
+          step = 4  
         
         if has_MIDI_channels==True and has_velocities==True:
-          step = 6
+          step = 5
 
         if not dataset_includes_beat:
           step = step - 1
@@ -2706,9 +2706,9 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
 
           st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
-          for s in range(0, len(istring), step):
+          for s in range(0, len(istring)-step, step):
               if has_MIDI_channels==True and has_velocities==True:
-                if step == 6 and len(istring) > 4:
+                if step >= 5 and len(istring) > 4:
                       out = []       
                       out.append('note')
 
@@ -2721,7 +2721,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
               
               if has_MIDI_channels==True and has_velocities==False:
-                if step == 5 and len(istring) > 3:
+                if step >= 4 and len(istring) > 3:
                       out = []       
                       out.append('note')
 
@@ -2735,7 +2735,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
 
               if has_velocities==True and has_MIDI_channels==False:
-                if step == 5 and len(istring) > 3:
+                if step >= 4 and len(istring) > 3:
                       out = []       
                       out.append('note')
                       
@@ -2748,7 +2748,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
 
               if has_MIDI_channels==False and has_velocities==False:
-                if step == 3 and len(istring) > 2:
+                if step >= 3 and len(istring) > 2:
                       out = []       
                       out.append('note')
 
