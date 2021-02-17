@@ -2598,10 +2598,10 @@ def Tegridy_TXT_Reducer(input_string,
           chars += chr(int(start_time)+char_encoding_offset) #Start Time
           chars += chr(int(dura)+char_encoding_offset) #Duration
           
-          if include_beat:
+          if include_beat == True and include_MIDI_channels == False:
             chars += chr(int(beat)+char_encoding_offset) #Beat
 
-          if include_MIDI_channels:
+          if include_MIDI_channels == True and include_beat == False:
             chars += chr(int(channel)+char_encoding_offset) #Channel
 
           chars += chr(int(notes_specs)+char_encoding_offset) #Note
@@ -2696,19 +2696,19 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
         if has_MIDI_channels==True and has_velocities==True:
           step = 5
 
-        if not dataset_includes_beat:
-          step = step - 1
+        if dataset_includes_beat:
+          step = step + 1
 
         dur = (ord(istring[1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
 
-        if dur != 0: #Check for rests (we are skipping them)
+        if dur != 0 and int(ord(istring[3]) - char_encoding_offset) != 0: #Check for rests/zero notes (we are skipping them)
 
           st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
-          for s in range(0, len(istring)-step, step):
+          for s in range(0, len(istring), step):
               if has_MIDI_channels==True and has_velocities==True:
-                if step >= 5 and len(istring) > 4:
+                if step >= 4 and len(istring) > 3:
                       out = []       
                       out.append('note')
 
@@ -2721,7 +2721,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
               
               if has_MIDI_channels==True and has_velocities==False:
-                if step >= 4 and len(istring) > 3:
+                if step >= 3 and len(istring) > 2:
                       out = []       
                       out.append('note')
 
@@ -2735,7 +2735,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
 
               if has_velocities==True and has_MIDI_channels==False:
-                if step >= 4 and len(istring) > 3:
+                if step >= 3 and len(istring) > 2:
                       out = []       
                       out.append('note')
                       
@@ -2748,7 +2748,7 @@ def Tegridy_Reduced_TXT_to_Notes_Converter(Reduced_TXT_String,
                       output_list.append(out)
 
               if has_MIDI_channels==False and has_velocities==False:
-                if step >= 3 and len(istring) > 2:
+                if step >= 2 and len(istring) > 1:
                       out = []       
                       out.append('note')
 
