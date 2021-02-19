@@ -2502,7 +2502,7 @@ def Tegridy_INT_String_to_TXT_Converter(input_INT_String, line_by_line_input=Tru
 
     for i in input_string:
       try:
-        output_TXT_string += chr(int(i))
+        output_TXT_string += chr(abs(int(i)))
       except:
         print('Bad note:', i)
         continue  
