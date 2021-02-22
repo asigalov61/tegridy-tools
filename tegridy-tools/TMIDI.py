@@ -478,9 +478,9 @@ but it does make it easy to mix different scores together.
         for old_event in old_opus[itrack]:
             # detect if ticks2tempo has something before this event
             # 20160702 if ticks2tempo is at the same time, leave it
-            event_delta_ticks = old_event[1]
+            event_delta_ticks = old_event[1] * desired_time_in_ms
             if (i_tempo_ticks < len(tempo_ticks) and
-              tempo_ticks[i_tempo_ticks] < (ticks_so_far + old_event[1])):
+              tempo_ticks[i_tempo_ticks] < (ticks_so_far + old_event[1]) * desired_time_in_ms):
                 delta_ticks = tempo_ticks[i_tempo_ticks] - ticks_so_far
                 ms_so_far += (ms_per_old_tick * delta_ticks * desired_time_in_ms)
                 ticks_so_far = tempo_ticks[i_tempo_ticks]
