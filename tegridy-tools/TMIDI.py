@@ -482,14 +482,14 @@ but it does make it easy to mix different scores together.
             if (i_tempo_ticks < len(tempo_ticks) and
               tempo_ticks[i_tempo_ticks] < (ticks_so_far + old_event[1])):
                 delta_ticks = tempo_ticks[i_tempo_ticks] - ticks_so_far
-                ms_so_far += (ms_per_old_tick * delta_ticks)
+                ms_so_far += (ms_per_old_tick * delta_ticks * desired_time_in_ms)
                 ticks_so_far = tempo_ticks[i_tempo_ticks]
                 ms_per_old_tick = ticks2tempo[ticks_so_far] / (1000.0*old_tpq * desired_time_in_ms)
                 i_tempo_ticks += 1
                 event_delta_ticks -= delta_ticks
             new_event = copy.deepcopy(old_event)  # now handle the new event
-            ms_so_far += (ms_per_old_tick * int(old_event[1] / desired_time_in_ms))
-            new_event[1] = round(ms_so_far - previous_ms_so_far / desired_time_in_ms)
+            ms_so_far += (ms_per_old_tick * old_event[1] * desired_time_in_ms)
+            new_event[1] = round(ms_so_far - previous_ms_so_far)
             if old_event[0] != 'set_tempo':
                 previous_ms_so_far = ms_so_far
                 new_track.append(new_event)
