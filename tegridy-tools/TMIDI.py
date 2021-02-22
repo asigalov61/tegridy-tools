@@ -434,20 +434,20 @@ then opus2score()
 
 #------------------------ Other Transformations ---------------------
 
-def to_millisecs(old_opus=None):
+def to_millisecs(old_opus=None, desired_time_in_ms=1):
     r'''Recallibrates all the times in an "opus" to use one beat
 per second and one tick per millisecond.  This makes it
 hard to retrieve any information about beats or barlines,
 but it does make it easy to mix different scores together.
 '''
     if old_opus == None:
-        return [1000,[],]
+        return [1000 * desired_time_in_ms,[],]
     try:
         old_tpq  = int(old_opus[0])
     except IndexError:   # 5.0
         _warn('to_millisecs: the opus '+str(type(old_opus))+' has no elements')
-        return [1000,[],]
-    new_opus = [1000,]
+        return [1000 * desired_time_in_ms,[],]
+    new_opus = [1000 * desired_time_in_ms,]
     # 6.7 first go through building a table of set_tempos by absolute-tick
     ticks2tempo = {}
     itrack = 1
@@ -469,12 +469,12 @@ but it does make it easy to mix different scores together.
     # set_tempo lies before the next track-event, and using it if so.
     itrack = 1
     while itrack < len(old_opus):
-        ms_per_old_tick = 500.0 / old_tpq  # float: will round later 6.3
+        ms_per_old_tick = 400 / old_tpq  # float: will round later 6.3
         i_tempo_ticks = 0
         ticks_so_far = 0
         ms_so_far = 0.0
         previous_ms_so_far = 0.0
-        new_track = [['set_tempo',0,1000000],]  # new "crochet" is 1 sec
+        new_track = [['set_tempo',0,1000000 * desired_time_in_ms],]  # new "crochet" is 1 sec
         for old_event in old_opus[itrack]:
             # detect if ticks2tempo has something before this event
             # 20160702 if ticks2tempo is at the same time, leave it
