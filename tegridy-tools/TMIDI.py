@@ -6,7 +6,7 @@
 #
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 1.4
+#	Version 2.0
 #
 # NOTE: TMIDI Module start from line 1760 of this file
 #
@@ -3195,4 +3195,268 @@ def Tegridy_Karaoke_Pitches_Words_List_to_CSV_Writer(pitches_words_list, file_na
       for key,items in final_list.items():
         w.writerow([key, ' '.join(sorted(items))])
 
-    print('Task complete! Enjoy :)')    
+    print('Task complete! Enjoy :)')
+
+###################################################################################
+
+# TMIDI 2.0 Code is below
+
+###################################################################################
+
+
+def Optimus_MIDI_TXT_Processor(MIDI_file, line_by_line_output=True, chordify_TXT=False, output_MIDI_channels = False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset = 30000):
+
+    '''Project Los Angeles
+       Tegridy Code 2021'''
+  
+###########
+
+    debug = False
+
+    ev = 0
+
+    chords_list_final = []
+    chords_list = []
+    events_matrix = []
+    melody = []
+    melody1 = []
+
+    itrack = 1
+
+    min_note = 0
+    max_note = 0
+    ev = 0
+    patch = 0
+
+    score = []
+    rec_event = []
+
+    txt = ''
+    chords = []
+
+###########    
+
+    def list_average(num):
+      sum_num = 0
+      for t in num:
+          sum_num = sum_num + t           
+
+      avg = sum_num / len(num)
+      return avg
+
+###########
+
+    #print('Loading MIDI file...')
+    midi_file = open(MIDI_file, 'rb')
+    if debug: print('Processing File:', file_address)
+    
+    try:
+      opus = midi2opus(midi_file.read())
+    
+    except:
+      print('Bad file. Skipping...')
+      print('File name:', MIDI_file)
+      midi_file.close()
+      return txt, melody, chords
+         
+    midi_file.close()
+
+    score1 = to_millisecs(opus)
+    score2 = opus2score(score1)
+    
+    if MIDI_channel == 16: # Process all MIDI channels
+      score = score2
+    
+    if MIDI_channel >= 0 and MIDI_channel <= 15: # Process only a selected single MIDI channel
+      score = grep(score2, [MIDI_channel])
+    
+    if MIDI_channel == -1: # Process all channels except drums (except channel 9)
+      score = grep(score2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15])   
+    
+    #print('Reading all MIDI events from the MIDI file...')
+    while itrack < len(score):
+      for event in score[itrack]:
+        if event[0] == 'patch_change':
+          patch = event[3] 
+        if event[0] == 'note' and patch in MIDI_patch:
+          if len(event) == 6: # Checking for bad notes...
+              events_matrix.append(event)
+
+              ev += 1
+      
+      itrack +=1 # Going to next track...
+
+    #print('Doing some heavy pythonic sorting...Please stand by...')
+
+    fn = os.path.basename(MIDI_file)
+    song_name = fn.split('.')[0].replace(' ', '_')\
+
+    txt += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
+
+    if line_by_line_output:
+      txt += chr(10)
+    else:
+      txt += chr(32)
+
+    #print('Sorting input by start time...')
+    events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
+
+    previous_event = copy.deepcopy(events_matrix[0])
+    for event in events_matrix[1:]:
+
+      '''# Computing deltas
+      start_time = int(event[1] - previous_event[1])
+      duration = int(event[2] - previous_event[2])
+      channel = int(event[3])
+      pitch = int(event[4] - previous_event[4])
+      velocity = int(event[5] - previous_event[5])'''
+
+      # Computing events details
+      start_time = int(previous_event[1])
+      duration = int(previous_event[2])
+      channel = int(previous_event[3])
+      pitch = int(previous_event[4])
+      velocity = int(previous_event[5])
+
+      # Converting to TXT
+      txt += str(chr(start_time + char_offset))
+      txt += str(chr(duration + char_offset))
+      txt += str(chr(pitch + char_offset))
+      txt += str(chr(velocity + char_offset))
+      if output_MIDI_channels:
+        txt += str(chr(channel + char_offset))
+
+
+      if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
+        txt += ''      
+      else:     
+        if line_by_line_output:
+          txt += chr(10)
+        else:
+          txt += chr(32) 
+      
+      previous_event = copy.deepcopy(event)
+      
+    chords.extend(events_matrix)
+    #print(chords)
+
+    #print('Extracting melody...')
+    melody_list = []
+
+    #print('Grouping by start time. This will take a while...')
+    values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
+
+    groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+  
+    #print('Sorting events...')
+    for items in groups:
+        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
+        melody_list.append(items[0]) # Creating final chords list
+    
+    #print('Final sorting by start time...')      
+    melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
+
+    #print(txt, melody, chords)
+
+    return txt, melody_list, chords
+
+###################################################################################
+
+def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
+                                          line_by_line_dataset = True,
+                                          has_MIDI_channels = True,
+                                          dataset_MIDI_events_time_denominator = 1,
+                                          char_encoding_offset = 30000,
+                                          save_only_first_composition = True,
+                                          simulate_velocity=True):
+                                                            
+    '''Project Los Angeles
+       Tegridy Code 2020'''
+
+    print('Tegridy Optimus TXT to Notes Converter')
+    print('Converting TXT to Notes list...Please wait...')
+
+    song_name = ''
+
+    if line_by_line_dataset:
+      input_string = Optimus_TXT_String.split('\n')
+    else:
+      input_string = Optimus_TXT_String.split(' ')
+    
+    if line_by_line_dataset:
+      name_string = Optimus_TXT_String.split('\n')[0].split('=')
+    else:
+      name_string = Optimus_TXT_String.split(' ')[0].split('=')
+
+    if name_string[0] == 'SONG':
+      song_name = name_string[1]
+
+    output_list = []
+    st = 0
+
+    for i in range(2, len(input_string)-1):
+      
+      if save_only_first_composition:
+        if input_string[i].split('=')[0] == 'SONG':
+
+          song_name = name_string[1]
+          break
+
+      try:
+        istring = input_string[i]
+        #print(istring)
+
+        if has_MIDI_channels==False:
+          step = 4          
+        
+        if has_MIDI_channels==True:
+          step = 5
+
+        st = int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
+
+        for s in range(0, len(istring), step):
+            if has_MIDI_channels==True:
+              if step > 4 and len(istring) > 3:
+                    out = []       
+                    out.append('note')
+
+                    out.append(st) # Start time
+                    out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                    out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
+                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                    
+                    if simulate_velocity:
+                      if s == 0:
+                        sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
+                      out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+                    else:                      
+                      out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+          
+            if has_MIDI_channels==False:
+              if step > 3 and len(istring) > 2:
+                    out = []       
+                    out.append('note')
+
+                    out.append(st) # Start time
+                    out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                    out.append(0) # Channel
+                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                    
+                    if simulate_velocity:
+                      if s == 0:
+                        sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
+                      out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+                    else:                      
+                      out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+
+            output_list.append(out)
+
+      except:
+        print('Bad note string:', istring)
+        continue
+
+    print('Task complete! Enjoy! :)')
+
+    return output_list, song_name
+
+###################################################################################
