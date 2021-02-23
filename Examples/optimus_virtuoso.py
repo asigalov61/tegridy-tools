@@ -87,8 +87,8 @@ print('Loading complete. Enjoy! :)')
 
 file_name_to_output_dataset_to = "/content/Optimus-Virtuoso-Music-Dataset" #@param {type:"string"}
 desired_MIDI_channel_to_process = 0 #@param {type:"slider", min:-1, max:15, step:1}
-MIDI_events_time_denominator = 10 #@param {type:"slider", min:1, max:100, step:1}
 melody_notes_in_chords = True #@param {type:"boolean"}
+chars_encoding_offset = 32000 #@param {type:"number"}
 
 print('TMIDI Processor')
 print('Starting up...')
@@ -132,7 +132,7 @@ for f in tqdm.auto.tqdm(filez):
   try:
 
     files_count += 1
-    TXT, melody, chords = TMIDI.Optimus_MIDI_TXT_Processor(f, chordify_TXT=True, output_MIDI_channels=False, char_offset=10000)
+    TXT, melody, chords = TMIDI.Optimus_MIDI_TXT_Processor(f, chordify_TXT=True, output_MIDI_channels=False, char_offset=chars_encoding_offset)
     melody_list_f += melody
     chords_list_f += chords
     TXT_String += TXT
@@ -172,12 +172,12 @@ TMIDI.Tegridy_Pickle_File_Writer(MusicDataset, file_name_to_output_dataset_to)
 #@title Create/prepare GPT2 model and load the dataset
 
 full_path_to_training_text_file = "/content/Optimus-Virtuoso-Music-Dataset.txt" #@param {type:"string"}
-model_attention_span_in_tokens = 512 #@param {type:"slider", min:0, max:1024, step:16}
+model_attention_span_in_tokens = 256 #@param {type:"slider", min:0, max:1024, step:16}
 model_embed_size = 256 #@param {type:"slider", min:0, max:1024, step:64}
 number_of_heads = 16 #@param {type:"slider", min:1, max:16, step:1}
 number_of_layers = 16 #@param {type:"slider", min:1, max:16, step:1}
 number_of_training_epochs = 3 #@param {type:"slider", min:1, max:5, step:1}
-training_batch_size = 12 #@param {type:"slider", min:0, max:160, step:4}
+training_batch_size = 32 #@param {type:"slider", min:0, max:160, step:4}
 model_learning_rate = 6e-4 #@param {type:"number"}
 checkpoint_full_path = "" #@param {type:"string"}
 
@@ -208,13 +208,13 @@ PlotPositionalEmbeddings(model, model_attention_span_in_tokens)
 # Commented out IPython magic to ensure Python compatibility.
 #@title Save/Re-Save the model from memory
 #@markdown Standard PyTorch AI models file extension is PTH
-full_path_to_save_model_to = "/content/Efficient-Virtuoso-Trained-Model.pth" #@param {type:"string"}
+full_path_to_save_model_to = "/content/Optimus-Virtuoso-Trained-Model.pth" #@param {type:"string"}
 # %cd /content/
 torch.save(model, full_path_to_save_model_to)
 #torch.save(model.state_dict(), full_path_to_save_model_to)
 
 #@title (OPTION 2) Load existing model/checkpoint
-full_path_to_model_checkpoint = "/content/Efficient-Virtuoso-Trained-Model.pth" #@param {type:"string"}
+full_path_to_model_checkpoint = "/content/Optimus-Virtuoso-Trained-Model.pth" #@param {type:"string"}
 model = torch.load(full_path_to_model_checkpoint)
 model.eval()
 
@@ -235,11 +235,11 @@ model.eval()
 
 #@markdown 3) Coherence of GPT2 Models is inversly proportional to the length of the generated composition, so the best resutls are achieved with shorter compositions and/or continuation routines use
 
-print('Efficient VIRTUOSO Model Generator')
+print('Optimus VIRTUOSO Model Generator')
 print('Starting up...')
 number_of_tokens_to_generate = 8192 #@param {type:"slider", min:0, max:32768, step:128}
 creativity_temperature = 0.8 #@param {type:"slider", min:0.05, max:4, step:0.05}
-top_k_prob = 50 #@param {type:"slider", min:0, max:50, step:1}
+top_k_prob = 48 #@param {type:"slider", min:0, max:50, step:1}
 input_prompt = "SONG=Deep" #@param {type:"string"}
 
 os.chdir('/content/')
@@ -253,7 +253,7 @@ completion = Generate(model,
                       input_prompt)
 
 # Stuff for datetime stamp
-filename = '/content/Efficient-VIRTUOSO-Composition-' + 'generated-on-' 
+filename = '/content/Optimus-VIRTUOSO-Composition-' + 'generated-on-' 
 fname = TMIDI.Tegridy_File_Time_Stamp(filename)
 
 print('Done!')
@@ -280,17 +280,18 @@ with open(fname, 'r') as f:
 number_of_ticks_per_quarter = 420 #@param {type:"slider", min:10, max:500, step:10}
 encoding_has_MIDI_channels = False #@param {type:"boolean"}
 simulate_velocity = True #@param {type:"boolean"}
+chars_encoding_offset_used_for_dataset = 32000 #@param {type:"number"}
 
 print('Converting TXT to MIDI. Please wait...')
 print('Converting TXT to Song...')
 output_list, song_name = TMIDI.Tegridy_Optimus_TXT_to_Notes_Converter(completion, 
                                                                 has_MIDI_channels=encoding_has_MIDI_channels, 
                                                                 simulate_velocity=simulate_velocity,
-                                                                char_encoding_offset=10000)
+                                                                char_encoding_offset=chars_encoding_offset_used_for_dataset)
 
 print('Converting Song to MIDI...')
 
-output_signature = 'Efficient VIRTUOSO'
+output_signature = 'Optimus VIRTUOSO'
 
 detailed_stats = TMIDI.Tegridy_SONG_to_MIDI_Converter(output_list,
                                                       output_signature = output_signature,  
