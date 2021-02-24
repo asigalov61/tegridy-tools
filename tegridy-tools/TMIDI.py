@@ -3204,7 +3204,14 @@ def Tegridy_Karaoke_Pitches_Words_List_to_CSV_Writer(pitches_words_list, file_na
 ###################################################################################
 
 
-def Optimus_MIDI_TXT_Processor(MIDI_file, line_by_line_output=True, chordify_TXT=False, output_MIDI_channels = False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset = 30000):
+def Optimus_MIDI_TXT_Processor(MIDI_file, 
+                              line_by_line_output=True, 
+                              chordify_TXT=False,
+                              dataset_MIDI_events_time_denominator=1, 
+                              output_MIDI_channels = False, 
+                              MIDI_channel=0, 
+                              MIDI_patch=[0, 1], 
+                              char_offset = 30000):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3280,7 +3287,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file, line_by_line_output=True, chordify_TXT
           patch = event[3] 
         if event[0] == 'note' and patch in MIDI_patch:
           if len(event) == 6: # Checking for bad notes...
-              events_matrix.append(event)
+              eve = copy.deepcopy(event)
+              eve[1] = int(event[1] / dataset_MIDI_events_time_denominator)
+              eve[2] = int(event[2] / dataset_MIDI_events_time_denominator)
+              events_matrix.append(eve)
 
               ev += 1
       
