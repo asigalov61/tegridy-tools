@@ -87,8 +87,9 @@ print('Loading complete. Enjoy! :)')
 
 file_name_to_output_dataset_to = "/content/Optimus-Virtuoso-Music-Dataset" #@param {type:"string"}
 desired_MIDI_channel_to_process = 0 #@param {type:"slider", min:-1, max:15, step:1}
-melody_notes_in_chords = True #@param {type:"boolean"}
-chars_encoding_offset = 32000 #@param {type:"number"}
+chordify_input_MIDIs = True #@param {type:"boolean"}
+time_denominator = 10 #@param {type:"slider", min:1, max:20, step:1}
+chars_encoding_offset = 30000 #@param {type:"number"}
 
 print('TMIDI Processor')
 print('Starting up...')
@@ -132,7 +133,7 @@ for f in tqdm.auto.tqdm(filez):
   try:
 
     files_count += 1
-    TXT, melody, chords = TMIDI.Optimus_MIDI_TXT_Processor(f, chordify_TXT=True, output_MIDI_channels=False, char_offset=chars_encoding_offset)
+    TXT, melody, chords = TMIDI.Optimus_MIDI_TXT_Processor(f, chordify_TXT=chordify_input_MIDIs, output_MIDI_channels=False, char_offset=chars_encoding_offset, dataset_MIDI_events_time_denominator=time_denominator)
     melody_list_f += melody
     chords_list_f += chords
     TXT_String += TXT
@@ -172,12 +173,12 @@ TMIDI.Tegridy_Pickle_File_Writer(MusicDataset, file_name_to_output_dataset_to)
 #@title Create/prepare GPT2 model and load the dataset
 
 full_path_to_training_text_file = "/content/Optimus-Virtuoso-Music-Dataset.txt" #@param {type:"string"}
-model_attention_span_in_tokens = 256 #@param {type:"slider", min:0, max:1024, step:16}
+model_attention_span_in_tokens = 512 #@param {type:"slider", min:0, max:1024, step:16}
 model_embed_size = 256 #@param {type:"slider", min:0, max:1024, step:64}
 number_of_heads = 16 #@param {type:"slider", min:1, max:16, step:1}
-number_of_layers = 16 #@param {type:"slider", min:1, max:16, step:1}
+number_of_layers = 8 #@param {type:"slider", min:1, max:16, step:1}
 number_of_training_epochs = 3 #@param {type:"slider", min:1, max:5, step:1}
-training_batch_size = 32 #@param {type:"slider", min:0, max:160, step:4}
+training_batch_size = 28 #@param {type:"slider", min:0, max:160, step:4}
 model_learning_rate = 6e-4 #@param {type:"number"}
 checkpoint_full_path = "" #@param {type:"string"}
 
@@ -237,10 +238,10 @@ model.eval()
 
 print('Optimus VIRTUOSO Model Generator')
 print('Starting up...')
-number_of_tokens_to_generate = 8192 #@param {type:"slider", min:0, max:32768, step:128}
+number_of_tokens_to_generate = 4096 #@param {type:"slider", min:0, max:32768, step:128}
 creativity_temperature = 0.8 #@param {type:"slider", min:0.05, max:4, step:0.05}
-top_k_prob = 48 #@param {type:"slider", min:0, max:50, step:1}
-input_prompt = "SONG=Deep" #@param {type:"string"}
+top_k_prob = 32 #@param {type:"slider", min:0, max:50, step:1}
+input_prompt = "SONG=Deep_Relaxation_Melody" #@param {type:"string"}
 
 os.chdir('/content/')
 
@@ -276,18 +277,23 @@ with open(fname, 'r') as f:
   completion = f.read()[:1500]
   completion'''
 
+#completion = TXT_String[:1500]
+
 
 number_of_ticks_per_quarter = 420 #@param {type:"slider", min:10, max:500, step:10}
+dataset_time_denominator = 10 #@param {type:"slider", min:1, max:20, step:1}
 encoding_has_MIDI_channels = False #@param {type:"boolean"}
 simulate_velocity = True #@param {type:"boolean"}
-chars_encoding_offset_used_for_dataset = 32000 #@param {type:"number"}
+chars_encoding_offset_used_for_dataset = 30000 #@param {type:"number"}
 
 print('Converting TXT to MIDI. Please wait...')
 print('Converting TXT to Song...')
 output_list, song_name = TMIDI.Tegridy_Optimus_TXT_to_Notes_Converter(completion, 
                                                                 has_MIDI_channels=encoding_has_MIDI_channels, 
                                                                 simulate_velocity=simulate_velocity,
-                                                                char_encoding_offset=chars_encoding_offset_used_for_dataset)
+                                                                char_encoding_offset=chars_encoding_offset_used_for_dataset,
+                                                                save_only_first_composition=True,
+                                                                dataset_MIDI_events_time_denominator=dataset_time_denominator)
 
 print('Converting Song to MIDI...')
 
