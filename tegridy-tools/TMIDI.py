@@ -3207,7 +3207,8 @@ def Tegridy_Karaoke_Pitches_Words_List_to_CSV_Writer(pitches_words_list, file_na
 def Optimus_MIDI_TXT_Processor(MIDI_file, 
                               line_by_line_output=True, 
                               chordify_TXT=False,
-                              dataset_MIDI_events_time_denominator=1, 
+                              dataset_MIDI_events_time_denominator=1,
+                              output_velocity=True,
                               output_MIDI_channels = False, 
                               MIDI_channel=0, 
                               MIDI_patch=[0, 1], 
@@ -3332,7 +3333,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       txt += str(chr(start_time + char_offset))
       txt += str(chr(duration + char_offset))
       txt += str(chr(pitch + char_offset))
-      txt += str(chr(velocity + char_offset))
+      if output_velocity:
+        txt += str(chr(velocity + char_offset))
       if output_MIDI_channels:
         txt += str(chr(channel + char_offset))
 
@@ -3374,6 +3376,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
 def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                                           line_by_line_dataset = True,
+                                          has_velocities=False,
                                           has_MIDI_channels = True,
                                           dataset_MIDI_events_time_denominator = 1,
                                           char_encoding_offset = 30000,
@@ -3422,6 +3425,9 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
         if has_MIDI_channels==True:
           step = 5
 
+        if has_velocities:
+          step = 3
+
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
         for s in range(0, len(istring), step):
@@ -3458,6 +3464,17 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                       out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
                     else:                      
                       out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+
+            if step == 3 and len(istring) > 2:
+                    out = []       
+                    out.append('note')
+
+                    out.append(st) # Start time
+                    out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                    out.append(0) # Channel
+                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                    
+                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Velocity = Pitch                     
 
             output_list.append(out)
 
