@@ -3312,7 +3312,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
 
     previous_event = copy.deepcopy(events_matrix[0])
-    for event in events_matrix[1:]:
+    for event in events_matrix:
 
       '''# Computing deltas
       start_time = int(event[1] - previous_event[1])
@@ -3322,7 +3322,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       velocity = int(event[5] - previous_event[5])'''
 
       # Computing events details
-      start_time = int(previous_event[1])
+      start_time = int(event[1] - previous_event[1])
       duration = int(previous_event[2])
       channel = int(previous_event[3])
       pitch = int(previous_event[4])
@@ -3422,7 +3422,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
         if has_MIDI_channels==True:
           step = 5
 
-        st = int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
+        st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
         for s in range(0, len(istring), step):
             if has_MIDI_channels==True:
