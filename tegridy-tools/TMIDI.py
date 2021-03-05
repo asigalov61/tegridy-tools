@@ -3348,7 +3348,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
           txt += chr(32) 
       
       previous_event = copy.deepcopy(event)
-      
+    
+    if not line_by_line_output:
+      txt += chr(10)      
+    
     chords.extend(events_matrix)
     #print(chords)
 
@@ -3376,7 +3379,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
 def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                                           line_by_line_dataset = True,
-                                          has_velocities=False,
+                                          has_velocities = True,
                                           has_MIDI_channels = True,
                                           dataset_MIDI_events_time_denominator = 1,
                                           char_encoding_offset = 30000,
@@ -3419,13 +3422,13 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
         istring = input_string[i]
         #print(istring)
 
-        if has_MIDI_channels==False:
+        if has_MIDI_channels == False:
           step = 4          
         
-        if has_MIDI_channels==True:
+        if has_MIDI_channels == True:
           step = 5
 
-        if has_velocities:
+        if has_velocities == False:
           step = 3
 
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
