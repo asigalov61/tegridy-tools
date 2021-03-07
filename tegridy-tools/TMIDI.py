@@ -3212,7 +3212,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               output_MIDI_channels = False, 
                               MIDI_channel=0, 
                               MIDI_patch=[0, 1], 
-                              char_offset = 30000):
+                              char_offset = 30000,
+                              transpose_by = 0):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3326,7 +3327,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       start_time = int(event[1] - previous_event[1])
       duration = int(previous_event[2])
       channel = int(previous_event[3])
-      pitch = int(previous_event[4])
+      pitch = int(previous_event[4] + transpose_by)
       velocity = int(previous_event[5])
 
       # Converting to TXT
