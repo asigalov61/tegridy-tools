@@ -3427,7 +3427,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
           step = 4          
         
         if has_MIDI_channels == True:
-          step = 4
+          step = 5
 
         if has_velocities == False:
           step = 3
@@ -3436,13 +3436,13 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
         for s in range(0, len(istring), step):
             if has_MIDI_channels==True:
-              if step > 3 and len(istring) > 2:
+              if step > 4 and len(istring) > 3:
                     out = []       
                     out.append('note')
 
                     out.append(st) # Start time
                     out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-                    out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Channel
+                    out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
                     out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
                     
                     if simulate_velocity:
