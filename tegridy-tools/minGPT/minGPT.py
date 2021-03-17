@@ -319,7 +319,7 @@ class Trainer:
                                 num_workers=config.num_workers)
 
             losses = []
-            pbar = tqdm.auto.tqdm(enumerate(loader), total=len(loader)) if is_train else enumerate(loader)
+            pbar = tqdm.auto.tqdm(enumerate(loader), total=len(loader) if is_train else enumerate(loader))
             for it, (x, y) in pbar:
 
                 # place data on the correct device
@@ -377,7 +377,7 @@ class Trainer:
             # supports early stopping based on the test loss, or just save always if no test set is provided
             good_model = self.test_dataset is None or test_loss < best_loss
             if self.config.ckpt_path is not None and good_model:
-                best_loss = test_loss
+                #best_loss = test_loss
                 self.save_checkpoint()
 
 
