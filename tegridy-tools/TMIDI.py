@@ -3486,6 +3486,16 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
         print('Bad note string:', istring)
         continue
 
+    # Simple error control just in case
+    S = []
+    for x in output_list:
+      if len(x) == 6:
+        S.append(x)
+
+    output_list.clear()    
+    output_list = copy.deepcopy(S)
+
+
     print('Task complete! Enjoy! :)')
 
     return output_list, song_name
