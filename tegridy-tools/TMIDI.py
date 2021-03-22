@@ -1,33 +1,47 @@
 #! /usr/bin/python3
 
 ###################################################################################
-###################################################################################
+
 ###################################################################################
 #
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
 #	Version 2.0
 #
-# NOTE: TMIDI Module start from line 1760 of this file
+#       NOTE: TMIDI Module starts after MIDI.py module @ line 1777
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
 #
 #	Project Los Angeles
 #	Tegridy Code 2021
-# https://github.com/Tegridy-Code/Project-Los-Angeles
+#       https://github.com/Tegridy-Code/Project-Los-Angeles
 #
 #
 ###################################################################################
-###################################################################################
+   Copyright 2021 Project Los Angeles / Tegridy Code
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 ###################################################################################
 #
 #	MIDI.py Module v.6.7. by Peter Billam
 #
 #	https://pjb.com.au/
+#	
+#	Copyright 2020 Peter Billam
 #
 ###################################################################################
-###################################################################################
+
 ###################################################################################
 
 # unsupported 20091104 ...
