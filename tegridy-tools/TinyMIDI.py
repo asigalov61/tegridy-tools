@@ -23,7 +23,9 @@
 # TinyMIDI INT to MIDI Processor:
 #
 # Input: List of lists of 7 INTs per list, representing a single MIDI event
-# Output: MIDI file
+# Output: pretty_midi.Pretty_MIDI object that can be written to a file like so:
+#
+# midi.write('MIDI_file.mid')
 #
 ################################################################################
 # 
@@ -40,8 +42,9 @@
 
 import warnings
 import pretty_midi as pm
+import numpy as np
 
-def midi_to_roll(path, augment=False):
+def TinyMIDI_MIDI_to_INTs_Processor(path, augment=False):
    
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
@@ -80,7 +83,7 @@ def midi_to_roll(path, augment=False):
 
 ################################################################################
 
-def roll_to_midi(roll):
+def TinyMIDI_INTs_to_MIDI_Processor(INTs_list):
     
     midi = pm.PrettyMIDI(resolution=960)
     
@@ -88,7 +91,7 @@ def roll_to_midi(roll):
                 + [pm.Instrument(0, is_drum=True)]
     current_time = 0
     
-    for event in roll:
+    for event in INTs_list:
         if event[0] == 130 or 129 in event[1:]:
             break
         if event[0] == 129 or 128 in event[1:]:
