@@ -7,6 +7,10 @@
 # Multi-instrumental, with augmentation functions
 #
 ################################################################################
+# 
+# Requirements: pip install pretty_midi
+#
+################################################################################
 #
 # TinyMIDI MIDI to INT Processor:
 #
@@ -33,6 +37,9 @@
 # License: Apache 2.0
 #
 ################################################################################
+
+import warnings
+import pretty_midi as pm
 
 def midi_to_roll(path, augment=False):
    
