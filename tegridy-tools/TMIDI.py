@@ -3658,6 +3658,42 @@ class Tegridy_ReprProcessor(ABC):
 
         """
 
+###################################################################################
+# pretty_midi Note class
+# Code is from original pretty_midi repo:
+# https://github.com/craffel/pretty-midi/blob/master/pretty_midi/containers.py
+###################################################################################
+class Note(object):
+    """A note event.
+    Parameters
+    ----------
+    velocity : int
+        Note velocity.
+    pitch : int
+        Note pitch, as a MIDI note number.
+    start : float
+        Note on time, absolute, in seconds.
+    end : float
+        Note off time, absolute, in seconds.
+    """
+
+    def __init__(self, velocity, pitch, start, end):
+        self.velocity = velocity
+        self.pitch = pitch
+        self.start = start
+        self.end = end
+
+    def get_duration(self):
+        """Get the duration of the note in seconds."""
+        return self.end - self.start
+
+    @property
+    def duration(self):
+        return self.get_duration()
+
+    def __repr__(self):
+        return 'Note(start={:f}, end={:f}, pitch={}, velocity={})'.format(
+            self.start, self.end, self.pitch, self.velocity)
 
 ###################################################################################
 
@@ -3794,6 +3830,7 @@ class Tegridy_RPR_MidiEventProcessor(Tegridy_ReprProcessor):
         note_seq : Note List.
 
         """
+        # print(repr_seq)
         if repr_seq is None:
             return []
         time_shift = 0.0
@@ -3845,7 +3882,7 @@ class Tegridy_RPR_MidiEventProcessor(Tegridy_ReprProcessor):
                     if token_on["time"] == token_off["time"]:
                         continue
                     notes.append(
-                        pyd.Note(
+                        Note(
                             velocity=token_on["vel"],
                             pitch=int(token_on["pitch"]),
                             start=token_on["time"],
@@ -3857,6 +3894,7 @@ class Tegridy_RPR_MidiEventProcessor(Tegridy_ReprProcessor):
         notes.sort(key=lambda x: x.start)
         if self.min_step > 1:
             notes = self._expand(notes)
+        # print(notes)
         return notes
 
 ###################################################################################
