@@ -3233,7 +3233,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               MIDI_channel=0, 
                               MIDI_patch=[0, 1], 
                               char_offset = 30000,
-                              transpose_by = 0):
+                              transpose_by = 0,
+                              flip=False):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3310,8 +3311,15 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         if event[0] == 'note' and patch in MIDI_patch:
           if len(event) == 6: # Checking for bad notes...
               eve = copy.deepcopy(event)
+              
               eve[1] = int(event[1] / dataset_MIDI_events_time_denominator)
               eve[2] = int(event[2] / dataset_MIDI_events_time_denominator)
+              
+              eve[4] = int(event[4] + transpose_by)
+              
+              if flip == True:
+                eve[4] = int(127 - (event[4] + transpose_by)) 
+              
               events_matrix.append(eve)
 
               ev += 1
@@ -3345,9 +3353,15 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
       # Computing events details
       start_time = int(event[1] - previous_event[1])
+      
       duration = int(previous_event[2])
+
       channel = int(previous_event[3])
+
       pitch = int(previous_event[4] + transpose_by)
+      if flip == True:
+        pitch = 127 - int(previous_event[4] + transpose_by)
+
       velocity = int(previous_event[5])
 
       # Converting to TXT
