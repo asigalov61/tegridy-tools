@@ -917,4 +917,4 @@ def get_signatures(MIDI_file):
               int(float(X[0][31]) * 1),
               int(float(X[0][32]) * 1)]
               
-    return SIG_SIMPLE, SIG_FULL
+    return SIG_SIMPLE, SIG_FULL, SIG, PR
