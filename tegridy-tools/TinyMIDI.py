@@ -118,7 +118,7 @@ def TinyMIDI_INTs_to_MIDI_Processor(INTs_list):
     
     return midi
 
-def TinyMIDI.midi_to_roll(path, output_length, augment=False) -> np.ndarray:
+def TinyMIDI_midi_to_roll(path, output_length, augment=False) -> np.ndarray:
    
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
@@ -157,7 +157,7 @@ def TinyMIDI.midi_to_roll(path, output_length, augment=False) -> np.ndarray:
     output = np.array(input_list[num : num + output_length], dtype=np.int64)
     return output
 
-def TinyMIDI.roll_to_midi(roll: np.array) -> pm.PrettyMIDI:
+def TinyMIDI_roll_to_midi(roll: np.array) -> pm.PrettyMIDI:
     midi = pm.PrettyMIDI(resolution=960)
     instruments = [pm.Instrument(i) for i in range(128)] \
                 + [pm.Instrument(0, is_drum=True)]
