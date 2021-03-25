@@ -8,7 +8,7 @@
 #	Tegridy MIDI Module (TMIDI / tee-midi)
 #	Version 2.0
 #
-#       NOTE: TMIDI Module starts after MIDI.py module @ line 1777
+#       NOTE: TMIDI Module starts after MIDI.py module @ line 1780
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
@@ -3174,6 +3174,26 @@ def Tegridy_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle
   print('Task complete. Enjoy! :)')
 
   return chords_list_f, melody_list_f
+
+def Tegridy_Any_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pickle'):
+
+  '''Tegridy Pickle File Loader
+     
+  Input: Full path and file name without extention
+         File extension if different from default .pickle
+       
+  Output: Standard Python 3 unpickled data object
+
+  Project Los Angeles
+  Tegridy Code 2021'''
+
+  print('Tegridy Pickle File Loader')
+  print('Loading the pickle file. Please wait...')
+
+  with open(input_file_name, 'rb') as pickle_file:
+    content = pickle.load(pickle_file)
+
+  return content
 
 ###################################################################################
 
