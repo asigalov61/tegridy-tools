@@ -3190,7 +3190,7 @@ def Tegridy_Any_Pickle_File_Loader(input_file_name='TMIDI_Pickle_File', ext='.pi
   print('Tegridy Pickle File Loader')
   print('Loading the pickle file. Please wait...')
 
-  with open(input_file_name, 'rb') as pickle_file:
+  with open(input_file_name + ext, 'rb') as pickle_file:
     content = pickle.load(pickle_file)
 
   return content
