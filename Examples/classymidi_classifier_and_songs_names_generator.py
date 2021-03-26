@@ -37,14 +37,14 @@ Original file is located at
 
 print('Loading all needed modules. Please wait...')
 
+import secrets
+import sys
+import os
+
 os.chdir('/content/tegridy-tools/tegridy-tools')
 import TMIDI
 import ClassyMIDI
 os.chdir('/content/')
-
-import secrets
-import sys
-import os
 
 import tqdm
 from tqdm import auto
@@ -224,28 +224,6 @@ enable_NOTE_Class = False #@param {type:"boolean"}
 print('ClassyMIDI Classifier and Songs Names Generator')
 print('=' * 100)
 
-# Helper converter function
-def TMIDI_to_Classy(file):
-
-  INTRO = []
-  RAND = []
-  SUM = 0
-
-  txt, melody_list, chords = TMIDI.Optimus_MIDI_TXT_Processor(file, True, False, 1, False, False, -1, range(127))
-  
-  for i in chords[:256]:
-    INTRO.append(i[4])
-
-  r = secrets.randbelow(len(chords) - 256)
-  
-  for i in chords[r:r+256]: 
-    RAND.append(i[4])
-
-  for i in chords:
-    SUM += i[4]
-
-  return SUM, INTRO, RAND
-
 print('Loading MIDI files...')
 print('This may take a while on a large dataset in particular.')
 
@@ -259,7 +237,7 @@ CLASS_DATA = []
 NOTE_DATA = []
 
 print('Processing MIDI files. Please wait...')
-for f in tqdm.auto.tqdm(filez[3200:]):
+for f in tqdm.auto.tqdm(filez):
   
   try:
     SIG_SIMPLE, SIG_FULL, ALL_F, PRL = ClassyMIDI.get_signatures(f)
@@ -276,7 +254,7 @@ for f in tqdm.auto.tqdm(filez[3200:]):
 
     if enable_NOTE_Class:
 
-      Z = [TMIDI_to_Classy(f)]
+      Z = [TMIDI.Tegridy_Optimus_Sum_Intro_Rand_End_Sampler(f)]
       NOTE_DATA.append(Z)
 
     CLASS_DATA.append([f, fnn, fnnn, SIG_SIMPLE, SIG_FULL, ALL_F.tolist(), X[s:s+64].tolist(), Z ])  
