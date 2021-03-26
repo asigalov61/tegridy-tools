@@ -3571,7 +3571,7 @@ def Tegridy_Optimus_Sum_Intro_Rand_End_Sampler(MIDI_file, number_of_notes_in_sam
 
   SUM = 0
 
-  txt, melody_list, chords = Optimus_MIDI_TXT_Processor(file, True, False, 1, False, False, -1, range(127))
+  txt, melody_list, chords = Optimus_MIDI_TXT_Processor(MIDI_file, True, False, 1, False, False, -1, range(127))
 
   if len(chords) < number_of_notes_in_samples:
     number_of_notes_in_samples = len(chords)
