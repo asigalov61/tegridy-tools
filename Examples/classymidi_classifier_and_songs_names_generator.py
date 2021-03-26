@@ -201,7 +201,7 @@ print('Resulting simple signature length:', len(SIG_FULL))
 print('Resulting simple signature summ:', sum(SIG_FULL))
 print('=' * 100)
 
-"""# Bulk MIDI classification and songs names generation
+"""# MIDI classification and songs names generation
 
 # Download a sample dataset for processing
 """
@@ -294,7 +294,7 @@ print('=' * 100)
 
 MIDI_File = full_path_to_MIDI_file
 SIG_S, SIG_F, ALL_F, PRL = ClassyMIDI.get_signatures(MIDI_File)
-SUM, INTRO, RAND = TMIDI_to_Classy(full_path_to_MIDI_file)
+SUM, INTRO, RAND, END = TMIDI.Tegridy_Optimus_Sum_Intro_Rand_End_Sampler(full_path_to_MIDI_file)
 
 
 print('Matching MIDI', MIDI_File)
