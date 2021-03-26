@@ -437,7 +437,7 @@ filez = [y for x in os.walk(dataset_addr) for y in glob(os.path.join(x[0], '*.mi
 print('Processing MIDI files. Please wait...')
 print('=' * 100)
 for f in tqdm.auto.tqdm(filez):
-  #try:
+  try:
     SIG_SIMPLE, SIG_FULL, ALL_F, PRL = ClassyMIDI.get_signatures(f)
     fn = os.path.basename(f)
     fnn = fn.split('.')[0]
@@ -512,12 +512,12 @@ for f in tqdm.auto.tqdm(filez):
     
     files_count += 1
 
-  #except KeyboardInterrupt:
-    #break
+  except KeyboardInterrupt:
+    break
 
-  #except:
-    #print('Bad file', f)
-    #continue
+  except:
+    print('Bad file', f)
+    continue
 
 print('Done! Enjoy! :)')
 
