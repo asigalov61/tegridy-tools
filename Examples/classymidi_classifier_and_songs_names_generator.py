@@ -92,9 +92,13 @@ print('Creating IO dirs...')
 
 # Make IO dirs
 os.chdir('/content')
-!mkdir Input
-!mkdir Output
-!mkdir Songs
+print('Prepping IO dirs...')
+if not os.path.exists('/content/Songs'):
+  os.makedirs('/content/Songs')
+if not os.path.exists('/content/Output'):
+  os.makedirs('/content/Output')
+if not os.path.exists('/content/Input'):
+  os.makedirs('/content/Input')
 
 print('Done! Enjoy! :)')
 
@@ -399,8 +403,9 @@ print('Done! Enjoy! :)')
 #@markdown 4) full_float_signature matching is very slow/resource intensive. Make sure you have enough resources to run in this mode
 
 
-match_by = "full_float_signature" #@param ["full_signature", "short_signature", "random_piano_roll_signature", "full_float_signature"]
+match_by = "full_signature" #@param ["full_signature", "short_signature", "random_piano_roll_signature", "full_float_signature"]
 leave_original_file_names_on_copies = False #@param {type:"boolean"}
+desired_prefix_for_song_new_name = "" #@param {type:"string"}
 
 print('Classy MIDI Classifier and Songs Names Generator')
 print('=' * 100)
@@ -409,12 +414,22 @@ print('Classifying and naming MIDI files...')
 print('This may take a while on a large dataset in particular.')
 print('=' * 100)
 
+print('Prepping IO dirs...')
+if not os.path.exists('/content/Songs'):
+  os.makedirs('/content/Songs')
+if not os.path.exists('/content/Output'):
+  os.makedirs('/content/Output')
+if not os.path.exists('/content/Input'):
+  os.makedirs('/content/Input')
+
+print('Initialzing...')
 files_count = 0
 SONG_DATA = []
 SONG_CLASS_DATA = []
 SONGS_NAMES = []
 FINAL_NAMES_LIST = []
 
+print('Gathering file names...')
 dataset_addr = "/content/Songs"
 os.chdir(dataset_addr)
 filez = [y for x in os.walk(dataset_addr) for y in glob(os.path.join(x[0], '*.mid'), recursive=True)]
@@ -453,20 +468,26 @@ for f in tqdm.auto.tqdm(filez):
 
     SONG_CLASS_DATA.append(CLASS_DATA[MATCH_idx])
     
-    if len(CLASS_DATA[MATCH_idx][2]) is str:
+    if CLASS_DATA[MATCH_idx][2] is str:
       song_name = CLASS_DATA[MATCH_idx][2].replace('.MID', '').replace('.mid', '').replace('/', '_').replace(' ', '_').replace('.', '_') #.replace('-', '_')
     
-    else:
+    if CLASS_DATA[MATCH_idx][2] is list:
       song_name = CLASS_DATA[MATCH_idx][2][0].replace('.MID', '').replace('.mid', '').replace('/', '_').replace(' ', '_').replace('.', '_') #.replace('-', '_')
-
+    
+    if CLASS_DATA[MATCH_idx][2] == []:
+      song_name = CLASS_DATA[MATCH_idx][1].replace('.MID', '').replace('.mid', '').replace('/', '_').replace(' ', '_').replace('.', '_') #.replace('-', '_')
 
     SONGS_NAMES.append(song_name)
     FINAL_NAMES_LIST.append([fnn, song_name, MAX_idx])
     
     if leave_original_file_names_on_copies:
-      fnnn = '../Output/' + fnn + '_' + song_name + '.mid'
+      fnnn = '../Output/' + fnn + '---' + song_name + '_' + str(files_count) + '.mid'
     else:
-      fnnn = '../Output/' + song_name + '.mid'
+      fnnn = '../Output/' + song_name + '_' + str(files_count) + '.mid'
+
+    if desired_prefix_for_song_new_name != '' and leave_original_file_names_on_copies == False:
+      fnnn = '../Output/' + desired_prefix_for_song_new_name + '---' + song_name + '_' + str(files_count) + '.mid'
+      
 
     copyfile(f, fnnn)
     print('=' * 100)
