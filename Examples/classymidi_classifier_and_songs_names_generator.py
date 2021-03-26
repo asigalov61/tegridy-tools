@@ -203,11 +203,11 @@ print('=' * 100)
 
 """# MIDI classification and songs names generation
 
-# Download a sample dataset for processing
+# Download a sample MIDI dataset for training the classifier
 """
 
 #@title Download and unzip clean_midi MIDI dataset
-os.chdir('/content/Input/')
+os.chdir('/content/Input')
 !wget http://hog.ee.columbia.edu/craffel/lmd/clean_midi.tar.gz
 !tar -xvf /content/Input/clean_midi.tar.gz
 
@@ -280,7 +280,9 @@ TMIDI.Tegridy_Pickle_File_Writer(CLASS_DATA, '/content/ClassySigsDataset')
 """
 
 # Commented out IPython magic to ensure Python compatibility.
-#@title Load ClassyMIDI Signatures Pack (full LAKH dataset)
+#@title Load ClassyMIDI Signatures Pack (173467 MIDI signatures from the full LAKH dataset)
+
+#@markdown NOTE: This is a very large dataset (700+ MB) so it needs at least 8GB of free RAM to load 
 
 #@markdown NOTE: DO NOT RUN if you processed (and want to use) your own/sample dataset above
 print('Downloading the dataset...Please wait...')
@@ -295,7 +297,20 @@ CLASS_DATA = TMIDI.Tegridy_Any_Pickle_File_Loader('/content/ClassySigs-LAKH-Full
 
 print('Loading complete! Enjoy! :)')
 
-#@title Load tegridy-tools ClassyMIDI Signatures Pack (LAKH_18000)
+#@title Load tegridy-tools ClassyMIDI Signatures Pack (clean_midi's 10359 MIDI signatures)
+
+#@markdown NOTE: DO NOT RUN if you processed (and want to use) your own/sample dataset above
+print('Loading the dataset...')
+os.chdir('/content/tegridy-tools/tegridy-data')
+
+!unzip ClassySigs_clean_midi_10359.zip
+
+CLASS_DATA = TMIDI.Tegridy_Any_Pickle_File_Loader('/content/tegridy-tools/tegridy-data/ClassySigs_clean_midi_10359')
+
+os.chdir('/content')
+print('Done! Enjoy! :)')
+
+#@title Load tegridy-tools ClassyMIDI Signatures Pack (LAKH's 18000 MIDI signatures)
 
 #@markdown NOTE: DO NOT RUN if you processed (and want to use) your own/sample dataset above
 
@@ -379,8 +394,12 @@ print('Done! Enjoy! :)')
 
 #@markdown 3) Select desired matching criteria
 
+#@markdown 4) full_float_signature matching is very slow/resource intensive make sure you have enough resources to run in this mode
+
+
 match_by = "full_signature" #@param ["full_signature", "short_signature", "random_piano_roll_signature", "full_float_signature"]
 leave_original_file_names_on_copies = False #@param {type:"boolean"}
+
 print('Classy MIDI Classifier and Songs Names Generator')
 print('=' * 100)
 
@@ -484,5 +503,8 @@ pprint(SONGS_NAMES, compact=True)
 #@title Print FINAL_NAMES_LIST
 
 pprint(FINAL_NAMES_LIST, compact=True)
+
+#@title Save the above data as a pickle file
+TMIDI.Tegridy_Pickle_File_Writer([SONG_DATA, SONG_CLASS_DATA, SONGS_NAMES, FINAL_NAMES_LIST], '/content/ClassyMIDI-Bulk-Conversion-Data')
 
 """# Congrats! You did it! :)"""
