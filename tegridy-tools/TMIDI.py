@@ -3560,6 +3560,41 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Optimus_TXT_to_INT_Converter(TXT_String, time_denominator=128):
+
+  '''Project Los Angeles
+     Tegridy Code 2021'''
+
+  INT8_List = []
+
+  for i in TXT_String:
+
+    a = int((ord(i) // time_denominator) // 128)
+    b = int(ord(i) % time_denominator)
+
+    INT8_List.append(a)
+    INT8_List.append(b)
+
+
+  return INT8_List
+
+###################################################################################
+
+def Tegridy_Optimus_INT_to_TXT_Converter(INT8_String, time_denominator=128):
+
+  TXT_String = ''
+
+  for i in range(0, len(INT8_String)-1, 2):
+    
+    a = INT8_String[i] * time_denominator * 128
+    b = INT8_String[i+1]
+    
+    TXT_String += chr(a+b)
+
+  return TXT_String
+
+###################################################################################
+
 def Tegridy_Optimus_Sum_Intro_Rand_End_Sampler(MIDI_file, number_of_notes_in_samples = 256):
 
   '''Project Los Angeles
