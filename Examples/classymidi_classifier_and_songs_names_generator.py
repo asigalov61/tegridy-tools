@@ -437,7 +437,7 @@ filez = [y for x in os.walk(dataset_addr) for y in glob(os.path.join(x[0], '*.mi
 print('Processing MIDI files. Please wait...')
 print('=' * 100)
 for f in tqdm.auto.tqdm(filez):
-  try:
+  #try:
     SIG_SIMPLE, SIG_FULL, ALL_F, PRL = ClassyMIDI.get_signatures(f)
     fn = os.path.basename(f)
     fnn = fn.split('.')[0]
@@ -461,7 +461,17 @@ for f in tqdm.auto.tqdm(filez):
         RATINGS_LIST.append(fuzz.ratio(PRL.tolist(), CLASS_DATA[i][-1]))
       
       if match_by == 'full_float_signature':
-        RATINGS_LIST.append(fuzz.ratio(ALL_F.tolist(), CLASS_DATA[i][-2]))
+        AF = ALL_F.tolist()[0][4:]
+        AFF = [float(i) for i in AF]
+        
+        try:
+          CD = CLASS_DATA[i][4][0]
+          CDF = [float(i) for i in CD]
+        except:
+          CD = CLASS_DATA[i][5][0][4:]
+          CDF = [float(i) for i in CD]
+
+        RATINGS_LIST.append(fuzz.ratio(AFF, CDF))
     
     MAX_idx = max(RATINGS_LIST)
     MATCH_idx = RATINGS_LIST.index(MAX_idx)
@@ -502,12 +512,12 @@ for f in tqdm.auto.tqdm(filez):
     
     files_count += 1
 
-  except KeyboardInterrupt:
-    break
+  #except KeyboardInterrupt:
+    #break
 
-  except:
-    print('Bad file', f)
-    continue
+  #except:
+    #print('Bad file', f)
+    #continue
 
 print('Done! Enjoy! :)')
 
