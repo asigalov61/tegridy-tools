@@ -6,7 +6,7 @@
 #
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 2.0
+#	Version 2.2
 #
 #       NOTE: TMIDI Module starts after MIDI.py module @ line 1780
 #
@@ -3049,6 +3049,40 @@ def Tegridy_Karaoke_TXT_to_MIDI_Processor(Karaoke_TXT_String,
 #
 # Tegridy helper functions
 #
+###################################################################################
+
+def Tegridy_Optimus_Sum_Intro_Rand_End_Sampler(MIDI_file, number_of_notes_in_samples = 256):
+
+  '''Project Los Angeles
+     Tegridy Code 2021'''
+
+  INTRO = []
+  RAND = []
+  END = []
+
+  SUM = 0
+
+  txt, melody_list, chords = Optimus_MIDI_TXT_Processor(file, True, False, 1, False, False, -1, range(127))
+
+  if len(chords) < number_of_notes_in_samples:
+    number_of_notes_in_samples = len(chords)
+
+  for i in chords[:number_of_notes_in_samples]:
+    INTRO.append(i[4])
+
+  r = secrets.randbelow(len(chords) - number_of_notes_in_samples)
+  
+  for i in chords[r:r+number_of_notes_in_samples]: 
+    RAND.append(i[4])
+  
+  for i in chords[len(chords)-number_of_notes_in_samples:len(chords)]: 
+    END.append(i[4])
+
+  for i in chords:
+    SUM += i[4]
+
+  return SUM, INTRO, RAND, END
+
 ###################################################################################
 
 def Tegridy_File_Time_Stamp(input_file_name='File_Created_on_', ext = ''):
