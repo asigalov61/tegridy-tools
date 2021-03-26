@@ -285,14 +285,13 @@ TMIDI.Tegridy_Pickle_File_Writer(CLASS_DATA, '/content/ClassySigsDataset')
 #@markdown NOTE: DO NOT RUN if you processed (and want to use) your own/sample dataset above
 print('Downloading the dataset...Please wait...')
 # %cd /content/
-!wget --no-check-certificate -O ClassySigsDataset.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118478&authkey=AAFp1jFdm99ANfw"
+!wget --no-check-certificate -O ClassySigs-LAKH-Full-Dataset.zip "https://onedrive.live.com/download?cid=8A0D502FC99C608F&resid=8A0D502FC99C608F%2118478&authkey=AAFp1jFdm99ANfw"
 
 print('Unzipping the dataset...')
-!unzip ClassySigsDataset.zip
-!mv /content/ClassySigs-LAKH-Full.pickle /content/ClassySigsDataset.pickle
+!unzip -j ClassySigs-LAKH-Full-Dataset.zip
 
 print('Loading the dataset into memory...')
-CLASS_DATA = TMIDI.Tegridy_Any_Pickle_File_Loader('/content/ClassySigsDataset')
+CLASS_DATA = TMIDI.Tegridy_Any_Pickle_File_Loader('/content/ClassySigs-LAKH-Full')
 
 print('Loading complete! Enjoy! :)')
 
@@ -381,6 +380,7 @@ print('Done! Enjoy! :)')
 #@markdown 3) Select desired matching criteria
 
 match_by = "full_signature" #@param ["full_signature", "short_signature", "random_piano_roll_signature", "full_float_signature"]
+leave_original_file_names_on_copies = False #@param {type:"boolean"}
 print('Classy MIDI Classifier and Songs Names Generator')
 print('=' * 100)
 
@@ -441,7 +441,12 @@ for f in tqdm.auto.tqdm(filez):
 
     SONGS_NAMES.append(song_name)
     FINAL_NAMES_LIST.append([fnn, song_name, MAX_idx])
-    fnnn = '../Output/' + fnn + '_' + song_name + '.mid'
+    
+    if leave_original_file_names_on_copies:
+      fnnn = '../Output/' + fnn + '_' + song_name + '.mid'
+    else:
+      fnnn = '../Output/' + song_name + '.mid'
+
     copyfile(f, fnnn)
     print('=' * 100)
     
