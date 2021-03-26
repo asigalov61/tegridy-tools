@@ -471,7 +471,9 @@ for f in tqdm.auto.tqdm(filez):
     if CLASS_DATA[MATCH_idx][2] is str:
       song_name = CLASS_DATA[MATCH_idx][2].replace('.MID', '').replace('.mid', '').replace('/', '_').replace(' ', '_').replace('.', '_') #.replace('-', '_')
     
-    if CLASS_DATA[MATCH_idx][2] is list:
+    if len(CLASS_DATA[MATCH_idx][2]) > 1:
+      song_name = CLASS_DATA[MATCH_idx][2][0].replace('.MID', '').replace('.mid', '').replace('/', '_').replace(' ', '_').replace('.', '_') #.replace('-', '_')
+    else:
       song_name = CLASS_DATA[MATCH_idx][2][0].replace('.MID', '').replace('.mid', '').replace('/', '_').replace(' ', '_').replace('.', '_') #.replace('-', '_')
     
     if CLASS_DATA[MATCH_idx][2] == []:
