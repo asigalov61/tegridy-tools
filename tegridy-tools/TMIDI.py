@@ -3282,7 +3282,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     rec_event = []
 
     txt = ''
+    txtc = ''
     chords = []
+    melody_chords = []
 
 ###########    
 
@@ -3352,11 +3354,14 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     song_name = fn.split('.')[0].replace(' ', '_')\
 
     txt += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
+    txtc += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
 
     if line_by_line_output:
       txt += chr(10)
+      txtc += chr(10)
     else:
       txt += chr(32)
+      txtc += chr(32)
 
     #print('Sorting input by start time...')
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
@@ -3422,13 +3427,52 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     for items in groups:
         items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
         melody_list.append(items[0]) # Creating final chords list
-    
+        melody_chords.append(items)
     #print('Final sorting by start time...')      
     melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-
+    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by highest pitch start time
     #print(txt, melody, chords)
 
-    return txt, melody_list, chords
+    # [WIP] Melody-conditioned chords list
+
+    melody_token = ''
+
+    previous_event = copy.deepcopy(chords[0])
+    
+    for event in chords:
+
+      # Computing events details
+      start_time = int(event[1] - previous_event[1])
+      
+      duration = int(previous_event[2])
+
+      channel = int(previous_event[3])
+
+      pitch = int(previous_event[4])
+
+      velocity = int(previous_event[5])
+
+      # Converting to TXT
+      txtc += str(chr(start_time + char_offset))
+      txtc += str(chr(duration + char_offset))
+      txtc += str(chr(pitch + char_offset))
+      if output_velocity:
+        txtc += str(chr(velocity + char_offset))
+      if output_MIDI_channels:
+        txtc += str(chr(channel + char_offset))
+      
+      for mt in melody_chords:
+        if mt[0][1] == event[1]:
+          melody_token = str(chr(mt[0][4] + char_offset))
+          txtc += melody_token
+      
+      previous_event = copy.deepcopy(event)
+
+      if line_by_line_output:
+        txtc += chr(10)  
+
+
+    return txt, melody_list, chords, melody_chords, txtc
 
 ###################################################################################
 
