@@ -1,11 +1,16 @@
-# This is a folder for modules documentation.
-## Will update shortly.
+# tegridy-tools docs
 
 ***
 
-## Description of docs:
+## [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
 
-### TMIDI.TXT - TMIDI Module documentation
+## [ClassyMIDI](https://asigalov61.github.io/tegridy-tools/ClassyMIDI.html)
+## [TinyMIDI](https://asigalov61.github.io/tegridy-tools/TinyMIDI.html)
+
+***
+
+## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
+## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
 
 ***
 
