@@ -22,6 +22,18 @@
 
 ***
 
+# Docs:
+
+## [TMIDI](https://github.com/asigalov61/tegridy-tools/blob/main/docs/TMIDI.html)
+
+## [ClassyMIDI](https://github.com/asigalov61/tegridy-tools/blob/main/docs/ClassyMIDI.html)
+## [TinyMIDI](https://github.com/asigalov61/tegridy-tools/blob/main/docs/TinyMIDI.html)
+
+## [minGPT](https://github.com/asigalov61/tegridy-tools/blob/main/docs/minGPT.html)
+## [markovify](https://github.com/asigalov61/tegridy-tools/blob/main/docs/markovify.html)
+
+***
+
 ### Main tegridy-tools repository for large packages/modules is located here:
 
 ### https://1drv.ms/u/s!Ao9gnMkvUA2KgY9Ftz4xsTyiCa4TGA?e=29eMZw
