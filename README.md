@@ -24,13 +24,13 @@
 
 # Docs:
 
-## [TMIDI](https://github.com/asigalov61/tegridy-tools/blob/main/docs/TMIDI.html)
+## [TMIDI](https://github.com/asigalov61/tegridy-tools/raw/main/docs/TMIDI.html)
 
-## [ClassyMIDI](https://github.com/asigalov61/tegridy-tools/blob/main/docs/ClassyMIDI.html)
-## [TinyMIDI](https://github.com/asigalov61/tegridy-tools/blob/main/docs/TinyMIDI.html)
+## [ClassyMIDI](https://github.com/asigalov61/tegridy-tools/raw/main/docs/ClassyMIDI.html)
+## [TinyMIDI](https://github.com/asigalov61/tegridy-tools/raw/main/docs/TinyMIDI.html)
 
-## [minGPT](https://github.com/asigalov61/tegridy-tools/blob/main/docs/minGPT.html)
-## [markovify](https://github.com/asigalov61/tegridy-tools/blob/main/docs/markovify.html)
+## [minGPT](https://github.com/asigalov61/tegridy-tools/raw/main/docs/minGPT.html)
+## [markovify](https://github.com/asigalov61/tegridy-tools/raw/main/docs/markovify.html)
 
 ***
 
