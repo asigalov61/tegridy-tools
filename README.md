@@ -22,18 +22,12 @@
 
 ***
 
-# Docs:
-
-## [TMIDI](https://github.com/asigalov61/tegridy-tools/raw/main/docs/TMIDI.html)
-
-## [ClassyMIDI](https://github.com/asigalov61/tegridy-tools/raw/main/docs/ClassyMIDI.html)
-## [TinyMIDI](https://github.com/asigalov61/tegridy-tools/raw/main/docs/TinyMIDI.html)
-
-## [minGPT](https://github.com/asigalov61/tegridy-tools/raw/main/docs/minGPT.html)
-## [markovify](https://github.com/asigalov61/tegridy-tools/raw/main/docs/markovify.html)
-
-***
-
 ### Main tegridy-tools repository for large packages/modules is located here:
 
 ### https://1drv.ms/u/s!Ao9gnMkvUA2KgY9Ftz4xsTyiCa4TGA?e=29eMZw
+
+***
+
+### Project Los Angeles
+
+### Tegridy Code 2021
