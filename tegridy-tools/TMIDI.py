@@ -3483,7 +3483,8 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                                           dataset_MIDI_events_time_denominator = 1,
                                           char_encoding_offset = 30000,
                                           save_only_first_composition = True,
-                                          simulate_velocity=True):
+                                          simulate_velocity=True,
+                                          melody_conditioned_encoding=False):
                                                             
     '''Project Los Angeles
        Tegridy Code 2020'''
@@ -3529,6 +3530,9 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
         if has_velocities == False:
           step = 3
+
+        if melody_conditioned_encoding:
+          step += 1
 
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
