@@ -3465,6 +3465,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         if mt[0][1] == event[1]:
           melody_token = str(chr(mt[0][4] + char_offset))
           txtc += melody_token
+          melody_token = ''
+          break
+        melody_token = ''
       
       previous_event = copy.deepcopy(event)
 
