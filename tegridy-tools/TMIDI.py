@@ -3254,7 +3254,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               MIDI_patch=[0, 1], 
                               char_offset = 30000,
                               transpose_by = 0,
-                              flip=False):
+                              flip=False, 
+                              melody_conditioned_encoding=False):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3430,52 +3431,60 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         melody_chords.append(items)
     #print('Final sorting by start time...')      
     melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by highest pitch start time
+    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
     #print(txt, melody, chords)
 
     # [WIP] Melody-conditioned chords list
+    if melody_conditioned_encoding == True:
+   
+      previous_event = copy.deepcopy(melody_chords[0][0])
 
-    melody_token = ''
+      for ev in melody_chords:
+        hp = True
+        
+        for event in ev:
+        
+          # Computing events details
+          start_time = int(event[1] - previous_event[1])
+          
+          duration = int(previous_event[2])
 
-    previous_event = copy.deepcopy(chords[0])
-    
-    for event in chords:
+          if hp == True:
+            channel = int(0)
+            hp = False
+          else:
+            channel = int(previous_event[3]+1)
 
-      # Computing events details
-      start_time = int(event[1] - previous_event[1])
-      
-      duration = int(previous_event[2])
+          pitch = int(previous_event[4])
 
-      channel = int(previous_event[3])
+          velocity = int(previous_event[5])
 
-      pitch = int(previous_event[4])
+          # Converting to TXT
+          txtc += str(chr(start_time + char_offset))
+          txtc += str(chr(duration + char_offset))
+          txtc += str(chr(pitch + char_offset))
+          if output_velocity:
+            txtc += str(chr(velocity + char_offset))
+          if output_MIDI_channels:
+            txtc += str(chr(channel + char_offset))
 
-      velocity = int(previous_event[5])
+          if line_by_line_output:
+          
 
-      # Converting to TXT
-      txtc += str(chr(start_time + char_offset))
-      txtc += str(chr(duration + char_offset))
-      txtc += str(chr(pitch + char_offset))
-      if output_velocity:
-        txtc += str(chr(velocity + char_offset))
-      if output_MIDI_channels:
-        txtc += str(chr(channel + char_offset))
-      
-      for mt in melody_chords:
-        if mt[0][1] == event[1]:
-          melody_token = str(chr(mt[0][4] + char_offset))
-          txtc += melody_token
-          melody_token = ''
-          break
-        melody_token = ''
-      
-      previous_event = copy.deepcopy(event)
+            txtc += chr(10)
+          else:
 
-      if line_by_line_output:
-        txtc += chr(10)  
+            txtc += chr(32)
 
+          previous_event = copy.deepcopy(event)
+          
+      if not line_by_line_output:
+        txtc += chr(10)
 
-    return txt, melody_list, chords, melody_chords, txtc
+      txt = txtc
+      chords = melody_chords
+
+    return txt, melody_list, chords
 
 ###################################################################################
 
