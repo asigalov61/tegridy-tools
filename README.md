@@ -2,7 +2,7 @@
 
 ***
 
-### All Tegridy tools as Python modules because there is never enough tegridy ;)
+### Music Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) Artificial Intelligence systems and architectures.
 
 ***
 ### Install:
