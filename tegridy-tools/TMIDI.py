@@ -3628,28 +3628,33 @@ def Tegridy_Optimus_TXT_to_INT_Converter(TXT_String, time_denominator=128):
   INT8_List = []
 
   for i in TXT_String:
+    try:
+      a = int((ord(i) // time_denominator) // 128)
+      b = int(ord(i) % time_denominator)
 
-    a = int((ord(i) // time_denominator) // 128)
-    b = int(ord(i) % time_denominator)
-
-    INT8_List.append(a)
-    INT8_List.append(b)
-
+      INT8_List.append(a)
+      INT8_List.append(b)
+    except:
+      print('Bad TXT bits:', a, '/', b)
+      continue
 
   return INT8_List
 
 ###################################################################################
 
-def Tegridy_Optimus_INT_to_TXT_Converter(INT8_String, time_denominator=128):
+def Tegridy_Optimus_INT_to_TXT_Converter(INT8_List, time_denominator=128):
 
   TXT_String = ''
 
-  for i in range(0, len(INT8_String)-1, 2):
+  for i in range(0, len(INT8_List)-1, 2):
+    try:
+      a = INT8_List[i] * time_denominator * 128
+      b = INT8_List[i+1]
     
-    a = INT8_String[i] * time_denominator * 128
-    b = INT8_String[i+1]
-    
-    TXT_String += chr(a+b)
+      TXT_String += chr(a+b)
+    except:
+      print('Bad INT bits:', a, '/', b)
+      continue
 
   return TXT_String
 
