@@ -3255,7 +3255,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               char_offset = 30000,
                               transpose_by = 0,
                               flip=False, 
-                              melody_conditioned_encoding=False):
+                              melody_conditioned_encoding=False,
+                              karaoke=False,
+                              karaoke_language_encoding='utf-8'):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3287,6 +3289,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     chords = []
     melody_chords = []
 
+    karaoke_events_matrix = []
+
 ###########    
 
     def list_average(num):
@@ -3314,8 +3318,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
          
     midi_file.close()
 
-    score1 = to_millisecs(opus)
-    score2 = opus2score(score1)
+    '''score1 = to_millisecs(opus)
+    score2 = opus2score(score1)'''
+
+    score2 = opus2score(opus)
     
     if MIDI_channel == 16: # Process all MIDI channels
       score = score2
@@ -3329,8 +3335,17 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
       for event in score[itrack]:
+        if event[0] == 'text_event' or event[0] == 'lyric':
+          try:
+            event[2] = str(event[2].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '').replace('\\', '')
+          except:
+            event[2] = str(event[2]).replace('/', '').replace(' ', '').replace('\\', '')
+            continue
+          karaoke_events_matrix.append(event)
+
         if event[0] == 'patch_change':
-          patch = event[3] 
+          patch = event[3]
+
         if event[0] == 'note' and patch in MIDI_patch:
           if len(event) == 6: # Checking for bad notes...
               eve = copy.deepcopy(event)
@@ -3367,51 +3382,52 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     #print('Sorting input by start time...')
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
 
-    previous_event = copy.deepcopy(events_matrix[0])
-    for event in events_matrix:
+    if not karaoke:
+      previous_event = copy.deepcopy(events_matrix[0])
+      for event in events_matrix:
 
-      '''# Computing deltas
-      start_time = int(event[1] - previous_event[1])
-      duration = int(event[2] - previous_event[2])
-      channel = int(event[3])
-      pitch = int(event[4] - previous_event[4])
-      velocity = int(event[5] - previous_event[5])'''
+        '''# Computing deltas
+        start_time = int(event[1] - previous_event[1])
+        duration = int(event[2] - previous_event[2])
+        channel = int(event[3])
+        pitch = int(event[4] - previous_event[4])
+        velocity = int(event[5] - previous_event[5])'''
 
-      # Computing events details
-      start_time = int(event[1] - previous_event[1])
+        # Computing events details
+        start_time = int(event[1] - previous_event[1])
+        
+        duration = int(previous_event[2])
+
+        channel = int(previous_event[3])
+
+        pitch = int(previous_event[4] + transpose_by)
+        if flip == True:
+          pitch = 127 - int(previous_event[4] + transpose_by)
+
+        velocity = int(previous_event[5])
+
+        # Converting to TXT
+        txt += str(chr(start_time + char_offset))
+        txt += str(chr(duration + char_offset))
+        txt += str(chr(pitch + char_offset))
+        if output_velocity:
+          txt += str(chr(velocity + char_offset))
+        if output_MIDI_channels:
+          txt += str(chr(channel + char_offset))
+
+
+        if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
+          txt += ''      
+        else:     
+          if line_by_line_output:
+            txt += chr(10)
+          else:
+            txt += chr(32) 
+        
+        previous_event = copy.deepcopy(event)
       
-      duration = int(previous_event[2])
-
-      channel = int(previous_event[3])
-
-      pitch = int(previous_event[4] + transpose_by)
-      if flip == True:
-        pitch = 127 - int(previous_event[4] + transpose_by)
-
-      velocity = int(previous_event[5])
-
-      # Converting to TXT
-      txt += str(chr(start_time + char_offset))
-      txt += str(chr(duration + char_offset))
-      txt += str(chr(pitch + char_offset))
-      if output_velocity:
-        txt += str(chr(velocity + char_offset))
-      if output_MIDI_channels:
-        txt += str(chr(channel + char_offset))
-
-
-      if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
-        txt += ''      
-      else:     
-        if line_by_line_output:
-          txt += chr(10)
-        else:
-          txt += chr(32) 
-      
-      previous_event = copy.deepcopy(event)
-    
-    if not line_by_line_output:
-      txt += chr(10)      
+      if not line_by_line_output:
+        txt += chr(10)      
     
     chords.extend(events_matrix)
     #print(chords)
@@ -3436,53 +3452,92 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
     # [WIP] Melody-conditioned chords list
     if melody_conditioned_encoding == True:
+      if not karaoke:
    
-      previous_event = copy.deepcopy(melody_chords[0][0])
+        previous_event = copy.deepcopy(melody_chords[0][0])
 
-      for ev in melody_chords:
-        hp = True
+        for ev in melody_chords:
+          hp = True
+          
+          for event in ev:
+          
+            # Computing events details
+            start_time = int(event[1] - previous_event[1])
+            
+            duration = int(previous_event[2])
+
+            if hp == True:
+              channel = int(0)
+              hp = False
+            else:
+              channel = int(previous_event[3]+1)
+
+            pitch = int(previous_event[4])
+
+            velocity = int(previous_event[5])
+
+            # Converting to TXT
+            txtc += str(chr(start_time + char_offset))
+            txtc += str(chr(duration + char_offset))
+            txtc += str(chr(pitch + char_offset))
+            if output_velocity:
+              txtc += str(chr(velocity + char_offset))
+            if output_MIDI_channels:
+              txtc += str(chr(channel + char_offset))
+
+            if line_by_line_output:
+            
+
+              txtc += chr(10)
+            else:
+
+              txtc += chr(32)
+
+            previous_event = copy.deepcopy(event)
+            
+        if not line_by_line_output:
+          txtc += chr(10)
+
+        txt = txtc
+        chords = melody_chords
+
+    if karaoke:
+      previous_event = copy.deepcopy(melody_list[0])
+      for event in melody_list:
+
+        # Computing events details
+        start_time = int(event[1] - previous_event[1])
         
-        for event in ev:
+        duration = int(previous_event[2])
+
+        channel = int(previous_event[3])
+
+        pitch = int(previous_event[4] + transpose_by)
+
+        velocity = int(previous_event[5])
+
+        # Converting to TXT
+        txt += str(chr(start_time + char_offset))
+        txt += str(chr(duration + char_offset))
+        txt += str(chr(pitch + char_offset))
+
+        txt += str(chr(velocity + char_offset))      
+
+        txt += '='
+        for k in karaoke_events_matrix:
+          if event[1] == k[1]:
+            txt += str(k[2])          
+            break
+
+        if line_by_line_output:
+          txt += chr(10)
+        else:
+          txt += chr(32) 
         
-          # Computing events details
-          start_time = int(event[1] - previous_event[1])
-          
-          duration = int(previous_event[2])
-
-          if hp == True:
-            channel = int(0)
-            hp = False
-          else:
-            channel = int(previous_event[3]+1)
-
-          pitch = int(previous_event[4])
-
-          velocity = int(previous_event[5])
-
-          # Converting to TXT
-          txtc += str(chr(start_time + char_offset))
-          txtc += str(chr(duration + char_offset))
-          txtc += str(chr(pitch + char_offset))
-          if output_velocity:
-            txtc += str(chr(velocity + char_offset))
-          if output_MIDI_channels:
-            txtc += str(chr(channel + char_offset))
-
-          if line_by_line_output:
-          
-
-            txtc += chr(10)
-          else:
-
-            txtc += chr(32)
-
-          previous_event = copy.deepcopy(event)
-          
+        previous_event = copy.deepcopy(event)
+      
       if not line_by_line_output:
-        txtc += chr(10)
-
-      txt = txtc
-      chords = melody_chords
+        txt += chr(10)
 
     return txt, melody_list, chords
 
@@ -3496,7 +3551,8 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                                           char_encoding_offset = 30000,
                                           save_only_first_composition = True,
                                           simulate_velocity=True,
-                                          melody_conditioned_encoding=False):
+                                          melody_conditioned_encoding=False,
+                                          karaoke=False):
                                                             
     '''Project Los Angeles
        Tegridy Code 2020'''
@@ -3548,53 +3604,81 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
-        for s in range(0, len(istring), step):
-            if has_MIDI_channels==True:
-              if step > 4 and len(istring) > 3:
-                    out = []       
-                    out.append('note')
+        if not karaoke:
+          for s in range(0, len(istring), step):
+              if has_MIDI_channels==True:
+                if step > 4 and len(istring) > 3:
+                      out = []       
+                      out.append('note')
 
-                    out.append(st) # Start time
-                    out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-                    out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
-                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
-                    
-                    if simulate_velocity:
-                      if s == 0:
-                        sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
-                      out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
-                    else:                      
-                      out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
-          
-            if has_MIDI_channels==False:
-              if step > 3 and len(istring) > 2:
-                    out = []       
-                    out.append('note')
+                      out.append(st) # Start time
+                      out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                      out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                      
+                      if simulate_velocity:
+                        if s == 0:
+                          sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
+                        out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+                      else:                      
+                        out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+            
+              if has_MIDI_channels==False:
+                if step > 3 and len(istring) > 2:
+                      out = []       
+                      out.append('note')
 
-                    out.append(st) # Start time
-                    out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-                    out.append(0) # Channel
-                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
-                    
-                    if simulate_velocity:
-                      if s == 0:
-                        sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
-                      out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
-                    else:                      
-                      out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+                      out.append(st) # Start time
+                      out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                      out.append(0) # Channel
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                      
+                      if simulate_velocity:
+                        if s == 0:
+                          sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
+                        out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+                      else:                      
+                        out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
 
-            if step == 3 and len(istring) > 2:
-                    out = []       
-                    out.append('note')
+              if step == 3 and len(istring) > 2:
+                      out = []       
+                      out.append('note')
 
-                    out.append(st) # Start time
-                    out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-                    out.append(0) # Channel
-                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
-                    
-                    out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Velocity = Pitch                     
+                      out.append(st) # Start time
+                      out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                      out.append(0) # Channel
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                      
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Velocity = Pitch
 
-            output_list.append(out)
+              output_list.append(out)
+
+        if karaoke:
+          try:
+              out = []       
+              out.append('note')
+
+              out.append(st) # Start time
+              out.append(int(ord(istring[1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+              out.append(0) # Channel
+              out.append(int(ord(istring[2]) - char_encoding_offset)) # Pitch
+              
+              if simulate_velocity:
+                if s == 0:
+                  sim_vel = int(ord(istring[2]) - char_encoding_offset)
+                out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+              else:                      
+                out.append(int(ord(istring[3]) - char_encoding_offset)) # Velocity
+              output_list.append(out)
+              out = []
+              if istring.split('=')[1] != '':
+                out.append('lyric')
+                out.append(st)
+                out.append(istring[5:])
+                output_list.append(out)
+          except:
+            continue
+            
 
       except:
         print('Bad note string:', istring)
@@ -3603,7 +3687,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     # Simple error control just in case
     S = []
     for x in output_list:
-      if len(x) == 6:
+      if len(x) == 6 or len(x) == 3:
         S.append(x)
 
     output_list.clear()    
