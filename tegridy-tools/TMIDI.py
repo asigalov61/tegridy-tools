@@ -3318,10 +3318,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
          
     midi_file.close()
 
-    '''score1 = to_millisecs(opus)
-    score2 = opus2score(score1)'''
+    score1 = to_millisecs(opus)
+    score2 = opus2score(score1)
 
-    score2 = opus2score(opus)
+    # score2 = opus2score(opus) # TODO Improve score timings when it will be possible.
     
     if MIDI_channel == 16: # Process all MIDI channels
       score = score2
