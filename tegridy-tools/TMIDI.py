@@ -3256,6 +3256,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               transpose_by = 0,
                               flip=False, 
                               melody_conditioned_encoding=False,
+                              melody_pitch_baseline = 0,
                               karaoke=False,
                               karaoke_language_encoding='utf-8'):
 
@@ -3447,7 +3448,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         melody_chords.append(items)
     #print('Final sorting by start time...')      
     melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
+    # melody_chords.sort(reverse=False, key=lambda x: x[0][4]) # Sorting events by start time
     #print(txt, melody, chords)
 
     # [WIP] Melody-conditioned chords list
@@ -3458,7 +3459,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         for ev in melody_chords:
           hp = True
-          
+          ev.sort(reverse=False, key=lambda x: x[4]) # Sorting events by start time
           for event in ev:
           
             # Computing events details
@@ -3467,10 +3468,15 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
             duration = int(previous_event[2])
 
             if hp == True:
-              channel = int(0)
-              hp = False
+              if int(previous_event[4]) >= melody_pitch_baseline:
+                channel = int(0)
+                hp = False
+              else:
+                channel = int(previous_event[3]+1)
+                hp = False  
             else:
               channel = int(previous_event[3]+1)
+              hp = False
 
             pitch = int(previous_event[4])
 
@@ -3551,7 +3557,6 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                                           char_encoding_offset = 30000,
                                           save_only_first_composition = True,
                                           simulate_velocity=True,
-                                          melody_conditioned_encoding=False,
                                           karaoke=False):
                                                             
     '''Project Los Angeles
@@ -3597,23 +3602,26 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
           step = 5
 
         if has_velocities == False:
-          step = 3
-
-        if melody_conditioned_encoding:
-          step += 1
+          step -= 1
 
         st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
 
         if not karaoke:
           for s in range(0, len(istring), step):
               if has_MIDI_channels==True:
-                if step > 4 and len(istring) > 3:
+                if step > 3 and len(istring) > 2:
                       out = []       
                       out.append('note')
 
                       out.append(st) # Start time
+                      
                       out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-                      out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
+                      
+                      if has_velocities:
+                        out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
+                      else:
+                        out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Channel  
+                      
                       out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
                       
                       if simulate_velocity:
