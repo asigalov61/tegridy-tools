@@ -3448,7 +3448,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         melody_chords.append(items)
     #print('Final sorting by start time...')      
     melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-    # melody_chords.sort(reverse=False, key=lambda x: x[0][4]) # Sorting events by start time
+    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
     #print(txt, melody, chords)
 
     # [WIP] Melody-conditioned chords list
@@ -3459,7 +3459,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         for ev in melody_chords:
           hp = True
-          ev.sort(reverse=False, key=lambda x: x[4]) # Sorting events by start time
+          ev.sort(reverse=False, key=lambda x: x[4]) # Sorting chord events by pitch
           for event in ev:
           
             # Computing events details
