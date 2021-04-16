@@ -3293,6 +3293,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
     karaoke_events_matrix = []
 
+    sample = 0
+
 ###########    
 
     def list_average(num):
@@ -3336,7 +3338,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
-      for event in score[itrack][:number_of_notes_to_sample]:
+      for event in score[itrack]:
         if event[0] == 'text_event' or event[0] == 'lyric':
           try:
             event[2] = str(event[2].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '').replace('\\', '')
@@ -3360,9 +3362,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
               if flip == True:
                 eve[4] = int(127 - (event[4] + transpose_by)) 
               
-              events_matrix.append(eve)
-
-              ev += 1
+              if sample <= number_of_notes_to_sample:
+                events_matrix.append(eve)
+                sample += 1
+                ev += 1
       
       itrack +=1 # Going to next track...
 
