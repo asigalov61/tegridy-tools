@@ -4518,6 +4518,7 @@ event, with a duration:
                               <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                               <span class="n">melody_conditioned_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">melody_pitch_baseline</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                              <span class="n">number_of_notes_to_sample</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                               <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
 
@@ -4552,6 +4553,8 @@ event, with a duration:
     <span class="n">melody_chords</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">karaoke_events_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">sample</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="c1">###########    </span>
 
@@ -4620,10 +4623,15 @@ event, with a duration:
               <span class="k">if</span> <span class="n">flip</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">eve</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">127</span> <span class="o">-</span> <span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">transpose_by</span><span class="p">))</span> 
               
-              <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
-
-              <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
-      
+              <span class="k">if</span> <span class="n">number_of_notes_to_sample</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sample</span> <span class="o">&lt;=</span> <span class="n">number_of_notes_to_sample</span><span class="p">:</span>
+                  <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
+                  <span class="n">sample</span> <span class="o">+=</span> <span class="mi">1</span>
+                  <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
+                <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                
       <span class="n">itrack</span> <span class="o">+=</span><span class="mi">1</span> <span class="c1"># Going to next track...</span>
 
     <span class="c1">#print(&#39;Doing some heavy pythonic sorting...Please stand by...&#39;)</span>
@@ -4709,7 +4717,7 @@ event, with a duration:
         <span class="n">melody_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
     <span class="c1">#print(&#39;Final sorting by start time...&#39;)      </span>
     <span class="n">melody_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
-    <span class="c1"># melody_chords.sort(reverse=False, key=lambda x: x[0][4]) # Sorting events by start time</span>
+    <span class="n">melody_chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
     <span class="c1">#print(txt, melody, chords)</span>
 
     <span class="c1"># [WIP] Melody-conditioned chords list</span>
@@ -4720,7 +4728,7 @@ event, with a duration:
 
         <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">melody_chords</span><span class="p">:</span>
           <span class="n">hp</span> <span class="o">=</span> <span class="kc">True</span>
-          <span class="n">ev</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
+          <span class="n">ev</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="c1"># Sorting chord events by pitch</span>
           <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">ev</span><span class="p">:</span>
           
             <span class="c1"># Computing events details</span>
@@ -5520,7 +5528,7 @@ event, with a duration:
       
   <div class="item">
     <div class="name def" id="TMIDI.Optimus_MIDI_TXT_Processor">
-    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;)</p>
+    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;)</p>
     </div>
     
 
@@ -5544,6 +5552,7 @@ Tegridy Code 2021</p></div>
                               <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                               <span class="n">melody_conditioned_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">melody_pitch_baseline</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                              <span class="n">number_of_notes_to_sample</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                               <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
 
@@ -5578,6 +5587,8 @@ Tegridy Code 2021</p></div>
     <span class="n">melody_chords</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">karaoke_events_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">sample</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="c1">###########    </span>
 
@@ -5646,10 +5657,15 @@ Tegridy Code 2021</p></div>
               <span class="k">if</span> <span class="n">flip</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">eve</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">127</span> <span class="o">-</span> <span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">transpose_by</span><span class="p">))</span> 
               
-              <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
-
-              <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
-      
+              <span class="k">if</span> <span class="n">number_of_notes_to_sample</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sample</span> <span class="o">&lt;=</span> <span class="n">number_of_notes_to_sample</span><span class="p">:</span>
+                  <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
+                  <span class="n">sample</span> <span class="o">+=</span> <span class="mi">1</span>
+                  <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
+                <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                
       <span class="n">itrack</span> <span class="o">+=</span><span class="mi">1</span> <span class="c1"># Going to next track...</span>
 
     <span class="c1">#print(&#39;Doing some heavy pythonic sorting...Please stand by...&#39;)</span>
@@ -5735,7 +5751,7 @@ Tegridy Code 2021</p></div>
         <span class="n">melody_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
     <span class="c1">#print(&#39;Final sorting by start time...&#39;)      </span>
     <span class="n">melody_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
-    <span class="c1"># melody_chords.sort(reverse=False, key=lambda x: x[0][4]) # Sorting events by start time</span>
+    <span class="n">melody_chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
     <span class="c1">#print(txt, melody, chords)</span>
 
     <span class="c1"># [WIP] Melody-conditioned chords list</span>
@@ -5746,7 +5762,7 @@ Tegridy Code 2021</p></div>
 
         <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">melody_chords</span><span class="p">:</span>
           <span class="n">hp</span> <span class="o">=</span> <span class="kc">True</span>
-          <span class="n">ev</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
+          <span class="n">ev</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="c1"># Sorting chord events by pitch</span>
           <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">ev</span><span class="p">:</span>
           
             <span class="c1"># Computing events details</span>
