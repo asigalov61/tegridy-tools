@@ -3362,11 +3362,15 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
               if flip == True:
                 eve[4] = int(127 - (event[4] + transpose_by)) 
               
-              if sample <= number_of_notes_to_sample:
+              if number_of_notes_to_sample > -1:
+                if sample <= number_of_notes_to_sample:
+                  events_matrix.append(eve)
+                  sample += 1
+                  ev += 1
+              else:
                 events_matrix.append(eve)
-                sample += 1
                 ev += 1
-      
+                
       itrack +=1 # Going to next track...
 
     #print('Doing some heavy pythonic sorting...Please stand by...')
