@@ -3257,6 +3257,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               flip=False, 
                               melody_conditioned_encoding=False,
                               melody_pitch_baseline = 0,
+                              number_of_notes_to_sample = -1,
                               karaoke=False,
                               karaoke_language_encoding='utf-8'):
 
@@ -3335,7 +3336,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
-      for event in score[itrack]:
+      for event in score[itrack][:number_of_notes_to_sample]:
         if event[0] == 'text_event' or event[0] == 'lyric':
           try:
             event[2] = str(event[2].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '').replace('\\', '')
