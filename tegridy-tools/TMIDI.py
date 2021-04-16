@@ -3467,7 +3467,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         for ev in melody_chords:
           hp = True
-          ev.sort(reverse=True, key=lambda x: x[4]) # Sorting chord events by pitch
+          ev.sort(reverse=False, key=lambda x: x[4]) # Sorting chord events by pitch
           for event in ev:
           
             # Computing events details
