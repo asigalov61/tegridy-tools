@@ -3356,7 +3356,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         if event[0] == 'note' and patch in MIDI_patch:
           if len(event) == 6: # Checking for bad notes...
-              eve = copy.deepcopy(event)
+              eve = event
               
               eve[1] = int(event[1] / dataset_MIDI_events_time_denominator)
               eve[2] = int(event[2] / dataset_MIDI_events_time_denominator)
@@ -3401,7 +3401,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
 
     if not karaoke:
-      previous_event = copy.deepcopy(events_matrix[0])
+      previous_event = events_matrix[0]
       for event in events_matrix:
 
         '''# Computing deltas
@@ -3442,7 +3442,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
           else:
             txt += chr(32) 
         
-        previous_event = copy.deepcopy(event)
+        previous_event = event
       
       if not line_by_line_output:
         txt += chr(10)      
@@ -3472,7 +3472,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     if melody_conditioned_encoding == True:
       if not karaoke:
    
-        previous_event = copy.deepcopy(melody_chords[0][0])
+        previous_event = melody_chords[0][0]
 
         for ev in melody_chords:
           hp = True
@@ -3516,7 +3516,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
               txtc += chr(32)
 
-            previous_event = copy.deepcopy(event)
+            previous_event = event
             
         if not line_by_line_output:
           txtc += chr(10)
@@ -3525,7 +3525,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         chords = melody_chords
 
     if karaoke:
-      previous_event = copy.deepcopy(melody_list[0])
+      previous_event = melody_list[0]
       for event in melody_list:
 
         # Computing events details
@@ -3557,7 +3557,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         else:
           txt += chr(32) 
         
-        previous_event = copy.deepcopy(event)
+        previous_event = event
       
       if not line_by_line_output:
         txt += chr(10)
