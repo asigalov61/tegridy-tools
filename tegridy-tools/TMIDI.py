@@ -1798,6 +1798,8 @@ import os
 
 import datetime
 
+import copy
+
 from datetime import datetime
 
 import secrets
@@ -3258,6 +3260,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               melody_conditioned_encoding=False,
                               melody_pitch_baseline = 0,
                               number_of_notes_to_sample = -1,
+                              sampling_offset_from_start = 0,
                               karaoke=False,
                               karaoke_language_encoding='utf-8'):
 
@@ -3294,6 +3297,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     karaoke_events_matrix = []
 
     sample = 0
+    start_sample = 0
 
 ###########    
 
@@ -3364,12 +3368,17 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
               
               if number_of_notes_to_sample > -1:
                 if sample <= number_of_notes_to_sample:
-                  events_matrix.append(eve)
-                  sample += 1
-                  ev += 1
+                  if start_sample >= sampling_offset_from_start:
+                    events_matrix.append(eve)
+                    sample += 1
+                    ev += 1
+                  else:
+                    start_sample += 1
+
               else:
                 events_matrix.append(eve)
                 ev += 1
+                start_sample += 1
                 
       itrack +=1 # Going to next track...
 
