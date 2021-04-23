@@ -249,7 +249,7 @@ sys.stdout.buffer.write(my_midi)
 '''
     if len(opus) < 2:
         opus=[1000, [],]
-    tracks = (opus)
+    tracks = copy.deepcopy(opus)
     ticks = int(tracks.pop(0))
     ntracks = len(tracks)
     if ntracks == 1:
@@ -290,7 +290,7 @@ my_opus = score2opus(my_score)
 '''
     if len(score) < 2:
         score=[1000, [],]
-    tracks = (score)
+    tracks = copy.deepcopy(score)
     ticks = int(tracks.pop(0))
     opus_tracks = []
     for scoretrack in tracks:
@@ -390,7 +390,7 @@ see opus2midi() and score2opus().
     if len(opus) < 2:
         _clean_up_warnings()
         return [1000,[],]
-    tracks = (opus)  # couple of slices probably quicker...
+    tracks = copy.deepcopy(opus)  # couple of slices probably quicker...
     ticks = int(tracks.pop(0))
     score = [ticks,]
     for opus_track in tracks:
@@ -503,7 +503,7 @@ but it does make it easy to mix different scores together.
                 ms_per_old_tick = ticks2tempo[ticks_so_far] / (1000.0*old_tpq * desired_time_in_ms)
                 i_tempo_ticks += 1
                 event_delta_ticks -= delta_ticks
-            new_event = (old_event)  # now handle the new event
+            new_event = copy.deepcopy(old_event)  # now handle the new event
             ms_so_far += (ms_per_old_tick * old_event[1] * desired_time_in_ms)
             new_event[1] = round(ms_so_far - previous_ms_so_far)
             if old_event[0] != 'set_tempo':
@@ -740,7 +740,7 @@ they will all get converted to millisecond-tick format.
     # the deepcopys are needed if the input_score's are refs to the same obj
     # e.g. if invoked by midisox's repeat()
     input_scores = _consistentise_ticks(scores)  # 3.7
-    output_score = (input_scores[0])
+    output_score = copy.deepcopy(input_scores[0])
     for input_score in input_scores[1:]:
         output_stats = score2stats(output_score)
         delta_ticks = output_stats['nticks']
@@ -749,7 +749,7 @@ they will all get converted to millisecond-tick format.
             if itrack >= len(output_score): # new output track if doesn't exist
                 output_score.append([])
             for event in input_score[itrack]:
-                output_score[itrack].append((event))
+                output_score[itrack].append(copy.deepcopy(event))
                 output_score[itrack][-1][1] += delta_ticks
             itrack += 1
     return output_score
@@ -1250,7 +1250,7 @@ def _some_text_event(which_kind=0x01, text=b'some_text', text_encoding='ISO-8859
 def _consistentise_ticks(scores):  # 3.6
     # used by mix_scores, merge_scores, concatenate_scores
     if len(scores) == 1:
-         return (scores)
+         return copy.deepcopy(scores)
     are_consistent = True
     ticks = scores[0][0]
     iscore = 1
@@ -1260,7 +1260,7 @@ def _consistentise_ticks(scores):  # 3.6
             break
         iscore += 1
     if are_consistent:
-        return (scores)
+        return copy.deepcopy(scores)
     new_scores = []
     iscore = 0
     while iscore < len(scores):
@@ -1581,7 +1581,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
     data = [] # what I'll store the chunks of byte-data in
 
     # This is so my end_track magic won't corrupt the original
-    events = (events_lol)
+    events = copy.deepcopy(events_lol)
 
     if not never_add_eot:
         # One way or another, tack on an 'end_track'
@@ -1607,7 +1607,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
     last_status = -1
 
     for event_r in (events):
-        E = (event_r)
+        E = copy.deepcopy(event_r)
         # otherwise the shifting'd corrupt the original
         if not E:
             continue
@@ -2916,7 +2916,7 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
           txt = event[2]
           
         if event[0] == 'note' and event[1] == tst:
-          evt = (event)
+          evt = copy.deepcopy(event)
           evt.extend([''])
           evt[6] = txt
           events_list.append(evt)       
@@ -2946,7 +2946,7 @@ def Tegridy_Karaoke_MIDI_to_Reduced_TXT_Processor(Karaoke_MIDI_file,
     output_song = []
 
     for n in range(len(f_matrix)-1):
-      no = (f_matrix[n])
+      no = copy.deepcopy(f_matrix[n])
 
       no[1] = int(delta / 10)
       no[2] = int(no[2] / 10)
@@ -3357,7 +3357,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         if event[0] == 'note' and patch in MIDI_patch:
           if len(event) == 6: # Checking for bad notes...
-              eve = event
+              eve = copy.deepcopy(event)
               
               eve[1] = int(event[1] / dataset_MIDI_events_time_denominator)
               eve[2] = int(event[2] / dataset_MIDI_events_time_denominator)
@@ -3405,7 +3405,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
 
     if not karaoke:
-      previous_event = events_matrix[0]
+      previous_event = copy.deepcopy(events_matrix[0])
       for event in events_matrix:
 
         '''# Computing deltas
@@ -3446,7 +3446,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
           else:
             txt += chr(32) 
         
-        previous_event = event
+        previous_event = copy.deepcopy(event)
       
       if not line_by_line_output:
         txt += chr(10)      
@@ -3476,7 +3476,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     if melody_conditioned_encoding == True:
       if not karaoke:
    
-        previous_event = melody_chords[0][0]
+        previous_event = copy.deepcopy(melody_chords[0][0])
 
         for ev in melody_chords:
           hp = True
@@ -3520,7 +3520,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
               txtc += chr(32)
 
-            previous_event = event
+            previous_event = copy.deepcopy(event)
             
         if not line_by_line_output:
           txtc += chr(10)
@@ -3529,7 +3529,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         chords = melody_chords
 
     if karaoke:
-      previous_event = melody_list[0]
+      previous_event = copy.deepcopy(melody_list[0])
       for event in melody_list:
 
         # Computing events details
@@ -3561,7 +3561,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         else:
           txt += chr(32) 
         
-        previous_event = event
+        previous_event = copy.deepcopy(event)
       
       if not line_by_line_output:
         txt += chr(10)
@@ -3720,7 +3720,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
         S.append(x)
 
     output_list.clear()    
-    output_list = (S)
+    output_list = copy.deepcopy(S)
 
 
     print('Task complete! Enjoy! :)')
