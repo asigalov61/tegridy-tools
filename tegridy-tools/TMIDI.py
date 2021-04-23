@@ -3262,7 +3262,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               number_of_notes_to_sample = -1,
                               sampling_offset_from_start = 0,
                               karaoke=False,
-                              karaoke_language_encoding='utf-8'):
+                              karaoke_language_encoding='utf-8',
+                              song_name='Song'):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3385,8 +3386,11 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     #print('Doing some heavy pythonic sorting...Please stand by...')
 
     fn = os.path.basename(MIDI_file)
-    song_name = fn.split('.')[0].replace(' ', '_')\
-
+    song_name = song_name.replace(' ', '_').replace('=', '_').replace('\'', '-')
+    if song_name == 'Song':
+      sng_name = fn.split('.')[0].replace(' ', '_').replace('=', '_').replace('\'', '-')
+      song_name = sng_name
+    
     txt += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
     txtc += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
 
