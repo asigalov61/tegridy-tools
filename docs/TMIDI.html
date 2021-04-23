@@ -3059,6 +3059,8 @@ event, with a duration:
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 
+<span class="kn">import</span> <span class="nn">copy</span>
+
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">secrets</span>
@@ -4519,8 +4521,10 @@ event, with a duration:
                               <span class="n">melody_conditioned_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">melody_pitch_baseline</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">number_of_notes_to_sample</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                              <span class="n">sampling_offset_from_start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+                              <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+                              <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -4555,6 +4559,7 @@ event, with a duration:
     <span class="n">karaoke_events_matrix</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">sample</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">start_sample</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="c1">###########    </span>
 
@@ -4625,20 +4630,28 @@ event, with a duration:
               
               <span class="k">if</span> <span class="n">number_of_notes_to_sample</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">sample</span> <span class="o">&lt;=</span> <span class="n">number_of_notes_to_sample</span><span class="p">:</span>
-                  <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
-                  <span class="n">sample</span> <span class="o">+=</span> <span class="mi">1</span>
-                  <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                  <span class="k">if</span> <span class="n">start_sample</span> <span class="o">&gt;=</span> <span class="n">sampling_offset_from_start</span><span class="p">:</span>
+                    <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
+                    <span class="n">sample</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                  <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start_sample</span> <span class="o">+=</span> <span class="mi">1</span>
+
               <span class="k">else</span><span class="p">:</span>
                 <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
                 <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">start_sample</span> <span class="o">+=</span> <span class="mi">1</span>
                 
       <span class="n">itrack</span> <span class="o">+=</span><span class="mi">1</span> <span class="c1"># Going to next track...</span>
 
     <span class="c1">#print(&#39;Doing some heavy pythonic sorting...Please stand by...&#39;)</span>
 
     <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">MIDI_file</span><span class="p">)</span>
-    <span class="n">song_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>\
-
+    <span class="n">song_name</span> <span class="o">=</span> <span class="n">song_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">song_name</span> <span class="o">==</span> <span class="s1">&#39;Song&#39;</span><span class="p">:</span>
+      <span class="n">sng_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+      <span class="n">song_name</span> <span class="o">=</span> <span class="n">sng_name</span>
+    
     <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
     <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
 
@@ -5528,7 +5541,7 @@ event, with a duration:
       
   <div class="item">
     <div class="name def" id="TMIDI.Optimus_MIDI_TXT_Processor">
-    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;)</p>
+    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;)</p>
     </div>
     
 
@@ -5553,8 +5566,10 @@ Tegridy Code 2021</p></div>
                               <span class="n">melody_conditioned_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">melody_pitch_baseline</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">number_of_notes_to_sample</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                              <span class="n">sampling_offset_from_start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+                              <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+                              <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -5589,6 +5604,7 @@ Tegridy Code 2021</p></div>
     <span class="n">karaoke_events_matrix</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">sample</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">start_sample</span> <span class="o">=</span> <span class="mi">0</span>
 
 <span class="c1">###########    </span>
 
@@ -5659,20 +5675,28 @@ Tegridy Code 2021</p></div>
               
               <span class="k">if</span> <span class="n">number_of_notes_to_sample</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">sample</span> <span class="o">&lt;=</span> <span class="n">number_of_notes_to_sample</span><span class="p">:</span>
-                  <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
-                  <span class="n">sample</span> <span class="o">+=</span> <span class="mi">1</span>
-                  <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                  <span class="k">if</span> <span class="n">start_sample</span> <span class="o">&gt;=</span> <span class="n">sampling_offset_from_start</span><span class="p">:</span>
+                    <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
+                    <span class="n">sample</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                  <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start_sample</span> <span class="o">+=</span> <span class="mi">1</span>
+
               <span class="k">else</span><span class="p">:</span>
                 <span class="n">events_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eve</span><span class="p">)</span>
                 <span class="n">ev</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">start_sample</span> <span class="o">+=</span> <span class="mi">1</span>
                 
       <span class="n">itrack</span> <span class="o">+=</span><span class="mi">1</span> <span class="c1"># Going to next track...</span>
 
     <span class="c1">#print(&#39;Doing some heavy pythonic sorting...Please stand by...&#39;)</span>
 
     <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">MIDI_file</span><span class="p">)</span>
-    <span class="n">song_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>\
-
+    <span class="n">song_name</span> <span class="o">=</span> <span class="n">song_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">song_name</span> <span class="o">==</span> <span class="s1">&#39;Song&#39;</span><span class="p">:</span>
+      <span class="n">sng_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+      <span class="n">song_name</span> <span class="o">=</span> <span class="n">sng_name</span>
+    
     <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
     <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
 
