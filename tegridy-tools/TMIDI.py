@@ -3464,9 +3464,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
   
     #print('Sorting events...')
     for items in groups:
-        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch 
-        melody_list.append(items[0]) # Creating final chords list
-        melody_chords.append(items)
+        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
+        items[0][3] = 0 # Melody should always bear MIDI Channel 0 for code to work
+        melody_list.append(items[0]) # Creating final melody list
+        melody_chords.append(items) # Creating final chords list
     #print('Final sorting by start time...')      
     melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
     melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
