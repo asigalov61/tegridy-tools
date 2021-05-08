@@ -1,0 +1,64 @@
+2006-jan-06  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Addition of more standard scales and modes to the recognizer
+	* Factor common code out of ChordRecognizer and ScaleRecognizer:
+	into KnowledgeBasedRecognizer, which serves as base class for both
+	recognizers
+
+2006-jan-05  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Addition of ScaleRecognizer and ScaleName classes: and add some scales
+	
+2006-jan-03  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Major speed improvement in chord teaching and recognition (avoid
+	combinatorial explosion): especially for large chords
+	* Bugfix in interval recognition: use octaves in situations like ['a#','a']
+2005-dec-30  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Allow ChordRecognizer to initialize from file only
+	* Improvements to midiinputdemo.py
+
+2005-dec-30  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Bugfix in ChordRecognizer: leading to unrecognized chords and
+	wrongly labeled chords. 
+	* Also updated unit tests.
+
+2005-dec-29  Stefaan Himpe  stefaan. himpe@gmail.com
+	* Add midiinputdemo.py: real-time chord recognition using midi input
+	device
+
+2005-dec-28  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Reorganize Chord code: introduce Scale class and let Chord derive 
+	from it
+	
+2005-dec-25  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Bugfix interval transposition
+	* Update unit tests
+
+2005-dec-23  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Add interval transposition
+
+2005-dec-23  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Add interval recognizer and interval name classes
+
+2005-dec-22  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Unit Testing:  replaced demo program with unit tests (need to add
+	more tests)
+	* ChordName: changed ChordName to always have a Slash attribute.
+	When initialized to the root note, it doesn't get displayed.
+	* Bug fix chordrecognizer: remove overloaded __init__ method since
+	python does not support overloading *blush* (at least not the way I
+	expected it to support it)
+
+2005-dec-22  Stefaan Himpe  stefaan.himpe@gmail.com
+	* Minor speed-up: in ChordRecognizer: avoid two passes over all
+	permutations while looking for chords with minimal energy function
+	* Comments: update some obsolete comments in the .py files
+	
+2005-dec-19  Stefaan Himpe  stefaan.himpe@gmail.com
+	
+	* GPL-ification: add copyright notices, add gpl.txt, author.txt,
+	changelog.txt
+	
+2005-dec-18  Stefaan Himpe  stefaan.himpe@gmail.com
+
+	* Initial, early release
+
+

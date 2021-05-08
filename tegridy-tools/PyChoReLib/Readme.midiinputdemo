@@ -1,0 +1,40 @@
+
+*** Remarks with respect to midiinputdemo.py:
+
+Warning! This program is meant to be a simple demonstrator.
+It is not robust nor very user or resource friendly.
+It works for me though ;)
+
+For Both Linux/Win32 users:
+---------------------------
+- get and install the PyPortMidi[1] package from the internet.
+  Make sure their test.py program runs correctly.
+  PyPortMidi is python wrapper around the cross-platform MIDI
+  library PortMidi (which you will also need).
+  On Debian sid, at the time of writing, a package libportmidi-dev
+  exists, which contains the necessary files. For other
+  distributions I am not certain. In any case you can get it
+  from [2].
+  
+  PyPortMidi by means of PortMidi handles both real-time input 
+  and output from/to MIDI devices.
+
+[1] http://alumni.media.mit.edu/~harrison/pyportmidi.html
+[2] http://www.cs.cmu.edu/~music/portmusic/
+
+For Linux users:
+----------------
+- make sure you have correctly installed and configured ALSA
+- if you haven't got a MIDI device that is set up for use with
+  ALSA, you can use a virtual MIDI keyboard [3].
+
+[3] http://www.alsa-project.org/~iwai/alsa.html#vkeybd
+
+For WIN32 users:
+----------------
+- portmidi is cross-platform so it runs under win32, yet I don't
+  have such a system available, nor do I plan to get one,
+  so you are basically on your own. Feel free to tell me about
+  your experiences.
+- also let me know if you know of a virtual midi keyboard for win32.
+
