@@ -3734,6 +3734,73 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_TXT_Tokenizer(input_TXT_string, line_by_line_TXT_string=True):
+
+    '''Tegridy TXT Tokenizer
+     
+    Input: TXT String
+
+    Output: Tokenized TXT string + forward and reverse dics
+    
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    print('Tegridy TXT Tokenizer')
+
+    if line_by_line_TXT_string:
+      T = input_TXT_string.split()
+    else:
+      T = input_TXT_string.split(' ')
+
+    DIC = dict(zip(T, range(len(T))))
+    RDIC = dict(zip(range(len(T)), T))
+
+    TXTT = ''
+
+    for t in T:
+      try:
+        TXTT += chr(DIC[t])
+      except:
+        print('Error. Could not finish.')
+        return TXTT, DIC, RDIC
+    
+    print('Done!')
+    
+    return TXTT, DIC, RDIC
+
+###################################################################################
+
+def Tegridy_TXT_DeTokenizer(input_Tokenized_TXT_string, RDIC):
+
+    '''Tegridy TXT Tokenizer
+     
+    Input: Tokenized TXT String
+           
+
+    Output: DeTokenized TXT string
+    
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    print('Tegridy TXT DeTokenizer')
+
+    Q = list(input_Tokenized_TXT_string)
+    c = 0
+    RTXT = ''
+    for q in Q:
+      try:
+        RTXT += RDIC[ord(q)] + chr(10)
+      except:
+        c+=1
+
+    print('Number of errors:', c)
+
+    print('Done!')
+
+    return RTXT
+
+###################################################################################
+
 def Tegridy_Optimus_TXT_to_INT_Converter(TXT_String, time_denominator=128):
 
   '''Project Los Angeles
