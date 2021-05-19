@@ -6,7 +6,7 @@
 #
 #
 #	Tegridy MIDI Module (TMIDI / tee-midi)
-#	Version 2.2
+#	Version 2.3
 #
 #       NOTE: TMIDI Module starts after MIDI.py module @ line 1780
 #
@@ -3296,6 +3296,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     melody_chords = []
 
     karaoke_events_matrix = []
+    karaokez = []
 
     sample = 0
     start_sample = 0
@@ -3344,6 +3345,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
       for event in score[itrack]:
+
+        if event[0] == 'text_event' or event[0] == 'lyric' or event[0] == 'note':
+          karaokez.append(event)
+        
         if event[0] == 'text_event' or event[0] == 'lyric':
           try:
             event[2] = str(event[2].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '').replace('\\', '')
@@ -3566,6 +3571,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       
       if not line_by_line_output:
         txt += chr(10)
+
+    # Helper aux/backup function for Karaoke
+    karaokez.sort(reverse=False, key=lambda x: x[1])
 
     return txt, melody_list, chords
 
@@ -3872,6 +3880,84 @@ def Tegridy_Optimus_Sum_Intro_Rand_End_Sampler(MIDI_file, number_of_notes_in_sam
     SUM += i[4]
 
   return SUM, INTRO, RAND, END
+
+###################################################################################
+
+def Tegridy_MIDI_Signature(melody, chords):
+
+  '''Input: flat melody list and flat chords list
+     
+     Output: Melody signature and Chords signature
+     
+     Project Los Angeles
+     Tegridy Code 2021'''
+
+  # prepping data
+  melody_list_f = []
+  chords_list_f = []
+
+  # melody
+  m_st_sum = sum([y[1] for y in melody])
+  m_st_avg = int(m_st_sum / len(melody))
+  m_du_sum = sum([y[2] for y in melody])
+  m_du_avg = int(m_du_sum / len(melody))
+  m_ch_sum = sum([y[3] for y in melody])
+  m_ch_avg = int(m_ch_sum / len(melody))
+  m_pt_sum = sum([y[4] for y in melody])
+  m_pt_avg = int(m_pt_sum / len(melody))
+  m_vl_sum = sum([y[5] for y in melody])
+  m_vl_avg = int(m_vl_sum / len(melody))
+  
+  melody_list_f.extend([m_st_sum, 
+                        m_st_avg,
+                        m_du_sum,
+                        m_du_avg,
+                        m_ch_sum,
+                        m_ch_avg,
+                        m_pt_sum,
+                        m_pt_avg,
+                        m_vl_sum,
+                        m_vl_avg])
+
+  # chords
+  c_st_sum = sum([y[1] for y in chords])
+  c_st_avg = int(c_st_sum / len(chords))
+  c_du_sum = sum([y[2] for y in chords])
+  c_du_avg = int(c_du_sum / len(chords))
+  c_ch_sum = sum([y[3] for y in chords])
+  c_ch_avg = int(c_ch_sum / len(chords))
+  c_pt_sum = sum([y[4] for y in chords])
+  c_pt_avg = int(c_pt_sum / len(chords))
+  c_vl_sum = sum([y[5] for y in chords])
+  c_vl_avg = int(c_vl_sum / len(chords))
+
+  chords_list_f.extend([c_st_sum, 
+                        c_st_avg,
+                        c_du_sum,
+                        c_du_avg,
+                        c_ch_sum,
+                        c_ch_avg,
+                        c_pt_sum,
+                        c_pt_avg,
+                        c_vl_sum,
+                        c_vl_avg])
+
+  return melody_list_f, chords_list_f
+
+###################################################################################
+
+def Tegridy_List_Slicer(input_list, number_of_slices):
+
+  '''Input: List to slice
+            Number of desired slices
+     
+     Output: Sliced list of lists
+     
+     Project Los Angeles
+     Tegridy Code 2021'''
+
+  for i in range(0, len(input_list), number_of_slices):
+     yield input_list[i:i + number_of_slices]
 
 ###################################################################################
 
