@@ -3776,9 +3776,9 @@ def Tegridy_Timings_Converter(chords_list,
 
     time = start_time
 
-    delta = []
+    delta = [0]
 
-    for i in range(1, len(song)):
+    for i in range(len(song)):
 
         ss = copy.deepcopy(song[i])
         if song[i][1] != p[1]:
