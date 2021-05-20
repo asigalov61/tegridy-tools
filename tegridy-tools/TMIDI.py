@@ -3794,14 +3794,14 @@ def Tegridy_Timings_Converter(chords_list,
           ss[2] = int(round(ss[2] * timings_multiplier, -1))
           song1.append(ss)
           
-          p = copy.deepcopy(song[i])
+          p = copy.deepcopy(ss)
         else:
           
           ss[1] = int(round(time * timings_multiplier, -1))
           ss[2] = int(round(ss[2] * timings_multiplier, -1))
           song1.append(ss)
           
-          p = copy.deepcopy(song[i])
+          p = copy.deepcopy(ss)
     
     average_delta_st = int(sum(delta) / len(delta))
     average_duration = int(sum([y[2] for y in song1]) / len([y[2] for y in song1]))
@@ -3830,9 +3830,10 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
 
     i = 0
 
-    chords_list.sort(reverse=False, key=lambda x: x[1])
-
-    for cc in chords_list:
+    chords_list1 = [x for x in chords_list if x]
+    chords_list1.sort(reverse=False, key=lambda x: x[1])
+    
+    for cc in chords_list1:
 
       if cc[1] < time:
         
@@ -3849,7 +3850,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
       chords.append(cho)
       i += 1
     
-    return chords, i
+    return [x for x in chords if x], i
 
 
 ###################################################################################
