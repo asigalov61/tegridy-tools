@@ -3777,8 +3777,6 @@ def Tegridy_Timings_Converter(chords_list,
 
     delta = []
 
-    song.sort(reverse=False, key=lambda x: x[1])
-
     for i in range(len(song)):
 
         ss = copy.deepcopy(song[i])
@@ -3805,6 +3803,8 @@ def Tegridy_Timings_Converter(chords_list,
     
     average_delta_st = int(sum(delta) / len(delta))
     average_duration = int(sum([y[2] for y in song1]) / len([y[2] for y in song1]))
+
+    song1.sort(reverse=False, key=lambda x: x[1])
 
     return song1, average_delta_st, average_duration
 
