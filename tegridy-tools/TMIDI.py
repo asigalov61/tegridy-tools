@@ -3748,7 +3748,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
-def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_time = 300):
+def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_time = 300, start_time = 0):
 
     '''Tegridy Timings Converter
      
@@ -3767,13 +3767,13 @@ def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_ti
 
     p = song[0]
 
-    p[1] = 0
+    p[1] = start_time
 
-    time = 0
+    time = start_time
 
     song.sort(reverse=False, key=lambda x: x[1])
 
-    for i in range(len(song)-1):
+    for i in range(len(song)):
 
         ss = copy.deepcopy(song[i])
         if song[i][1] != p[1]:
