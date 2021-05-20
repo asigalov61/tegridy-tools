@@ -3748,6 +3748,100 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_time = 300):
+
+    '''Tegridy Timings Converter
+     
+    Input: Flat chords list
+           Max delta time allowed between notes
+           Fixed start note time for excessive gaps
+
+    Output: Converted flat chords list
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    song = chords_list
+
+    song1 = []
+
+    p = song[0]
+
+    p[1] = 0
+
+    time = 0
+
+    song.sort(reverse=False, key=lambda x: x[1])
+
+    for i in range(len(song)-1):
+
+        ss = copy.deepcopy(song[i])
+        if song[i][1] != p[1]:
+          
+          if abs(song[i][1] - p[1]) > max_delta_time:
+            time += fixed_start_time
+          else:
+            time += abs(song[i][1] - p[1])
+
+          ss[1] = time 
+          song1.append(ss)
+          
+          p = copy.deepcopy(song[i])
+        else:
+          
+          ss[1] = time
+          song1.append(ss)
+          
+          p = copy.deepcopy(song[i])
+
+    return song1
+
+###################################################################################
+
+def Tegridy_Score_Slicer(chords_list, number_of_bars_per_slice=2):
+
+    '''Tegridy Score Slicer
+     
+    Input: Flat chords list
+           Number of bars per slice
+
+    Output: Sliced chords list
+            Number of created slices
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords = []
+    cho = []
+
+    time = number_of_bars_per_slice * 1000 
+
+    i = 0
+
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+
+    for cc in chords_list:
+
+      if cc[1] < time:
+        
+        cho.append(cc)
+      
+
+      else:
+        chords.append(cho)
+        cho = []
+        time += number_of_bars_per_slice * 1000
+        i += 1
+      
+    if cho != []: 
+      chords.append(cho)
+      i += 1
+    
+    return chords, i
+
+
+###################################################################################
+
 def Tegridy_TXT_Tokenizer(input_TXT_string, line_by_line_TXT_string=True):
 
     '''Tegridy TXT Tokenizer
