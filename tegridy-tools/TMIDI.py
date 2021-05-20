@@ -3263,7 +3263,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               sampling_offset_from_start = 0,
                               karaoke=False,
                               karaoke_language_encoding='utf-8',
-                              song_name='Song'):
+                              song_name='Song',
+                              perfect_timings=False):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3345,6 +3346,11 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     #print('Reading all MIDI events from the MIDI file...')
     while itrack < len(score):
       for event in score[itrack]:
+        
+        if perfect_timings:
+          if event[0] == 'note':
+            event[1] = round(event[1], -1)
+            event[2] = round(event[2], -1)
 
         if event[0] == 'text_event' or event[0] == 'lyric' or event[0] == 'note':
           karaokez.append(event)
