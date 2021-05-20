@@ -3748,7 +3748,11 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
-def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_time = 300, start_time = 0):
+def Tegridy_Timings_Converter(chords_list, 
+                              max_delta_time = 1000, 
+                              fixed_start_time = 300, 
+                              start_time = 0,
+                              timings_multiplier = 1):
 
     '''Tegridy Timings Converter
      
@@ -3771,6 +3775,8 @@ def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_ti
 
     time = start_time
 
+    delta = []
+
     song.sort(reverse=False, key=lambda x: x[1])
 
     for i in range(len(song)):
@@ -3782,23 +3788,29 @@ def Tegridy_Timings_Converter(chords_list, max_delta_time = 1000, fixed_start_ti
             time += fixed_start_time
           else:
             time += abs(song[i][1] - p[1])
+            delta.append(abs(song[i][1] - p[1]))
 
-          ss[1] = time 
+          ss[1] = int(round(time * timings_multiplier, -1))
+          ss[2] = int(round(ss[2] * timings_multiplier, -1))
           song1.append(ss)
           
           p = copy.deepcopy(song[i])
         else:
           
-          ss[1] = time
+          ss[1] = int(round(time * timings_multiplier, -1))
+          ss[2] = int(round(ss[2] * timings_multiplier, -1))
           song1.append(ss)
           
           p = copy.deepcopy(song[i])
+    
+    average_delta_st = int(sum(delta) / len(delta))
+    average_duration = int(sum([y[2] for y in song1]) / len([y[2] for y in song1]))
 
-    return song1
+    return song1, average_delta_st, average_duration
 
 ###################################################################################
 
-def Tegridy_Score_Slicer(chords_list, number_of_bars_per_slice=2):
+def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
 
     '''Tegridy Score Slicer
      
@@ -3814,7 +3826,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_bars_per_slice=2):
     chords = []
     cho = []
 
-    time = number_of_bars_per_slice * 1000 
+    time = number_of_miliseconds_per_slice 
 
     i = 0
 
@@ -3830,7 +3842,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_bars_per_slice=2):
       else:
         chords.append(cho)
         cho = []
-        time += number_of_bars_per_slice * 1000
+        time += number_of_miliseconds_per_slice
         i += 1
       
     if cho != []: 
