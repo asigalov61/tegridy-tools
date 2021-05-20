@@ -3807,7 +3807,7 @@ def Tegridy_Timings_Converter(chords_list,
 
     song1.sort(reverse=False, key=lambda x: x[1])
 
-    return song1, average_delta_st, average_duration
+    return song1, time, average_delta_st, average_duration
 
 ###################################################################################
 
