@@ -3302,6 +3302,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     sample = 0
     start_sample = 0
 
+    bass_melody = []
+
 ###########    
 
     def list_average(num):
@@ -3479,9 +3481,12 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         items[0][3] = 0 # Melody should always bear MIDI Channel 0 for code to work
         melody_list.append(items[0]) # Creating final melody list
         melody_chords.append(items) # Creating final chords list
+        bass_melody.append(items[-1]) # Creating final bass melody list
+    
     #print('Final sorting by start time...')      
     melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
     melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
+    bass_melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
     #print(txt, melody, chords)
 
     # [WIP] Melody-conditioned chords list
@@ -3579,9 +3584,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         txt += chr(10)
 
     # Helper aux/backup function for Karaoke
-    karaokez.sort(reverse=False, key=lambda x: x[1])
+    karaokez.sort(reverse=False, key=lambda x: x[1])  
 
-    return txt, melody_list, chords
+    return txt, melody_list, chords #, bass_melody # Bass melody aux output
 
 ###################################################################################
 
