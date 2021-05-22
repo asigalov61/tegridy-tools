@@ -1804,6 +1804,8 @@ from datetime import datetime
 
 import secrets
 
+import random
+
 import pickle
 
 import csv
@@ -3753,6 +3755,54 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Sliced_Score_Pairs_Generator(chords_list, number_of_miliseconds_per_slice=2000, shuffle_pairs = False):
+
+    '''Tegridy Sliced Score Pairs Generator
+     
+    Input: Flat chords list
+           Number of miliseconds per slice
+
+    Output: Sliced score pairs list
+            Number of created slices
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords = []
+    cho = []
+
+    time = number_of_miliseconds_per_slice 
+
+    i = 0
+
+    chords_list1 = [x for x in chords_list if x]
+    chords_list1.sort(reverse=False, key=lambda x: x[1])
+    pcho = chords_list1[0]
+    for cc in chords_list1[1:]:
+
+      if cc[1] <= time:
+        
+        cho.append(cc)
+
+      else:
+        if cho != [] and pcho != []: chords.append([pcho, cho])
+        pcho = copy.deepcopy(cho)
+        cho = []
+        cho.append(cc)
+        time += number_of_miliseconds_per_slice
+        i += 1
+      
+    if cho != [] and pcho != []: 
+      chords.append([pcho, cho])
+      pcho = copy.deepcopy(cho)
+      i += 1
+    
+    if shuffle_pairs: random.shuffle(chords)
+
+    return chords, i
+
+###################################################################################
+
 def Tegridy_Timings_Converter(chords_list, 
                               max_delta_time = 1000, 
                               fixed_start_time = 300, 
@@ -3821,7 +3871,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
     '''Tegridy Score Slicer
      
     Input: Flat chords list
-           Number of bars per slice
+           Number of miliseconds per slice
 
     Output: Sliced chords list
             Number of created slices
@@ -3858,7 +3908,6 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
       i += 1
     
     return [x for x in chords if x], i
-
 
 ###################################################################################
 
