@@ -3841,7 +3841,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
     
     for cc in chords_list1:
 
-      if cc[1] < time:
+      if cc[1] <= time:
         
         cho.append(cc)
       
@@ -3849,6 +3849,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
       else:
         chords.append(cho)
         cho = []
+        cho.append(cc)
         time += number_of_miliseconds_per_slice
         i += 1
       
