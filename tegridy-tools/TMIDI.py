@@ -3755,6 +3755,43 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, max_number_of_unique_pitches = 128):
+
+    '''Tegridy MIDI Zip Notes Summarizer
+     
+    Input: Flat chords list / SONG
+           Max number of unique pitches allowed
+
+    Output: Summarized chords list
+            Number of summarized notes
+            Number of dicarted notes
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    i = 0
+    j = 0
+    out1 = []
+    pout = []
+    
+    for o in chords_list:
+
+      # MIDI Zip
+
+      if o[4] not in pout:
+        if len(pout) > max_number_of_unique_pitches:
+          pout = []
+        pout.append(o[4])
+        out1.append(o)
+        j += 1
+      
+      else:
+        i += 1
+
+    return out1, i
+
+###################################################################################
+
 def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
 
     '''Tegridy Score Chords Pairs Generator
