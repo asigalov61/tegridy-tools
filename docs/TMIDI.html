@@ -1085,6 +1085,7 @@ table {
     <li class="mono"><a href="#TMIDI.Tegridy_MIDI_Processor">Tegridy_MIDI_Processor</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_MIDI_Signature">Tegridy_MIDI_Signature</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_MIDI_TXT_Processor">Tegridy_MIDI_TXT_Processor</a></li>
+    <li class="mono"><a href="#TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer">Tegridy_MIDI_Zip_Notes_Summarizer</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Optimus_INT_to_TXT_Converter">Tegridy_Optimus_INT_to_TXT_Converter</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Optimus_Sum_Intro_Rand_End_Sampler">Tegridy_Optimus_Sum_Intro_Rand_End_Sampler</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Optimus_TXT_to_INT_Converter">Tegridy_Optimus_TXT_to_INT_Converter</a></li>
@@ -1093,6 +1094,9 @@ table {
     <li class="mono"><a href="#TMIDI.Tegridy_Pickle_File_Writer">Tegridy_Pickle_File_Writer</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Reduced_TXT_to_Notes_Converter">Tegridy_Reduced_TXT_to_Notes_Converter</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_SONG_to_MIDI_Converter">Tegridy_SONG_to_MIDI_Converter</a></li>
+    <li class="mono"><a href="#TMIDI.Tegridy_Score_Chords_Pairs_Generator">Tegridy_Score_Chords_Pairs_Generator</a></li>
+    <li class="mono"><a href="#TMIDI.Tegridy_Score_Slicer">Tegridy_Score_Slicer</a></li>
+    <li class="mono"><a href="#TMIDI.Tegridy_Sliced_Score_Pairs_Generator">Tegridy_Sliced_Score_Pairs_Generator</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_Dataset_File_Writer">Tegridy_TXT_Dataset_File_Writer</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_DeTokenizer">Tegridy_TXT_DeTokenizer</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_MIDI_Processor">Tegridy_TXT_MIDI_Processor</a></li>
@@ -1100,6 +1104,7 @@ table {
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_Tokenizer">Tegridy_TXT_Tokenizer</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_to_INT_Converter">Tegridy_TXT_to_INT_Converter</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_to_INT_Processor">Tegridy_TXT_to_INT_Processor</a></li>
+    <li class="mono"><a href="#TMIDI.Tegridy_Timings_Converter">Tegridy_Timings_Converter</a></li>
     <li class="mono"><a href="#TMIDI.concatenate_scores">concatenate_scores</a></li>
     <li class="mono"><a href="#TMIDI.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDI.grep">grep</a></li>
@@ -3069,6 +3074,8 @@ event, with a duration:
 
 <span class="kn">import</span> <span class="nn">secrets</span>
 
+<span class="kn">import</span> <span class="nn">random</span>
+
 <span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="kn">import</span> <span class="nn">csv</span>
@@ -4528,7 +4535,8 @@ event, with a duration:
                               <span class="n">sampling_offset_from_start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
-                              <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">):</span>
+                              <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">,</span>
+                              <span class="n">perfect_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -4565,6 +4573,8 @@ event, with a duration:
 
     <span class="n">sample</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">start_sample</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">bass_melody</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="c1">###########    </span>
 
@@ -4610,6 +4620,11 @@ event, with a duration:
     <span class="c1">#print(&#39;Reading all MIDI events from the MIDI file...&#39;)</span>
     <span class="k">while</span> <span class="n">itrack</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
       <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">score</span><span class="p">[</span><span class="n">itrack</span><span class="p">]:</span>
+        
+        <span class="k">if</span> <span class="n">perfect_timings</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+            <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;text_event&#39;</span> <span class="ow">or</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lyric&#39;</span> <span class="ow">or</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
           <span class="n">karaokez</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -4738,9 +4753,12 @@ event, with a duration:
         <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Melody should always bear MIDI Channel 0 for code to work</span>
         <span class="n">melody_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Creating final melody list</span>
         <span class="n">melody_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="c1"># Creating final chords list</span>
+        <span class="n">bass_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Creating final bass melody list</span>
+    
     <span class="c1">#print(&#39;Final sorting by start time...&#39;)      </span>
     <span class="n">melody_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
     <span class="n">melody_chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
+    <span class="n">bass_melody</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
     <span class="c1">#print(txt, melody, chords)</span>
 
     <span class="c1"># [WIP] Melody-conditioned chords list</span>
@@ -4838,9 +4856,9 @@ event, with a duration:
         <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
     <span class="c1"># Helper aux/backup function for Karaoke</span>
-    <span class="n">karaokez</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">karaokez</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  
 
-    <span class="k">return</span> <span class="n">txt</span><span class="p">,</span> <span class="n">melody_list</span><span class="p">,</span> <span class="n">chords</span>
+    <span class="k">return</span> <span class="n">txt</span><span class="p">,</span> <span class="n">melody_list</span><span class="p">,</span> <span class="n">chords</span> <span class="c1">#, bass_melody # Bass melody aux output</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -5005,6 +5023,243 @@ event, with a duration:
 <span class="c1">#</span>
 <span class="c1"># TMIDI 2.0 Helper functions</span>
 <span class="c1">#</span>
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">max_number_of_unique_pitches</span> <span class="o">=</span> <span class="mi">128</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list / SONG</span>
+<span class="sd">           Max number of unique pitches allowed</span>
+
+<span class="sd">    Output: Summarized chords list</span>
+<span class="sd">            Number of summarized notes</span>
+<span class="sd">            Number of dicarted notes</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">:</span>
+
+      <span class="c1"># MIDI Zip</span>
+
+      <span class="k">if</span> <span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pout</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pout</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_number_of_unique_pitches</span><span class="p">:</span>
+          <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">out1</span><span class="p">,</span> <span class="n">i</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Tegridy_Score_Chords_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Shuffle pairs (recommended)</span>
+
+<span class="sd">    Output: Score chords pairs list</span>
+<span class="sd">            Number of created pairs</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">chords_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pcho</span> <span class="o">=</span> <span class="n">chords_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">pcho</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">pcho</span><span class="p">],</span> <span class="n">cho</span><span class="p">])</span>
+        <span class="n">pcho</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+    <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> 
+      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">pcho</span><span class="p">],</span> <span class="n">cho</span><span class="p">])</span>
+      
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">shuffle_pairs</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chords</span><span class="p">,</span> <span class="n">i</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Tegridy_Sliced_Score_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Sliced Score Pairs Generator</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Number of miliseconds per slice</span>
+
+<span class="sd">    Output: Sliced score pairs list</span>
+<span class="sd">            Number of created slices</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">number_of_miliseconds_per_slice</span> 
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">chords_list1</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chords_list</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">chords_list1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pcho</span> <span class="o">=</span> <span class="n">chords_list1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chords_list1</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">:</span>
+        
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">pcho</span><span class="p">,</span> <span class="n">cho</span><span class="p">])</span>
+        <span class="n">pcho</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="n">number_of_miliseconds_per_slice</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+    <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> 
+      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">pcho</span><span class="p">,</span> <span class="n">cho</span><span class="p">])</span>
+      <span class="n">pcho</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">shuffle_pairs</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chords</span><span class="p">,</span> <span class="n">i</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Tegridy_Timings_Converter</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> 
+                              <span class="n">max_delta_time</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> 
+                              <span class="n">fixed_start_time</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> 
+                              <span class="n">start_time</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                              <span class="n">start_time_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                              <span class="n">durations_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Timings Converter</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Max delta time allowed between notes</span>
+<span class="sd">           Fixed start note time for excessive gaps</span>
+
+<span class="sd">    Output: Converted flat chords list</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">song</span> <span class="o">=</span> <span class="n">chords_list</span>
+
+    <span class="n">song1</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">song</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_time</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">song</span><span class="p">)):</span>
+
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+          
+          <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">max_delta_time</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">+=</span> <span class="n">fixed_start_time</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">delta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+          <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span> <span class="o">*</span> <span class="n">start_time_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">ss</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">durations_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+          
+          <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+          
+          <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span> <span class="o">*</span> <span class="n">start_time_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">ss</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">durations_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+          
+          <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    
+    <span class="n">average_delta_st</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span>
+    <span class="n">average_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">]))</span>
+
+    <span class="n">song1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">song1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">average_delta_st</span><span class="p">,</span> <span class="n">average_duration</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Tegridy_Score_Slicer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Slicer</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Number of miliseconds per slice</span>
+
+<span class="sd">    Output: Sliced chords list</span>
+<span class="sd">            Number of created slices</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">number_of_miliseconds_per_slice</span> 
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">chords_list1</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chords_list</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">chords_list1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chords_list1</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">:</span>
+        
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+      
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="n">number_of_miliseconds_per_slice</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+    <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]:</span> 
+      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chords</span> <span class="k">if</span> <span class="n">x</span><span class="p">],</span> <span class="n">i</span>
+
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">Tegridy_TXT_Tokenizer</span><span class="p">(</span><span class="n">input_TXT_string</span><span class="p">,</span> <span class="n">line_by_line_TXT_string</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -5699,7 +5954,7 @@ event, with a duration:
       
   <div class="item">
     <div class="name def" id="TMIDI.Optimus_MIDI_TXT_Processor">
-    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;)</p>
+    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;, perfect_timings=False)</p>
     </div>
     
 
@@ -5727,7 +5982,8 @@ Tegridy Code 2021</p></div>
                               <span class="n">sampling_offset_from_start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
-                              <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">):</span>
+                              <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">,</span>
+                              <span class="n">perfect_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -5764,6 +6020,8 @@ Tegridy Code 2021</p></div>
 
     <span class="n">sample</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">start_sample</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">bass_melody</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="c1">###########    </span>
 
@@ -5809,6 +6067,11 @@ Tegridy Code 2021</p></div>
     <span class="c1">#print(&#39;Reading all MIDI events from the MIDI file...&#39;)</span>
     <span class="k">while</span> <span class="n">itrack</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
       <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">score</span><span class="p">[</span><span class="n">itrack</span><span class="p">]:</span>
+        
+        <span class="k">if</span> <span class="n">perfect_timings</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+            <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;text_event&#39;</span> <span class="ow">or</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lyric&#39;</span> <span class="ow">or</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
           <span class="n">karaokez</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -5937,9 +6200,12 @@ Tegridy Code 2021</p></div>
         <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Melody should always bear MIDI Channel 0 for code to work</span>
         <span class="n">melody_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Creating final melody list</span>
         <span class="n">melody_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="c1"># Creating final chords list</span>
+        <span class="n">bass_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Creating final bass melody list</span>
+    
     <span class="c1">#print(&#39;Final sorting by start time...&#39;)      </span>
     <span class="n">melody_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
     <span class="n">melody_chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
+    <span class="n">bass_melody</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Sorting events by start time</span>
     <span class="c1">#print(txt, melody, chords)</span>
 
     <span class="c1"># [WIP] Melody-conditioned chords list</span>
@@ -6037,9 +6303,9 @@ Tegridy Code 2021</p></div>
         <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
     <span class="c1"># Helper aux/backup function for Karaoke</span>
-    <span class="n">karaokez</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">karaokez</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  
 
-    <span class="k">return</span> <span class="n">txt</span><span class="p">,</span> <span class="n">melody_list</span><span class="p">,</span> <span class="n">chords</span>
+    <span class="k">return</span> <span class="n">txt</span><span class="p">,</span> <span class="n">melody_list</span><span class="p">,</span> <span class="n">chords</span> <span class="c1">#, bass_melody # Bass melody aux output</span>
 </pre></div>
 
   </div>
@@ -7231,6 +7497,67 @@ Tegridy Code 2020</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer">
+    <p>def <span class="ident">Tegridy_MIDI_Zip_Notes_Summarizer</span>(</p><p>chords_list, max_number_of_unique_pitches=128)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Tegridy MIDI Zip Notes Summarizer</p>
+<p>Input: Flat chords list / SONG
+       Max number of unique pitches allowed</p>
+<p>Output: Summarized chords list
+        Number of summarized notes
+        Number of dicarted notes</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">max_number_of_unique_pitches</span> <span class="o">=</span> <span class="mi">128</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list / SONG</span>
+<span class="sd">           Max number of unique pitches allowed</span>
+
+<span class="sd">    Output: Summarized chords list</span>
+<span class="sd">            Number of summarized notes</span>
+<span class="sd">            Number of dicarted notes</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">:</span>
+
+      <span class="c1"># MIDI Zip</span>
+
+      <span class="k">if</span> <span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pout</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pout</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_number_of_unique_pitches</span><span class="p">:</span>
+          <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">out1</span><span class="p">,</span> <span class="n">i</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDI.Tegridy_Optimus_INT_to_TXT_Converter">
     <p>def <span class="ident">Tegridy_Optimus_INT_to_TXT_Converter</span>(</p><p>INT8_List, time_denominator=128)</p>
     </div>
@@ -7910,6 +8237,212 @@ Tegridy Code 2020</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDI.Tegridy_Score_Chords_Pairs_Generator">
+    <p>def <span class="ident">Tegridy_Score_Chords_Pairs_Generator</span>(</p><p>chords_list, shuffle_pairs=True)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Tegridy Score Chords Pairs Generator</p>
+<p>Input: Flat chords list
+       Shuffle pairs (recommended)</p>
+<p>Output: Score chords pairs list
+        Number of created pairs</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_Score_Chords_Pairs_Generator', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Tegridy_Score_Chords_Pairs_Generator" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Score_Chords_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Shuffle pairs (recommended)</span>
+
+<span class="sd">    Output: Score chords pairs list</span>
+<span class="sd">            Number of created pairs</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">chords_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pcho</span> <span class="o">=</span> <span class="n">chords_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">pcho</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">pcho</span><span class="p">],</span> <span class="n">cho</span><span class="p">])</span>
+        <span class="n">pcho</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+    <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> 
+      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">pcho</span><span class="p">],</span> <span class="n">cho</span><span class="p">])</span>
+      
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">shuffle_pairs</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chords</span><span class="p">,</span> <span class="n">i</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDI.Tegridy_Score_Slicer">
+    <p>def <span class="ident">Tegridy_Score_Slicer</span>(</p><p>chords_list, number_of_miliseconds_per_slice=2000)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Tegridy Score Slicer</p>
+<p>Input: Flat chords list
+       Number of miliseconds per slice</p>
+<p>Output: Sliced chords list
+        Number of created slices</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_Score_Slicer', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Tegridy_Score_Slicer" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Score_Slicer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Slicer</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Number of miliseconds per slice</span>
+
+<span class="sd">    Output: Sliced chords list</span>
+<span class="sd">            Number of created slices</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">number_of_miliseconds_per_slice</span> 
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">chords_list1</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chords_list</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">chords_list1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chords_list1</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">:</span>
+        
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+      
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="n">number_of_miliseconds_per_slice</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+    <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]:</span> 
+      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chords</span> <span class="k">if</span> <span class="n">x</span><span class="p">],</span> <span class="n">i</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDI.Tegridy_Sliced_Score_Pairs_Generator">
+    <p>def <span class="ident">Tegridy_Sliced_Score_Pairs_Generator</span>(</p><p>chords_list, number_of_miliseconds_per_slice=2000, shuffle_pairs=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Tegridy Sliced Score Pairs Generator</p>
+<p>Input: Flat chords list
+       Number of miliseconds per slice</p>
+<p>Output: Sliced score pairs list
+        Number of created slices</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_Sliced_Score_Pairs_Generator', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Tegridy_Sliced_Score_Pairs_Generator" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Sliced_Score_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Sliced Score Pairs Generator</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Number of miliseconds per slice</span>
+
+<span class="sd">    Output: Sliced score pairs list</span>
+<span class="sd">            Number of created slices</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">number_of_miliseconds_per_slice</span> 
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">chords_list1</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chords_list</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">chords_list1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pcho</span> <span class="o">=</span> <span class="n">chords_list1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chords_list1</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">:</span>
+        
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">pcho</span><span class="p">,</span> <span class="n">cho</span><span class="p">])</span>
+        <span class="n">pcho</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="n">number_of_miliseconds_per_slice</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+    <span class="k">if</span> <span class="n">cho</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">pcho</span> <span class="o">!=</span> <span class="p">[]:</span> 
+      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">pcho</span><span class="p">,</span> <span class="n">cho</span><span class="p">])</span>
+      <span class="n">pcho</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">shuffle_pairs</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chords</span><span class="p">,</span> <span class="n">i</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDI.Tegridy_TXT_Dataset_File_Writer">
     <p>def <span class="ident">Tegridy_TXT_Dataset_File_Writer</span>(</p><p>input_file_name=&#39;TMIDI_TXT_Dataset&#39;, ext=&#39;&#39;, TXT_String=&#39;&#39;)</p>
     </div>
@@ -8519,6 +9052,92 @@ Tegridy Code 2020</p></div>
     <span class="n">output_INT_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word2int</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">input_TXT_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)]</span>
     
     <span class="k">return</span> <span class="n">output_INT_list</span><span class="p">,</span> <span class="n">decoding_dictionary</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDI.Tegridy_Timings_Converter">
+    <p>def <span class="ident">Tegridy_Timings_Converter</span>(</p><p>chords_list, max_delta_time=1000, fixed_start_time=300, start_time=0, start_time_multiplier=1, durations_multiplier=1)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Tegridy Timings Converter</p>
+<p>Input: Flat chords list
+       Max delta time allowed between notes
+       Fixed start note time for excessive gaps</p>
+<p>Output: Converted flat chords list</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_Timings_Converter', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Tegridy_Timings_Converter" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Timings_Converter</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> 
+                              <span class="n">max_delta_time</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> 
+                              <span class="n">fixed_start_time</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> 
+                              <span class="n">start_time</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                              <span class="n">start_time_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                              <span class="n">durations_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Timings Converter</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Max delta time allowed between notes</span>
+<span class="sd">           Fixed start note time for excessive gaps</span>
+
+<span class="sd">    Output: Converted flat chords list</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">song</span> <span class="o">=</span> <span class="n">chords_list</span>
+
+    <span class="n">song1</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">song</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_time</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+    <span class="n">delta</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">song</span><span class="p">)):</span>
+
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+          
+          <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">max_delta_time</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">+=</span> <span class="n">fixed_start_time</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">delta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+          <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span> <span class="o">*</span> <span class="n">start_time_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">ss</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">durations_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+          
+          <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+          
+          <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span> <span class="o">*</span> <span class="n">start_time_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">ss</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">durations_multiplier</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+          <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+          
+          <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    
+    <span class="n">average_delta_st</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span>
+    <span class="n">average_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">]))</span>
+
+    <span class="n">song1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">song1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">average_delta_st</span><span class="p">,</span> <span class="n">average_duration</span>
 </pre></div>
 
   </div>
