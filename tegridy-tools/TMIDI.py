@@ -3755,6 +3755,50 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
+
+    '''Tegridy Score Chords Pairs Generator
+     
+    Input: Flat chords list
+           Shuffle pairs (recommended)
+
+    Output: Score chords pairs list
+            Number of created pairs
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords = []
+    cho = []
+
+    i = 0
+
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+    pcho = chords_list[0]
+    for cc in chords_list[1:]:
+      if cc[1] == pcho[1]:
+        
+        cho.append(cc)
+
+      else:
+        if cho != [] and pcho != []: chords.append([pcho, cho])
+        pcho = copy.deepcopy(cc)
+        cho = []
+        cho.append(cc)
+        
+        i += 1
+      
+    if cho != [] and pcho != []: 
+      chords.append([pcho, cho])
+      
+      i += 1
+    
+    if shuffle_pairs: random.shuffle(chords)
+
+    return chords, i
+
+###################################################################################
+
 def Tegridy_Sliced_Score_Pairs_Generator(chords_list, number_of_miliseconds_per_slice=2000, shuffle_pairs = False):
 
     '''Tegridy Sliced Score Pairs Generator
