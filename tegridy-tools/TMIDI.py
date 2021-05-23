@@ -3781,7 +3781,7 @@ def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
         cho.append(cc)
 
       else:
-        if cho != [] and pcho != []: chords.append([pcho, cho])
+        if cho != [] and pcho != []: chords.append([[pcho], cho])
         pcho = copy.deepcopy(cc)
         cho = []
         cho.append(cc)
@@ -3789,7 +3789,7 @@ def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
         i += 1
       
     if cho != [] and pcho != []: 
-      chords.append([pcho, cho])
+      chords.append([[pcho], cho])
       
       i += 1
     
