@@ -3755,12 +3755,12 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
-def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, max_number_of_unique_pitches = 128):
+def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, match_type = 4):
 
     '''Tegridy MIDI Zip Notes Summarizer
      
     Input: Flat chords list / SONG
-           Max number of unique pitches allowed
+           Match type according to 'note' event of MIDI.py
 
     Output: Summarized chords list
             Number of summarized notes
@@ -3773,15 +3773,15 @@ def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, max_number_of_unique_pitches 
     j = 0
     out1 = []
     pout = []
-    
+ 
+
     for o in chords_list:
 
       # MIDI Zip
 
-      if o[4] not in pout:
-        if len(pout) > max_number_of_unique_pitches:
-          pout = []
-        pout.append(o[4])
+      if o[match_type:] not in pout:
+        pout.append(o[match_type:])
+        
         out1.append(o)
         j += 1
       
@@ -3915,7 +3915,7 @@ def Tegridy_Timings_Converter(chords_list,
     delta = [0]
 
     for i in range(len(song)):
-      if song[i][0] =='note':
+      if song[i][0] == 'note':
         ss = copy.deepcopy(song[i])
         if song[i][1] != p[1]:
           
@@ -3937,9 +3937,10 @@ def Tegridy_Timings_Converter(chords_list,
           song1.append(ss)
           
           p = copy.deepcopy(song[i])
+      
       else:
         song1.append(song[i])
-
+        
     average_delta_st = int(sum(delta) / len(delta))
     average_duration = int(sum([y[2] for y in song1]) / len([y[2] for y in song1]))
 
