@@ -3942,7 +3942,7 @@ def Tegridy_Timings_Converter(chords_list,
         song1.append(song[i])
         
     average_delta_st = int(sum(delta) / len(delta))
-    average_duration = int(sum([y[2] for y in song1]) / len([y[2] for y in song1]))
+    average_duration = int(sum([y[2] for y in song1 if y[0] == 'note']) / len([y[2] for y in song1 if y[0] == 'note']))
 
     song1.sort(reverse=False, key=lambda x: x[1])
 
