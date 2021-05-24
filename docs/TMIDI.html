@@ -5025,12 +5025,12 @@ event, with a duration:
 <span class="c1">#</span>
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">max_number_of_unique_pitches</span> <span class="o">=</span> <span class="mi">128</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">match_type</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list / SONG</span>
-<span class="sd">           Max number of unique pitches allowed</span>
+<span class="sd">           Match type according to &#39;note&#39; event of MIDI.py</span>
 
 <span class="sd">    Output: Summarized chords list</span>
 <span class="sd">            Number of summarized notes</span>
@@ -5043,15 +5043,15 @@ event, with a duration:
     <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
-    
+ 
+
     <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">:</span>
 
       <span class="c1"># MIDI Zip</span>
 
-      <span class="k">if</span> <span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pout</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pout</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_number_of_unique_pitches</span><span class="p">:</span>
-          <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">pout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">o</span><span class="p">[</span><span class="n">match_type</span><span class="p">:]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pout</span><span class="p">:</span>
+        <span class="n">pout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="n">match_type</span><span class="p">:])</span>
+        
         <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
       
@@ -5185,7 +5185,7 @@ event, with a duration:
     <span class="n">delta</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">song</span><span class="p">)):</span>
-
+      <span class="k">if</span> <span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
           
@@ -5207,9 +5207,14 @@ event, with a duration:
           <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
           
           <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+        
     <span class="n">average_delta_st</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span>
-    <span class="n">average_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">]))</span>
+    <span class="n">average_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span> <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span> <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]))</span>
 
     <span class="n">song1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
@@ -7498,7 +7503,7 @@ Tegridy Code 2020</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer">
-    <p>def <span class="ident">Tegridy_MIDI_Zip_Notes_Summarizer</span>(</p><p>chords_list, max_number_of_unique_pitches=128)</p>
+    <p>def <span class="ident">Tegridy_MIDI_Zip_Notes_Summarizer</span>(</p><p>chords_list, match_type=4)</p>
     </div>
     
 
@@ -7506,7 +7511,7 @@ Tegridy Code 2020</p></div>
   
     <div class="desc"><p>Tegridy MIDI Zip Notes Summarizer</p>
 <p>Input: Flat chords list / SONG
-       Max number of unique pitches allowed</p>
+       Match type according to 'note' event of MIDI.py</p>
 <p>Output: Summarized chords list
         Number of summarized notes
         Number of dicarted notes</p>
@@ -7515,12 +7520,12 @@ Tegridy Code 2021</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer', this);">Show source &equiv;</a></p>
   <div id="source-TMIDI.Tegridy_MIDI_Zip_Notes_Summarizer" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">max_number_of_unique_pitches</span> <span class="o">=</span> <span class="mi">128</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">match_type</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list / SONG</span>
-<span class="sd">           Max number of unique pitches allowed</span>
+<span class="sd">           Match type according to &#39;note&#39; event of MIDI.py</span>
 
 <span class="sd">    Output: Summarized chords list</span>
 <span class="sd">            Number of summarized notes</span>
@@ -7533,15 +7538,15 @@ Tegridy Code 2021</p></div>
     <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
-    
+ 
+
     <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">:</span>
 
       <span class="c1"># MIDI Zip</span>
 
-      <span class="k">if</span> <span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pout</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pout</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_number_of_unique_pitches</span><span class="p">:</span>
-          <span class="n">pout</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">pout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">o</span><span class="p">[</span><span class="n">match_type</span><span class="p">:]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pout</span><span class="p">:</span>
+        <span class="n">pout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="n">match_type</span><span class="p">:])</span>
+        
         <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
       
@@ -9109,7 +9114,7 @@ Tegridy Code 2021</p></div>
     <span class="n">delta</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">song</span><span class="p">)):</span>
-
+      <span class="k">if</span> <span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
           
@@ -9131,9 +9136,14 @@ Tegridy Code 2021</p></div>
           <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
           
           <span class="n">p</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">song</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="n">song1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+        
     <span class="n">average_delta_st</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span>
-    <span class="n">average_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span><span class="p">]))</span>
+    <span class="n">average_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span> <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">song1</span> <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]))</span>
 
     <span class="n">song1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
