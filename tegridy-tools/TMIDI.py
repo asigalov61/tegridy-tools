@@ -3939,7 +3939,9 @@ def Tegridy_Timings_Converter(chords_list,
           p = copy.deepcopy(song[i])
       
       else:
-        song1.append(song[i])
+        ss = copy.deepcopy(song[i])
+        ss[1] = time
+        song1.append(ss)
         
     average_delta_st = int(sum(delta) / len(delta))
     average_duration = int(sum([y[2] for y in song1 if y[0] == 'note']) / len([y[2] for y in song1 if y[0] == 'note']))
