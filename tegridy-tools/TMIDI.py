@@ -3792,7 +3792,7 @@ def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, match_type = 4):
 
 ###################################################################################
 
-def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
+def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True, remove_single_notes=False):
 
     '''Tegridy Score Chords Pairs Generator
      
@@ -3801,6 +3801,7 @@ def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
 
     Output: Score chords pairs list
             Number of created pairs
+            Number of detected chords
 
     Project Los Angeles
     Tegridy Code 2021'''
@@ -3809,30 +3810,40 @@ def Tegridy_Score_Chords_Pairs_Generator(chords_list, shuffle_pairs = True):
     cho = []
 
     i = 0
+    j = 0
 
     chords_list.sort(reverse=False, key=lambda x: x[1])
     pcho = chords_list[0]
-    for cc in chords_list[1:]:
+    for cc in chords_list:
       if cc[1] == pcho[1]:
         
         cho.append(cc)
+        pcho = copy.deepcopy(cc)
 
       else:
-        if cho != [] and pcho != []: chords.append([[pcho], cho])
-        pcho = copy.deepcopy(cc)
-        cho = []
-        cho.append(cc)
-        
-        i += 1
-      
-    if cho != [] and pcho != []: 
-      chords.append([[pcho], cho])
-      
-      i += 1
+        if not remove_single_notes:
+          chords.append(cho)
+          cho = []
+          cho.append(cc)
+          pcho = copy.deepcopy(cc)
+          
+          i += 1
+        else:
+          if len(cho) > 1:
+            chords.append(cho)
+          cho = []
+          cho.append(cc)
+          pcho = copy.deepcopy(cc)
+            
+          i += 1  
     
-    if shuffle_pairs: random.shuffle(chords)
+    chords_pairs = []
+    for i in range(len(chords)-1):
+      chords_pairs.append([chords[i], chords[i+1]])
+      j += 1
+    if shuffle_pairs: random.shuffle(chords_pairs)
 
-    return chords, i
+    return chords_pairs, j, i
 
 ###################################################################################
 
