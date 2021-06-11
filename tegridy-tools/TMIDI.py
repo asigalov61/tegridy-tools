@@ -3963,7 +3963,7 @@ def Tegridy_Timings_Converter(chords_list,
 
 ###################################################################################
 
-def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
+def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, overlap_notes = 0):
 
     '''Tegridy Score Slicer
      
@@ -3996,6 +3996,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000):
       else:
         chords.append(cho)
         cho = []
+        cho.extend(chords[-1][-overlap_notes:])
         cho.append(cc)
         time += number_of_miliseconds_per_slice
         i += 1
