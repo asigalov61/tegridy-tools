@@ -3755,7 +3755,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
-def Tegridy_Chords_List_Music_Features(chords_list):
+def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 32, pitch_div = 1, vel_div = 8):
 
     '''Tegridy Chords List Music Features
      
@@ -3798,35 +3798,35 @@ def Tegridy_Chords_List_Music_Features(chords_list):
     # Extracting music features from the chords list
     
     # Melody features
-    mel_avg_pitch = int(sum([y[4] for y in melody_list]) / len(melody_list)  / 12)
-    mel_avg_dur = int(sum([int(y[2] / 128) for y in melody_list]) / len(melody_list))
-    mel_avg_vel = int(sum([int(y[5] / 8) for y in melody_list]) / len(melody_list))
+    mel_avg_pitch = int(sum([y[4] for y in melody_list]) / len(melody_list) / pitch_div)
+    mel_avg_dur = int(sum([int(y[2] / st_dur_div) for y in melody_list]) / len(melody_list))
+    mel_avg_vel = int(sum([int(y[5] / vel_div) for y in melody_list]) / len(melody_list))
     mel_avg_chan = int(sum([int(y[3]) for y in melody_list]) / len(melody_list))
     
     mel_tds = [int(abs(melody_list[i-1][1]-melody_list[i][1])) for i in range(1, len(melody_list))]
-    if len(mel_tds) != 0: mel_avg_tds = int(sum(mel_tds) / len(mel_tds) / 128)
+    if len(mel_tds) != 0: mel_avg_tds = int(sum(mel_tds) / len(mel_tds) / st_dur_div)
     
     melody_features = [mel_avg_tds, mel_avg_dur, mel_avg_chan, mel_avg_pitch, mel_avg_vel]
 
     # Chords list features
-    mel_chrd_avg_pitch = int(sum([y[4] for y in chords_list1]) / len(chords_list1) / 12)
-    mel_chrd_avg_dur = int(sum([int(y[2] / 128) for y in chords_list1]) / len(chords_list1))
-    mel_chrd_avg_vel = int(sum([int(y[5] / 8) for y in chords_list1]) / len(chords_list1))
+    mel_chrd_avg_pitch = int(sum([y[4] for y in chords_list1]) / len(chords_list1) / pitch_div)
+    mel_chrd_avg_dur = int(sum([int(y[2] / st_dur_div) for y in chords_list1]) / len(chords_list1))
+    mel_chrd_avg_vel = int(sum([int(y[5] / vel_div) for y in chords_list1]) / len(chords_list1))
     mel_chrd_avg_chan = int(sum([int(y[3]) for y in chords_list1]) / len(chords_list1))
     
     mel_chrd_tds = [int(abs(chords_list1[i-1][1]-chords_list1[i][1])) for i in range(1, len(chords_list1))]
-    if len(mel_tds) != 0: mel_chrd_avg_tds = int(sum(mel_chrd_tds) / len(mel_chrd_tds) / 128)
+    if len(mel_tds) != 0: mel_chrd_avg_tds = int(sum(mel_chrd_tds) / len(mel_chrd_tds) / st_dur_div)
     
     chords_list_features = [mel_chrd_avg_tds, mel_chrd_avg_dur, mel_chrd_avg_chan, mel_chrd_avg_pitch, mel_chrd_avg_vel]
 
     # Bass melody features
-    bass_melody_avg_pitch = int(sum([y[4] for y in bass_melody]) / len(bass_melody) / 12)
-    bass_melody_avg_dur = int(sum([int(y[2] / 128) for y in bass_melody]) / len(bass_melody))
-    bass_melody_avg_vel = int(sum([int(y[5] / 8) for y in bass_melody]) / len(bass_melody))
+    bass_melody_avg_pitch = int(sum([y[4] for y in bass_melody]) / len(bass_melody) / pitch_div)
+    bass_melody_avg_dur = int(sum([int(y[2] / st_dur_div) for y in bass_melody]) / len(bass_melody))
+    bass_melody_avg_vel = int(sum([int(y[5] / vel_div) for y in bass_melody]) / len(bass_melody))
     bass_melody_avg_chan = int(sum([int(y[3]) for y in bass_melody]) / len(bass_melody))
     
     bass_melody_tds = [int(abs(bass_melody[i-1][1]-bass_melody[i][1])) for i in range(1, len(bass_melody))]
-    if len(bass_melody_tds) != 0: bass_melody_avg_tds = int(sum(bass_melody_tds) / len(bass_melody_tds) / 128)
+    if len(bass_melody_tds) != 0: bass_melody_avg_tds = int(sum(bass_melody_tds) / len(bass_melody_tds) / st_dur_div)
     
     bass_melody_features = [bass_melody_avg_tds, bass_melody_avg_dur, bass_melody_avg_chan, bass_melody_avg_pitch, bass_melody_avg_vel]
     
