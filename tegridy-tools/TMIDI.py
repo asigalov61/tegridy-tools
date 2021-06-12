@@ -3755,6 +3755,93 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Chords_List_Music_Features(chords_list):
+
+    '''Tegridy Chords List Music Features
+     
+    Input: Flat chords list
+
+    Output: A list of the extracted chords list's music features
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords_list1 = [x for x in chords_list if x]
+    chords_list1.sort(reverse=False, key=lambda x: x[1])
+    
+    # Features extraction code
+
+    melody_list = []
+    bass_melody = []
+    melody_chords = []
+    mel_avg_tds = []
+    bass_melody_avg_tds = []
+
+    #print('Grouping by start time. This will take a while...')
+    values = set(map(lambda x:x[1], chords_list1)) # Non-multithreaded function version just in case
+
+    groups = [[y for y in chords_list1 if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+
+    #print('Sorting events...')
+    for items in groups:
+        items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
+        melody_list.append(items[0]) # Creating final melody list
+        melody_chords.append(items) # Creating final chords list
+        bass_melody.append(items[-1]) # Creating final bass melody list
+
+    #print('Final sorting by start time...')      
+    melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
+    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
+    bass_melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
+
+    # Extracting music features from the chords list
+    
+    # Melody features
+    mel_avg_pitch = int(sum([y[4] for y in melody_list]) / len(melody_list)  / 12)
+    mel_avg_dur = int(sum([int(y[2] / 128) for y in melody_list]) / len(melody_list))
+    mel_avg_vel = int(sum([int(y[5] / 8) for y in melody_list]) / len(melody_list))
+    mel_avg_chan = int(sum([int(y[3]) for y in melody_list]) / len(melody_list))
+    
+    mel_tds = [int(abs(melody_list[i-1][1]-melody_list[i][1])) for i in range(1, len(melody_list))]
+    if len(mel_tds) != 0: mel_avg_tds = int(sum(mel_tds) / len(mel_tds) / 128)
+    
+    melody_features = [mel_avg_tds, mel_avg_dur, mel_avg_chan, mel_avg_pitch, mel_avg_vel]
+
+    # Chords list features
+    mel_chrd_avg_pitch = int(sum([y[4] for y in chords_list1]) / len(chords_list1) / 12)
+    mel_chrd_avg_dur = int(sum([int(y[2] / 128) for y in chords_list1]) / len(chords_list1))
+    mel_chrd_avg_vel = int(sum([int(y[5] / 8) for y in chords_list1]) / len(chords_list1))
+    mel_chrd_avg_chan = int(sum([int(y[3]) for y in chords_list1]) / len(chords_list1))
+    
+    mel_chrd_tds = [int(abs(chords_list1[i-1][1]-chords_list1[i][1])) for i in range(1, len(chords_list1))]
+    if len(mel_tds) != 0: mel_chrd_avg_tds = int(sum(mel_chrd_tds) / len(mel_chrd_tds) / 128)
+    
+    chords_list_features = [mel_chrd_avg_tds, mel_chrd_avg_dur, mel_chrd_avg_chan, mel_chrd_avg_pitch, mel_chrd_avg_vel]
+
+    # Bass melody features
+    bass_melody_avg_pitch = int(sum([y[4] for y in bass_melody]) / len(bass_melody) / 12)
+    bass_melody_avg_dur = int(sum([int(y[2] / 128) for y in bass_melody]) / len(bass_melody))
+    bass_melody_avg_vel = int(sum([int(y[5] / 8) for y in bass_melody]) / len(bass_melody))
+    bass_melody_avg_chan = int(sum([int(y[3]) for y in bass_melody]) / len(bass_melody))
+    
+    bass_melody_tds = [int(abs(bass_melody[i-1][1]-bass_melody[i][1])) for i in range(1, len(bass_melody))]
+    if len(bass_melody_tds) != 0: bass_melody_avg_tds = int(sum(bass_melody_tds) / len(bass_melody_tds) / 128)
+    
+    bass_melody_features = [bass_melody_avg_tds, bass_melody_avg_dur, bass_melody_avg_chan, bass_melody_avg_pitch, bass_melody_avg_vel]
+    
+    # A list to return all features
+    music_features = []
+
+    music_features.extend([len(chords_list1)]) # Count of the original chords list notes
+    
+    music_features.extend(melody_features) # Extracted melody features
+    music_features.extend(chords_list_features) # Extracted chords list features
+    music_features.extend(bass_melody_features) # Extracted bass melody features
+
+    return music_features
+
+###################################################################################
+
 def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, match_type = 4):
 
     '''Tegridy MIDI Zip Notes Summarizer
