@@ -3326,7 +3326,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       opus = midi2opus(midi_file.read())
     
     except:
-      print('Bad file. Skipping...')
+      print('Problematic MIDI. Skipping...')
       print('File name:', MIDI_file)
       midi_file.close()
       return txt, melody, chords
@@ -3443,26 +3443,31 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         velocity = int(previous_event[5])
 
-        # Converting to TXT
-        txt += str(chr(start_time + char_offset))
-        txt += str(chr(duration + char_offset))
-        txt += str(chr(pitch + char_offset))
-        if output_velocity:
-          txt += str(chr(velocity + char_offset))
-        if output_MIDI_channels:
-          txt += str(chr(channel + char_offset))
+        # Converting to TXT if possible...
+        try:
+          txt += str(chr(start_time + char_offset))
+          txt += str(chr(duration + char_offset))
+          txt += str(chr(pitch + char_offset))
+          if output_velocity:
+            txt += str(chr(velocity + char_offset))
+          if output_MIDI_channels:
+            txt += str(chr(channel + char_offset))
 
 
-        if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
-          txt += ''      
-        else:     
-          if line_by_line_output:
-            txt += chr(10)
-          else:
-            txt += chr(32) 
+          if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
+            txt += ''      
+          else:     
+            if line_by_line_output:
+              txt += chr(10)
+            else:
+              txt += chr(32) 
+          
+          previous_event = copy.deepcopy(event)
         
-        previous_event = copy.deepcopy(event)
-      
+        except:
+          # print('Problematic MIDI event. Skipping...')
+          continue
+
       if not line_by_line_output:
         txt += chr(10)      
     
@@ -3522,25 +3527,31 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
             velocity = int(previous_event[5])
 
-            # Converting to TXT
-            txtc += str(chr(start_time + char_offset))
-            txtc += str(chr(duration + char_offset))
-            txtc += str(chr(pitch + char_offset))
-            if output_velocity:
-              txtc += str(chr(velocity + char_offset))
-            if output_MIDI_channels:
-              txtc += str(chr(channel + char_offset))
-
-            if line_by_line_output:
+            # Converting to TXT if possible...
             
+            try:
+              txtc += str(chr(start_time + char_offset))
+              txtc += str(chr(duration + char_offset))
+              txtc += str(chr(pitch + char_offset))
+              if output_velocity:
+                txtc += str(chr(velocity + char_offset))
+              if output_MIDI_channels:
+                txtc += str(chr(channel + char_offset))
 
-              txtc += chr(10)
-            else:
+              if line_by_line_output:
+              
 
-              txtc += chr(32)
+                txtc += chr(10)
+              else:
 
-            previous_event = copy.deepcopy(event)
+                txtc += chr(32)
+
+              previous_event = copy.deepcopy(event)
             
+            except:
+              # print('Problematic MIDI event! Skipping...')
+              continue
+
         if not line_by_line_output:
           txtc += chr(10)
 
