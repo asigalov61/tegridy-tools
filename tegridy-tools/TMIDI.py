@@ -3775,6 +3775,7 @@ def Tegridy_Chords_List_Music_Features(chords_list):
     bass_melody = []
     melody_chords = []
     mel_avg_tds = []
+    mel_chrd_avg_tds = []
     bass_melody_avg_tds = []
 
     #print('Grouping by start time. This will take a while...')
