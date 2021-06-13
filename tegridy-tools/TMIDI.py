@@ -3766,7 +3766,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
-def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 32, pitch_div = 1, vel_div = 8):
+def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 1, pitch_div = 1, vel_div = 1):
 
     '''Tegridy Chords List Music Features
      
@@ -3849,6 +3849,7 @@ def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 32, pitch_div =
     music_features.extend(melody_features) # Extracted melody features
     music_features.extend(chords_list_features) # Extracted chords list features
     music_features.extend(bass_melody_features) # Extracted bass melody features
+    music_features.extend([sum([y[4] for y in chords_list1])]) # Sum of all pitches in the original chords list
 
     return music_features
 
