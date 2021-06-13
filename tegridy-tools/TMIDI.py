@@ -3766,6 +3766,85 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Chords_Generator(chords_list, shuffle_pairs = True, remove_single_notes=False):
+
+    '''Tegridy Score Chords Pairs Generator
+     
+    Input: Flat chords list
+           Shuffle pairs (recommended)
+
+    Output: List of chords
+            
+            Average time(ms) per chord
+            Average time(ms) per pitch
+            Average chords delta time
+
+            Average duration
+            Average channel
+            Average pitch
+            Average velocity
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords = []
+    cho = []
+
+    i = 0
+
+    # Sort by start time
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+
+    # Main loop
+    pcho = chords_list[0]
+    for cc in chords_list:
+      if cc[1] == pcho[1]:
+        
+        cho.append(cc)
+        pcho = copy.deepcopy(cc)
+
+      else:
+        if not remove_single_notes:
+          chords.append(cho)
+          cho = []
+          cho.append(cc)
+          pcho = copy.deepcopy(cc)
+          
+          i += 1
+        else:
+          if len(cho) > 1:
+            chords.append(cho)
+          cho = []
+          cho.append(cc)
+          pcho = copy.deepcopy(cc)
+            
+          i += 1  
+    
+    # Averages
+    t0 = chords[0][0][1]
+    t1 = chords[-1][-1][1]
+    tdel = abs(t1 - t0)
+    avg_ms_per_chord = int(tdel / i)
+    avg_ms_per_pitch = int(tdel / len(chords_list))
+
+    # Delta time
+    tds = [int(abs(chords_list[i-1][1]-chords_list[i][1]) / 1) for i in range(1, len(chords_list))]
+    if len(tds) != 0: avg_delta_time = int(sum(tds) / len(tds))
+
+    # Chords list attributes
+    p = int(sum([int(y[4]) for y in chords_list]) / len(chords_list))
+    d = int(sum([int(y[2]) for y in chords_list]) / len(chords_list))
+    c = int(sum([int(y[3]) for y in chords_list]) / len(chords_list))
+    v = int(sum([int(y[5]) for y in chords_list]) / len(chords_list))
+
+    # Final shuffle
+    if shuffle_pairs:
+      random.shuffle(chords)
+
+    return chords, [avg_ms_per_chord, avg_ms_per_pitch, avg_delta_time], [d, c, p, v]
+
+###################################################################################
+
 def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 1, pitch_div = 1, vel_div = 1):
 
     '''Tegridy Chords List Music Features
