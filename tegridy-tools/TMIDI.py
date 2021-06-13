@@ -3766,6 +3766,101 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4000, shuffle_slices=False):
+
+    '''Tegridy Advanced Score Slicer
+     
+    Input: Flat chords list
+           Number of miliseconds per slice
+
+    Output: Sliced chords list
+            List of aligned slices features
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords = []
+    cho = []
+
+    melody_list = []
+    bass_melody = []
+
+    time = number_of_miliseconds_per_slice 
+
+    i = 0
+
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+    
+    for cc in chords_list:
+
+      if cc[1] <= time:
+        
+        cho.append(cc)
+      
+
+      else:
+        chords.append(cho)
+        cho = []
+        cho.append(cc)
+        time += number_of_miliseconds_per_slice
+        i += 1
+      
+    if cho != []: 
+      chords.append(cho)
+      i += 1
+
+    # Optional shuffle
+    if shuffle_slices:
+      random.shuffle(chords)
+
+    slices_features = []
+
+    for c in chords:
+
+      # Averages
+      t0 = c[0][1]
+      t1 = c[-1][1]
+      tdel = abs(t1 - t0)
+      avg_ms_per_pitch = int(tdel / len(c))
+
+      # Delta time
+      tds = [int(abs(c[i-1][1]-c[i][1]) / 1) for i in range(1, len(c))]
+      if len(tds) != 0: avg_delta_time = int(sum(tds) / len(tds))
+
+      # Chords list attributes
+      p = int(sum([int(y[4]) for y in c]) / len(c))
+      d = int(sum([int(y[2]) for y in c]) / len(c))
+      ch = int(sum([int(y[3]) for y in c]) / len(c))
+      v = int(sum([int(y[5]) for y in c]) / len(c))
+
+      #print('Extracting melody...')
+      melody_list = []
+
+      #print('Grouping by start time. This will take a while...')
+      values = set(map(lambda x:x[1], c)) # Non-multithreaded function version just in case
+
+      groups = [[y for y in c if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+    
+      #print('Sorting events...')
+      for items in groups:
+          items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
+          if items[0][4] >= 60: melody_list.append(items[0]) # Creating final melody list
+          if items[-1][4] < 60: bass_melody.append(items[-1]) # Creating final bass melody list
+      
+      #print('Final sorting by start time...')      
+      melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
+      bass_melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
+
+      # Computing slice keys/avg. pitches
+      mkey = int(sum([y[4] for y in bass_melody]) / len(bass_melody))
+      bkey = int(sum([y[4] for y in bass_melody]) / len(bass_melody))
+
+      slices_features.append([mkey, bkey, avg_ms_per_pitch, avg_delta_time, d, ch, p, v])
+
+    return chords, slices_features
+
+###################################################################################
+
 def Tegridy_Chords_Generator(chords_list, shuffle_pairs = True, remove_single_notes=False):
 
     '''Tegridy Score Chords Pairs Generator
