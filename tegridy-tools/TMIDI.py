@@ -3266,7 +3266,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               karaoke=False,
                               karaoke_language_encoding='utf-8',
                               song_name='Song',
-                              perfect_timings=False):
+                              perfect_timings=False,
+                              musenet_encoding=False):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3552,7 +3553,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         txt = txtc
         chords = melody_chords
     
+    # Default stuff (not melody-conditioned/not-karaoke)
     else:
+      melody_chords.sort(reverse=False, key=lambda x: x[0][3])
       melody_chords.sort(reverse=False, key=lambda x: x[0][1])
       mel_chords = []
       for mc in melody_chords:
@@ -3646,6 +3649,9 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
     # Helper aux/backup function for Karaoke
     karaokez.sort(reverse=False, key=lambda x: x[1])  
+
+    if musenet_encoding and not melody_conditioned_encoding and not karaoke:
+      chords.sort(key=lambda x: (x[1], x[3]))
 
     return txt, melody_list, chords #, bass_melody # Bass melody aux output
 
