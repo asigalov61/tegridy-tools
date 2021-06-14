@@ -3773,8 +3773,7 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     Input: Flat chords list
            Number of miliseconds per slice
 
-    Output: Sliced chords list
-            List of aligned slices features
+    Output: Sliced chords list with aligned slices features
 
     Project Los Angeles
     Tegridy Code 2021'''
@@ -3814,7 +3813,7 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     if shuffle_slices:
       random.shuffle(chords)
 
-    slices_features = []
+    sliced_chords_list = []
 
     for c in chords:
       if c != []:
@@ -3855,9 +3854,9 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
         if melody_list != []: mkey = int(sum([y[4] for y in melody_list]) / len(melody_list))
         if bass_melody != []: bkey = int(sum([y[4] for y in bass_melody]) / len(bass_melody))
 
-        slices_features.append([mkey, bkey, avg_ms_per_pitch, d, ch, p, v])
+        sliced_chords_list.append([c, mkey, bkey, avg_ms_per_pitch, d, ch, p, v])
 
-    return chords, slices_features
+    return sliced_chords_list
 
 ###################################################################################
 
