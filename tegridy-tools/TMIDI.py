@@ -3485,8 +3485,11 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
   
     #print('Sorting events...')
     for items in groups:
+        
         items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
-        items[0][3] = 0 # Melody should always bear MIDI Channel 0 for code to work
+        
+        if melody_conditioned_encoding: items[0][3] = 0 # Melody should always bear MIDI Channel 0 for code to work
+        
         melody_list.append(items[0]) # Creating final melody list
         melody_chords.append(items) # Creating final chords list
         bass_melody.append(items[-1]) # Creating final bass melody list
@@ -3555,7 +3558,6 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     
     # Default stuff (not melody-conditioned/not-karaoke)
     else:
-      melody_chords.sort(reverse=False, key=lambda x: x[0][3])
       melody_chords.sort(reverse=False, key=lambda x: x[0][1])
       mel_chords = []
       for mc in melody_chords:
@@ -3846,16 +3848,17 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     
     for cc in chords_list:
 
-      if cc[1] <= time:
+      if cc[1] <= time and ptime[1] == cc[1]:
         
         cho.append(cc)
-      
+        ptime = cc[1]
 
       else:
         if cho != []:
           chords.append(cho)
         cho = []
         cho.append(cc)
+        ptime = cc[1]
         time += number_of_miliseconds_per_slice
         i += 1
       
@@ -3899,10 +3902,6 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
             items.sort(reverse=True, key=lambda x: x[4]) # Sorting events by pitch
             melody_list.append(items[0]) # Creating final melody list
             bass_melody.append(items[-1]) # Creating final bass melody list
-        
-        #print('Final sorting by start time...')      
-        melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-        bass_melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
 
         # Computing slice keys/avg. pitches
         if melody_list != []: mkey = int(sum([y[4] for y in melody_list]) / len(melody_list))
