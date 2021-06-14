@@ -4328,12 +4328,16 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, over
 
 
       else:
-        chords.append(cho)
-        cho = []
 
         if overlap_chords:
+          chords.append(cho)
           cho.extend(chords[-1][pc_idx:])
         
+        else:
+          chords.append(cho[:pc_idx])
+        
+        cho = []
+      
         cho.append(cc)
         
         time += number_of_miliseconds_per_slice
