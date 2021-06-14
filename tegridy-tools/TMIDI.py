@@ -3849,7 +3849,7 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     
     for cc in chords_list:
 
-      if cc[1] <= time and ptime == cc[1]:
+      if cc[1] <= time or ptime == cc[1]:
         
         cho.append(cc)
         ptime = cc[1]
@@ -4316,7 +4316,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, over
     
     for cc in chords_list1:
 
-      if cc[1] <= time and ptime == cc[1]:
+      if cc[1] <= time or ptime == cc[1]:
         
         cho.append(cc)
         ptime = cc[1]
