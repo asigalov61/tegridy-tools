@@ -3840,7 +3840,8 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     melody_list = []
     bass_melody = []
 
-    time = number_of_miliseconds_per_slice 
+    time = number_of_miliseconds_per_slice
+    ptime = 0
 
     i = 0
 
@@ -3848,7 +3849,7 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     
     for cc in chords_list:
 
-      if cc[1] <= time and ptime[1] == cc[1]:
+      if cc[1] <= time and ptime == cc[1]:
         
         cho.append(cc)
         ptime = cc[1]
@@ -4289,7 +4290,7 @@ def Tegridy_Timings_Converter(chords_list,
 
 ###################################################################################
 
-def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, overlap_notes = 0):
+def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, overlap_notes = 0, overlap_chords=False):
 
     '''Tegridy Score Slicer
      
@@ -4305,7 +4306,8 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, over
     chords = []
     cho = []
 
-    time = number_of_miliseconds_per_slice 
+    time = number_of_miliseconds_per_slice
+    ptime = 0
 
     i = 0
 
@@ -4314,17 +4316,24 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, over
     
     for cc in chords_list1:
 
-      if cc[1] <= time:
+      if cc[1] <= time and ptime == cc[1]:
         
         cho.append(cc)
-      
+        ptime = cc[1]
+
 
       else:
         chords.append(cho)
         cho = []
-        cho.extend(chords[-1][-overlap_notes:])
+        
+        if overlap_chords:
+          cho.extend(chords[-1])
+        
         cho.append(cc)
+        
         time += number_of_miliseconds_per_slice
+        ptime = cc[1]
+        
         i += 1
       
     if cho != []: 
