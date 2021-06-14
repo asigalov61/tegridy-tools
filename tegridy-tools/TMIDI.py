@@ -3490,12 +3490,6 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         melody_chords.append(items) # Creating final chords list
         bass_melody.append(items[-1]) # Creating final bass melody list
     
-    #print('Final sorting by start time...')      
-    melody_list.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-    melody_chords.sort(reverse=False, key=lambda x: x[0][1]) # Sorting events by start time
-    bass_melody.sort(reverse=False, key=lambda x: x[1]) # Sorting events by start time
-    #print(txt, melody, chords)
-
     # [WIP] Melody-conditioned chords list
     if melody_conditioned_encoding == True:
       if not karaoke:
@@ -3557,7 +3551,61 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
         txt = txtc
         chords = melody_chords
+    
+    else:
+      melody_chords.sort(reverse=False, key=lambda x: x[0][1])
+      mel_chords = []
+      for mc in melody_chords:
+        mel_chords.extend(mc)
 
+      chords = mel_chords
+
+      # TXT Stuff
+      previous_event = copy.deepcopy(chords[0])
+      for event in chords:
+
+        # Computing events details
+        start_time = int(event[1] - previous_event[1])
+        
+        duration = int(previous_event[2])
+
+        channel = int(previous_event[3])
+
+        pitch = int(previous_event[4] + transpose_by)
+        if flip == True:
+          pitch = 127 - int(previous_event[4] + transpose_by)
+
+        velocity = int(previous_event[5])
+
+        # Converting to TXT if possible...
+        try:
+          txt += str(chr(start_time + char_offset))
+          txt += str(chr(duration + char_offset))
+          txt += str(chr(pitch + char_offset))
+          if output_velocity:
+            txt += str(chr(velocity + char_offset))
+          if output_MIDI_channels:
+            txt += str(chr(channel + char_offset))
+
+
+          if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
+            txt += ''      
+          else:     
+            if line_by_line_output:
+              txt += chr(10)
+            else:
+              txt += chr(32) 
+          
+          previous_event = copy.deepcopy(event)
+        
+        except:
+          # print('Problematic MIDI event. Skipping...')
+          continue
+
+      if not line_by_line_output:
+        txt += chr(10)      
+
+    # Karaoke stuff
     if karaoke:
       previous_event = copy.deepcopy(melody_list[0])
       for event in melody_list:
