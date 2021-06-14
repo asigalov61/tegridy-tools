@@ -3822,7 +3822,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
-def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4000, shuffle_slices=False):
+def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4000, shuffle_slices=False, overlap_chords=False):
 
     '''Tegridy Advanced Score Slicer
      
@@ -3849,7 +3849,7 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
     
     for cc in chords_list:
 
-      if cc[1] <= time or ptime == cc[1]:
+      if cc[1] <= time:
         
         cho.append(cc)
         ptime = cc[1]
@@ -3857,7 +3857,7 @@ def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4
       else:
         if cho != []:
           chords.append(cho)
-        cho = []
+        if not overlap_chords: cho = []
         cho.append(cc)
         ptime = cc[1]
         time += number_of_miliseconds_per_slice
@@ -4311,12 +4311,12 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, over
 
     i = 0
 
-    chords_list1 = [x for x in chords_list if x]
-    chords_list1.sort(reverse=False, key=lambda x: x[1])
-    
-    for cc in chords_list1:
 
-      if cc[1] <= time or ptime == cc[1]:
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+    
+    for cc in chords_list:
+
+      if cc[1] <= time:
         
         cho.append(cc)
         ptime = cc[1]
@@ -4324,10 +4324,7 @@ def Tegridy_Score_Slicer(chords_list, number_of_miliseconds_per_slice=2000, over
 
       else:
         chords.append(cho)
-        cho = []
-        
-        if overlap_chords:
-          cho.extend(chords[-1])
+        if not overlap_chords: cho = []
         
         cho.append(cc)
         
