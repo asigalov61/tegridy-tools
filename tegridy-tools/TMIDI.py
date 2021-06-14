@@ -3822,6 +3822,58 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 ###################################################################################
 
+def Tegridy_Last_Chord_Finder(chords_list):
+
+    '''Tegridy Last Chord Finder
+     
+    Input: Flat chords list
+
+    Output: Last detected chord of the chords list
+            Last chord start index in the original chords list
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    chords = []
+    cho = []
+
+    ptime = 0
+
+    i = 0
+
+    pc_idx = 0
+
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+    
+    for cc in chords_list:
+
+      if cc[1] == ptime:
+        
+        cho.append(cc)
+
+        ptime = cc[1]
+
+      else:
+
+        pc_idx = chords_list.index(cc)
+        chords.append(cho)
+        
+        cho = []
+      
+        cho.append(cc)
+        
+        ptime = cc[1]
+        
+        i += 1
+      
+    if cho != []: 
+      chords.append(cho)
+      i += 1
+     
+    return chords_list[pc_idx:], pc_idx
+
+###################################################################################
+
 def Tegridy_Advanced_Score_Slicer(chords_list, number_of_miliseconds_per_slice=4000, shuffle_slices=False):
 
     '''Tegridy Advanced Score Slicer
