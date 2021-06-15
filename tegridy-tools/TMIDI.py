@@ -4196,6 +4196,40 @@ def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 1, pitch_div = 
 
 ###################################################################################
 
+def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=90):
+
+    '''Tegridy Transform
+     
+    Input: Flat chords list
+           Desired average pitch
+           Desired average velocity
+
+    Output: Transformed flat chords list
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    transformed_chords_list = []
+
+    chords_list.sort(reverse=False, key=lambda x: x[1])
+
+    chords_list_features = Tegridy_Chords_List_Music_Features(chords_list)[9:11]
+
+    pitch_diff = chords_list_features[0] - to_pitch
+    velocity_diff = chords_list_features[1] - to_velocity
+
+    for c in chords_list:
+      cc = copy.deepcopy(c)
+      
+      cc[4] = c[4] - pitch_diff
+      cc[5] = c[5] - velocity_diff
+      
+      transformed_chords_list.append(cc)
+
+    return transformed_chords_list
+
+###################################################################################
+
 def Tegridy_MIDI_Zip_Notes_Summarizer(chords_list, match_type = 4):
 
     '''Tegridy MIDI Zip Notes Summarizer
