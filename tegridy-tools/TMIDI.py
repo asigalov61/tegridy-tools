@@ -1821,6 +1821,8 @@ import sys
 
 from abc import ABC, abstractmethod
 
+from difflib import SequenceMatcher as SM
+
 # from collections import defaultdict
 
 ###################################################################################
@@ -3820,6 +3822,62 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 #
 # TMIDI 2.0 Helper functions
 #
+###################################################################################
+
+def Tegridy_Chord_Match(chord1, chord2, match_type=2):
+
+    '''Tegridy Chord Match
+     
+    Input: Two chords to evaluate
+           Match type: 2 = duration, channel, pitch, velocity
+                       3 = channel, pitch, velocity
+                       4 = pitch, velocity
+                       5 = velocity
+
+    Output: Match rating (0-100)
+            NOTE: Match rating == -1 means identical source chords
+            NOTE: Match rating == 100 means mutual shortest chord
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    match_rating = 0
+
+    if chord1 == []:
+      return 0
+    if chord2 == []:
+      return 0
+
+    if chord1 == chord2:
+      return -1
+
+    else:
+      zipped_pairs = list(zip(chord1, chord2))
+      zipped_diff = abs(len(chord1) - len(chord2))
+
+      short_match = [False]
+      for pair in zipped_pairs:
+        cho1 = ' '.join([str(y) for y in pair[0][match_type:]])
+        cho2 = ' '.join([str(y) for y in pair[1][match_type:]])
+        if cho1 == cho2:
+          short_match.append(True)
+        else:
+          short_match.append(False)
+      
+      if True in short_match:
+        return 100
+
+      pairs_ratings = []
+
+      for pair in zipped_pairs:
+        cho1 = ' '.join([str(y) for y in pair[0][match_type:]])
+        cho2 = ' '.join([str(y) for y in pair[1][match_type:]])
+        pairs_ratings.append(SM(None, cho1, cho2).ratio())
+
+      match_rating = sum(pairs_ratings) / len(pairs_ratings) * 100
+
+      return match_rating
+
 ###################################################################################
 
 def Tegridy_Last_Chord_Finder(chords_list):
