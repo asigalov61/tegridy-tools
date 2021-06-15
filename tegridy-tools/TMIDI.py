@@ -4201,8 +4201,8 @@ def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=90):
     '''Tegridy Transform
      
     Input: Flat chords list
-           Desired average pitch
-           Desired average velocity
+           Desired average pitch (-1 == no change)
+           Desired average velocity (-1 == no change)
 
     Output: Transformed flat chords list
 
@@ -4221,8 +4221,11 @@ def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=90):
     for c in chords_list:
       cc = copy.deepcopy(c)
       
-      cc[4] = c[4] - pitch_diff
-      cc[5] = c[5] - velocity_diff
+      if to_pitch != -1: 
+        cc[4] = c[4] - pitch_diff
+      
+      if to_velocity != -1: 
+        cc[5] = c[5] - velocity_diff
       
       transformed_chords_list.append(cc)
 
