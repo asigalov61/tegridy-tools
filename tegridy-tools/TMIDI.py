@@ -3915,7 +3915,7 @@ def Tegridy_Last_Chord_Finder(chords_list):
 
       else:
         if pc_idx == 0: 
-          fc_idx = chords_list.index(cc)-1
+          fc_idx = chords_list.index(cc)
         pc_idx = chords_list.index(cc)
         
         chords.append(cho)
