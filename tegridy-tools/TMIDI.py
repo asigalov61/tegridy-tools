@@ -3888,6 +3888,7 @@ def Tegridy_Last_Chord_Finder(chords_list):
 
     Output: Last detected chord of the chords list
             Last chord start index in the original chords list
+            First chord end index in the original chords list
 
     Project Los Angeles
     Tegridy Code 2021'''
@@ -3900,6 +3901,7 @@ def Tegridy_Last_Chord_Finder(chords_list):
     i = 0
 
     pc_idx = 0
+    fc_idx = 0
 
     chords_list.sort(reverse=False, key=lambda x: x[1])
     
@@ -3912,8 +3914,10 @@ def Tegridy_Last_Chord_Finder(chords_list):
         ptime = cc[1]
 
       else:
-
+        if pc_idx == 0: 
+          fc_idx = chords_list.index(cc)-1
         pc_idx = chords_list.index(cc)
+        
         chords.append(cho)
         
         cho = []
@@ -3928,7 +3932,7 @@ def Tegridy_Last_Chord_Finder(chords_list):
       chords.append(cho)
       i += 1
      
-    return chords_list[pc_idx:], pc_idx
+    return chords_list[pc_idx:], pc_idx, fc_idx
 
 ###################################################################################
 
