@@ -3269,7 +3269,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               karaoke_language_encoding='utf-8',
                               song_name='Song',
                               perfect_timings=False,
-                              musenet_encoding=False):
+                              musenet_encoding=False,
+                              transform=0):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -3559,13 +3560,17 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         chords = melody_chords
     
     # Default stuff (not melody-conditioned/not-karaoke)
-    else:
+    else:      
+
       melody_chords.sort(reverse=False, key=lambda x: x[0][1])
       mel_chords = []
       for mc in melody_chords:
         mel_chords.extend(mc)
 
-      chords = mel_chords
+      if transform != 0: 
+        chords = Tegridy_Transform(mel_chords, transform)
+      else:
+        chords = mel_chords
 
       # TXT Stuff
       previous_event = copy.deepcopy(chords[0])
