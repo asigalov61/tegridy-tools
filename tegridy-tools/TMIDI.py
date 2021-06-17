@@ -1823,6 +1823,8 @@ from abc import ABC, abstractmethod
 
 from difflib import SequenceMatcher as SM
 
+import statistics
+
 # from collections import defaultdict
 
 ###################################################################################
@@ -3822,6 +3824,44 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     print('Task complete! Enjoy! :)')
 
     return output_list, song_name
+
+###################################################################################
+
+def Optimus_Signature(chords_list):
+
+    '''Optimus Signature
+
+    ---In the name of the search for a perfect score slice signature---
+     
+    Input: Flat chords list to evaluate
+
+    Output: Special Optimus Signature
+
+    Project Los Angeles
+    Tegridy Code 2021'''
+    
+    # Pitches
+
+    ## StDev
+    psd = statistics.stdev([int(y[4]) for y in chords_list])
+    ## Median
+    pmh = statistics.median_high([int(y[4]) for y in chords_list])
+    pm = statistics.median([int(y[4]) for y in chords_list])
+    pml = statistics.median_low([int(y[4]) for y in chords_list])
+    ## Mean
+    phm = statistics.harmonic_mean([int(y[4]) for y in chords_list])
+      
+    # Durations
+    dur = statistics.median([int(y[2]) for y in chords_list])
+
+    # Velocities
+    vel = statistics.median([int(y[5]) for y in chords_list])
+    
+    # Beats
+    mtds = statistics.median([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
+    hmtds = statistics.harmonic_mean([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
+
+    return round(psd), round(pmh), round(pm), round(pml), round(phm), round(dur, -1), round(vel, -1), round(mtds, -1), round(hmtds, -1)
 
 ###################################################################################
 #
