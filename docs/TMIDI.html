@@ -1072,6 +1072,7 @@ table {
       
   <ul>
     <li class="mono"><a href="#TMIDI.Optimus_MIDI_TXT_Processor">Optimus_MIDI_TXT_Processor</a></li>
+    <li class="mono"><a href="#TMIDI.Optimus_Signature">Optimus_Signature</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Advanced_Score_Slicer">Tegridy_Advanced_Score_Slicer</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Any_Pickle_File_Loader">Tegridy_Any_Pickle_File_Loader</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Chord_Match">Tegridy_Chord_Match</a></li>
@@ -1110,6 +1111,7 @@ table {
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_to_INT_Converter">Tegridy_TXT_to_INT_Converter</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_TXT_to_INT_Processor">Tegridy_TXT_to_INT_Processor</a></li>
     <li class="mono"><a href="#TMIDI.Tegridy_Timings_Converter">Tegridy_Timings_Converter</a></li>
+    <li class="mono"><a href="#TMIDI.Tegridy_Transform">Tegridy_Transform</a></li>
     <li class="mono"><a href="#TMIDI.concatenate_scores">concatenate_scores</a></li>
     <li class="mono"><a href="#TMIDI.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDI.grep">grep</a></li>
@@ -3098,6 +3100,8 @@ event, with a duration:
 
 <span class="kn">from</span> <span class="nn">difflib</span> <span class="kn">import</span> <span class="n">SequenceMatcher</span> <span class="k">as</span> <span class="n">SM</span>
 
+<span class="kn">import</span> <span class="nn">statistics</span>
+
 <span class="c1"># from collections import defaultdict</span>
 
 <span class="c1">###################################################################################</span>
@@ -4544,7 +4548,8 @@ event, with a duration:
                               <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
                               <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">,</span>
                               <span class="n">perfect_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">musenet_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                              <span class="n">musenet_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">transform</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -4834,13 +4839,17 @@ event, with a duration:
         <span class="n">chords</span> <span class="o">=</span> <span class="n">melody_chords</span>
     
     <span class="c1"># Default stuff (not melody-conditioned/not-karaoke)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">else</span><span class="p">:</span>      
+
       <span class="n">melody_chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
       <span class="n">mel_chords</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">melody_chords</span><span class="p">:</span>
         <span class="n">mel_chords</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mc</span><span class="p">)</span>
 
-      <span class="n">chords</span> <span class="o">=</span> <span class="n">mel_chords</span>
+      <span class="k">if</span> <span class="n">transform</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> 
+        <span class="n">chords</span> <span class="o">=</span> <span class="n">Tegridy_Transform</span><span class="p">(</span><span class="n">mel_chords</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">chords</span> <span class="o">=</span> <span class="n">mel_chords</span>
 
       <span class="c1"># TXT Stuff</span>
       <span class="n">previous_event</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -5094,6 +5103,66 @@ event, with a duration:
     <span class="k">return</span> <span class="n">output_list</span><span class="p">,</span> <span class="n">song_name</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">calculate_full_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Optimus Signature</span>
+
+<span class="sd">    ---In the name of the search for a perfect score slice signature---</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list to evaluate</span>
+
+<span class="sd">    Output: Full Optimus Signature as a list</span>
+<span class="sd">            Best/recommended Optimus Signature as a list</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+    
+    <span class="c1"># Pitches</span>
+
+    <span class="c1">## StDev</span>
+    <span class="k">if</span> <span class="n">calculate_full_signature</span><span class="p">:</span>
+      <span class="n">psd</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">psd</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">## Median</span>
+    <span class="n">pmh</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median_high</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="n">pml</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median_low</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    
+    <span class="c1">## Mean</span>
+    <span class="k">if</span> <span class="n">calculate_full_signature</span><span class="p">:</span>
+      <span class="n">phm</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">harmonic_mean</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">phm</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Durations</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+
+    <span class="c1"># Velocities</span>
+
+    <span class="n">vel</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+
+    <span class="c1"># Beats</span>
+    <span class="n">mtds</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords_list</span><span class="p">))])</span>
+    <span class="k">if</span> <span class="n">calculate_full_signature</span><span class="p">:</span>
+      <span class="n">hmtds</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">harmonic_mean</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords_list</span><span class="p">))])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">hmtds</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Final Optimus signatures</span>
+    <span class="n">full_Optimus_signature</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">psd</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pmh</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pm</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pml</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">phm</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">dur</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">vel</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">mtds</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">hmtds</span><span class="p">)]</span>
+    <span class="c1">########################    PStDev     PMedianH    PMedian    PMedianL    PHarmoMe    Duration    Velocity      Beat       HarmoBeat</span>
+
+    <span class="n">best_Optimus_signature</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">pmh</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pm</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pml</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">dur</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">mtds</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="c1">########################   PMedianH    PMedian    PMedianL      Duration        Velocity          Beat</span>
+    
+    <span class="c1"># Return...</span>
+    <span class="k">return</span> <span class="n">full_Optimus_signature</span><span class="p">,</span> <span class="n">best_Optimus_signature</span>
+    
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># TMIDI 2.0 Helper functions</span>
 <span class="c1">#</span>
@@ -5163,6 +5232,7 @@ event, with a duration:
 
 <span class="sd">    Output: Last detected chord of the chords list</span>
 <span class="sd">            Last chord start index in the original chords list</span>
+<span class="sd">            First chord end index in the original chords list</span>
 
 <span class="sd">    Project Los Angeles</span>
 <span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -5175,6 +5245,7 @@ event, with a duration:
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">pc_idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fc_idx</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">chords_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     
@@ -5187,8 +5258,10 @@ event, with a duration:
         <span class="n">ptime</span> <span class="o">=</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
       <span class="k">else</span><span class="p">:</span>
-
+        <span class="k">if</span> <span class="n">pc_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+          <span class="n">fc_idx</span> <span class="o">=</span> <span class="n">chords_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
         <span class="n">pc_idx</span> <span class="o">=</span> <span class="n">chords_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        
         <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
         
         <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
@@ -5203,7 +5276,7 @@ event, with a duration:
       <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
       <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
      
-    <span class="k">return</span> <span class="n">chords_list</span><span class="p">[</span><span class="n">pc_idx</span><span class="p">:],</span> <span class="n">pc_idx</span>
+    <span class="k">return</span> <span class="n">chords_list</span><span class="p">[</span><span class="n">pc_idx</span><span class="p">:],</span> <span class="n">pc_idx</span><span class="p">,</span> <span class="n">fc_idx</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -5464,6 +5537,43 @@ event, with a duration:
     <span class="n">music_features</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="nb">sum</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list1</span><span class="p">])])</span> <span class="c1"># Sum of all pitches in the original chords list</span>
 
     <span class="k">return</span> <span class="n">music_features</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">Tegridy_Transform</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">to_pitch</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">to_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Transform</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Desired average pitch (-1 == no change)</span>
+<span class="sd">           Desired average velocity (-1 == no change)</span>
+
+<span class="sd">    Output: Transformed flat chords list</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">transformed_chords_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">chords_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">chords_list_features</span> <span class="o">=</span> <span class="n">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">pitch_diff</span> <span class="o">=</span> <span class="n">chords_list_features</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">to_pitch</span>
+    <span class="n">velocity_diff</span> <span class="o">=</span> <span class="n">chords_list_features</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">to_velocity</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">:</span>
+      <span class="n">cc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="n">to_pitch</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> 
+        <span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">pitch_diff</span>
+      
+      <span class="k">if</span> <span class="n">to_velocity</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> 
+        <span class="n">cc</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">-</span> <span class="n">velocity_diff</span>
+      
+      <span class="n">transformed_chords_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">transformed_chords_list</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -6430,7 +6540,7 @@ event, with a duration:
       
   <div class="item">
     <div class="name def" id="TMIDI.Optimus_MIDI_TXT_Processor">
-    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;, perfect_timings=False, musenet_encoding=False)</p>
+    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;, perfect_timings=False, musenet_encoding=False, transform=0)</p>
     </div>
     
 
@@ -6460,7 +6570,8 @@ Tegridy Code 2021</p></div>
                               <span class="n">karaoke_language_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
                               <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">,</span>
                               <span class="n">perfect_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">musenet_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                              <span class="n">musenet_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">transform</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -6750,13 +6861,17 @@ Tegridy Code 2021</p></div>
         <span class="n">chords</span> <span class="o">=</span> <span class="n">melody_chords</span>
     
     <span class="c1"># Default stuff (not melody-conditioned/not-karaoke)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">else</span><span class="p">:</span>      
+
       <span class="n">melody_chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
       <span class="n">mel_chords</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">melody_chords</span><span class="p">:</span>
         <span class="n">mel_chords</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mc</span><span class="p">)</span>
 
-      <span class="n">chords</span> <span class="o">=</span> <span class="n">mel_chords</span>
+      <span class="k">if</span> <span class="n">transform</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> 
+        <span class="n">chords</span> <span class="o">=</span> <span class="n">Tegridy_Transform</span><span class="p">(</span><span class="n">mel_chords</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">chords</span> <span class="o">=</span> <span class="n">mel_chords</span>
 
       <span class="c1"># TXT Stuff</span>
       <span class="n">previous_event</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -6849,6 +6964,88 @@ Tegridy Code 2021</p></div>
       <span class="n">chords</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="n">txt</span><span class="p">,</span> <span class="n">melody_list</span><span class="p">,</span> <span class="n">chords</span> <span class="c1">#, bass_melody # Bass melody aux output</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDI.Optimus_Signature">
+    <p>def <span class="ident">Optimus_Signature</span>(</p><p>chords_list, calculate_full_signature=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Optimus Signature</p>
+<p>&mdash;In the name of the search for a perfect score slice signature&mdash;</p>
+<p>Input: Flat chords list to evaluate</p>
+<p>Output: Full Optimus Signature as a list
+        Best/recommended Optimus Signature as a list</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Optimus_Signature', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Optimus_Signature" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">calculate_full_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Optimus Signature</span>
+
+<span class="sd">    ---In the name of the search for a perfect score slice signature---</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list to evaluate</span>
+
+<span class="sd">    Output: Full Optimus Signature as a list</span>
+<span class="sd">            Best/recommended Optimus Signature as a list</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+    
+    <span class="c1"># Pitches</span>
+
+    <span class="c1">## StDev</span>
+    <span class="k">if</span> <span class="n">calculate_full_signature</span><span class="p">:</span>
+      <span class="n">psd</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">psd</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">## Median</span>
+    <span class="n">pmh</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median_high</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="n">pml</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median_low</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    
+    <span class="c1">## Mean</span>
+    <span class="k">if</span> <span class="n">calculate_full_signature</span><span class="p">:</span>
+      <span class="n">phm</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">harmonic_mean</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">phm</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Durations</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+
+    <span class="c1"># Velocities</span>
+
+    <span class="n">vel</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">])</span>
+
+    <span class="c1"># Beats</span>
+    <span class="n">mtds</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords_list</span><span class="p">))])</span>
+    <span class="k">if</span> <span class="n">calculate_full_signature</span><span class="p">:</span>
+      <span class="n">hmtds</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">harmonic_mean</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">chords_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords_list</span><span class="p">))])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">hmtds</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Final Optimus signatures</span>
+    <span class="n">full_Optimus_signature</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">psd</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pmh</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pm</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pml</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">phm</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">dur</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">vel</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">mtds</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">hmtds</span><span class="p">)]</span>
+    <span class="c1">########################    PStDev     PMedianH    PMedian    PMedianL    PHarmoMe    Duration    Velocity      Beat       HarmoBeat</span>
+
+    <span class="n">best_Optimus_signature</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">pmh</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pm</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">pml</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">dur</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">mtds</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="c1">########################   PMedianH    PMedian    PMedianL      Duration        Velocity          Beat</span>
+    
+    <span class="c1"># Return...</span>
+    <span class="k">return</span> <span class="n">full_Optimus_signature</span><span class="p">,</span> <span class="n">best_Optimus_signature</span>
 </pre></div>
 
   </div>
@@ -7931,7 +8128,8 @@ Tegridy Code 2021
     <div class="desc"><p>Tegridy Last Chord Finder</p>
 <p>Input: Flat chords list</p>
 <p>Output: Last detected chord of the chords list
-        Last chord start index in the original chords list</p>
+        Last chord start index in the original chords list
+        First chord end index in the original chords list</p>
 <p>Project Los Angeles
 Tegridy Code 2021</p></div>
   <div class="source_cont">
@@ -7945,6 +8143,7 @@ Tegridy Code 2021</p></div>
 
 <span class="sd">    Output: Last detected chord of the chords list</span>
 <span class="sd">            Last chord start index in the original chords list</span>
+<span class="sd">            First chord end index in the original chords list</span>
 
 <span class="sd">    Project Los Angeles</span>
 <span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -7957,6 +8156,7 @@ Tegridy Code 2021</p></div>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">pc_idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fc_idx</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">chords_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     
@@ -7969,8 +8169,10 @@ Tegridy Code 2021</p></div>
         <span class="n">ptime</span> <span class="o">=</span> <span class="n">cc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
       <span class="k">else</span><span class="p">:</span>
-
+        <span class="k">if</span> <span class="n">pc_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+          <span class="n">fc_idx</span> <span class="o">=</span> <span class="n">chords_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
         <span class="n">pc_idx</span> <span class="o">=</span> <span class="n">chords_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        
         <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
         
         <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
@@ -7985,7 +8187,7 @@ Tegridy Code 2021</p></div>
       <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
       <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
      
-    <span class="k">return</span> <span class="n">chords_list</span><span class="p">[</span><span class="n">pc_idx</span><span class="p">:],</span> <span class="n">pc_idx</span>
+    <span class="k">return</span> <span class="n">chords_list</span><span class="p">[</span><span class="n">pc_idx</span><span class="p">:],</span> <span class="n">pc_idx</span><span class="p">,</span> <span class="n">fc_idx</span>
 </pre></div>
 
   </div>
@@ -10207,6 +10409,66 @@ Tegridy Code 2021</p></div>
     <span class="n">song1</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">song1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">average_delta_st</span><span class="p">,</span> <span class="n">average_duration</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDI.Tegridy_Transform">
+    <p>def <span class="ident">Tegridy_Transform</span>(</p><p>chords_list, to_pitch=60, to_velocity=-1)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Tegridy Transform</p>
+<p>Input: Flat chords list
+       Desired average pitch (-1 == no change)
+       Desired average velocity (-1 == no change)</p>
+<p>Output: Transformed flat chords list</p>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDI.Tegridy_Transform', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDI.Tegridy_Transform" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Transform</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">to_pitch</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">to_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;Tegridy Transform</span>
+<span class="sd">     </span>
+<span class="sd">    Input: Flat chords list</span>
+<span class="sd">           Desired average pitch (-1 == no change)</span>
+<span class="sd">           Desired average velocity (-1 == no change)</span>
+
+<span class="sd">    Output: Transformed flat chords list</span>
+
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="n">transformed_chords_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">chords_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">chords_list_features</span> <span class="o">=</span> <span class="n">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">pitch_diff</span> <span class="o">=</span> <span class="n">chords_list_features</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">to_pitch</span>
+    <span class="n">velocity_diff</span> <span class="o">=</span> <span class="n">chords_list_features</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">to_velocity</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chords_list</span><span class="p">:</span>
+      <span class="n">cc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="n">to_pitch</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> 
+        <span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">pitch_diff</span>
+      
+      <span class="k">if</span> <span class="n">to_velocity</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> 
+        <span class="n">cc</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">-</span> <span class="n">velocity_diff</span>
+      
+      <span class="n">transformed_chords_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">transformed_chords_list</span>
 </pre></div>
 
   </div>
