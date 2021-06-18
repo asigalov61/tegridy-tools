@@ -3835,7 +3835,8 @@ def Optimus_Signature(chords_list, best_or_full=True):
      
     Input: Flat chords list to evaluate
 
-    Output: Special Optimus Signature
+    Output: Full Optimus Signature as a list
+            Best/recommended Optimus Signature as a list
 
     Project Los Angeles
     Tegridy Code 2021'''
@@ -3863,11 +3864,9 @@ def Optimus_Signature(chords_list, best_or_full=True):
     dur = statistics.median([int(y[2]) for y in chords_list])
 
     # Velocities
-    if not best_or_full:
-      vel = statistics.median([int(y[5]) for y in chords_list])
-    else:
-      vel = 0
-    
+
+    vel = statistics.median([int(y[5]) for y in chords_list])
+
     # Beats
     mtds = statistics.median([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
     if not best_or_full:
@@ -3875,7 +3874,13 @@ def Optimus_Signature(chords_list, best_or_full=True):
     else:
       hmtds = 0
 
-    return round(psd), round(pmh), round(pm), round(pml), round(phm), round(dur, -1), round(vel, -1), round(mtds, -1), round(hmtds, -1)
+    # Final Optimus signatures
+    full_Optimus_signature = [round(psd), round(pmh), round(pm), round(pml), round(phm), round(dur), round(vel), round(mtds), round(hmtds)]
+    ########################    PStDev     PMedianH    PMedian    PMedianL
+    best_Optimus_signature = [round(pmh), round(pm), round(pml), round(phm), round(dur, -1), round(vel, -1), round(mtds, -1)]
+    
+    return full_Optimus_signature, best_Optimus_signature
+    
 
 ###################################################################################
 #
