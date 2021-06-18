@@ -3827,7 +3827,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
 ###################################################################################
 
-def Optimus_Signature(chords_list, best_or_full=True):
+def Optimus_Signature(chords_list, calculate_full_signature=False):
 
     '''Optimus Signature
 
@@ -3844,7 +3844,7 @@ def Optimus_Signature(chords_list, best_or_full=True):
     # Pitches
 
     ## StDev
-    if not best_or_full:
+    if calculate_full_signature:
       psd = statistics.stdev([int(y[4]) for y in chords_list])
     else:
       psd = 0
@@ -3855,7 +3855,7 @@ def Optimus_Signature(chords_list, best_or_full=True):
     pml = statistics.median_low([int(y[4]) for y in chords_list])
     
     ## Mean
-    if not best_or_full:
+    if calculate_full_signature:
       phm = statistics.harmonic_mean([int(y[4]) for y in chords_list])
     else:
       phm = 0
@@ -3869,16 +3869,19 @@ def Optimus_Signature(chords_list, best_or_full=True):
 
     # Beats
     mtds = statistics.median([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
-    if not best_or_full:
+    if calculate_full_signature:
       hmtds = statistics.harmonic_mean([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
     else:
       hmtds = 0
 
     # Final Optimus signatures
     full_Optimus_signature = [round(psd), round(pmh), round(pm), round(pml), round(phm), round(dur), round(vel), round(mtds), round(hmtds)]
-    ########################    PStDev     PMedianH    PMedian    PMedianL
-    best_Optimus_signature = [round(pmh), round(pm), round(pml), round(phm), round(dur, -1), round(vel, -1), round(mtds, -1)]
+    ########################    PStDev     PMedianH    PMedian    PMedianL    PHarmoMe    Duration    Velocity      Beat       HarmoBeat
+
+    best_Optimus_signature = [round(pmh), round(pm), round(pml), round(dur, -1), round(vel, -1), round(mtds, -1)]
+    ########################   PMedianH    PMedian    PMedianL      Duration        Velocity          Beat
     
+    # Return...
     return full_Optimus_signature, best_Optimus_signature
     
 
