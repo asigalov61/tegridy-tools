@@ -3827,7 +3827,7 @@ def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
 ###################################################################################
 
-def Optimus_Signature(chords_list):
+def Optimus_Signature(chords_list, best_or_full=True):
 
     '''Optimus Signature
 
@@ -3843,23 +3843,37 @@ def Optimus_Signature(chords_list):
     # Pitches
 
     ## StDev
-    psd = statistics.stdev([int(y[4]) for y in chords_list])
+    if not best_or_full:
+      psd = statistics.stdev([int(y[4]) for y in chords_list])
+    else:
+      psd = 0
+
     ## Median
     pmh = statistics.median_high([int(y[4]) for y in chords_list])
     pm = statistics.median([int(y[4]) for y in chords_list])
     pml = statistics.median_low([int(y[4]) for y in chords_list])
+    
     ## Mean
-    phm = statistics.harmonic_mean([int(y[4]) for y in chords_list])
-      
+    if not best_or_full:
+      phm = statistics.harmonic_mean([int(y[4]) for y in chords_list])
+    else:
+      phm = 0
+
     # Durations
     dur = statistics.median([int(y[2]) for y in chords_list])
 
     # Velocities
-    vel = statistics.median([int(y[5]) for y in chords_list])
+    if not best_or_full:
+      vel = statistics.median([int(y[5]) for y in chords_list])
+    else:
+      vel = 0
     
     # Beats
     mtds = statistics.median([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
-    hmtds = statistics.harmonic_mean([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
+    if not best_or_full:
+      hmtds = statistics.harmonic_mean([int(abs(chords_list[i-1][1]-chords_list[i][1])) for i in range(1, len(chords_list))])
+    else:
+      hmtds = 0
 
     return round(psd), round(pmh), round(pm), round(pml), round(phm), round(dur, -1), round(vel, -1), round(mtds, -1), round(hmtds, -1)
 
