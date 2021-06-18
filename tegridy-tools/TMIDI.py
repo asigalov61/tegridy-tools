@@ -4263,7 +4263,7 @@ def Tegridy_Chords_List_Music_Features(chords_list, st_dur_div = 1, pitch_div = 
 
 ###################################################################################
 
-def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=90):
+def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=-1):
 
     '''Tegridy Transform
      
@@ -4280,10 +4280,10 @@ def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=90):
 
     chords_list.sort(reverse=False, key=lambda x: x[1])
 
-    chords_list_features = Tegridy_Chords_List_Music_Features(chords_list)[9:11]
+    chords_list_features = Optimus_Signature(chords_list)[1]
 
-    pitch_diff = chords_list_features[0] - to_pitch
-    velocity_diff = chords_list_features[1] - to_velocity
+    pitch_diff = chords_list_features[1] - to_pitch
+    velocity_diff = chords_list_features[4] - to_velocity
 
     for c in chords_list:
       cc = copy.deepcopy(c)
