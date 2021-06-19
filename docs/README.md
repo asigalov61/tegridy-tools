@@ -1,8 +1,8 @@
 # tegridy-tools docs
 
 ***
-
-## [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
+## [TMIDIX](https://asigalov61.github.io/tegridy-tools/TMIDIX.html)
+## (RETIRED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
 
 ## [ClassyMIDI](https://asigalov61.github.io/tegridy-tools/ClassyMIDI.html)
 ## [TinyMIDI](https://asigalov61.github.io/tegridy-tools/TinyMIDI.html)
