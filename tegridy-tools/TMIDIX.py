@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
-###################################################################################
+
+r'''###############################################################################
 ###################################################################################
 #
 #
@@ -45,7 +46,7 @@
 #	Copyright 2020 Peter Billam
 #
 ###################################################################################
-###################################################################################
+###################################################################################'''
 
 import sys, struct, copy
 Version = '6.7'
@@ -1867,8 +1868,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
             velocity = int(previous_event[5])
 
             # Writing INTergerS...
-            if (start_time // 128)+char_offset < 256 and (duration // 128)+char_offset < 256:
-              INTS.append([(start_time // 128)+char_offset, (duration // 128)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
+            if (start_time)+char_offset < 256 and (duration)+char_offset < 256:
+              INTS.append([(start_time)+char_offset, (duration)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
             else:
               bints += 1
 
@@ -1933,8 +1934,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         velocity = int(previous_event[5])
 
         # Writing INTergerS...
-        if (start_time // 128)+char_offset < 256 and (duration // 128)+char_offset < 256:
-          INTS.append([(start_time // 128)+char_offset, (duration // 128)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
+        if (start_time)+char_offset < 256 and (duration)+char_offset < 256:
+          INTS.append([(start_time)+char_offset, (duration)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
         else:
           bints += 1
 
