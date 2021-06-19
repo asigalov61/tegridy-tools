@@ -2065,6 +2065,165 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
 ###################################################################################
 
+def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
+                                          line_by_line_dataset = True,
+                                          has_velocities = True,
+                                          has_MIDI_channels = True,
+                                          dataset_MIDI_events_time_denominator = 1,
+                                          char_encoding_offset = 30000,
+                                          save_only_first_composition = True,
+                                          simulate_velocity=True,
+                                          karaoke=False):
+                                                            
+    '''Project Los Angeles
+       Tegridy Code 2020'''
+
+    print('Tegridy Optimus TXT to Notes Converter')
+    print('Converting TXT to Notes list...Please wait...')
+
+    song_name = ''
+
+    if line_by_line_dataset:
+      input_string = Optimus_TXT_String.split('\n')
+    else:
+      input_string = Optimus_TXT_String.split(' ')
+    
+    if line_by_line_dataset:
+      name_string = Optimus_TXT_String.split('\n')[0].split('=')
+    else:
+      name_string = Optimus_TXT_String.split(' ')[0].split('=')
+
+    if name_string[0] == 'SONG':
+      song_name = name_string[1]
+
+    output_list = []
+    st = 0
+
+    for i in range(2, len(input_string)-1):
+      
+      if save_only_first_composition:
+        if input_string[i].split('=')[0] == 'SONG':
+
+          song_name = name_string[1]
+          break
+
+      try:
+        istring = input_string[i]
+        #print(istring)
+
+        if has_MIDI_channels == False:
+          step = 4          
+        
+        if has_MIDI_channels == True:
+          step = 5
+
+        if has_velocities == False:
+          step -= 1
+
+        st += int(ord(istring[0]) - char_encoding_offset) * dataset_MIDI_events_time_denominator
+
+        if not karaoke:
+          for s in range(0, len(istring), step):
+              if has_MIDI_channels==True:
+                if step > 3 and len(istring) > 2:
+                      out = []       
+                      out.append('note')
+
+                      out.append(st) # Start time
+                      
+                      out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                      
+                      if has_velocities:
+                        out.append(int(ord(istring[s+4]) - char_encoding_offset)) # Channel
+                      else:
+                        out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Channel  
+                      
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                      
+                      if simulate_velocity:
+                        if s == 0:
+                          sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
+                        out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+                      else:                      
+                        out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+            
+              if has_MIDI_channels==False:
+                if step > 3 and len(istring) > 2:
+                      out = []       
+                      out.append('note')
+
+                      out.append(st) # Start time
+                      out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                      out.append(0) # Channel
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                      
+                      if simulate_velocity:
+                        if s == 0:
+                          sim_vel = int(ord(istring[s+2]) - char_encoding_offset)
+                        out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+                      else:                      
+                        out.append(int(ord(istring[s+3]) - char_encoding_offset)) # Velocity
+
+              if step == 3 and len(istring) > 2:
+                      out = []       
+                      out.append('note')
+
+                      out.append(st) # Start time
+                      out.append(int(ord(istring[s+1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+                      out.append(0) # Channel
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Pitch
+                      
+                      out.append(int(ord(istring[s+2]) - char_encoding_offset)) # Velocity = Pitch
+
+              output_list.append(out)
+
+        if karaoke:
+          try:
+              out = []       
+              out.append('note')
+
+              out.append(st) # Start time
+              out.append(int(ord(istring[1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
+              out.append(0) # Channel
+              out.append(int(ord(istring[2]) - char_encoding_offset)) # Pitch
+              
+              if simulate_velocity:
+                if s == 0:
+                  sim_vel = int(ord(istring[2]) - char_encoding_offset)
+                out.append(sim_vel) # Simulated Velocity (= highest note's pitch)
+              else:                      
+                out.append(int(ord(istring[3]) - char_encoding_offset)) # Velocity
+              output_list.append(out)
+              out = []
+              if istring.split('=')[1] != '':
+                out.append('lyric')
+                out.append(st)
+                out.append(istring[5:])
+                output_list.append(out)
+          except:
+            continue
+            
+
+      except:
+        print('Bad note string:', istring)
+        continue
+
+    # Simple error control just in case
+    S = []
+    for x in output_list:
+      if len(x) == 6 or len(x) == 3:
+        S.append(x)
+
+    output_list.clear()    
+    output_list = copy.deepcopy(S)
+
+
+    print('Task complete! Enjoy! :)')
+
+    return output_list, song_name
+
+###################################################################################
+
 def Optimus_Signature(chords_list, calculate_full_signature=False):
 
     '''Optimus Signature
