@@ -1698,6 +1698,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     bass_melody = []
 
     INTS = []
+    bints = 0
 
 ###########    
 
@@ -1810,52 +1811,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       txtc += chr(32)
 
     #print('Sorting input by start time...')
-    events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time
-
-    if not karaoke:
-      previous_event = copy.deepcopy(events_matrix[0])
-      for event in events_matrix:
-
-        # Computing events details
-        start_time = int(event[1] - previous_event[1])
-        
-        duration = int(previous_event[2])
-
-        channel = int(previous_event[3])
-
-        pitch = int(previous_event[4] + transpose_by)
-        if flip == True:
-          pitch = 127 - int(previous_event[4] + transpose_by)
-
-        velocity = int(previous_event[5])
-
-        # Converting to TXT if possible...
-        try:
-          txt += str(chr(start_time + char_offset))
-          txt += str(chr(duration + char_offset))
-          txt += str(chr(pitch + char_offset))
-          if output_velocity:
-            txt += str(chr(velocity + char_offset))
-          if output_MIDI_channels:
-            txt += str(chr(channel + char_offset))
-
-
-          if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
-            txt += ''      
-          else:     
-            if line_by_line_output:
-              txt += chr(10)
-            else:
-              txt += chr(32) 
-          
-          previous_event = copy.deepcopy(event)
-        
-        except:
-          # print('Problematic MIDI event. Skipping...')
-          continue
-
-      if not line_by_line_output:
-        txt += chr(10)      
+    events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time    
     
     chords.extend(events_matrix)
     #print(chords)
@@ -1911,8 +1867,11 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
             velocity = int(previous_event[5])
 
             # Writing INTergerS...
-            INTS.append([start_time, duration, channel, pitch, velocity])
-            
+            if (start_time // 128)+char_offset < 256 and (duration // 128)+char_offset < 256:
+              INTS.append([(start_time // 128)+char_offset, (duration // 128)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
+            else:
+              bints += 1
+
             # Converting to TXT if possible...
             try:
               txtc += str(chr(start_time + char_offset))
@@ -1974,7 +1933,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         velocity = int(previous_event[5])
 
         # Writing INTergerS...
-        INTS.append([start_time, duration, channel, pitch, velocity])
+        if (start_time // 128)+char_offset < 256 and (duration // 128)+char_offset < 256:
+          INTS.append([(start_time // 128)+char_offset, (duration // 128)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
+        else:
+          bints += 1
 
         # Converting to TXT if possible...
         try:
