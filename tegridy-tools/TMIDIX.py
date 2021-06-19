@@ -2019,15 +2019,15 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
 ###################################################################################
 
-def Tegridy_Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
-                                          line_by_line_dataset = True,
-                                          has_velocities = True,
-                                          has_MIDI_channels = True,
-                                          dataset_MIDI_events_time_denominator = 1,
-                                          char_encoding_offset = 30000,
-                                          save_only_first_composition = True,
-                                          simulate_velocity=True,
-                                          karaoke=False):
+def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
+                                    line_by_line_dataset = True,
+                                    has_velocities = True,
+                                    has_MIDI_channels = True,
+                                    dataset_MIDI_events_time_denominator = 1,
+                                    char_encoding_offset = 30000,
+                                    save_only_first_composition = True,
+                                    simulate_velocity=True,
+                                    karaoke=False):
 
     '''Project Los Angeles
        Tegridy Code 2020'''
