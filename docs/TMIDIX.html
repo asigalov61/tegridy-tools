@@ -1083,6 +1083,7 @@ table {
     <li class="mono"><a href="#TMIDIX.Tegridy_Last_Chord_Finder">Tegridy_Last_Chord_Finder</a></li>
     <li class="mono"><a href="#TMIDIX.Tegridy_List_Slicer">Tegridy_List_Slicer</a></li>
     <li class="mono"><a href="#TMIDIX.Tegridy_MIDI_Zip_Notes_Summarizer">Tegridy_MIDI_Zip_Notes_Summarizer</a></li>
+    <li class="mono"><a href="#TMIDIX.Tegridy_Optimus_TXT_to_Notes_Converter">Tegridy_Optimus_TXT_to_Notes_Converter</a></li>
     <li class="mono"><a href="#TMIDIX.Tegridy_SONG_to_MIDI_Converter">Tegridy_SONG_to_MIDI_Converter</a></li>
     <li class="mono"><a href="#TMIDIX.Tegridy_Score_Chords_Pairs_Generator">Tegridy_Score_Chords_Pairs_Generator</a></li>
     <li class="mono"><a href="#TMIDIX.Tegridy_Score_Slicer">Tegridy_Score_Slicer</a></li>
@@ -3191,6 +3192,165 @@ table {
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">Tegridy_Optimus_TXT_to_Notes_Converter</span><span class="p">(</span><span class="n">Optimus_TXT_String</span><span class="p">,</span>
+                                          <span class="n">line_by_line_dataset</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">has_velocities</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">has_MIDI_channels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">dataset_MIDI_events_time_denominator</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                          <span class="n">char_encoding_offset</span> <span class="o">=</span> <span class="mi">30000</span><span class="p">,</span>
+                                          <span class="n">save_only_first_composition</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">simulate_velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                                                            
+    <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
+<span class="sd">       Tegridy Code 2020&#39;&#39;&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tegridy Optimus TXT to Notes Converter&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converting TXT to Notes list...Please wait...&#39;</span><span class="p">)</span>
+
+    <span class="n">song_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">line_by_line_dataset</span><span class="p">:</span>
+      <span class="n">input_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">input_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">line_by_line_dataset</span><span class="p">:</span>
+      <span class="n">name_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">name_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+      <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">output_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      
+      <span class="k">if</span> <span class="n">save_only_first_composition</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+
+          <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">break</span>
+
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">istring</span> <span class="o">=</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#print(istring)</span>
+
+        <span class="k">if</span> <span class="n">has_MIDI_channels</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+          <span class="n">step</span> <span class="o">=</span> <span class="mi">4</span>          
+        
+        <span class="k">if</span> <span class="n">has_MIDI_channels</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+          <span class="n">step</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="k">if</span> <span class="n">has_velocities</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+          <span class="n">step</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="n">st</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">karaoke</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+              <span class="k">if</span> <span class="n">has_MIDI_channels</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+                      
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+                      
+                      <span class="k">if</span> <span class="n">has_velocities</span><span class="p">:</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">4</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Channel</span>
+                      <span class="k">else</span><span class="p">:</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Channel  </span>
+                      
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+                      
+                      <span class="k">if</span> <span class="n">simulate_velocity</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                          <span class="n">sim_vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim_vel</span><span class="p">)</span> <span class="c1"># Simulated Velocity (= highest note&#39;s pitch)</span>
+                      <span class="k">else</span><span class="p">:</span>                      
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity</span>
+            
+              <span class="k">if</span> <span class="n">has_MIDI_channels</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Channel</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+                      
+                      <span class="k">if</span> <span class="n">simulate_velocity</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                          <span class="n">sim_vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim_vel</span><span class="p">)</span> <span class="c1"># Simulated Velocity (= highest note&#39;s pitch)</span>
+                      <span class="k">else</span><span class="p">:</span>                      
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity</span>
+
+              <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Channel</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+                      
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity = Pitch</span>
+
+              <span class="n">output_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">karaoke</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
+              <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Channel</span>
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+              
+              <span class="k">if</span> <span class="n">simulate_velocity</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">sim_vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim_vel</span><span class="p">)</span> <span class="c1"># Simulated Velocity (= highest note&#39;s pitch)</span>
+              <span class="k">else</span><span class="p">:</span>                      
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity</span>
+              <span class="n">output_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+              <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+              <span class="k">if</span> <span class="n">istring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lyric&#39;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span>
+                <span class="n">output_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+          <span class="k">except</span><span class="p">:</span>
+            <span class="k">continue</span>
+            
+
+      <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bad note string:&#39;</span><span class="p">,</span> <span class="n">istring</span><span class="p">)</span>
+        <span class="k">continue</span>
+
+    <span class="c1"># Simple error control just in case</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_list</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">S</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="n">output_list</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>    
+    <span class="n">output_list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Task complete! Enjoy! :)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_list</span><span class="p">,</span> <span class="n">song_name</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="k">def</span> <span class="nf">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">calculate_full_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Optimus Signature</span>
@@ -5253,6 +5413,183 @@ Tegridy Code 2021</p></div>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">out1</span><span class="p">,</span> <span class="n">i</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.Tegridy_Optimus_TXT_to_Notes_Converter">
+    <p>def <span class="ident">Tegridy_Optimus_TXT_to_Notes_Converter</span>(</p><p>Optimus_TXT_String, line_by_line_dataset=True, has_velocities=True, has_MIDI_channels=True, dataset_MIDI_events_time_denominator=1, char_encoding_offset=30000, save_only_first_composition=True, simulate_velocity=True, karaoke=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Project Los Angeles
+Tegridy Code 2020</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.Tegridy_Optimus_TXT_to_Notes_Converter', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.Tegridy_Optimus_TXT_to_Notes_Converter" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Optimus_TXT_to_Notes_Converter</span><span class="p">(</span><span class="n">Optimus_TXT_String</span><span class="p">,</span>
+                                          <span class="n">line_by_line_dataset</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">has_velocities</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">has_MIDI_channels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">dataset_MIDI_events_time_denominator</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                          <span class="n">char_encoding_offset</span> <span class="o">=</span> <span class="mi">30000</span><span class="p">,</span>
+                                          <span class="n">save_only_first_composition</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">simulate_velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                                                            
+    <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
+<span class="sd">       Tegridy Code 2020&#39;&#39;&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tegridy Optimus TXT to Notes Converter&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converting TXT to Notes list...Please wait...&#39;</span><span class="p">)</span>
+
+    <span class="n">song_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">line_by_line_dataset</span><span class="p">:</span>
+      <span class="n">input_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">input_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">line_by_line_dataset</span><span class="p">:</span>
+      <span class="n">name_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">name_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+      <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">output_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      
+      <span class="k">if</span> <span class="n">save_only_first_composition</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+
+          <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">break</span>
+
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">istring</span> <span class="o">=</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#print(istring)</span>
+
+        <span class="k">if</span> <span class="n">has_MIDI_channels</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+          <span class="n">step</span> <span class="o">=</span> <span class="mi">4</span>          
+        
+        <span class="k">if</span> <span class="n">has_MIDI_channels</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+          <span class="n">step</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="k">if</span> <span class="n">has_velocities</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+          <span class="n">step</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="n">st</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">karaoke</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+              <span class="k">if</span> <span class="n">has_MIDI_channels</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+                      
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+                      
+                      <span class="k">if</span> <span class="n">has_velocities</span><span class="p">:</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">4</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Channel</span>
+                      <span class="k">else</span><span class="p">:</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Channel  </span>
+                      
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+                      
+                      <span class="k">if</span> <span class="n">simulate_velocity</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                          <span class="n">sim_vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim_vel</span><span class="p">)</span> <span class="c1"># Simulated Velocity (= highest note&#39;s pitch)</span>
+                      <span class="k">else</span><span class="p">:</span>                      
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity</span>
+            
+              <span class="k">if</span> <span class="n">has_MIDI_channels</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Channel</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+                      
+                      <span class="k">if</span> <span class="n">simulate_velocity</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                          <span class="n">sim_vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim_vel</span><span class="p">)</span> <span class="c1"># Simulated Velocity (= highest note&#39;s pitch)</span>
+                      <span class="k">else</span><span class="p">:</span>                      
+                        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity</span>
+
+              <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">istring</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                      <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Channel</span>
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+                      
+                      <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity = Pitch</span>
+
+              <span class="n">output_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">karaoke</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
+              <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>       
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;note&#39;</span><span class="p">)</span>
+
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="c1"># Start time</span>
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataset_MIDI_events_time_denominator</span><span class="p">)</span> <span class="c1"># Duration</span>
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Channel</span>
+              <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Pitch</span>
+              
+              <span class="k">if</span> <span class="n">simulate_velocity</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">sim_vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim_vel</span><span class="p">)</span> <span class="c1"># Simulated Velocity (= highest note&#39;s pitch)</span>
+              <span class="k">else</span><span class="p">:</span>                      
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">char_encoding_offset</span><span class="p">))</span> <span class="c1"># Velocity</span>
+              <span class="n">output_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+              <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+              <span class="k">if</span> <span class="n">istring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lyric&#39;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">istring</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span>
+                <span class="n">output_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+          <span class="k">except</span><span class="p">:</span>
+            <span class="k">continue</span>
+            
+
+      <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bad note string:&#39;</span><span class="p">,</span> <span class="n">istring</span><span class="p">)</span>
+        <span class="k">continue</span>
+
+    <span class="c1"># Simple error control just in case</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_list</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">S</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="n">output_list</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>    
+    <span class="n">output_list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Task complete! Enjoy! :)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_list</span><span class="p">,</span> <span class="n">song_name</span>
 </pre></div>
 
   </div>
