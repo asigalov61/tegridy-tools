@@ -2029,7 +2029,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     # Optional Optimus signature
 
     if add_optimus_signature == True:
-      song_signature = Optimus_Signature(chords)
+      song_signature = Optimus_Signature(chords)[1]
       chords_final = []
       for c in chords:
         c.extend(song_signature)
@@ -2080,7 +2080,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     else:
       name_string = Optimus_TXT_String.split(' ')[0].split('=')
 
-    if 'SONG' in str(name_string[0]).split(dataset_MIDI_events_time_denominator):
+    if 'SONG' in str(name_string[0]).split(chr(dataset_MIDI_events_time_denominator)):
       song_name = name_string[1]
 
     output_list = []
@@ -2089,7 +2089,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     for i in range(2, len(input_string)-1):
 
       if save_only_first_composition:
-        if 'SONG' in str(input_string[i].split('=')[0]).split(dataset_MIDI_events_time_denominator):
+        if 'SONG' in str(input_string[i].split('=')[0]).split(chr(dataset_MIDI_events_time_denominator)):
 
           song_name = name_string[1]
           break
