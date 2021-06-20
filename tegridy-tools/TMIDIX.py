@@ -1658,7 +1658,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               song_name='Song',
                               perfect_timings=False,
                               musenet_encoding=False,
-                              transform=0):
+                              transform=0, 
+                              add_optimus_signature=False):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -1800,7 +1801,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     if song_name == 'Song':
       sng_name = fn.split('.')[0].replace(' ', '_').replace('=', '_').replace('\'', '-')
       song_name = sng_name
-
+    
     # Zero token
     txt += chr(char_offset) + chr(char_offset)
     if output_MIDI_channels:
@@ -2024,9 +2025,22 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       if not line_by_line_output:
         txt += chr(10)
 
+    # Almost done...
+    # Optional Optimus signature
+
+    if add_optimus_signature == True:
+      song_signature = Optimus_Signature(chords)
+      chords_final = []
+      for c in chords:
+        c.extend(song_signature)
+        chords_final.append(c)
+    else:
+      chords_final = chords
+
     # Helper aux/backup function for Karaoke
     karaokez.sort(reverse=False, key=lambda x: x[1])  
 
+    # Multi-instrumenta MuseNet encoding
     if musenet_encoding and not melody_conditioned_encoding and not karaoke:
       chords.sort(key=lambda x: (x[1], x[3]))
 
@@ -2034,7 +2048,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     aux1 = [None]
     aux2 = [None]
 
-    return txt, melody_list, chords, bass_melody, karaokez, INTS, aux1, aux2 # aux1 and aux2 are not used atm
+    return txt, melody_list, chords_final, bass_melody, karaokez, INTS, aux1, aux2 # aux1 and aux2 are not used atm
 
 ###################################################################################
 
@@ -2066,7 +2080,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     else:
       name_string = Optimus_TXT_String.split(' ')[0].split('=')
 
-    if name_string[0] == 'SONG':
+    if 'SONG' in str(name_string[0]).split(dataset_MIDI_events_time_denominator):
       song_name = name_string[1]
 
     output_list = []
@@ -2075,7 +2089,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     for i in range(2, len(input_string)-1):
 
       if save_only_first_composition:
-        if input_string[i].split('=')[0] == 'SONG':
+        if 'SONG' in str(input_string[i].split('=')[0]).split(dataset_MIDI_events_time_denominator):
 
           song_name = name_string[1]
           break
