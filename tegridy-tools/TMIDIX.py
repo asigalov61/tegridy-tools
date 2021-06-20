@@ -1800,7 +1800,25 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     if song_name == 'Song':
       sng_name = fn.split('.')[0].replace(' ', '_').replace('=', '_').replace('\'', '-')
       song_name = sng_name
-    
+
+    # Zero token
+    txt += chr(char_offset) + chr(char_offset)
+    if output_MIDI_channels:
+      txt += chr(char_offset)
+    if output_velocity:
+      txt += chr(char_offset) + chr(char_offset)     
+    else:
+      txt += chr(char_offset)
+
+    txtc += chr(char_offset) + chr(char_offset)
+    if output_MIDI_channels:
+      txtc += chr(char_offset)
+    if output_velocity:
+      txtc += chr(char_offset) + chr(char_offset)      
+    else:
+      txtc += chr(char_offset)
+
+    # Song stamp
     txt += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
     txtc += 'SONG=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
 
