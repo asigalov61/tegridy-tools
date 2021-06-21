@@ -1820,8 +1820,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       else:
         txtc += chr(char_offset)
       
-      txt += '='
-      txtc += '='
+      txt += '=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
+      txtc += '=' + song_name + '_with_' + str(len(events_matrix)-1) + '_notes'
     
     else:
       # Song stamp
