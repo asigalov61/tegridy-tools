@@ -2076,16 +2076,16 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     # Zero token
     zt = ''
 
-    zt += chr(char_offset) + chr(char_offset)
+    zt += chr(char_encoding_offset) + chr(char_encoding_offset)
     
     if has_MIDI_channels:
-      zt += chr(char_offset)
+      zt += chr(char_encoding_offset)
     
     if has_velocities:
-      zt += chr(char_offset) + chr(char_offset)     
+      zt += chr(char_encoding_offset) + chr(char_encoding_offset)     
     
     else:
-      zt += chr(char_offset)
+      zt += chr(char_encoding_offset)
 
     if zero_token:
       if name_string[0] == zt:
