@@ -2052,7 +2052,8 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
                                     char_encoding_offset = 30000,
                                     save_only_first_composition = True,
                                     simulate_velocity=True,
-                                    karaoke=False):
+                                    karaoke=False,
+                                    zero_token=False):
 
     '''Project Los Angeles
        Tegridy Code 2020'''
@@ -2072,8 +2073,27 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     else:
       name_string = Optimus_TXT_String.split(' ')[0].split('=')
 
-    if name_string[0] == 'SONG':
-      song_name = name_string[1]
+    # Zero token
+    zt = ''
+
+    zt += chr(char_offset) + chr(char_offset)
+    
+    if has_MIDI_channels:
+      zt += chr(char_offset)
+    
+    if has_velocities:
+      zt += chr(char_offset) + chr(char_offset)     
+    
+    else:
+      zt += chr(char_offset)
+
+    if zero_token:
+      if name_string[0] == zt:
+        song_name = name_string[1]
+    
+    else:
+      if name_string[0] == 'SONG':
+        song_name = name_string[1]
 
     output_list = []
     st = 0
@@ -2081,14 +2101,19 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
     for i in range(2, len(input_string)-1):
 
       if save_only_first_composition:
-        if input_string[i].split('=')[0] == 'SONG':
+        if zero_token:
+          if input_string[i].split('=')[0] == zt:
 
-          song_name = name_string[1]
-          break
+            song_name = name_string[1]
+            break
+        
+        else:
+          if input_string[i].split('=')[0] == 'SONG':
 
+            song_name = name_string[1]
+            break
       try:
         istring = input_string[i]
-        #print(istring)
 
         if has_MIDI_channels == False:
           step = 4          
