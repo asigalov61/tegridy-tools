@@ -2591,7 +2591,7 @@ def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=-1):
 
     chords_list_features = Optimus_Signature(chords_list)[1]
 
-    pitch_diff = chords_list_features[1] - to_pitch
+    pitch_diff = int((chords_list_features[0] + chords_list_features[1] + chords_list_features[2]) / 3) - to_pitch
     velocity_diff = chords_list_features[4] - to_velocity
 
     for c in chords_list:
