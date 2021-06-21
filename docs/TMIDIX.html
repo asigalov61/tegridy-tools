@@ -5,7 +5,8 @@
 
   
   <title>TMIDIX API documentation</title>
-  <meta name="description" content="" />
+  <meta name="description" content="###############################################################################
+####################..." />
 
 
   <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1121,58 +1122,104 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">TMIDIX</span> module</h1>
-  
+  <h6 id="_1"></h6>
+<h6 id="_2"></h6>
+<h1 id="_3"></h1>
+<h1 id="_4"></h1>
+<h1 id="tegridy-midi-x-module-tmidi-x-tee-midi-eks">Tegridy MIDI X Module (TMIDI X / tee-midi eks)</h1>
+<h1 id="version-10">Version 1.0</h1>
+<h1 id="_5"></h1>
+<h1 id="note-tmidi-x-module-starts-after-the-partial-midipy-module-line-1342">NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1342</h1>
+<h1 id="_6"></h1>
+<h1 id="based-upon-midipy-module-v67-by-peter-billam-pjbcomau">Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au</h1>
+<h1 id="_7"></h1>
+<h1 id="project-los-angeles">Project Los Angeles</h1>
+<h1 id="_8"></h1>
+<h1 id="tegridy-code-2021">Tegridy Code 2021</h1>
+<h1 id="_9"></h1>
+<h1 id="httpsgithubcomtegridy-codeproject-los-angeles">https://github.com/Tegridy-Code/Project-Los-Angeles</h1>
+<h1 id="_10"></h1>
+<h1 id="_11"></h1>
+<h6 id="_12"></h6>
+<h6 id="_13"></h6>
+<h1 id="copyright-2021-project-los-angeles-tegridy-code">Copyright 2021 Project Los Angeles / Tegridy Code</h1>
+<h1 id="_14"></h1>
+<h1 id="licensed-under-the-apache-license-version-20-the-license">Licensed under the Apache License, Version 2.0 (the "License");</h1>
+<h1 id="you-may-not-use-this-file-except-in-compliance-with-the-license">you may not use this file except in compliance with the License.</h1>
+<h1 id="you-may-obtain-a-copy-of-the-license-at">You may obtain a copy of the License at</h1>
+<h1 id="_15"></h1>
+<h1 id="httpwwwapacheorglicenseslicense-20">http://www.apache.org/licenses/LICENSE-2.0</h1>
+<h1 id="_16"></h1>
+<h1 id="unless-required-by-applicable-law-or-agreed-to-in-writing-software">Unless required by applicable law or agreed to in writing, software</h1>
+<h1 id="distributed-under-the-license-is-distributed-on-an-as-is-basis">distributed under the License is distributed on an "AS IS" BASIS,</h1>
+<h1 id="without-warranties-or-conditions-of-any-kind-either-express-or-implied">WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</h1>
+<h1 id="see-the-license-for-the-specific-language-governing-permissions-and">See the License for the specific language governing permissions and</h1>
+<h1 id="limitations-under-the-license">limitations under the License.</h1>
+<h6 id="_17"></h6>
+<h6 id="_18"></h6>
+<h1 id="_19"></h1>
+<h1 id="partial-midipy-module-v67-by-peter-billam">PARTIAL MIDI.py Module v.6.7. by Peter Billam</h1>
+<h1 id="please-see-tmidi-23tegridy-tools-repo-for-full-midipy-module-code">Please see TMIDI 2.3/tegridy-tools repo for full MIDI.py module code</h1>
+<h1 id="_20"></h1>
+<h1 id="or-you-can-always-download-the-latest-full-version-from">Or you can always download the latest full version from:</h1>
+<h1 id="httpspjbcomau">https://pjb.com.au/</h1>
+<h1 id="_21"></h1>
+<h1 id="copyright-2020-peter-billam">Copyright 2020 Peter Billam</h1>
+<h1 id="_22"></h1>
+<h6 id="_23"></h6>
+<h6 id="_24"></h6>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX" class="source">
     <div class="codehilite"><pre><span></span><span class="ch">#! /usr/bin/python3</span>
 
-<span class="c1">###################################################################################</span>
-<span class="c1">###################################################################################</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#	Tegridy MIDI X Module (TMIDI X / tee-midi eks)</span>
-<span class="c1">#	Version 1.0</span>
-<span class="c1">#</span>
-<span class="c1">#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1342</span>
-<span class="c1">#</span>
-<span class="c1">#	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au</span>
-<span class="c1">#</span>
-<span class="c1">#	Project Los Angeles</span>
-<span class="c1">#</span>
-<span class="c1">#	Tegridy Code 2021</span>
-<span class="c1">#</span>
-<span class="c1">#   https://github.com/Tegridy-Code/Project-Los-Angeles</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">###################################################################################</span>
-<span class="c1">###################################################################################</span>
-<span class="c1">#       Copyright 2021 Project Los Angeles / Tegridy Code</span>
-<span class="c1">#</span>
-<span class="c1">#       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
-<span class="c1">#       you may not use this file except in compliance with the License.</span>
-<span class="c1">#       You may obtain a copy of the License at</span>
-<span class="c1">#</span>
-<span class="c1">#           http://www.apache.org/licenses/LICENSE-2.0</span>
-<span class="c1">#</span>
-<span class="c1">#       Unless required by applicable law or agreed to in writing, software</span>
-<span class="c1">#       distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
-<span class="c1">#       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span class="c1">#       See the License for the specific language governing permissions and</span>
-<span class="c1">#       limitations under the License.</span>
-<span class="c1">###################################################################################</span>
-<span class="c1">###################################################################################</span>
-<span class="c1">#</span>
-<span class="c1">#	PARTIAL MIDI.py Module v.6.7. by Peter Billam</span>
-<span class="c1">#   Please see TMIDI 2.3/tegridy-tools repo for full MIDI.py module code</span>
-<span class="c1"># </span>
-<span class="c1">#   Or you can always download the latest full version from:</span>
-<span class="c1">#	https://pjb.com.au/</span>
-<span class="c1">#	</span>
-<span class="c1">#	Copyright 2020 Peter Billam</span>
-<span class="c1">#</span>
-<span class="c1">###################################################################################</span>
-<span class="c1">###################################################################################</span>
+
+<span class="sa">r</span><span class="sd">&#39;&#39;&#39;###############################################################################</span>
+<span class="sd">###################################################################################</span>
+<span class="sd">#</span>
+<span class="sd">#</span>
+<span class="sd">#	Tegridy MIDI X Module (TMIDI X / tee-midi eks)</span>
+<span class="sd">#	Version 1.0</span>
+<span class="sd">#</span>
+<span class="sd">#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1342</span>
+<span class="sd">#</span>
+<span class="sd">#	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au</span>
+<span class="sd">#</span>
+<span class="sd">#	Project Los Angeles</span>
+<span class="sd">#</span>
+<span class="sd">#	Tegridy Code 2021</span>
+<span class="sd">#</span>
+<span class="sd">#   https://github.com/Tegridy-Code/Project-Los-Angeles</span>
+<span class="sd">#</span>
+<span class="sd">#</span>
+<span class="sd">###################################################################################</span>
+<span class="sd">###################################################################################</span>
+<span class="sd">#       Copyright 2021 Project Los Angeles / Tegridy Code</span>
+<span class="sd">#</span>
+<span class="sd">#       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="sd">#       you may not use this file except in compliance with the License.</span>
+<span class="sd">#       You may obtain a copy of the License at</span>
+<span class="sd">#</span>
+<span class="sd">#           http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="sd">#</span>
+<span class="sd">#       Unless required by applicable law or agreed to in writing, software</span>
+<span class="sd">#       distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="sd">#       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="sd">#       See the License for the specific language governing permissions and</span>
+<span class="sd">#       limitations under the License.</span>
+<span class="sd">###################################################################################</span>
+<span class="sd">###################################################################################</span>
+<span class="sd">#</span>
+<span class="sd">#	PARTIAL MIDI.py Module v.6.7. by Peter Billam</span>
+<span class="sd">#   Please see TMIDI 2.3/tegridy-tools repo for full MIDI.py module code</span>
+<span class="sd"># </span>
+<span class="sd">#   Or you can always download the latest full version from:</span>
+<span class="sd">#	https://pjb.com.au/</span>
+<span class="sd">#	</span>
+<span class="sd">#	Copyright 2020 Peter Billam</span>
+<span class="sd">#</span>
+<span class="sd">###################################################################################</span>
+<span class="sd">###################################################################################&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">struct</span><span class="o">,</span> <span class="nn">copy</span>
 <span class="n">Version</span> <span class="o">=</span> <span class="s1">&#39;6.7&#39;</span>
@@ -2784,7 +2831,8 @@ table {
                               <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">,</span>
                               <span class="n">perfect_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">musenet_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">transform</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                              <span class="n">transform</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -2926,9 +2974,32 @@ table {
     <span class="k">if</span> <span class="n">song_name</span> <span class="o">==</span> <span class="s1">&#39;Song&#39;</span><span class="p">:</span>
       <span class="n">sng_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
       <span class="n">song_name</span> <span class="o">=</span> <span class="n">sng_name</span>
+
+    <span class="c1"># Zero token</span>
+    <span class="k">if</span> <span class="n">zero_token</span><span class="p">:</span>
+      <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_MIDI_channels</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_velocity</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>     
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+
+      <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_MIDI_channels</span><span class="p">:</span>
+        <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_velocity</span><span class="p">:</span>
+        <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      
+      <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
+      <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
     
-    <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
-    <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Song stamp</span>
+      <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
+      <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
 
     <span class="k">if</span> <span class="n">line_by_line_output</span><span class="p">:</span>
       <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -2994,8 +3065,8 @@ table {
             <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
             <span class="c1"># Writing INTergerS...</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
-              <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+              <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -3060,8 +3131,8 @@ table {
         <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
         <span class="c1"># Writing INTergerS...</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
-          <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+          <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -3154,7 +3225,8 @@ table {
                                     <span class="n">char_encoding_offset</span> <span class="o">=</span> <span class="mi">30000</span><span class="p">,</span>
                                     <span class="n">save_only_first_composition</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                                     <span class="n">simulate_velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                    <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                                    <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2020&#39;&#39;&#39;</span>
@@ -3174,8 +3246,27 @@ table {
     <span class="k">else</span><span class="p">:</span>
       <span class="n">name_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
-      <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Zero token</span>
+    <span class="n">zt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">has_MIDI_channels</span><span class="p">:</span>
+      <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">has_velocities</span><span class="p">:</span>
+      <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>     
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zero_token</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">zt</span><span class="p">:</span>
+        <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+        <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">output_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">st</span> <span class="o">=</span> <span class="mi">0</span>
@@ -3183,14 +3274,19 @@ table {
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 
       <span class="k">if</span> <span class="n">save_only_first_composition</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">zero_token</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">zt</span><span class="p">:</span>
 
-          <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-          <span class="k">break</span>
+            <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">break</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
 
+            <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">break</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="n">istring</span> <span class="o">=</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="c1">#print(istring)</span>
 
         <span class="k">if</span> <span class="n">has_MIDI_channels</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
           <span class="n">step</span> <span class="o">=</span> <span class="mi">4</span>          
@@ -4135,7 +4231,7 @@ table {
       
   <div class="item">
     <div class="name def" id="TMIDIX.Optimus_MIDI_TXT_Processor">
-    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;, perfect_timings=False, musenet_encoding=False, transform=0)</p>
+    <p>def <span class="ident">Optimus_MIDI_TXT_Processor</span>(</p><p>MIDI_file, line_by_line_output=True, chordify_TXT=False, dataset_MIDI_events_time_denominator=1, output_velocity=True, output_MIDI_channels=False, MIDI_channel=0, MIDI_patch=[0, 1], char_offset=30000, transpose_by=0, flip=False, melody_conditioned_encoding=False, melody_pitch_baseline=0, number_of_notes_to_sample=-1, sampling_offset_from_start=0, karaoke=False, karaoke_language_encoding=&#39;utf-8&#39;, song_name=&#39;Song&#39;, perfect_timings=False, musenet_encoding=False, transform=0, zero_token=False)</p>
     </div>
     
 
@@ -4166,7 +4262,8 @@ Tegridy Code 2021</p></div>
                               <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;Song&#39;</span><span class="p">,</span>
                               <span class="n">perfect_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">musenet_encoding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">transform</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                              <span class="n">transform</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
@@ -4308,9 +4405,32 @@ Tegridy Code 2021</p></div>
     <span class="k">if</span> <span class="n">song_name</span> <span class="o">==</span> <span class="s1">&#39;Song&#39;</span><span class="p">:</span>
       <span class="n">sng_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
       <span class="n">song_name</span> <span class="o">=</span> <span class="n">sng_name</span>
+
+    <span class="c1"># Zero token</span>
+    <span class="k">if</span> <span class="n">zero_token</span><span class="p">:</span>
+      <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_MIDI_channels</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_velocity</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>     
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+
+      <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_MIDI_channels</span><span class="p">:</span>
+        <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">output_velocity</span><span class="p">:</span>
+        <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">txtc</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_offset</span><span class="p">)</span>
+      
+      <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
+      <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
     
-    <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
-    <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Song stamp</span>
+      <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
+      <span class="n">txtc</span> <span class="o">+=</span> <span class="s1">&#39;SONG=&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;_with_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events_matrix</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_notes&#39;</span>
 
     <span class="k">if</span> <span class="n">line_by_line_output</span><span class="p">:</span>
       <span class="n">txt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -4376,8 +4496,8 @@ Tegridy Code 2021</p></div>
             <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
             <span class="c1"># Writing INTergerS...</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
-              <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+              <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -4442,8 +4562,8 @@ Tegridy Code 2021</p></div>
         <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
         <span class="c1"># Writing INTergerS...</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
-          <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+          <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -4617,7 +4737,7 @@ Tegridy Code 2021</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.Optimus_TXT_to_Notes_Converter">
-    <p>def <span class="ident">Optimus_TXT_to_Notes_Converter</span>(</p><p>Optimus_TXT_String, line_by_line_dataset=True, has_velocities=True, has_MIDI_channels=True, dataset_MIDI_events_time_denominator=1, char_encoding_offset=30000, save_only_first_composition=True, simulate_velocity=True, karaoke=False)</p>
+    <p>def <span class="ident">Optimus_TXT_to_Notes_Converter</span>(</p><p>Optimus_TXT_String, line_by_line_dataset=True, has_velocities=True, has_MIDI_channels=True, dataset_MIDI_events_time_denominator=1, char_encoding_offset=30000, save_only_first_composition=True, simulate_velocity=True, karaoke=False, zero_token=False)</p>
     </div>
     
 
@@ -4636,7 +4756,8 @@ Tegridy Code 2020</p></div>
                                     <span class="n">char_encoding_offset</span> <span class="o">=</span> <span class="mi">30000</span><span class="p">,</span>
                                     <span class="n">save_only_first_composition</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                                     <span class="n">simulate_velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                    <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                                    <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2020&#39;&#39;&#39;</span>
@@ -4656,8 +4777,27 @@ Tegridy Code 2020</p></div>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">name_string</span> <span class="o">=</span> <span class="n">Optimus_TXT_String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
-      <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Zero token</span>
+    <span class="n">zt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">has_MIDI_channels</span><span class="p">:</span>
+      <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">has_velocities</span><span class="p">:</span>
+      <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>     
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">zt</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_encoding_offset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zero_token</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">zt</span><span class="p">:</span>
+        <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+        <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">output_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">st</span> <span class="o">=</span> <span class="mi">0</span>
@@ -4665,14 +4805,19 @@ Tegridy Code 2020</p></div>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 
       <span class="k">if</span> <span class="n">save_only_first_composition</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">zero_token</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">zt</span><span class="p">:</span>
 
-          <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-          <span class="k">break</span>
+            <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">break</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SONG&#39;</span><span class="p">:</span>
 
+            <span class="n">song_name</span> <span class="o">=</span> <span class="n">name_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">break</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="n">istring</span> <span class="o">=</span> <span class="n">input_string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="c1">#print(istring)</span>
 
         <span class="k">if</span> <span class="n">has_MIDI_channels</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
           <span class="n">step</span> <span class="o">=</span> <span class="mi">4</span>          
