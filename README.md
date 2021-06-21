@@ -38,6 +38,7 @@
 
 ## [ClassyMIDI](https://asigalov61.github.io/tegridy-tools/ClassyMIDI.html)
 ## [TinyMIDI](https://asigalov61.github.io/tegridy-tools/TinyMIDI.html)
+## [HaystackSearch](https://asigalov61.github.io/tegridy-tools/HaystackSearch.html)
 
 ***
 
