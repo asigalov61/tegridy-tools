@@ -2596,12 +2596,12 @@ def Tegridy_Transform(chords_list, to_pitch=60, to_velocity=-1):
 
     for c in chords_list:
       cc = copy.deepcopy(c)
-      
-      if to_pitch != -1: 
-        cc[4] = c[4] - pitch_diff
-      
-      if to_velocity != -1: 
-        cc[5] = c[5] - velocity_diff
+      if c[3] != 9: # Except the drums
+        if to_pitch != -1: 
+          cc[4] = c[4] - pitch_diff
+        
+        if to_velocity != -1: 
+          cc[5] = c[5] - velocity_diff
       
       transformed_chords_list.append(cc)
 
