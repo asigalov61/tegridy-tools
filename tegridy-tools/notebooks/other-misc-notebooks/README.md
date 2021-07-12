@@ -1,4 +1,4 @@
-# Other's people's MUsic related Jupyter/Google Colab notebooks
+# Other people music related Jupyter/Google Colab notebooks
 
 ***
 
