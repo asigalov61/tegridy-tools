@@ -322,6 +322,10 @@ class Trainer:
             pbar = tqdm.auto.tqdm(enumerate(loader), total=len(loader) if is_train else enumerate(loader))
             for it, (x, y) in pbar:
 
+                # Iterations save function
+                if int(it) % 1000 == 0 and self.config.ckpt_path != None:
+                  self.save_checkpoint()
+
                 # place data on the correct device
                 x = x.to(self.device)
                 y = y.to(self.device)
