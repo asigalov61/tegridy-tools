@@ -1659,7 +1659,8 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
                               perfect_timings=False,
                               musenet_encoding=False,
                               transform=0,
-                              zero_token=False):
+                              zero_token=False,
+                              reset_timings=False):
 
     '''Project Los Angeles
        Tegridy Code 2021'''
@@ -1838,16 +1839,22 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     #print('Sorting input by start time...')
     events_matrix.sort(key=lambda x: x[1]) # Sorting input by start time    
     
-    chords.extend(events_matrix)
+    #print('Timings converter')
+    if reset_timings:
+      ev_matrix = Tegridy_Timings_Converter(events_matrix)[0]
+    else:
+      ev_matrix = events_matrix
+    
+    chords.extend(ev_matrix)
     #print(chords)
 
     #print('Extracting melody...')
     melody_list = []
 
     #print('Grouping by start time. This will take a while...')
-    values = set(map(lambda x:x[1], events_matrix)) # Non-multithreaded function version just in case
+    values = set(map(lambda x:x[1], ev_matrix)) # Non-multithreaded function version just in case
 
-    groups = [[y for y in events_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
+    groups = [[y for y in ev_matrix if y[1]==x and len(y) == 6] for x in values] # Grouping notes into chords while discarting bad notes...
   
     #print('Sorting events...')
     for items in groups:
@@ -2030,11 +2037,18 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       if not line_by_line_output:
         txt += chr(10)
 
+    # Final processing code...
+    # =======================================================================
+
     # Helper aux/backup function for Karaoke
     karaokez.sort(reverse=False, key=lambda x: x[1])  
 
+    # MuseNet sorting
     if musenet_encoding and not melody_conditioned_encoding and not karaoke:
       chords.sort(key=lambda x: (x[1], x[3]))
+    
+    # Final melody sort
+    melody_list.sort()
 
     # auxs for future use
     aux1 = [None]
@@ -2751,7 +2765,7 @@ def Tegridy_Sliced_Score_Pairs_Generator(chords_list, number_of_miliseconds_per_
 
 def Tegridy_Timings_Converter(chords_list, 
                               max_delta_time = 1000, 
-                              fixed_start_time = 300, 
+                              fixed_start_time = 250, 
                               start_time = 0,
                               start_time_multiplier = 1,
                               durations_multiplier = 1):
