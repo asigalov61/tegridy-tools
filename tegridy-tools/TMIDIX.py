@@ -1754,9 +1754,13 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
             event[2] = round(event[2], -1)
 
         if event[0] == 'text_event' or event[0] == 'lyric' or event[0] == 'note':
+          if perfect_timings:
+            event[1] = round(event[1], -1)
           karaokez.append(event)
         
         if event[0] == 'text_event' or event[0] == 'lyric':
+          if perfect_timings:
+            event[1] = round(event[1], -1)
           try:
             event[2] = str(event[2].decode(karaoke_language_encoding, 'replace')).replace('/', '').replace(' ', '').replace('\\', '')
           except:
@@ -1879,7 +1883,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
           for event in ev:
           
             # Computing events details
-            start_time = int(event[1] - previous_event[1])
+            start_time = int(abs(event[1] - previous_event[1]))
             
             duration = int(previous_event[2])
 
@@ -1936,7 +1940,71 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
     
     # Default stuff (not melody-conditioned/not-karaoke)
     else:      
-    
+      if not karaoke:
+        melody_chords.sort(reverse=False, key=lambda x: x[0][1])
+        mel_chords = []
+        for mc in melody_chords:
+          mel_chords.extend(mc)
+
+        if transform != 0: 
+          chords = Tegridy_Transform(mel_chords, transform)
+        else:
+          chords = mel_chords
+
+        # TXT Stuff
+        previous_event = copy.deepcopy(chords[0])
+        for event in chords:
+
+          # Computing events details
+          start_time = int(abs(event[1] - previous_event[1]))
+          
+          duration = int(previous_event[2])
+
+          channel = int(previous_event[3])
+
+          pitch = int(previous_event[4] + transpose_by)
+          if flip == True:
+            pitch = 127 - int(previous_event[4] + transpose_by)
+
+          velocity = int(previous_event[5])
+
+          # Writing INTergerS...
+          if (start_time)+char_offset < 256 and (duration)+char_offset < 256:
+            INTS.append([(start_time)+char_offset, (duration)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
+          else:
+            bints += 1
+
+          # Converting to TXT if possible...
+          try:
+            txt += str(chr(start_time + char_offset))
+            txt += str(chr(duration + char_offset))
+            txt += str(chr(pitch + char_offset))
+            if output_velocity:
+              txt += str(chr(velocity + char_offset))
+            if output_MIDI_channels:
+              txt += str(chr(channel + char_offset))
+
+
+            if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
+              txt += ''      
+            else:     
+              if line_by_line_output:
+                txt += chr(10)
+              else:
+                txt += chr(32) 
+            
+            previous_event = copy.deepcopy(event)
+          
+          except:
+            # print('Problematic MIDI event. Skipping...')
+            continue
+
+        if not line_by_line_output:
+          txt += chr(10)      
+
+    # Karaoke stuff
+    if karaoke:
+
       melody_chords.sort(reverse=False, key=lambda x: x[0][1])
       mel_chords = []
       for mc in melody_chords:
@@ -1947,64 +2015,11 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
       else:
         chords = mel_chords
 
-      # TXT Stuff
       previous_event = copy.deepcopy(chords[0])
       for event in chords:
 
         # Computing events details
-        start_time = int(event[1] - previous_event[1])
-        
-        duration = int(previous_event[2])
-
-        channel = int(previous_event[3])
-
-        pitch = int(previous_event[4] + transpose_by)
-        if flip == True:
-          pitch = 127 - int(previous_event[4] + transpose_by)
-
-        velocity = int(previous_event[5])
-
-        # Writing INTergerS...
-        if (start_time)+char_offset < 256 and (duration)+char_offset < 256:
-          INTS.append([(start_time)+char_offset, (duration)+char_offset, channel+char_offset, pitch+char_offset, velocity+char_offset])
-        else:
-          bints += 1
-
-        # Converting to TXT if possible...
-        try:
-          txt += str(chr(start_time + char_offset))
-          txt += str(chr(duration + char_offset))
-          txt += str(chr(pitch + char_offset))
-          if output_velocity:
-            txt += str(chr(velocity + char_offset))
-          if output_MIDI_channels:
-            txt += str(chr(channel + char_offset))
-
-
-          if chordify_TXT == True and int(event[1] - previous_event[1]) == 0:
-            txt += ''      
-          else:     
-            if line_by_line_output:
-              txt += chr(10)
-            else:
-              txt += chr(32) 
-          
-          previous_event = copy.deepcopy(event)
-        
-        except:
-          # print('Problematic MIDI event. Skipping...')
-          continue
-
-      if not line_by_line_output:
-        txt += chr(10)      
-
-    # Karaoke stuff
-    if karaoke:
-      previous_event = copy.deepcopy(melody_list[0])
-      for event in melody_list:
-
-        # Computing events details
-        start_time = int(event[1] - previous_event[1])
+        start_time = int(abs(event[1] - previous_event[1]))
         
         duration = int(previous_event[2])
 
@@ -2019,13 +2034,16 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         txt += str(chr(duration + char_offset))
         txt += str(chr(pitch + char_offset))
 
-        txt += str(chr(velocity + char_offset))      
+        txt += str(chr(velocity + char_offset))
+        txt += str(chr(channel + char_offset))     
 
-        txt += '='
-        for k in karaoke_events_matrix:
-          if event[1] == k[1]:
-            txt += str(k[2])          
-            break
+        txt += str('=')
+
+        if start_time > 0:
+          for k in karaoke_events_matrix:
+            if event[1] == k[1]:
+              txt += str(k[2])          
+              break
 
         if line_by_line_output:
           txt += chr(10)
@@ -2202,7 +2220,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
               out.append(st) # Start time
               out.append(int(ord(istring[1]) - char_encoding_offset) * dataset_MIDI_events_time_denominator) # Duration
-              out.append(0) # Channel
+              out.append(int(ord(istring[4]) - char_encoding_offset)) # Channel
               out.append(int(ord(istring[2]) - char_encoding_offset)) # Pitch
 
               if simulate_velocity:
