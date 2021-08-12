@@ -2037,11 +2037,10 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
         txt += str(chr(velocity + char_offset))
         txt += str(chr(channel + char_offset))     
 
-        txt += str('=')
-
         if start_time > 0:
           for k in karaoke_events_matrix:
             if event[1] == k[1]:
+              txt += str('=')
               txt += str(k[2])          
               break
 
@@ -2234,7 +2233,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
               if istring.split('=')[1] != '':
                 out.append('lyric')
                 out.append(st)
-                out.append(istring[5:])
+                out.append(istring.split('=')[1])
                 output_list.append(out)
           except:
             continue
