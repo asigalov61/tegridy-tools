@@ -2259,6 +2259,65 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
 ###################################################################################
 
+def Optimus_Squash(chords_list, simulate_velocity=True, mono_compression=False):
+
+  '''Input: Flat chords list
+            Simulate velocity or not
+            Mono-compression enabled or disabled
+            
+            Default is almost lossless 25% compression, otherwise, lossy 50% compression (mono-compression)
+
+     Output: Squashed chords list
+             Resulting compression level
+
+             Please note that if drums are passed through as is
+
+     Project Los Angeles
+     Tegridy Code 2021'''
+
+  output = []
+  ptime = 0
+  vel = 0
+  boost = 15
+  stptc = []
+  ocount = 0
+  rcount = 0
+
+  for c in chords_list:
+    
+    cc = copy.deepcopy(c)
+    ocount += 1
+    
+    if [cc[1], cc[3], (cc[4] % 12) + 60] not in stptc:
+      stptc.append([cc[1], cc[3], (cc[4] % 12) + 60])
+
+      if cc[3] != 9:
+        cc[4] = (c[4] % 12) + 60
+
+      if simulate_velocity and c[1] != ptime:
+        vel = c[4] + boost
+      
+      if cc[3] != 9:
+        cc[5] = vel
+
+      if mono_compression:
+        if c[1] != ptime:
+          output.append(cc)
+          rcount += 1  
+      else:
+        output.append(cc)
+        rcount += 1
+      
+      ptime = c[1]
+
+  output.sort(key=lambda x: (x[1], x[4]))
+
+  comp_level = 100 - int((rcount * 100) / ocount)
+
+  return output, comp_level
+
+###################################################################################
+
 def Optimus_Signature(chords_list, calculate_full_signature=False):
 
     '''Optimus Signature
