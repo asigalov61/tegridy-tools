@@ -3077,9 +3077,9 @@ table {
             <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
             <span class="c1"># Writing INTergerS...</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
               <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">except</span><span class="p">:</span>
               <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># Converting to TXT if possible...</span>
@@ -3143,9 +3143,9 @@ table {
           <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
           <span class="c1"># Writing INTergerS...</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
             <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
-          <span class="k">else</span><span class="p">:</span>
+          <span class="k">except</span><span class="p">:</span>
             <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
           <span class="c1"># Converting to TXT if possible...</span>
@@ -4598,9 +4598,9 @@ Tegridy Code 2021</p></div>
             <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
             <span class="c1"># Writing INTergerS...</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
               <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">except</span><span class="p">:</span>
               <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># Converting to TXT if possible...</span>
@@ -4664,9 +4664,9 @@ Tegridy Code 2021</p></div>
           <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_event</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
           <span class="c1"># Writing INTergerS...</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
             <span class="n">INTS</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">start_time</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">channel</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">pitch</span><span class="o">+</span><span class="n">char_offset</span><span class="p">,</span> <span class="n">velocity</span><span class="o">+</span><span class="n">char_offset</span><span class="p">])</span>
-          <span class="k">else</span><span class="p">:</span>
+          <span class="k">except</span><span class="p">:</span>
             <span class="n">bints</span> <span class="o">+=</span> <span class="mi">1</span>
 
           <span class="c1"># Converting to TXT if possible...</span>
