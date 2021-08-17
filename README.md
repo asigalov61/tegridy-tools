@@ -46,7 +46,7 @@
 
 ***
 
-## [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
+## (NEW) [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
 ## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
 ## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
 
