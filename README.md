@@ -2,7 +2,7 @@
 
 ***
 
-### Music Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) Artificial Intelligence systems and architectures.
+### Music NLP Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) NLP Artificial Intelligence systems and architectures.
 
 ***
 ### Install:
@@ -42,16 +42,19 @@
 
 ## (NEW) [TMIDIX](https://asigalov61.github.io/tegridy-tools/TMIDIX.html)
 
-## (RETIRED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
+## (DEPRECIATED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
+
+***
+
+## [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
+## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
+## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
+
+***
 
 ## [ClassyMIDI](https://asigalov61.github.io/tegridy-tools/ClassyMIDI.html)
 ## [TinyMIDI](https://asigalov61.github.io/tegridy-tools/TinyMIDI.html)
 ## [HaystackSearch](https://asigalov61.github.io/tegridy-tools/HaystackSearch.html)
-
-***
-
-## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
-## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
 
 ***
 
