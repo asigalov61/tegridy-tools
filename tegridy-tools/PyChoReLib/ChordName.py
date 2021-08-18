@@ -55,6 +55,6 @@ class ChordName(object):
                 return Repr
                 
         def Print(self):
-                print self.__repr__()
+                print(self.__repr__())
                 
 

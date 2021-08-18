@@ -49,7 +49,7 @@ class Scale(object):
                 if len(self.Notes) == 0:
                         raise InvalidInput
                 for Note in self.Notes:
-                        if AlreadyFoundNote.has_key(Note):
+                        if AlreadyFoundNote.__contains__(Note):
                                 pass
                         else:
                                 AlreadyFoundNote[Note] = 1
@@ -98,6 +98,6 @@ class Scale(object):
         
         def Print(self):
                 """ Prints a representation of a scale """
-                print self.__repr__()
+                print(self.__repr__())
 
 

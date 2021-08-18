@@ -64,7 +64,7 @@ class TestInterval(unittest.TestCase):
                 for Ch, Int in self.TranspositionTest:
                         TransposedInterval = Interval(Ch[0][0],Ch[0][1]).TransposeTo(Ch[1])
                         self.assertEqual(TransposedInterval.__repr__(), Int.__repr__())
-                        print Interval(Ch[0][0],Ch[0][1]),"transposed to ",Ch[1]," gives",TransposedInterval
+                        print(Interval(Ch[0][0],Ch[0][1]),"transposed to ",Ch[1]," gives",TransposedInterval)
 
 
 class TestRecognizeInterval(unittest.TestCase):
@@ -87,7 +87,7 @@ class TestRecognizeInterval(unittest.TestCase):
                 for Ch, In in self.ExpectedValues:
                         IName = IR.RecognizeInterval(Interval(Ch[0],Ch[1]))
                         self.assertEqual(IName.__repr__(), In.__repr__())
-                        print "Interval ",Ch," is found to be a ",IName
+                        print("Interval ",Ch," is found to be a ",IName)
 
 
 class TestChord(unittest.TestCase):
@@ -142,7 +142,7 @@ class TestChord(unittest.TestCase):
         def testTransposeTo(self):
                 for InputData, Result in self.KnownTranspositions:
                         self.assertEqual(Chord(InputData[0]).TransposeTo(InputData[1]), Result)
-                        print "Chord ",InputData[0], " transposed to ",InputData[1],"gives ",Result
+                        print("Chord ",InputData[0], " transposed to ",InputData[1],"gives ",Result)
                 for InputData, Result in self.KnownImpossibleTranspositions:
                         self.assertRaises(NoMatch, Chord(InputData[0]).TransposeTo, InputData[1])
 
@@ -178,21 +178,21 @@ class TestRecognizeChord(unittest.TestCase):
         def testRecognizeChord(self):
                 for ChNot, ChNam in self.KnownChords:
                         self.assertEqual( self.CR.RecognizeChord(Chord(ChNot)).__repr__(), ChNam.__repr__() )
-                        print ChNot,"is a ",ChNam.__repr__(),"chord"
+                        print(ChNot,"is a ",ChNam.__repr__(),"chord")
 
 
         def testWriteReadChordRecognitionKnowledgeBase(self):
-                print "Writing chord recognition knowledge base to disk"
+                print("Writing chord recognition knowledge base to disk")
                 self.CR.WriteRecognitionKnowledgeBaseToFile('Stefaan.ChordDefs')
-                print "Done writing."
+                print("Done writing.")
                 
-                print "Loading chord recognition knowledge base from disk"
+                print("Loading chord recognition knowledge base from disk")
                 self.CR.ReadRecognitionKnowledgeBaseFromFile('Stefaan.ChordDefs')
-                print "Done loading."
+                print("Done loading.")
         
-                print "Test loaded definitions"
+                print("Test loaded definitions")
                 self.testRecognizeChord()
-                print "Done testing"
+                print("Done testing")
                 
 class TestScale(unittest.TestCase):
         KnownScale = (( ['c','d','e','f','g','a','b'], [2,2,1,2,2,2] ), )
@@ -211,19 +211,19 @@ class TestScale(unittest.TestCase):
                 for S,R in self.KnownScale:
                         P = Scale(S).ToIntervalPattern()
                         self.assertEqual(P,R)
-                        print S,"to interval pattern yields",R
+                        print(S,"to interval pattern yields",R)
                         
         def testTransposedScale(self):
                 for S,R in self.KnownTransposedScale:
                         T = Scale(S[0]).TransposeTo(S[1])
                         self.assertEqual(T, R)
-                        print S[0],"transposed to",S[1],"yields",T
+                        print(S[0],"transposed to",S[1],"yields",T)
 
         def testScaleSort(self):
                 for S,R in self.KnownScaleSort:
                         T = Scale(S)
                         T.SortInPlaceRelativeToFirstNote()
-                        print "Sorting scale",S,"yields ",T.Notes
+                        print("Sorting scale",S,"yields ",T.Notes)
                         self.assertEqual(T.Notes, R)
                         
 class TestRecognizeScale(unittest.TestCase):
@@ -246,21 +246,21 @@ class TestRecognizeScale(unittest.TestCase):
         def testRecognizeScale(self):
                 for ChNot, ChNam in self.KnownScales:
                         self.assertEqual( self.CR.RecognizeScale(Scale(ChNot)).__repr__(), ChNam.__repr__() )
-                        print ChNot,"is a ",ChNam.__repr__(),"scale"
+                        print(ChNot,"is a ",ChNam.__repr__(),"scale")
 
 
         def testWriteReadScaleRecognitionKnowledgeBase(self):
-                print "Writing chord recognition knowledge base to disk"
+                print("Writing chord recognition knowledge base to disk")
                 self.CR.WriteRecognitionKnowledgeBaseToFile('Stefaan.ScaleDefs')
-                print "Done writing."
+                print("Done writing.")
                 
-                print "Loading chord recognition knowledge base from disk"
+                print("Loading chord recognition knowledge base from disk")
                 self.CR.ReadRecognitionKnowledgeBaseFromFile('Stefaan.ScaleDefs')
-                print "Done loading."
+                print("Done loading.")
         
-                print "Test loaded definitions"
+                print("Test loaded definitions")
                 self.testRecognizeScale()
-                print "Done testing"
+                print("Done testing")
                 
                 
 def main():

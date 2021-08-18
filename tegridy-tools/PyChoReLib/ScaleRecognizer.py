@@ -29,14 +29,14 @@ class ScaleRecognizer(KnowledgeBasedRecognizer):
                 SimplifiedScale = AScale.FindCanonicForm()
                 if SimplifiedScale != AScale.Notes:
                         if Verbosity != 0:
-                                print "*** Warning: registration of non-canonical scale", AScale.Notes, "as ", SimplifiedScale
+                                print("*** Warning: registration of non-canonical scale", AScale.Notes, "as ", SimplifiedScale)
                                 pass
                         
                 Intervals= Scale(SimplifiedScale).ToIntervalPattern()
                 DBKey = tuple(Intervals)
-                if self.KnowledgeBase.has_key(DBKey):
+                if self.KnowledgeBase.__contains__(DBKey):
                         if Verbosity != 0:
-                                print "*** Warning: duplicate Scale definition overrules earlier defined scale. Old: ",self.KnowledgeBase[DBKey][0].Print(),"New: ",AScaleName.Print()
+                                print("*** Warning: duplicate Scale definition overrules earlier defined scale. Old: ",self.KnowledgeBase[DBKey][0].Print(),"New: ",AScaleName.Print())
                 RootNoteIndex = SimplifiedScale.index(AScaleName.GetRootName())
                 ModeRootNoteIndex = SimplifiedScale.index(AScaleName.GetModeRootName())
                 self.KnowledgeBase[DBKey] = tuple([AScaleName, RootNoteIndex, ModeRootNoteIndex])
@@ -129,7 +129,7 @@ class ScaleRecognizer(KnowledgeBasedRecognizer):
         def RecognizeScale(self, AScale):
                 """ Method to lookup a Scale AScale in the knowledge base """
                 DBKey = self.ScaleToKey(AScale)
-                if self.KnowledgeBase.has_key(DBKey):
+                if self.KnowledgeBase.__contains__(DBKey):
                         MatchedScale = self.KnowledgeBase[DBKey][0]
                         SimplifiedScale = Scale(AScale.FindCanonicForm())
                         RootName = SimplifiedScale.Notes[self.KnowledgeBase[DBKey][1]]

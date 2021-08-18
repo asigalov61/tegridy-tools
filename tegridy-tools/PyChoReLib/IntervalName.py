@@ -30,5 +30,5 @@ class IntervalName(object):
         def __repr__(self):
                 return self.Modifier.__repr__().strip("'") + " " + self.IntervalName.__repr__().strip("'")
         def Print(self):
-                print self.__repr__()
+                print(self.__repr__())
 

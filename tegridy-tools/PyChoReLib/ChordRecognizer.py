@@ -42,14 +42,14 @@ class ChordRecognizer(KnowledgeBasedRecognizer):
                 SimplifiedChord = AChord.FindCanonicForm()
                 if SimplifiedChord != AChord.Notes:
                         if Verbosity != 0:
-                                print "*** Warning: registration of non-canonical chord", AChord.Notes, "as ", SimplifiedChord
+                                print("*** Warning: registration of non-canonical chord", AChord.Notes, "as ", SimplifiedChord)
                                 pass
                         
                 Intervals= Chord(SimplifiedChord).ToIntervalPattern()
                 DBKey = tuple(Intervals)
-                if self.KnowledgeBase.has_key(DBKey):
+                if self.KnowledgeBase.__contains__(DBKey):
                         if Verbosity != 0:
-                                print "*** Warning: duplicate Chord definition overrules earlier defined chord. Old: ",self.KnowledgeBase[DBKey][0].Print(),"New: ",AChordName.Print()
+                                print("*** Warning: duplicate Chord definition overrules earlier defined chord. Old: ",self.KnowledgeBase[DBKey][0].Print(),"New: ",AChordName.Print())
                 BaseNoteIndex = SimplifiedChord.index(AChord.Notes[0])
                 self.KnowledgeBase[DBKey] = tuple([AChordName, BaseNoteIndex])
 
@@ -145,7 +145,7 @@ class ChordRecognizer(KnowledgeBasedRecognizer):
         def RecognizeChord(self, AChord):
                 """ Method to lookup a Chord AChord in the knowledge base """
                 DBKey = self.ChordToKey(AChord)
-                if self.KnowledgeBase.has_key(DBKey):
+                if self.KnowledgeBase.__contains__(DBKey):
                         MatchedChord = self.KnowledgeBase[DBKey][0]
                         SimplifiedChord = Chord(AChord.FindCanonicForm())
                         RootName = SimplifiedChord.Notes[self.KnowledgeBase[DBKey][1]]

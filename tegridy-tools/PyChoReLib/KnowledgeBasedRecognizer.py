@@ -26,7 +26,7 @@ class KnowledgeBasedRecognizer(object):
                 else:
                         try:
                                 self.ReadRecognitionKnowledgeBaseFromFile(DefinitionFile)
-                        except:
+                        except BaseException:
                                 P("Warning! Could not open scale definition file"+DefinitionFile,Verbosity)
                                 P("Falling back to initialization from scratch",Verbosity)
                                 self.InitializeKnowledgeBase(Verbosity)

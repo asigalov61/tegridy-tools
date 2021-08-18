@@ -52,19 +52,19 @@ class ScaleName(object):
 
         def __repr__(self):
                 RName = self.RootName.__repr__().strip("'")         # for D dorian, this is 'c'
-#                print "RName = ",RName,"expected for d dorian: c"
+#                print("RName = ",RName,"expected for d dorian: c")
                 MRName= self.ModeRootName.__repr__().strip("'")     # for D dorian, this is 'd'
-#                print "MRName = ",MRName,"expected for d dorian: d"
+#                print("MRName = ",MRName,"expected for d dorian: d")
                 RtName = RName[0].upper() + RName[1:] + " "         # for D dorian, this is 'C'
-#                print "RtName = ",RtName,"expected for d dorian: C"
+#                print("RtName = ",RtName,"expected for d dorian: C")
                 MRtName= MRName[0].upper() + MRName[1:] + " "       # for D dorian, this is 'D'
-#                print "MRtName = ",MRtName, "expected for d dorian: D" 
+#                print("MRtName = ",MRtName, "expected for d dorian: D") 
                 Repr = MRtName                                      # for D dorian, this is 'D'
-#                print "MRtName = ","expected for d dorian: D"
+#                print("MRtName = ","expected for d dorian: D")
                 MdName = self.Mode.__repr__().strip("'")            # for D dorian, this is 'dorian'
-#                print "MdName = ","expected for d dorian: dorian"
+#                print("MdName = ","expected for d dorian: dorian")
                 TName = self.Type.__repr__().strip("'")             # for D dorian, this is 'major'
-#                print "TName = ","expected for d dorian: major"
+#                print("TName = ","expected for d dorian: major")
 
                 if self.Mode == '': 
                         Repr = RtName + TName                       # for D dorian, this would be 'C major'
@@ -75,6 +75,6 @@ class ScaleName(object):
                 return Repr
                 
         def Print(self):
-                print self.__repr__()
+                print(self.__repr__())
                 
 

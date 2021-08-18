@@ -23,7 +23,7 @@ import sys
 try:
         import pypm
 except ImportError:
-        print "Error! You need to install the PyPortMidi package in order to use this demo program."
+        print("Error! You need to install the PyPortMidi package in order to use this demo program.")
         sys.exit(1)
 
 class MidiNumberToNoteName(object):
@@ -61,10 +61,10 @@ class ChordExplorer(object):
                          Interface,Name,Inp,Outp,Opened = pypm.GetDeviceInfo(DeviceNr)
                          if Inp==1: # input devices only
                                 Found = 1
-                                print "Device Number: ", DeviceNr, "Interface: ",Interface, "Name: ",Name
+                                print("Device Number: ", DeviceNr, "Interface: ",Interface, "Name: ",Name)
                 if Found == 0:
-                        print "*** No MIDI input devices found! Consider using a virtual midi keyboard (e.g. vkeyb on linux)"
-                        print "Going back to command line now."
+                        print("*** No MIDI input devices found! Consider using a virtual midi keyboard (e.g. vkeyb on linux)")
+                        print("Going back to command line now.")
                         sys.exit(1)
                               
 
@@ -77,11 +77,11 @@ class ChordExplorer(object):
 
         def InitializeMidiInput(self):
                 pypm.Initialize()
-                print "The following MIDI input devices are detected on your system: "
+                print("The following MIDI input devices are detected on your system: ")
                 self.ListMidiInputDevices()
                 dev = int(raw_input("Please type a device number from the list: "))
                 self.MidiIn = pypm.Input(dev)
-                print "Midi Input opened. Waiting for chords of 3 notes or more... press Ctrl-Break to stop."
+                print("Midi Input opened. Waiting for chords of 3 notes or more... press Ctrl-Break to stop.")
 
         def UpdateNoteMap(self, NoteNr, Velocity):
                 self.NoteOnOffMap[NoteNr] = Velocity
@@ -96,19 +96,19 @@ class ChordExplorer(object):
                         elif len(NoteList) == 2:
                                 try:
                                         Recognized = self.IR.RecognizeInterval(Interval(NoteList[0],NoteList[1]))
-                                        print "Found interval: ", Recognized
+                                        print("Found interval: ", Recognized)
                                 except InvalidInput:
-                                        print "Programming Error: invalid input for IntervalRecognizer."
+                                        print("Programming Error: invalid input for IntervalRecognizer.")
                                 except NoMatch:
-                                        print "Unknown interval: ", NoteList
+                                        print("Unknown interval: ", NoteList)
                         else:
                                 try:
                                         Recognized = self.CR.RecognizeChord(Chord(NoteList))
-                                        print "Found chord: ", Recognized 
+                                        print("Found chord: ", Recognized) 
                                 except InvalidInput:
-                                        print "Programming Error: invalid input for ChordRecognizer."
+                                        print("Programming Error: invalid input for ChordRecognizer.")
                                 except NoMatch:
-                                        print "Not a known chord: ",NoteList 
+                                        print("Not a known chord: ",NoteList) 
 
         def Step(self):
                 while not self.MidiIn.Poll(): pass
@@ -125,17 +125,17 @@ class ChordExplorer(object):
                                 
 
 def main(CommandLineArguments):
-        print "Initializing chord recognition system."
+        print("Initializing chord recognition system.")
         CE = ChordExplorer(CommandLineArguments[0])
-        print "Finished chord initialization system."
-        print "Autodetect available midi input devices."
+        print("Finished chord initialization system.")
+        print("Autodetect available midi input devices.")
         CE.InitializeMidiInput()
         try:
                 while 1==1:
                         CE.Step()
         except KeyboardInterrupt:
                 CE.Finish()
-                print "Finishing the recognizer..."
+                print("Finishing the recognizer...")
         
 if __name__ == "__main__":
         try:
@@ -143,21 +143,21 @@ if __name__ == "__main__":
         except IndexError:
                 Arg = '' 
         if Arg == '-v' or Arg == '--version' or Arg == '/v' or Arg == '/version':
-                print "midiinputdemo Version 0.0.2"
+                print("midiinputdemo Version 0.0.2")
         elif Arg == '-h' or Arg == '--help' or Arg == '/h' or Arg == '/help':
-                print ""
-                print "Usage:"
-                print "         python midiinputdemo.py --version | -v | /v | /version  : prints the version"
-                print "         python midiinputdemo.py --help    | -h | /h | /help     : prints this help"
-                print "         python midiinputdemo.py [CHORDDEFINITIONFILENAME]"
-                print ""
-                print "   The optional parameter CHORDDEFINITIONFILE is the name of a file containing a chord recognition database."
-                print "   Using such a file drastically shortens the initialization time of the recognition system."
-                print "   An example of such a file is generated if you run the unit tests. This demo program does not understand the .XML format."
-                print "   If you don't specify a CHORDDEFINITIONFILE or you specify a non-existing file, the system will be initialized"
-                print "   from scratch. This will take several seconds to complete."
-                print ""
-                print ""
+                print(""
+                print("Usage:")
+                print("         python midiinputdemo.py --version | -v | /v | /version  : prints the version")
+                print("         python midiinputdemo.py --help    | -h | /h | /help     : prints this help")
+                print("         python midiinputdemo.py [CHORDDEFINITIONFILENAME]")
+                print "")
+                print("   The optional parameter CHORDDEFINITIONFILE is the name of a file containing a chord recognition database.")
+                print("   Using such a file drastically shortens the initialization time of the recognition system.")
+                print("   An example of such a file is generated if you run the unit tests. This demo program does not understand the .XML format.")
+                print("   If you don't specify a CHORDDEFINITIONFILE or you specify a non-existing file, the system will be initialized")
+                print("   from scratch. This will take several seconds to complete.")
+                print(""
+                print "")
         else:
                 if Arg != '' :
                         main(sys.argv[1:])
