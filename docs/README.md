@@ -16,6 +16,14 @@
 
 ## [ClassyMIDI](https://asigalov61.github.io/tegridy-tools/ClassyMIDI.html)
 ## [TinyMIDI](https://asigalov61.github.io/tegridy-tools/TinyMIDI.html)
+
+***
+
+## (NEW) [SyllablesSearch](https://asigalov61.github.io/tegridy-tools/SyllablesSearch.html)
 ## [HaystackSearch](https://asigalov61.github.io/tegridy-tools/HaystackSearch.html)
 
 ***
+
+### Project Los Angeles
+
+### Tegridy Code 2021
