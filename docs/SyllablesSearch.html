@@ -1072,6 +1072,7 @@ table {
     <li class="mono"><a href="#SyllablesSearch.C">C</a></li>
     <li class="mono"><a href="#SyllablesSearch.Detailed_English_Syllables_Breakdown">Detailed_English_Syllables_Breakdown</a></li>
     <li class="mono"><a href="#SyllablesSearch.END">END</a></li>
+    <li class="mono"><a href="#SyllablesSearch.Lyric_Syllables_Processor">Lyric_Syllables_Processor</a></li>
     <li class="mono"><a href="#SyllablesSearch.M">M</a></li>
     <li class="mono"><a href="#SyllablesSearch.S">S</a></li>
     <li class="mono"><a href="#SyllablesSearch.V">V</a></li>
@@ -1194,10 +1195,87 @@ table {
 <span class="c1">#</span>
 <span class="kn">import</span> <span class="nn">pkg_resources</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
 <span class="c1">#</span>
 <span class="c1">########################################################</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading SyllablesSearch Module...&#39;</span><span class="p">)</span>
+
+<span class="c1">########################################################</span>
+
+<span class="k">def</span> <span class="nf">Lyric_Syllables_Processor</span><span class="p">(</span><span class="n">input_lyrics</span><span class="o">=</span><span class="s1">&#39;some great lyrics&#39;</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Input: Lyrics as a TXT string in any format</span>
+
+<span class="sd">    Output: All encoded words as a TXT string separated by spaces</span>
+
+<span class="sd">            Encoded words syllables as a TXT string, where: </span>
+<span class="sd">            1 == syllable, 2 == break between words, 3 == break between the lines</span>
+<span class="sd">            This allows to have a two-bytes-per-token encoding</span>
+
+<span class="sd">            Encoded syllables byte-pairs count (aka encoding tokens count)</span>
+<span class="sd">       </span>
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_lyrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">input_lyrics</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">load_syllables_dictionary</span><span class="p">()</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="n">letters_count</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="n">syls_bytes</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="n">syls_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">input_lyrics</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="n">clean_txt</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">txt</span><span class="p">)):</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">clean_text</span><span class="p">(</span><span class="n">txt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">())])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">clean_txt</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">clean_text</span><span class="p">(</span><span class="n">txt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">())])</span>
+
+    <span class="n">all_words</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clean_txt</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">all_words</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">)))</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
+    <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wout1</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">kbd</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">clean_txt</span><span class="p">):</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">idx</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+              <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">words</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">letters_count</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">syls_bytes</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">syls_count</span><span class="p">[</span><span class="n">idx</span><span class="p">]])</span>
+            
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+              <span class="n">kbd</span> <span class="o">=</span> <span class="kc">True</span>
+              <span class="k">break</span>
+            
+            <span class="k">except</span><span class="p">:</span>
+              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="n">word2bits</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">word2bits</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)])</span>
+              <span class="k">continue</span>
+        
+        <span class="n">syls_bytes_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39;2&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">out1</span><span class="p">])</span> <span class="c1"># 2 == words break</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">syls_bytes_str</span> <span class="o">+</span> <span class="s1">&#39;3&#39;</span><span class="p">)</span> <span class="c1"># 3 == lines break</span>
+        <span class="n">wout1</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">out1</span><span class="p">])</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+        <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">kbd</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+          <span class="k">break</span>
+
+      <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">wout1</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
 <span class="c1">########################################################</span>
 
@@ -2202,6 +2280,108 @@ table {
   <div id="source-SyllablesSearch.END" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">END</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">c</span> <span class="o">==</span> <span class="sa">u</span><span class="s2">&quot;]&quot;</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="SyllablesSearch.Lyric_Syllables_Processor">
+    <p>def <span class="ident">Lyric_Syllables_Processor</span>(</p><p>input_lyrics=&#39;some great lyrics&#39;)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Input: Lyrics as a TXT string in any format</p>
+<p>Output: All encoded words as a TXT string separated by spaces</p>
+<pre><code>    Encoded words syllables as a TXT string, where: 
+    1 == syllable, 2 == break between words, 3 == break between the lines
+    This allows to have a two-bytes-per-token encoding
+
+    Encoded syllables byte-pairs count (aka encoding tokens count)
+</code></pre>
+<p>Project Los Angeles
+Tegridy Code 2021</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-SyllablesSearch.Lyric_Syllables_Processor', this);">Show source &equiv;</a></p>
+  <div id="source-SyllablesSearch.Lyric_Syllables_Processor" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Lyric_Syllables_Processor</span><span class="p">(</span><span class="n">input_lyrics</span><span class="o">=</span><span class="s1">&#39;some great lyrics&#39;</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Input: Lyrics as a TXT string in any format</span>
+
+<span class="sd">    Output: All encoded words as a TXT string separated by spaces</span>
+
+<span class="sd">            Encoded words syllables as a TXT string, where: </span>
+<span class="sd">            1 == syllable, 2 == break between words, 3 == break between the lines</span>
+<span class="sd">            This allows to have a two-bytes-per-token encoding</span>
+
+<span class="sd">            Encoded syllables byte-pairs count (aka encoding tokens count)</span>
+<span class="sd">       </span>
+<span class="sd">    Project Los Angeles</span>
+<span class="sd">    Tegridy Code 2021&#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_lyrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">input_lyrics</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">load_syllables_dictionary</span><span class="p">()</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="n">letters_count</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="n">syls_bytes</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="n">syls_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">input_lyrics</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="n">clean_txt</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">txt</span><span class="p">)):</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">clean_text</span><span class="p">(</span><span class="n">txt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">())])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">clean_txt</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">clean_text</span><span class="p">(</span><span class="n">txt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">())])</span>
+
+    <span class="n">all_words</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clean_txt</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">all_words</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">)))</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
+    <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wout1</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">kbd</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">clean_txt</span><span class="p">):</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">idx</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+              <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">words</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">letters_count</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">syls_bytes</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">syls_count</span><span class="p">[</span><span class="n">idx</span><span class="p">]])</span>
+            
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+              <span class="n">kbd</span> <span class="o">=</span> <span class="kc">True</span>
+              <span class="k">break</span>
+            
+            <span class="k">except</span><span class="p">:</span>
+              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="n">word2bits</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">word2bits</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)])</span>
+              <span class="k">continue</span>
+        
+        <span class="n">syls_bytes_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s1">&#39;2&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">out1</span><span class="p">])</span> <span class="c1"># 2 == words break</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">syls_bytes_str</span> <span class="o">+</span> <span class="s1">&#39;3&#39;</span><span class="p">)</span> <span class="c1"># 3 == lines break</span>
+        <span class="n">wout1</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">out1</span><span class="p">])</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+        <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">kbd</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+          <span class="k">break</span>
+
+      <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">wout1</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 </pre></div>
 
   </div>
