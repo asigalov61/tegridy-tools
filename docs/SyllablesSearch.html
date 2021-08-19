@@ -1070,6 +1070,7 @@ table {
   <ul>
     <li class="mono"><a href="#SyllablesSearch.BEG">BEG</a></li>
     <li class="mono"><a href="#SyllablesSearch.C">C</a></li>
+    <li class="mono"><a href="#SyllablesSearch.Detailed_English_Syllables_Breakdown">Detailed_English_Syllables_Breakdown</a></li>
     <li class="mono"><a href="#SyllablesSearch.END">END</a></li>
     <li class="mono"><a href="#SyllablesSearch.M">M</a></li>
     <li class="mono"><a href="#SyllablesSearch.S">S</a></li>
@@ -2023,7 +2024,17 @@ table {
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dic</span><span class="p">:</span>
       <span class="n">dictionary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">))</span>
   
-  <span class="k">return</span> <span class="n">dictionary</span>    
+  <span class="k">return</span> <span class="n">dictionary</span>
+
+<span class="k">def</span> <span class="nf">Detailed_English_Syllables_Breakdown</span><span class="p">():</span>
+
+  <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">letters_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">syls</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;¥.&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">syls_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">syls_bytes</span> <span class="o">=</span> <span class="p">[</span><span class="n">word2bits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">syls</span><span class="p">]</span>
+
+  <span class="k">return</span> <span class="n">words</span><span class="p">,</span> <span class="n">letters_count</span><span class="p">,</span> <span class="n">syls</span><span class="p">,</span> <span class="n">syls_count</span><span class="p">,</span> <span class="n">syls_bytes</span> 
 
 <span class="c1">########################################################</span>
 
@@ -2142,6 +2153,34 @@ table {
   <div id="source-SyllablesSearch.C" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">c</span> <span class="ow">in</span> <span class="sa">u</span><span class="s2">&quot;BCDFGHJKLMNPQRSTVWXYZbcdfghjklmnpqrstvwxyz&quot;</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="SyllablesSearch.Detailed_English_Syllables_Breakdown">
+    <p>def <span class="ident">Detailed_English_Syllables_Breakdown</span>(</p><p>)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-SyllablesSearch.Detailed_English_Syllables_Breakdown', this);">Show source &equiv;</a></p>
+  <div id="source-SyllablesSearch.Detailed_English_Syllables_Breakdown" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Detailed_English_Syllables_Breakdown</span><span class="p">():</span>
+
+  <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">letters_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">syls</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;¥.&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">syls_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">English_Words_Syllables</span><span class="p">]</span>
+  <span class="n">syls_bytes</span> <span class="o">=</span> <span class="p">[</span><span class="n">word2bits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">syls</span><span class="p">]</span>
+
+  <span class="k">return</span> <span class="n">words</span><span class="p">,</span> <span class="n">letters_count</span><span class="p">,</span> <span class="n">syls</span><span class="p">,</span> <span class="n">syls_count</span><span class="p">,</span> <span class="n">syls_bytes</span> 
 </pre></div>
 
   </div>
@@ -2874,7 +2913,7 @@ table {
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dic</span><span class="p">:</span>
       <span class="n">dictionary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">))</span>
   
-  <span class="k">return</span> <span class="n">dictionary</span>    
+  <span class="k">return</span> <span class="n">dictionary</span>
 </pre></div>
 
   </div>
