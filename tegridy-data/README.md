@@ -2,6 +2,10 @@
 
 ***
 
+Apazche 2.0 license, unless otherwise stated/requested
+
+***
+
 https://colinraffel.com/projects/lmd/
 
 The Lakh MIDI Dataset is distributed with a CC-BY 4.0 license; if you use this data in any capacity, please reference this page and my thesis:
@@ -11,4 +15,5 @@ Colin Raffel. "Learning-Based Methods for Comparing Sequences, with Applications
 ***
 
 Project Los Angeles
+
 Tegridy Code 2021
