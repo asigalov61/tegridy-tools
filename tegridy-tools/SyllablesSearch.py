@@ -48,10 +48,87 @@ r'''############################################################################
 #
 import pkg_resources
 import re
+import tqdm
 #
 ########################################################
 
 print('Loading SyllablesSearch Module...')
+
+########################################################
+
+def Lyric_Syllables_Processor(input_lyrics='some great lyrics'):
+
+    '''
+    Input: Lyrics as a TXT string in any format
+
+    Output: All encoded words as a TXT string separated by spaces
+
+            Encoded words syllables as a TXT string, where: 
+            1 == syllable, 2 == break between words, 3 == break between the lines
+            This allows to have a two-bytes-per-token encoding
+
+            Encoded syllables byte-pairs count (aka encoding tokens count)
+       
+    Project Los Angeles
+    Tegridy Code 2021'''
+
+    if len(input_lyrics) == 0 or input_lyrics == None:
+      return ' ', 3, 0
+
+    data = load_syllables_dictionary()
+
+    words = [y[0].lower() for y in data[1:]]
+    letters_count = [len(y[0]) for y in data[1:]]
+    syls_bytes = [y[1] for y in data[1:]]
+    syls_count = [y[2] for y in data[1:]]
+
+    txt = input_lyrics.split(chr(10))
+
+    clean_txt = []
+    for i in range(len(txt)):
+      if len([clean_text(txt[i].lower())]) != 0:
+        clean_txt.extend([clean_text(txt[i].lower())])
+
+    all_words = []
+
+    for c in clean_txt:
+      if len(c) != 0:
+        all_words.extend(c.split(chr(32)))
+
+    out = '3'
+    out1 = []
+    wout1 = ''
+    kbd = False
+
+    for c in tqdm.tqdm(clean_txt):
+      try:
+        if len(c) != 0:
+          for w in c.replace(chr(10), chr(32)).split(chr(32)):
+            try:
+              idx = words.index(w.lower())
+              out1.append([words[idx], letters_count[idx], syls_bytes[idx], syls_count[idx]])
+            
+            except KeyboardInterrupt:
+              kbd = True
+              break
+            
+            except:
+              if len(w.lower()) != 0:
+                out1.append([w.lower(), len(w.lower()), word2bits(w.lower()), str(word2bits(w.lower())).count('1')])
+              continue
+        
+        syls_bytes_str = ''.join([('2' + str(y[2])) for y in out1]) # 2 == words break
+        out += (syls_bytes_str + '3') # 3 == lines break
+        wout1 += ' '.join([y[0] for y in out1]) + chr(32)
+        out1 = []
+
+        if kbd == True:
+          break
+
+      except KeyboardInterrupt:
+        break
+
+    return wout1, out, len(out)
 
 ########################################################
 
