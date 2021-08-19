@@ -2,7 +2,7 @@
 
 ***
 
-Apazche 2.0 license, unless otherwise stated/requested
+Apache 2.0 license, unless otherwise stated/requested
 
 ***
 
