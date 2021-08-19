@@ -878,7 +878,17 @@ def load_syllables_dictionary(full_path_to_dict='/content/tegridy-tools/tegridy-
     for d in dic:
       dictionary.append(d.replace(chr(10), '').split('\t'))
   
-  return dictionary    
+  return dictionary
+
+def Detailed_English_Syllables_Breakdown():
+
+  words = [y[0].lower() for y in English_Words_Syllables]
+  letters_count = [y[1] for y in English_Words_Syllables]
+  syls = [y[2].replace(' ', '¥.') for y in English_Words_Syllables]
+  syls_count = [y[3] for y in English_Words_Syllables]
+  syls_bytes = [word2bits(y) for y in syls]
+
+  return words, letters_count, syls, syls_count, syls_bytes 
 
 ########################################################
 
