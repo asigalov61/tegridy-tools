@@ -2260,6 +2260,7 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 ###################################################################################
 
 def Optimus_Data2TXT_Converter(data,
+                              dataset_time_denominator=1,
                               transpose_by = 0,
                               char_offset = 33,
                               line_by_line_output = True,
@@ -2275,12 +2276,12 @@ def Optimus_Data2TXT_Converter(data,
   Project Los Angeles
   Tegridy Code 2021'''
 
-
-
   txt = ''
   TXT = ''
+
   quit = False
   counter = 0
+
   INTs = []
   INTs_f = []
 
@@ -2304,9 +2305,9 @@ def Optimus_Data2TXT_Converter(data,
     for event in sorted(d):
 
       # Computing events details
-      start_time = int(abs(event[1] - previous_event[1]) / 10)
+      start_time = int(abs(event[1] - previous_event[1]) / dataset_time_denominator)
       
-      duration = int(previous_event[2] / 10)
+      duration = int(previous_event[2] / dataset_time_denominator)
 
       channel = int(previous_event[3])
 
@@ -2491,7 +2492,8 @@ def Tegridy_FastSearch(needle, haystack, randomize = False):
   try:
     if randomize:
       idx = haystack[secrets.randbelow(len(haystack)):].index(need)
-    idx = haystack.index(need)
+    else:
+      idx = haystack.index(need)
 
   except KeyboardInterrupt:
     return -1
