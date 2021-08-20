@@ -2491,7 +2491,8 @@ def Tegridy_FastSearch(needle, haystack, randomize = False):
 
   try:
     if randomize:
-      idx = haystack[secrets.randbelow(len(haystack)):].index(need)
+      ridx = haystack[secrets.randbelow(len(haystack)-len(need)):]
+      idx = ridx.index(need)
     else:
       idx = haystack.index(need)
 
