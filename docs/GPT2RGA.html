@@ -1497,11 +1497,11 @@ table {
 <span class="n">epochs</span> <span class="o">=</span> <span class="mi">5</span>
 
 <span class="n">rpr</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#&#39;store_true&#39;</span>
-<span class="n">max_seq</span> <span class="o">=</span> <span class="mi">2048</span>
+<span class="n">max_seq</span> <span class="o">=</span> <span class="mi">1024</span>
 <span class="n">n_layers</span> <span class="o">=</span> <span class="mi">6</span>
 <span class="n">num_heads</span> <span class="o">=</span> <span class="mi">8</span>
 <span class="n">d_model</span> <span class="o">=</span> <span class="mi">512</span>
-<span class="n">dim_feedforward</span> <span class="o">=</span> <span class="mi">1024</span>
+<span class="n">dim_feedforward</span> <span class="o">=</span> <span class="mi">512</span>
 <span class="n">dropout_prob</span> <span class="o">=</span> <span class="mf">0.1</span>
 
 <span class="c1">########################################################</span>
@@ -2320,7 +2320,7 @@ table {
             <span class="k">del</span> <span class="n">mask</span>
         <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">loss</span>
     
-    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
         <span class="k">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">),</span> <span class="s2">&quot;Cannot generate while in training mode&quot;</span>
 
@@ -2335,7 +2335,7 @@ table {
         <span class="k">while</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">&lt;</span> <span class="n">target_seq_length</span><span class="p">):</span>
             <span class="n">logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">])</span>
             <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">TOKEN_END</span><span class="p">]</span>
-            <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
 
             <span class="k">if</span><span class="p">(</span><span class="n">beam</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">beam_ran</span> <span class="o">=</span> <span class="mf">2.0</span>
@@ -8094,7 +8094,7 @@ strings are acceptable.</p></div>
             
   <div class="item">
     <div class="name def" id="GPT2RGA.GPT.generate">
-    <p>def <span class="ident">generate</span>(</p><p>self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0)</p>
+    <p>def <span class="ident">generate</span>(</p><p>self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=0)</p>
     </div>
     
 
@@ -8103,7 +8103,7 @@ strings are acceptable.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGA.GPT.generate', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGA.GPT.generate" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="k">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">),</span> <span class="s2">&quot;Cannot generate while in training mode&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating sequence of max length:&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
     <span class="n">gen_seq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="n">target_seq_length</span><span class="p">),</span> <span class="n">TOKEN_PAD</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">TORCH_LABEL_TYPE</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">get_device</span><span class="p">())</span>
@@ -8113,7 +8113,7 @@ strings are acceptable.</p></div>
     <span class="k">while</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">&lt;</span> <span class="n">target_seq_length</span><span class="p">):</span>
         <span class="n">logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">])</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">TOKEN_END</span><span class="p">]</span>
-        <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="n">beam</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">beam_ran</span> <span class="o">=</span> <span class="mf">2.0</span>
         <span class="k">else</span><span class="p">:</span>
