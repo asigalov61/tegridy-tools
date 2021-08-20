@@ -125,11 +125,11 @@ random_seq = True
 epochs = 5
 
 rpr = False #'store_true'
-max_seq = 2048
+max_seq = 1024
 n_layers = 6
 num_heads = 8
 d_model = 512
-dim_feedforward = 1024
+dim_feedforward = 512
 dropout_prob = 0.1
 
 ########################################################
@@ -948,7 +948,7 @@ class GPT(nn.Module):
             del mask
         return logits, loss
     
-    def generate(self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0):
+    def generate(self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=0):
 
         assert (not self.training), "Cannot generate while in training mode"
 
@@ -963,7 +963,7 @@ class GPT(nn.Module):
         while(cur_i < target_seq_length):
             logits, _ = self.forward(gen_seq[..., :cur_i])
             y = self.softmax(logits)[..., :TOKEN_END]
-            token_probs = y[:, cur_i-1, :]
+            token_probs = y[:, cur_i-1, :] / (temperature if temperature > 0 else 1.)
 
             if(beam == 0):
                 beam_ran = 2.0
