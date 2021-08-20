@@ -2259,6 +2259,96 @@ def Optimus_TXT_to_Notes_Converter(Optimus_TXT_String,
 
 ###################################################################################
 
+def Optimus_Data2TXT_Converter(data,
+                              transpose_by = 0,
+                              char_offset = 33,
+                              line_by_line_output = True,
+                              output_velocity = False,
+                              output_MIDI_channels = False):
+
+
+  '''Input: data as a flat chords list of flat chords lists
+
+  Output: TXT string
+          INTs
+
+  Project Los Angeles
+  Tegridy Code 2021'''
+
+
+
+  txt = ''
+  TXT = ''
+  quit = False
+  counter = 0
+  INTs = []
+  INTs_f = []
+
+  for d in tqdm.tqdm(sorted(data)):
+
+    if quit == True:
+      break
+
+    txt = 'SONG=' + str(counter)
+    counter += 1
+
+    if line_by_line_output:
+      txt += chr(10)
+    else:
+      txt += chr(32)
+      
+    INTs = []
+
+    # TXT Stuff
+    previous_event = copy.deepcopy(d[0])
+    for event in sorted(d):
+
+      # Computing events details
+      start_time = int(abs(event[1] - previous_event[1]) / 10)
+      
+      duration = int(previous_event[2] / 10)
+
+      channel = int(previous_event[3])
+
+      pitch = int(previous_event[4] + transpose_by)
+
+      velocity = int(previous_event[5])
+
+      INTs.append([start_time, duration, pitch])
+
+      # Converting to TXT if possible...
+      try:
+        txt += str(chr(start_time + char_offset))
+        txt += str(chr(duration + char_offset))
+        txt += str(chr(pitch + char_offset))
+        if output_velocity:
+          txt += str(chr(velocity + char_offset))
+        if output_MIDI_channels:
+          txt += str(chr(channel + char_offset))
+    
+        if line_by_line_output:
+          txt += chr(10)
+        else:
+          txt += chr(32) 
+        
+        previous_event = copy.deepcopy(event)
+      except KeyboardInterrupt:
+        quit = True
+        break
+      except:
+        print('Problematic MIDI data. Skipping...')
+        continue
+
+    if not line_by_line_output:
+      txt += chr(10)
+    
+    TXT += txt
+    INTs_f.extend(INTs)
+
+  return TXT, INTs_f
+
+###################################################################################
+
 def Optimus_Squash(chords_list, simulate_velocity=True, mono_compression=False):
 
   '''Input: Flat chords list
@@ -2380,6 +2470,37 @@ def Optimus_Signature(chords_list, calculate_full_signature=False):
 #
 # TMIDI 2.0 Helper functions
 #
+###################################################################################
+
+def Tegridy_FastSearch(needle, haystack, randomize = False):
+
+  '''
+
+  Input: Needle iterable
+         Haystack iterable
+         Randomize search range (this prevents determinism)
+
+  Output: Start index of the needle iterable in a haystack iterable
+          If nothing found, -1 is returned
+
+  Project Los Angeles
+  Tegridy Code 2021'''
+
+  need = copy.deepcopy(needle)
+
+  try:
+    if randomize:
+      idx = haystack[secrets.randbelow(len(haystack)):].index(need)
+    idx = haystack.index(need)
+
+  except KeyboardInterrupt:
+    return -1
+
+  except:
+    return -1
+    
+  return idx
+
 ###################################################################################
 
 def Tegridy_Chord_Match(chord1, chord2, match_type=2):
