@@ -62,6 +62,7 @@
 
 ***
 
+```bibtex
 @inproceedings{sigalov2021optimusvirtuoso,
     title       = {tegridy-tools: Symbolic Music NLP Artificial Intelligence Toolkit},
     author      = {Aleksandr Sigalov},
@@ -69,7 +70,7 @@
     year        = {2021},
     url         = {https://github.com/asigalov61/tegridy-tools}
 }
-
+```
 ***
 
 ### Project Los Angeles
