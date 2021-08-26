@@ -63,7 +63,7 @@
 ***
 
 ```bibtex
-@inproceedings{sigalov2021optimusvirtuoso,
+@inproceedings{sigalov2021tegridytools,
     title       = {tegridy-tools: Symbolic Music NLP Artificial Intelligence Toolkit},
     author      = {Aleksandr Sigalov},
     booktitle   = {GitHub},
