@@ -63,12 +63,11 @@
 ***
 
 ```bibtex
-@inproceedings{sigalov2021tegridytools,
+@inproceedings{lev2021tegridytools,
     title       = {tegridy-tools: Symbolic Music NLP Artificial Intelligence Toolkit},
     author      = {Aleksandr Lev},
     booktitle   = {GitHub},
     year        = {2021},
-    url         = {https://github.com/asigalov61/tegridy-tools}
 }
 ```
 ***
