@@ -3172,6 +3172,28 @@ def Tegridy_List_Slicer(input_list, slices_length_in_notes=20):
 
   for i in range(0, len(input_list), slices_length_in_notes):
      yield input_list[i:i + slices_length_in_notes]
+    
+###################################################################################    
+    
+def Tegridy_Split_List(list_to_split, split_value=0):
+    
+    # src courtesy of geeks4geeks.com
+  
+    # using list comprehension + zip() + slicing + enumerate()
+    # Split list into lists by particular value
+    size = len(list_to_split)
+    idx_list = [idx + 1 for idx, val in
+                enumerate(list_to_split) if val == split_value]
+
+
+    res = [list_to_split[i: j] for i, j in
+            zip([0] + idx_list, idx_list + 
+            ([size] if idx_list[-1] != size else []))]
+  
+    # print result
+    # print("The list after splitting by a value : " + str(res))
+    
+    return res
 
 ###################################################################################
 
