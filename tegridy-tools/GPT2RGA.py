@@ -948,11 +948,12 @@ class GPT(nn.Module):
             del mask
         return logits, loss
     
-    def generate(self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=0):
+    def generate(self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=0, 
+                 stop_token=TOKEN_END, verbose=True):
 
         assert (not self.training), "Cannot generate while in training mode"
 
-        print("Generating sequence of max length:", target_seq_length)
+        if verbose: print("Generating sequence of max length:", target_seq_length)
 
         gen_seq = torch.full((1,target_seq_length), TOKEN_PAD, dtype=TORCH_LABEL_TYPE, device=get_device())
 
@@ -987,13 +988,13 @@ class GPT(nn.Module):
 
 
                 # Let the transformer decide to end if it wants to
-                if(next_token == TOKEN_END):
-                    print("Model called end of sequence at:", cur_i, "/", target_seq_length)
+                if(next_token == stop_token):
+                    if verbose: print("Model called end of sequence at:", cur_i, "/", target_seq_length)
                     break
 
             cur_i += 1
             if(cur_i % 50 == 0):
-                print(cur_i, "/", target_seq_length)
+                if verbose: print(cur_i, "/", target_seq_length)
 
         return gen_seq[:, :cur_i]
     
