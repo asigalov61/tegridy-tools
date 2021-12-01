@@ -7,16 +7,16 @@ r'''############################################################################
 #	GPT-2 with Relative Global Attention
 #	Version 0.5
 #
-# PLEASE NOTE THAT THIS IS A WORK IN PROGRESS
-# CHECK BACK FOR UPDATES SOON
+#   PLEASE NOTE THAT THIS IS A WORK IN PROGRESS
+#   CHECK BACK FOR UPDATES SOON
 #
 #	Based upon a source-code of Sashmark97:
-# https://github.com/Sashmark97/midigen
+#   https://github.com/Sashmark97/midigen
 #
 #	Project Los Angeles
 #	Tegridy Code 2021
 #
-# https://github.com/Tegridy-Code/Project-Los-Angeles
+#   https://github.com/Tegridy-Code/Project-Los-Angeles
 #
 #
 ###################################################################################
@@ -963,7 +963,7 @@ class GPT(nn.Module):
         cur_i = num_primer
         while(cur_i < target_seq_length):
             logits, _ = self.forward(gen_seq[..., :cur_i])
-            y = self.softmax(logits)[..., :TOKEN_END]
+            y = self.softmax(logits)[..., :stop_token]
             token_probs = y[:, cur_i-1, :] / (temperature if temperature > 0 else 1.)
 
             if(beam == 0):
