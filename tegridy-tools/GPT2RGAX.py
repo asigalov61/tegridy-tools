@@ -150,13 +150,13 @@ def get_device():
     else:
         return TORCH_CUDA_DEVICE
 
-def train(cur_epoch, model, dataloader, loss, opt, lr_scheduler=None, num_iters=-1):
+def train(cur_epoch, model, dataloader, loss, opt, lr_scheduler=None, num_iters=-1, save_checkpoint_steps=1000):
     best_eval_acc        = 0.0
     best_eval_acc_epoch  = -1
     best_eval_loss       = float("inf")
     best_eval_loss_epoch = -1
     loss_hist = []
-    
+    save_steps = 0
     out = -1
     model.train()
     with tqdm(total=len(dataloader)) as bar_train:
@@ -187,6 +187,16 @@ def train(cur_epoch, model, dataloader, loss, opt, lr_scheduler=None, num_iters=
             bar_train.set_description(f'Epoch: {cur_epoch} Loss: {float(out):.4} LR: {float(lr):.8}')
             bar_train.update(1)
             loss_hist.append(out.item())
+            
+            
+            
+            if save_steps % save_checkpoint_steps == 0:
+                print('Saving model progress. Please wait...')
+                print('gpt2_rpr_checkpoint_' + str(cur_epoch) + '_epoch_' + str(save_steps) + '_steps_' + str(round(float(out), 4)) + '_loss.pth')
+                torch.save(model.state_dict(), 'gpt2_rpr_checkpoint_' + str(cur_epoch) + '_epoch_' + str(save_steps) + '_steps_' + str(round(float(out), 4)) + '_loss.pth')
+                print('Done! Continuing training...')
+            save_steps +=1
+            
             if batch_num == num_iters:
                 break
 
