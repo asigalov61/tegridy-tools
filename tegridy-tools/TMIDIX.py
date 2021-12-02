@@ -3177,7 +3177,7 @@ def Tegridy_List_Slicer(input_list, slices_length_in_notes=20):
     
 def Tegridy_Split_List(list_to_split, split_value=0):
     
-    # src courtesy of geeks4geeks.com
+    # src courtesy of www.geeksforgeeks.org
   
     # using list comprehension + zip() + slicing + enumerate()
     # Split list into lists by particular value
