@@ -113,7 +113,7 @@ PREPEND_ZEROS_WIDTH     = 4
 
 TORCH_CPU_DEVICE = torch.device("cpu")
 USE_CUDA = 1
-TORCH_CUDA_DEVICE = torch.device("cuda:0")
+TORCH_CUDA_DEVICE = torch.device("cuda")
 
 #====
 
