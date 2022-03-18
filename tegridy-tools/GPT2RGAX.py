@@ -978,7 +978,7 @@ class GPT(nn.Module):
         cur_i = num_primer
         while(cur_i < target_seq_length):
             logits, _ = self.forward(gen_seq[..., :cur_i])
-            y = self.softmax(logits)[..., :stop_token]
+            y = self.softmax(logits)[..., :stop_token+1]
             token_probs = y[:, cur_i-1, :] / (temperature if temperature > 0 else 1.)
 
             if(beam == 0):
