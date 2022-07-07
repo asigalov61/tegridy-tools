@@ -202,7 +202,7 @@ def train(cur_epoch, model, dataloader, loss, opt, lr_scheduler=None, num_iters=
                 torch.save(model.state_dict(), 'gpt2_rpr_checkpoint_' + str(cur_epoch) + '_epoch_' + str(save_steps) + '_steps_' + str(round(float(out), 4)) + '_loss.pth')
                 print('Done!')
                 print('Saving training loss graph...')
-                tr_loss_list = [item for sublist in loss_hist for item in sublist]
+                tr_loss_list = [sublist for sublist in loss_hist]
                 plt.plot([i for i in range(len(tr_loss_list))] ,tr_loss_list, 'b')
                 plt.savefig('gpt2_rpr_checkpoint_training_loss_graph.png')
                 print('Done! Continuing training...')
