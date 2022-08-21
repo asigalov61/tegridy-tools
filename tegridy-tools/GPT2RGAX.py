@@ -974,7 +974,7 @@ class GPT(nn.Module):
             del mask
         return logits, loss
     
-    def generate(self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=0, 
+    def generate(self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=1, 
                  stop_token=TOKEN_END, verbose=True):
 
         assert (not self.training), "Cannot generate while in training mode"
@@ -1017,6 +1017,34 @@ class GPT(nn.Module):
                 if(next_token == stop_token):
                     if verbose: print("Model called end of sequence at:", cur_i, "/", target_seq_length)
                     break
+
+            cur_i += 1
+            if(cur_i % 50 == 0):
+                if verbose: print(cur_i, "/", target_seq_length)
+
+        return gen_seq[:, :cur_i]
+
+    def generate_batches(self, primer=None, target_seq_length=1024, temperature=1, num_batches=1, verbose=True):
+
+        assert (not self.training), "Cannot generate while in training mode"
+
+        if verbose: print("Generating sequence of max length:", target_seq_length)
+
+        gen_seq = torch.full((num_batches,target_seq_length), TOKEN_PAD, dtype=TORCH_LABEL_TYPE, device=get_device())
+
+        num_primer = len(primer)
+        gen_seq[..., :num_primer] = primer.type(TORCH_LABEL_TYPE).to(get_device())
+
+        cur_i = num_primer
+        while(cur_i < target_seq_length):
+            logits, _ = self.forward(gen_seq[..., :cur_i])
+            y = self.softmax(logits)[..., :]
+            token_probs = y[:, cur_i-1, :] / (temperature if temperature > 0 else 1.)
+
+
+            distrib = torch.distributions.categorical.Categorical(probs=token_probs)
+            next_token = distrib.sample()
+            gen_seq[:, cur_i] = next_token
 
             cur_i += 1
             if(cur_i % 50 == 0):
