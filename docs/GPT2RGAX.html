@@ -849,13 +849,8 @@ table {
   /*****************************/
 </style>
   <style type="text/css">
-  pre { line-height: 125%; }
-td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-.codehilite .hll { background-color: #ffffcc }
-.codehilite { background: #f8f8f8; }
+  .codehilite .hll { background-color: #ffffcc }
+.codehilite  { background: #f8f8f8; }
 .codehilite .c { color: #408080; font-style: italic } /* Comment */
 .codehilite .err { border: 1px solid #FF0000 } /* Error */
 .codehilite .k { color: #008000; font-weight: bold } /* Keyword */
@@ -1143,6 +1138,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.Block.get_parameter">get_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.get_submodule">get_submodule</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.half">half</a></li>
+    <li class="mono"><a href="#GPT2RGAX.Block.ipu">ipu</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.load_state_dict">load_state_dict</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.modules">modules</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.named_buffers">named_buffers</a></li>
@@ -1155,6 +1151,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.Block.register_forward_hook">register_forward_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.register_forward_pre_hook">register_forward_pre_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.register_full_backward_hook">register_full_backward_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.Block.register_load_state_dict_post_hook">register_load_state_dict_post_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.Block.register_module">register_module</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.register_parameter">register_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.requires_grad_">requires_grad_</a></li>
     <li class="mono"><a href="#GPT2RGAX.Block.set_extra_state">set_extra_state</a></li>
@@ -1191,6 +1189,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.get_parameter">get_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.get_submodule">get_submodule</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.half">half</a></li>
+    <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.ipu">ipu</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.load_state_dict">load_state_dict</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.modules">modules</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.named_buffers">named_buffers</a></li>
@@ -1203,6 +1202,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.register_forward_hook">register_forward_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.register_forward_pre_hook">register_forward_pre_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.register_full_backward_hook">register_full_backward_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.register_load_state_dict_post_hook">register_load_state_dict_post_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.register_module">register_module</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.register_parameter">register_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.requires_grad_">requires_grad_</a></li>
     <li class="mono"><a href="#GPT2RGAX.CausalSelfAttention.set_extra_state">set_extra_state</a></li>
@@ -1220,12 +1221,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <li class="mono">
         <span class="class_name"><a href="#GPT2RGAX.EPianoDataset">EPianoDataset</a></span>
         
-          
-  <ul>
-    <li class="mono"><a href="#GPT2RGAX.EPianoDataset.register_datapipe_as_function">register_datapipe_as_function</a></li>
-    <li class="mono"><a href="#GPT2RGAX.EPianoDataset.register_function">register_function</a></li>
-  </ul>
-
         </li>
         <li class="mono">
         <span class="class_name"><a href="#GPT2RGAX.GPT">GPT</a></span>
@@ -1246,12 +1241,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.GPT.float">float</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.forward">forward</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.generate">generate</a></li>
+    <li class="mono"><a href="#GPT2RGAX.GPT.generate_batches">generate_batches</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.get_block_size">get_block_size</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.get_buffer">get_buffer</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.get_extra_state">get_extra_state</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.get_parameter">get_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.get_submodule">get_submodule</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.half">half</a></li>
+    <li class="mono"><a href="#GPT2RGAX.GPT.ipu">ipu</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.load_state_dict">load_state_dict</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.modules">modules</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.named_buffers">named_buffers</a></li>
@@ -1264,6 +1261,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.GPT.register_forward_hook">register_forward_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.register_forward_pre_hook">register_forward_pre_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.register_full_backward_hook">register_full_backward_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.GPT.register_load_state_dict_post_hook">register_load_state_dict_post_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.GPT.register_module">register_module</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.register_parameter">register_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.requires_grad_">requires_grad_</a></li>
     <li class="mono"><a href="#GPT2RGAX.GPT.set_extra_state">set_extra_state</a></li>
@@ -1313,6 +1312,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.get_parameter">get_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.get_submodule">get_submodule</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.half">half</a></li>
+    <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.ipu">ipu</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.load_state_dict">load_state_dict</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.modules">modules</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.named_buffers">named_buffers</a></li>
@@ -1325,6 +1325,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.register_forward_hook">register_forward_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.register_forward_pre_hook">register_forward_pre_hook</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.register_full_backward_hook">register_full_backward_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.register_load_state_dict_post_hook">register_load_state_dict_post_hook</a></li>
+    <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.register_module">register_module</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.register_parameter">register_parameter</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.requires_grad_">requires_grad_</a></li>
     <li class="mono"><a href="#GPT2RGAX.MultiheadAttentionRPR.set_extra_state">set_extra_state</a></li>
@@ -1443,6 +1445,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">#</span>
 <span class="c1"># pip install torch</span>
 <span class="c1"># pip install tqdm</span>
+<span class="c1"># pip install matplotlib</span>
 <span class="c1">#</span>
 <span class="c1">########################################################</span>
 
@@ -1458,9 +1461,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">joblib</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">torch</span>
 
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torch.optim</span> <span class="kn">import</span> <span class="n">Adam</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
@@ -1510,7 +1516,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="n">TORCH_CPU_DEVICE</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
 <span class="n">USE_CUDA</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">TORCH_CUDA_DEVICE</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+<span class="n">TORCH_CUDA_DEVICE</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
 
 <span class="c1">#====</span>
 
@@ -1560,6 +1566,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">for</span> <span class="n">batch_num</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataloader</span><span class="p">):</span>
             <span class="n">time_before</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="mf">0.5</span><span class="p">)</span>
+
             <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
             <span class="n">x</span>   <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device</span><span class="p">())</span>
@@ -1591,6 +1599,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving model progress. Please wait...&#39;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;gpt2_rpr_checkpoint_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_epoch_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_steps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_steps_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;_loss.pth&#39;</span><span class="p">)</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;gpt2_rpr_checkpoint_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_epoch_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_steps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_steps_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;_loss.pth&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving training loss graph...&#39;</span><span class="p">)</span>
+                <span class="n">tr_loss_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">sublist</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">loss_hist</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tr_loss_list</span><span class="p">))]</span> <span class="p">,</span><span class="n">tr_loss_list</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;gpt2_rpr_checkpoint_training_loss_graph.png&#39;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done! Continuing training...&#39;</span><span class="p">)</span>
             <span class="n">save_steps</span> <span class="o">+=</span><span class="mi">1</span>
             
@@ -2360,7 +2373,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             <span class="k">del</span> <span class="n">mask</span>
         <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">loss</span>
     
-    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
                  <span class="n">stop_token</span><span class="o">=</span><span class="n">TOKEN_END</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="k">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">),</span> <span class="s2">&quot;Cannot generate while in training mode&quot;</span>
@@ -2375,7 +2388,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">cur_i</span> <span class="o">=</span> <span class="n">num_primer</span>
         <span class="k">while</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">&lt;</span> <span class="n">target_seq_length</span><span class="p">):</span>
             <span class="n">logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">])</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">stop_token</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">stop_token</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
 
             <span class="k">if</span><span class="p">(</span><span class="n">beam</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
@@ -2403,6 +2416,34 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 <span class="k">if</span><span class="p">(</span><span class="n">next_token</span> <span class="o">==</span> <span class="n">stop_token</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model called end of sequence at:&quot;</span><span class="p">,</span> <span class="n">cur_i</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
                     <span class="k">break</span>
+
+            <span class="n">cur_i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">cur_i</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gen_seq</span><span class="p">[:,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">generate_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_batches</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">),</span> <span class="s2">&quot;Cannot generate while in training mode&quot;</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating sequence of max length:&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
+
+        <span class="n">gen_seq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">num_batches</span><span class="p">,</span><span class="n">target_seq_length</span><span class="p">),</span> <span class="n">TOKEN_PAD</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">TORCH_LABEL_TYPE</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">get_device</span><span class="p">())</span>
+
+        <span class="n">num_primer</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primer</span><span class="p">)</span>
+        <span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">num_primer</span><span class="p">]</span> <span class="o">=</span> <span class="n">primer</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">TORCH_LABEL_TYPE</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device</span><span class="p">())</span>
+
+        <span class="n">cur_i</span> <span class="o">=</span> <span class="n">num_primer</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">&lt;</span> <span class="n">target_seq_length</span><span class="p">):</span>
+            <span class="n">logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">])</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
+
+
+            <span class="n">distrib</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">categorical</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">probs</span><span class="o">=</span><span class="n">token_probs</span><span class="p">)</span>
+            <span class="n">next_token</span> <span class="o">=</span> <span class="n">distrib</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+            <span class="n">gen_seq</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_token</span>
 
             <span class="n">cur_i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
@@ -3654,6 +3695,8 @@ go from the start based on random_seq.</p>
         <span class="k">for</span> <span class="n">batch_num</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataloader</span><span class="p">):</span>
             <span class="n">time_before</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="mf">0.5</span><span class="p">)</span>
+
             <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
             <span class="n">x</span>   <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device</span><span class="p">())</span>
@@ -3685,6 +3728,11 @@ go from the start based on random_seq.</p>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving model progress. Please wait...&#39;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;gpt2_rpr_checkpoint_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_epoch_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_steps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_steps_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;_loss.pth&#39;</span><span class="p">)</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;gpt2_rpr_checkpoint_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_epoch_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_steps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_steps_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;_loss.pth&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving training loss graph...&#39;</span><span class="p">)</span>
+                <span class="n">tr_loss_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">sublist</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">loss_hist</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tr_loss_list</span><span class="p">))]</span> <span class="p">,</span><span class="n">tr_loss_list</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;gpt2_rpr_checkpoint_training_loss_graph.png&#39;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done! Continuing training...&#39;</span><span class="p">)</span>
             <span class="n">save_steps</span> <span class="o">+=</span><span class="mi">1</span>
             
@@ -4319,7 +4367,7 @@ their serialized pickled form changes.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.get_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -4403,7 +4451,7 @@ correctly specify <code>target</code>.</p>
 otherwise throws an error.</p>
 <p>For example, let's say you have an <code>nn.Module</code> <code>A</code> that
 looks like this:</p>
-<p>.. code-block::text</p>
+<p>.. code-block:: text</p>
 <pre><code>A(
     (net_b): Module(
         (net_c): Module(
@@ -4445,7 +4493,7 @@ used.</p>
 <span class="sd">    otherwise throws an error.</span>
 <span class="sd">    For example, let&#39;s say you have an ``nn.Module`` ``A`` that</span>
 <span class="sd">    looks like this:</span>
-<span class="sd">    .. code-block::text</span>
+<span class="sd">    .. code-block:: text</span>
 <span class="sd">        A(</span>
 <span class="sd">            (net_b): Module(</span>
 <span class="sd">                (net_c): Module(</span>
@@ -4532,8 +4580,52 @@ used.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.Block.ipu">
+    <p>def <span class="ident">ipu</span>(</p><p>self: ~T, device: Union[int, torch.device, NoneType] = None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Moves all model parameters and buffers to the IPU.</p>
+<p>This also makes associated parameters and buffers different objects. So
+it should be called before constructing optimizer if the module will
+live on IPU while being optimized.</p>
+<p>.. note::
+    This method modifies the module in-place.</p>
+<p>Arguments:
+    device (int, optional): if specified, all parameters will be
+        copied to that device</p>
+<p>Returns:
+    Module: self</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.Block.ipu', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.Block.ipu" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ipu</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Moves all model parameters and buffers to the IPU.</span>
+<span class="sd">    This also makes associated parameters and buffers different objects. So</span>
+<span class="sd">    it should be called before constructing optimizer if the module will</span>
+<span class="sd">    live on IPU while being optimized.</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        This method modifies the module in-place.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        device (int, optional): if specified, all parameters will be</span>
+<span class="sd">            copied to that device</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Module: self</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">ipu</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.Block.load_state_dict">
-    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: &#39;OrderedDict[str, Tensor]&#39;, strict: bool = True)</p>
+    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: Mapping[str, Any], strict: bool = True)</p>
     </div>
     
 
@@ -4560,7 +4652,7 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.Block.load_state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.Block.load_state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="s1">&#39;OrderedDict[str, Tensor]&#39;</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
                     <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Copies parameters and buffers from :attr:`state_dict` into</span>
 <span class="sd">    this module and its descendants. If :attr:`strict` is ``True``, then</span>
@@ -4581,12 +4673,14 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
 <span class="sd">        exists in :attr:`state_dict`, :meth:`load_state_dict` will raise a</span>
 <span class="sd">        ``RuntimeError``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected state_dict to be dict-like, got </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)))</span>
     <span class="n">missing_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">unexpected_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">error_msgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># copy state_dict so _load_from_state_dict can modify it</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="s1">&#39;_metadata&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># mypy isn&#39;t aware that &quot;_metadata&quot; exists in state_dict</span>
         <span class="n">state_dict</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">metadata</span>  <span class="c1"># type: ignore[attr-defined]</span>
@@ -4597,6 +4691,15 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">load</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="c1"># Note that the hook can modify missing_keys and unexpected_keys.</span>
+        <span class="n">incompatible_keys</span> <span class="o">=</span> <span class="n">_IncompatibleKeys</span><span class="p">(</span><span class="n">missing_keys</span><span class="p">,</span> <span class="n">unexpected_keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">incompatible_keys</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Hooks registered with ``register_load_state_dict_post_hook`` are not&quot;</span>
+                <span class="s2">&quot;expected to return new values, if incompatible_keys need to be modified,&quot;</span>
+                <span class="s2">&quot;it should be done inplace.&quot;</span>
+            <span class="p">)</span>
     <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">load</span>
     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
@@ -4787,7 +4890,7 @@ both the name of the module as well as the module itself.</p>
     memo: a memo to store the set of modules already added to the result
     prefix: a prefix that will be added to the name of the module
     remove_duplicate: whether to remove the duplicated module instances in the result
-    or not</p>
+        or not</p>
 <p>Yields:
     (string, Module): Tuple of name and module</p>
 <p>Note:
@@ -4815,7 +4918,7 @@ both the name of the module as well as the module itself.</p>
 <span class="sd">        memo: a memo to store the set of modules already added to the result</span>
 <span class="sd">        prefix: a prefix that will be added to the name of the module</span>
 <span class="sd">        remove_duplicate: whether to remove the duplicated module instances in the result</span>
-<span class="sd">        or not</span>
+<span class="sd">            or not</span>
 <span class="sd">    Yields:</span>
 <span class="sd">        (string, Module): Tuple of name and module</span>
 <span class="sd">    Note:</span>
@@ -5263,6 +5366,91 @@ of each Tensor returned by the Module's forward function.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.Block.register_load_state_dict_post_hook">
+    <p>def <span class="ident">register_load_state_dict_post_hook</span>(</p><p>self, hook)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Registers a post hook to be run after module's <code>load_state_dict</code>
+is called.</p>
+<p>It should have the following signature::
+    hook(module, incompatible_keys) -&gt; None</p>
+<p>The <code>module</code> argument is the current module that this hook is registered
+on, and the <code>incompatible_keys</code> argument is a <code>NamedTuple</code> consisting
+of attributes <code>missing_keys</code> and <code>unexpected_keys</code>. <code>missing_keys</code>
+is a <code>list</code> of <code>str</code> containing the missing keys and
+<code>unexpected_keys</code> is a <code>list</code> of <code>str</code> containing the unexpected keys.</p>
+<p>The given incompatible_keys can be modified inplace if needed.</p>
+<p>Note that the checks performed when calling :func:<code>load_state_dict</code> with
+<code>strict=True</code> are affected by modifications the hook makes to
+<code>missing_keys</code> or <code>unexpected_keys</code>, as expected. Additions to either
+set of keys will result in an error being thrown when <code>strict=True</code>, and
+clearning out both missing and unexpected keys will avoid an error.</p>
+<p>Returns:
+    :class:<code>torch.utils.hooks.RemovableHandle</code>:
+        a handle that can be used to remove the added hook by calling
+        <code>handle.remove()</code></p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.Block.register_load_state_dict_post_hook', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.Block.register_load_state_dict_post_hook" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_load_state_dict_post_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hook</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Registers a post hook to be run after module&#39;s ``load_state_dict``</span>
+<span class="sd">    is called.</span>
+<span class="sd">    It should have the following signature::</span>
+<span class="sd">        hook(module, incompatible_keys) -&gt; None</span>
+<span class="sd">    The ``module`` argument is the current module that this hook is registered</span>
+<span class="sd">    on, and the ``incompatible_keys`` argument is a ``NamedTuple`` consisting</span>
+<span class="sd">    of attributes ``missing_keys`` and ``unexpected_keys``. ``missing_keys``</span>
+<span class="sd">    is a ``list`` of ``str`` containing the missing keys and</span>
+<span class="sd">    ``unexpected_keys`` is a ``list`` of ``str`` containing the unexpected keys.</span>
+<span class="sd">    The given incompatible_keys can be modified inplace if needed.</span>
+<span class="sd">    Note that the checks performed when calling :func:`load_state_dict` with</span>
+<span class="sd">    ``strict=True`` are affected by modifications the hook makes to</span>
+<span class="sd">    ``missing_keys`` or ``unexpected_keys``, as expected. Additions to either</span>
+<span class="sd">    set of keys will result in an error being thrown when ``strict=True``, and</span>
+<span class="sd">    clearning out both missing and unexpected keys will avoid an error.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`torch.utils.hooks.RemovableHandle`:</span>
+<span class="sd">            a handle that can be used to remove the added hook by calling</span>
+<span class="sd">            ``handle.remove()``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">hooks</span><span class="o">.</span><span class="n">RemovableHandle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">[</span><span class="n">handle</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">hook</span>
+    <span class="k">return</span> <span class="n">handle</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="GPT2RGAX.Block.register_module">
+    <p>def <span class="ident">register_module</span>(</p><p>self, name: str, module: Union[ForwardRef(&#39;Module&#39;), NoneType])</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Alias for :func:<code>add_module</code>.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.Block.register_module', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.Block.register_module" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Module&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alias for :func:`add_module`.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.Block.register_parameter">
     <p>def <span class="ident">register_parameter</span>(</p><p>self, name: str, param: Union[torch.nn.parameter.Parameter, NoneType])</p>
     </div>
@@ -5405,7 +5593,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.set_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -5440,7 +5628,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
             
   <div class="item">
     <div class="name def" id="GPT2RGAX.Block.state_dict">
-    <p>def <span class="ident">state_dict</span>(</p><p>self, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
+    <p>def <span class="ident">state_dict</span>(</p><p>self, *args, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
     </div>
     
 
@@ -5450,6 +5638,25 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <p>Both parameters and persistent buffers (e.g. running averages) are
 included. Keys are corresponding parameter and buffer names.
 Parameters and buffers set to <code>None</code> are not included.</p>
+<p>.. warning::
+    Currently <code>state_dict()</code> also accepts positional arguments for
+    <code>destination</code>, <code>prefix</code> and <code>keep_vars</code> in order. However,
+    this is being deprecated and keyword arguments will be enforced in
+    future releases.</p>
+<p>.. warning::
+    Please avoid the use of argument <code>destination</code> as it is not
+    designed for end-users.</p>
+<p>Args:
+    destination (dict, optional): If provided, the state of module will
+        be updated into the dict and the same object is returned.
+        Otherwise, an <code>OrderedDict</code> will be created and returned.
+        Default: <code>None</code>.
+    prefix (str, optional): a prefix added to parameter and buffer
+        names to compose the keys in state_dict. Default: <code>''</code>.
+    keep_vars (bool, optional): by default the :class:<code>~torch.Tensor</code> s
+        returned in the state dict are detached from autograd. If it's
+        set to <code>True</code>, detaching will not be performed.
+        Default: <code>False</code>.</p>
 <p>Returns:
     dict:
         a dictionary containing a whole state of the module</p>
@@ -5460,11 +5667,30 @@ Parameters and buffers set to <code>None</code> are not included.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.Block.state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.Block.state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a whole state of the module.</span>
 <span class="sd">    Both parameters and persistent buffers (e.g. running averages) are</span>
 <span class="sd">    included. Keys are corresponding parameter and buffer names.</span>
 <span class="sd">    Parameters and buffers set to ``None`` are not included.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Currently ``state_dict()`` also accepts positional arguments for</span>
+<span class="sd">        ``destination``, ``prefix`` and ``keep_vars`` in order. However,</span>
+<span class="sd">        this is being deprecated and keyword arguments will be enforced in</span>
+<span class="sd">        future releases.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Please avoid the use of argument ``destination`` as it is not</span>
+<span class="sd">        designed for end-users.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        destination (dict, optional): If provided, the state of module will</span>
+<span class="sd">            be updated into the dict and the same object is returned.</span>
+<span class="sd">            Otherwise, an ``OrderedDict`` will be created and returned.</span>
+<span class="sd">            Default: ``None``.</span>
+<span class="sd">        prefix (str, optional): a prefix added to parameter and buffer</span>
+<span class="sd">            names to compose the keys in state_dict. Default: ``&#39;&#39;``.</span>
+<span class="sd">        keep_vars (bool, optional): by default the :class:`~torch.Tensor` s</span>
+<span class="sd">            returned in the state dict are detached from autograd. If it&#39;s</span>
+<span class="sd">            set to ``True``, detaching will not be performed.</span>
+<span class="sd">            Default: ``False``.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict:</span>
 <span class="sd">            a dictionary containing a whole state of the module</span>
@@ -5472,14 +5698,29 @@ Parameters and buffers set to <code>None</code> are not included.</p>
 <span class="sd">        &gt;&gt;&gt; module.state_dict().keys()</span>
 <span class="sd">        [&#39;bias&#39;, &#39;weight&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Remove `args` and the parsing logic when BC allows.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">keep_vars</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">keep_vars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># DeprecationWarning is ignored by default</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Positional args are being deprecated, use kwargs instead. Refer to &quot;</span>
+            <span class="s2">&quot;https://pytorch.org/docs/master/generated/torch.nn.Module.html#torch.nn.Module.state_dict&quot;</span>
+            <span class="s2">&quot; for details.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s2">&quot;_metadata&quot;</span><span class="p">):</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_to_state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_dict_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">hook_result</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">local_metadata</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">hook_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -5653,7 +5894,7 @@ tensor([[0.6122+0.j, 0.1150+0.j],
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;Complex modules are a new feature under active development whose design may change, &quot;</span>
                 <span class="s2">&quot;and some modules might not work as expected when using complex tensors as parameters or buffers. &quot;</span>
-                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
                 <span class="s2">&quot;if a complex module does not work as expected.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">convert_to_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
@@ -6507,7 +6748,7 @@ their serialized pickled form changes.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.get_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -6591,7 +6832,7 @@ correctly specify <code>target</code>.</p>
 otherwise throws an error.</p>
 <p>For example, let's say you have an <code>nn.Module</code> <code>A</code> that
 looks like this:</p>
-<p>.. code-block::text</p>
+<p>.. code-block:: text</p>
 <pre><code>A(
     (net_b): Module(
         (net_c): Module(
@@ -6633,7 +6874,7 @@ used.</p>
 <span class="sd">    otherwise throws an error.</span>
 <span class="sd">    For example, let&#39;s say you have an ``nn.Module`` ``A`` that</span>
 <span class="sd">    looks like this:</span>
-<span class="sd">    .. code-block::text</span>
+<span class="sd">    .. code-block:: text</span>
 <span class="sd">        A(</span>
 <span class="sd">            (net_b): Module(</span>
 <span class="sd">                (net_c): Module(</span>
@@ -6720,8 +6961,52 @@ used.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.CausalSelfAttention.ipu">
+    <p>def <span class="ident">ipu</span>(</p><p>self: ~T, device: Union[int, torch.device, NoneType] = None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Moves all model parameters and buffers to the IPU.</p>
+<p>This also makes associated parameters and buffers different objects. So
+it should be called before constructing optimizer if the module will
+live on IPU while being optimized.</p>
+<p>.. note::
+    This method modifies the module in-place.</p>
+<p>Arguments:
+    device (int, optional): if specified, all parameters will be
+        copied to that device</p>
+<p>Returns:
+    Module: self</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.CausalSelfAttention.ipu', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.CausalSelfAttention.ipu" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ipu</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Moves all model parameters and buffers to the IPU.</span>
+<span class="sd">    This also makes associated parameters and buffers different objects. So</span>
+<span class="sd">    it should be called before constructing optimizer if the module will</span>
+<span class="sd">    live on IPU while being optimized.</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        This method modifies the module in-place.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        device (int, optional): if specified, all parameters will be</span>
+<span class="sd">            copied to that device</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Module: self</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">ipu</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.CausalSelfAttention.load_state_dict">
-    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: &#39;OrderedDict[str, Tensor]&#39;, strict: bool = True)</p>
+    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: Mapping[str, Any], strict: bool = True)</p>
     </div>
     
 
@@ -6748,7 +7033,7 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.CausalSelfAttention.load_state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.CausalSelfAttention.load_state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="s1">&#39;OrderedDict[str, Tensor]&#39;</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
                     <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Copies parameters and buffers from :attr:`state_dict` into</span>
 <span class="sd">    this module and its descendants. If :attr:`strict` is ``True``, then</span>
@@ -6769,12 +7054,14 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
 <span class="sd">        exists in :attr:`state_dict`, :meth:`load_state_dict` will raise a</span>
 <span class="sd">        ``RuntimeError``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected state_dict to be dict-like, got </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)))</span>
     <span class="n">missing_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">unexpected_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">error_msgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># copy state_dict so _load_from_state_dict can modify it</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="s1">&#39;_metadata&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># mypy isn&#39;t aware that &quot;_metadata&quot; exists in state_dict</span>
         <span class="n">state_dict</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">metadata</span>  <span class="c1"># type: ignore[attr-defined]</span>
@@ -6785,6 +7072,15 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">load</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="c1"># Note that the hook can modify missing_keys and unexpected_keys.</span>
+        <span class="n">incompatible_keys</span> <span class="o">=</span> <span class="n">_IncompatibleKeys</span><span class="p">(</span><span class="n">missing_keys</span><span class="p">,</span> <span class="n">unexpected_keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">incompatible_keys</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Hooks registered with ``register_load_state_dict_post_hook`` are not&quot;</span>
+                <span class="s2">&quot;expected to return new values, if incompatible_keys need to be modified,&quot;</span>
+                <span class="s2">&quot;it should be done inplace.&quot;</span>
+            <span class="p">)</span>
     <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">load</span>
     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
@@ -6975,7 +7271,7 @@ both the name of the module as well as the module itself.</p>
     memo: a memo to store the set of modules already added to the result
     prefix: a prefix that will be added to the name of the module
     remove_duplicate: whether to remove the duplicated module instances in the result
-    or not</p>
+        or not</p>
 <p>Yields:
     (string, Module): Tuple of name and module</p>
 <p>Note:
@@ -7003,7 +7299,7 @@ both the name of the module as well as the module itself.</p>
 <span class="sd">        memo: a memo to store the set of modules already added to the result</span>
 <span class="sd">        prefix: a prefix that will be added to the name of the module</span>
 <span class="sd">        remove_duplicate: whether to remove the duplicated module instances in the result</span>
-<span class="sd">        or not</span>
+<span class="sd">            or not</span>
 <span class="sd">    Yields:</span>
 <span class="sd">        (string, Module): Tuple of name and module</span>
 <span class="sd">    Note:</span>
@@ -7451,6 +7747,91 @@ of each Tensor returned by the Module's forward function.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.CausalSelfAttention.register_load_state_dict_post_hook">
+    <p>def <span class="ident">register_load_state_dict_post_hook</span>(</p><p>self, hook)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Registers a post hook to be run after module's <code>load_state_dict</code>
+is called.</p>
+<p>It should have the following signature::
+    hook(module, incompatible_keys) -&gt; None</p>
+<p>The <code>module</code> argument is the current module that this hook is registered
+on, and the <code>incompatible_keys</code> argument is a <code>NamedTuple</code> consisting
+of attributes <code>missing_keys</code> and <code>unexpected_keys</code>. <code>missing_keys</code>
+is a <code>list</code> of <code>str</code> containing the missing keys and
+<code>unexpected_keys</code> is a <code>list</code> of <code>str</code> containing the unexpected keys.</p>
+<p>The given incompatible_keys can be modified inplace if needed.</p>
+<p>Note that the checks performed when calling :func:<code>load_state_dict</code> with
+<code>strict=True</code> are affected by modifications the hook makes to
+<code>missing_keys</code> or <code>unexpected_keys</code>, as expected. Additions to either
+set of keys will result in an error being thrown when <code>strict=True</code>, and
+clearning out both missing and unexpected keys will avoid an error.</p>
+<p>Returns:
+    :class:<code>torch.utils.hooks.RemovableHandle</code>:
+        a handle that can be used to remove the added hook by calling
+        <code>handle.remove()</code></p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.CausalSelfAttention.register_load_state_dict_post_hook', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.CausalSelfAttention.register_load_state_dict_post_hook" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_load_state_dict_post_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hook</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Registers a post hook to be run after module&#39;s ``load_state_dict``</span>
+<span class="sd">    is called.</span>
+<span class="sd">    It should have the following signature::</span>
+<span class="sd">        hook(module, incompatible_keys) -&gt; None</span>
+<span class="sd">    The ``module`` argument is the current module that this hook is registered</span>
+<span class="sd">    on, and the ``incompatible_keys`` argument is a ``NamedTuple`` consisting</span>
+<span class="sd">    of attributes ``missing_keys`` and ``unexpected_keys``. ``missing_keys``</span>
+<span class="sd">    is a ``list`` of ``str`` containing the missing keys and</span>
+<span class="sd">    ``unexpected_keys`` is a ``list`` of ``str`` containing the unexpected keys.</span>
+<span class="sd">    The given incompatible_keys can be modified inplace if needed.</span>
+<span class="sd">    Note that the checks performed when calling :func:`load_state_dict` with</span>
+<span class="sd">    ``strict=True`` are affected by modifications the hook makes to</span>
+<span class="sd">    ``missing_keys`` or ``unexpected_keys``, as expected. Additions to either</span>
+<span class="sd">    set of keys will result in an error being thrown when ``strict=True``, and</span>
+<span class="sd">    clearning out both missing and unexpected keys will avoid an error.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`torch.utils.hooks.RemovableHandle`:</span>
+<span class="sd">            a handle that can be used to remove the added hook by calling</span>
+<span class="sd">            ``handle.remove()``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">hooks</span><span class="o">.</span><span class="n">RemovableHandle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">[</span><span class="n">handle</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">hook</span>
+    <span class="k">return</span> <span class="n">handle</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="GPT2RGAX.CausalSelfAttention.register_module">
+    <p>def <span class="ident">register_module</span>(</p><p>self, name: str, module: Union[ForwardRef(&#39;Module&#39;), NoneType])</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Alias for :func:<code>add_module</code>.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.CausalSelfAttention.register_module', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.CausalSelfAttention.register_module" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Module&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alias for :func:`add_module`.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.CausalSelfAttention.register_parameter">
     <p>def <span class="ident">register_parameter</span>(</p><p>self, name: str, param: Union[torch.nn.parameter.Parameter, NoneType])</p>
     </div>
@@ -7593,7 +7974,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.set_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -7628,7 +8009,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
             
   <div class="item">
     <div class="name def" id="GPT2RGAX.CausalSelfAttention.state_dict">
-    <p>def <span class="ident">state_dict</span>(</p><p>self, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
+    <p>def <span class="ident">state_dict</span>(</p><p>self, *args, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
     </div>
     
 
@@ -7638,6 +8019,25 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <p>Both parameters and persistent buffers (e.g. running averages) are
 included. Keys are corresponding parameter and buffer names.
 Parameters and buffers set to <code>None</code> are not included.</p>
+<p>.. warning::
+    Currently <code>state_dict()</code> also accepts positional arguments for
+    <code>destination</code>, <code>prefix</code> and <code>keep_vars</code> in order. However,
+    this is being deprecated and keyword arguments will be enforced in
+    future releases.</p>
+<p>.. warning::
+    Please avoid the use of argument <code>destination</code> as it is not
+    designed for end-users.</p>
+<p>Args:
+    destination (dict, optional): If provided, the state of module will
+        be updated into the dict and the same object is returned.
+        Otherwise, an <code>OrderedDict</code> will be created and returned.
+        Default: <code>None</code>.
+    prefix (str, optional): a prefix added to parameter and buffer
+        names to compose the keys in state_dict. Default: <code>''</code>.
+    keep_vars (bool, optional): by default the :class:<code>~torch.Tensor</code> s
+        returned in the state dict are detached from autograd. If it's
+        set to <code>True</code>, detaching will not be performed.
+        Default: <code>False</code>.</p>
 <p>Returns:
     dict:
         a dictionary containing a whole state of the module</p>
@@ -7648,11 +8048,30 @@ Parameters and buffers set to <code>None</code> are not included.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.CausalSelfAttention.state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.CausalSelfAttention.state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a whole state of the module.</span>
 <span class="sd">    Both parameters and persistent buffers (e.g. running averages) are</span>
 <span class="sd">    included. Keys are corresponding parameter and buffer names.</span>
 <span class="sd">    Parameters and buffers set to ``None`` are not included.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Currently ``state_dict()`` also accepts positional arguments for</span>
+<span class="sd">        ``destination``, ``prefix`` and ``keep_vars`` in order. However,</span>
+<span class="sd">        this is being deprecated and keyword arguments will be enforced in</span>
+<span class="sd">        future releases.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Please avoid the use of argument ``destination`` as it is not</span>
+<span class="sd">        designed for end-users.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        destination (dict, optional): If provided, the state of module will</span>
+<span class="sd">            be updated into the dict and the same object is returned.</span>
+<span class="sd">            Otherwise, an ``OrderedDict`` will be created and returned.</span>
+<span class="sd">            Default: ``None``.</span>
+<span class="sd">        prefix (str, optional): a prefix added to parameter and buffer</span>
+<span class="sd">            names to compose the keys in state_dict. Default: ``&#39;&#39;``.</span>
+<span class="sd">        keep_vars (bool, optional): by default the :class:`~torch.Tensor` s</span>
+<span class="sd">            returned in the state dict are detached from autograd. If it&#39;s</span>
+<span class="sd">            set to ``True``, detaching will not be performed.</span>
+<span class="sd">            Default: ``False``.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict:</span>
 <span class="sd">            a dictionary containing a whole state of the module</span>
@@ -7660,14 +8079,29 @@ Parameters and buffers set to <code>None</code> are not included.</p>
 <span class="sd">        &gt;&gt;&gt; module.state_dict().keys()</span>
 <span class="sd">        [&#39;bias&#39;, &#39;weight&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Remove `args` and the parsing logic when BC allows.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">keep_vars</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">keep_vars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># DeprecationWarning is ignored by default</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Positional args are being deprecated, use kwargs instead. Refer to &quot;</span>
+            <span class="s2">&quot;https://pytorch.org/docs/master/generated/torch.nn.Module.html#torch.nn.Module.state_dict&quot;</span>
+            <span class="s2">&quot; for details.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s2">&quot;_metadata&quot;</span><span class="p">):</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_to_state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_dict_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">hook_result</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">local_metadata</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">hook_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -7841,7 +8275,7 @@ tensor([[0.6122+0.j, 0.1150+0.j],
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;Complex modules are a new feature under active development whose design may change, &quot;</span>
                 <span class="s2">&quot;and some modules might not work as expected when using complex tensors as parameters or buffers. &quot;</span>
-                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
                 <span class="s2">&quot;if a complex module does not work as expected.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">convert_to_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
@@ -8088,72 +8522,6 @@ Maestro midi files.</p>
           <li><a href="/torch.utils.data.dataset.Dataset.ext">torch.utils.data.dataset.Dataset</a></li>
           <li><a href="/typing.Generic.ext">typing.Generic</a></li>
           </ul>
-          <h3>Class variables</h3>
-            <div class="item">
-            <p id="GPT2RGAX.EPianoDataset.functions" class="name">var <span class="ident">functions</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-          <h3>Static methods</h3>
-            
-  <div class="item">
-    <div class="name def" id="GPT2RGAX.EPianoDataset.register_datapipe_as_function">
-    <p>def <span class="ident">register_datapipe_as_function</span>(</p><p>function_name, cls_to_register, enable_df_api_tracing=False)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.EPianoDataset.register_datapipe_as_function', this);">Show source &equiv;</a></p>
-  <div id="source-GPT2RGAX.EPianoDataset.register_datapipe_as_function" class="source">
-    <div class="codehilite"><pre><span></span><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">register_datapipe_as_function</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">cls_to_register</span><span class="p">,</span> <span class="n">enable_df_api_tracing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unable to add DataPipe function name </span><span class="si">{}</span><span class="s2"> as it is already taken&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
-    <span class="k">def</span> <span class="nf">class_function</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">enable_df_api_tracing</span><span class="p">,</span> <span class="n">source_dp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">result_pipe</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">source_dp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result_pipe</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">enable_df_api_tracing</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_dp</span><span class="p">,</span> <span class="n">DFIterDataPipe</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">function_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UNTRACABLE_DATAFRAME_PIPES</span><span class="p">:</span>
-                    <span class="n">result_pipe</span> <span class="o">=</span> <span class="n">result_pipe</span><span class="o">.</span><span class="n">trace_as_dataframe</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">result_pipe</span>
-    <span class="n">function</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">class_function</span><span class="p">,</span> <span class="n">cls_to_register</span><span class="p">,</span> <span class="n">enable_df_api_tracing</span><span class="p">)</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="GPT2RGAX.EPianoDataset.register_function">
-    <p>def <span class="ident">register_function</span>(</p><p>function_name, function)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.EPianoDataset.register_function', this);">Show source &equiv;</a></p>
-  <div id="source-GPT2RGAX.EPianoDataset.register_function" class="source">
-    <div class="codehilite"><pre><span></span><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">register_function</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
       </div>
       </div>
       
@@ -8764,7 +9132,7 @@ strings are acceptable.</p></div>
             
   <div class="item">
     <div class="name def" id="GPT2RGAX.GPT.generate">
-    <p>def <span class="ident">generate</span>(</p><p>self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=0, stop_token=768, verbose=True)</p>
+    <p>def <span class="ident">generate</span>(</p><p>self, primer=None, target_seq_length=1024, beam=0, beam_chance=1.0, temperature=1, stop_token=768, verbose=True)</p>
     </div>
     
 
@@ -8773,7 +9141,7 @@ strings are acceptable.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.generate', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.GPT.generate" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beam_chance</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
              <span class="n">stop_token</span><span class="o">=</span><span class="n">TOKEN_END</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="k">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">),</span> <span class="s2">&quot;Cannot generate while in training mode&quot;</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating sequence of max length:&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
@@ -8783,7 +9151,7 @@ strings are acceptable.</p></div>
     <span class="n">cur_i</span> <span class="o">=</span> <span class="n">num_primer</span>
     <span class="k">while</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">&lt;</span> <span class="n">target_seq_length</span><span class="p">):</span>
         <span class="n">logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">])</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">stop_token</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">stop_token</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="n">beam</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">beam_ran</span> <span class="o">=</span> <span class="mf">2.0</span>
@@ -8804,6 +9172,43 @@ strings are acceptable.</p></div>
             <span class="k">if</span><span class="p">(</span><span class="n">next_token</span> <span class="o">==</span> <span class="n">stop_token</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model called end of sequence at:&quot;</span><span class="p">,</span> <span class="n">cur_i</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
                 <span class="k">break</span>
+        <span class="n">cur_i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">cur_i</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gen_seq</span><span class="p">[:,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="GPT2RGAX.GPT.generate_batches">
+    <p>def <span class="ident">generate_batches</span>(</p><p>self, primer=None, target_seq_length=1024, temperature=1, num_batches=1, verbose=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.generate_batches', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.GPT.generate_batches" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_batches</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">),</span> <span class="s2">&quot;Cannot generate while in training mode&quot;</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating sequence of max length:&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
+    <span class="n">gen_seq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">num_batches</span><span class="p">,</span><span class="n">target_seq_length</span><span class="p">),</span> <span class="n">TOKEN_PAD</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">TORCH_LABEL_TYPE</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">get_device</span><span class="p">())</span>
+    <span class="n">num_primer</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primer</span><span class="p">)</span>
+    <span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">num_primer</span><span class="p">]</span> <span class="o">=</span> <span class="n">primer</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">TORCH_LABEL_TYPE</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device</span><span class="p">())</span>
+    <span class="n">cur_i</span> <span class="o">=</span> <span class="n">num_primer</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">&lt;</span> <span class="n">target_seq_length</span><span class="p">):</span>
+        <span class="n">logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">gen_seq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">cur_i</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">token_probs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="n">distrib</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">categorical</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">probs</span><span class="o">=</span><span class="n">token_probs</span><span class="p">)</span>
+        <span class="n">next_token</span> <span class="o">=</span> <span class="n">distrib</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+        <span class="n">gen_seq</span><span class="p">[:,</span> <span class="n">cur_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_token</span>
         <span class="n">cur_i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span><span class="p">(</span><span class="n">cur_i</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">cur_i</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">target_seq_length</span><span class="p">)</span>
@@ -8934,7 +9339,7 @@ their serialized pickled form changes.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.get_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -9018,7 +9423,7 @@ correctly specify <code>target</code>.</p>
 otherwise throws an error.</p>
 <p>For example, let's say you have an <code>nn.Module</code> <code>A</code> that
 looks like this:</p>
-<p>.. code-block::text</p>
+<p>.. code-block:: text</p>
 <pre><code>A(
     (net_b): Module(
         (net_c): Module(
@@ -9060,7 +9465,7 @@ used.</p>
 <span class="sd">    otherwise throws an error.</span>
 <span class="sd">    For example, let&#39;s say you have an ``nn.Module`` ``A`` that</span>
 <span class="sd">    looks like this:</span>
-<span class="sd">    .. code-block::text</span>
+<span class="sd">    .. code-block:: text</span>
 <span class="sd">        A(</span>
 <span class="sd">            (net_b): Module(</span>
 <span class="sd">                (net_c): Module(</span>
@@ -9147,8 +9552,52 @@ used.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.GPT.ipu">
+    <p>def <span class="ident">ipu</span>(</p><p>self: ~T, device: Union[int, torch.device, NoneType] = None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Moves all model parameters and buffers to the IPU.</p>
+<p>This also makes associated parameters and buffers different objects. So
+it should be called before constructing optimizer if the module will
+live on IPU while being optimized.</p>
+<p>.. note::
+    This method modifies the module in-place.</p>
+<p>Arguments:
+    device (int, optional): if specified, all parameters will be
+        copied to that device</p>
+<p>Returns:
+    Module: self</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.ipu', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.GPT.ipu" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ipu</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Moves all model parameters and buffers to the IPU.</span>
+<span class="sd">    This also makes associated parameters and buffers different objects. So</span>
+<span class="sd">    it should be called before constructing optimizer if the module will</span>
+<span class="sd">    live on IPU while being optimized.</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        This method modifies the module in-place.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        device (int, optional): if specified, all parameters will be</span>
+<span class="sd">            copied to that device</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Module: self</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">ipu</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.GPT.load_state_dict">
-    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: &#39;OrderedDict[str, Tensor]&#39;, strict: bool = True)</p>
+    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: Mapping[str, Any], strict: bool = True)</p>
     </div>
     
 
@@ -9175,7 +9624,7 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.load_state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.GPT.load_state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="s1">&#39;OrderedDict[str, Tensor]&#39;</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
                     <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Copies parameters and buffers from :attr:`state_dict` into</span>
 <span class="sd">    this module and its descendants. If :attr:`strict` is ``True``, then</span>
@@ -9196,12 +9645,14 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
 <span class="sd">        exists in :attr:`state_dict`, :meth:`load_state_dict` will raise a</span>
 <span class="sd">        ``RuntimeError``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected state_dict to be dict-like, got </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)))</span>
     <span class="n">missing_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">unexpected_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">error_msgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># copy state_dict so _load_from_state_dict can modify it</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="s1">&#39;_metadata&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># mypy isn&#39;t aware that &quot;_metadata&quot; exists in state_dict</span>
         <span class="n">state_dict</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">metadata</span>  <span class="c1"># type: ignore[attr-defined]</span>
@@ -9212,6 +9663,15 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">load</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="c1"># Note that the hook can modify missing_keys and unexpected_keys.</span>
+        <span class="n">incompatible_keys</span> <span class="o">=</span> <span class="n">_IncompatibleKeys</span><span class="p">(</span><span class="n">missing_keys</span><span class="p">,</span> <span class="n">unexpected_keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">incompatible_keys</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Hooks registered with ``register_load_state_dict_post_hook`` are not&quot;</span>
+                <span class="s2">&quot;expected to return new values, if incompatible_keys need to be modified,&quot;</span>
+                <span class="s2">&quot;it should be done inplace.&quot;</span>
+            <span class="p">)</span>
     <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">load</span>
     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
@@ -9402,7 +9862,7 @@ both the name of the module as well as the module itself.</p>
     memo: a memo to store the set of modules already added to the result
     prefix: a prefix that will be added to the name of the module
     remove_duplicate: whether to remove the duplicated module instances in the result
-    or not</p>
+        or not</p>
 <p>Yields:
     (string, Module): Tuple of name and module</p>
 <p>Note:
@@ -9430,7 +9890,7 @@ both the name of the module as well as the module itself.</p>
 <span class="sd">        memo: a memo to store the set of modules already added to the result</span>
 <span class="sd">        prefix: a prefix that will be added to the name of the module</span>
 <span class="sd">        remove_duplicate: whether to remove the duplicated module instances in the result</span>
-<span class="sd">        or not</span>
+<span class="sd">            or not</span>
 <span class="sd">    Yields:</span>
 <span class="sd">        (string, Module): Tuple of name and module</span>
 <span class="sd">    Note:</span>
@@ -9878,6 +10338,91 @@ of each Tensor returned by the Module's forward function.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.GPT.register_load_state_dict_post_hook">
+    <p>def <span class="ident">register_load_state_dict_post_hook</span>(</p><p>self, hook)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Registers a post hook to be run after module's <code>load_state_dict</code>
+is called.</p>
+<p>It should have the following signature::
+    hook(module, incompatible_keys) -&gt; None</p>
+<p>The <code>module</code> argument is the current module that this hook is registered
+on, and the <code>incompatible_keys</code> argument is a <code>NamedTuple</code> consisting
+of attributes <code>missing_keys</code> and <code>unexpected_keys</code>. <code>missing_keys</code>
+is a <code>list</code> of <code>str</code> containing the missing keys and
+<code>unexpected_keys</code> is a <code>list</code> of <code>str</code> containing the unexpected keys.</p>
+<p>The given incompatible_keys can be modified inplace if needed.</p>
+<p>Note that the checks performed when calling :func:<code>load_state_dict</code> with
+<code>strict=True</code> are affected by modifications the hook makes to
+<code>missing_keys</code> or <code>unexpected_keys</code>, as expected. Additions to either
+set of keys will result in an error being thrown when <code>strict=True</code>, and
+clearning out both missing and unexpected keys will avoid an error.</p>
+<p>Returns:
+    :class:<code>torch.utils.hooks.RemovableHandle</code>:
+        a handle that can be used to remove the added hook by calling
+        <code>handle.remove()</code></p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.register_load_state_dict_post_hook', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.GPT.register_load_state_dict_post_hook" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_load_state_dict_post_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hook</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Registers a post hook to be run after module&#39;s ``load_state_dict``</span>
+<span class="sd">    is called.</span>
+<span class="sd">    It should have the following signature::</span>
+<span class="sd">        hook(module, incompatible_keys) -&gt; None</span>
+<span class="sd">    The ``module`` argument is the current module that this hook is registered</span>
+<span class="sd">    on, and the ``incompatible_keys`` argument is a ``NamedTuple`` consisting</span>
+<span class="sd">    of attributes ``missing_keys`` and ``unexpected_keys``. ``missing_keys``</span>
+<span class="sd">    is a ``list`` of ``str`` containing the missing keys and</span>
+<span class="sd">    ``unexpected_keys`` is a ``list`` of ``str`` containing the unexpected keys.</span>
+<span class="sd">    The given incompatible_keys can be modified inplace if needed.</span>
+<span class="sd">    Note that the checks performed when calling :func:`load_state_dict` with</span>
+<span class="sd">    ``strict=True`` are affected by modifications the hook makes to</span>
+<span class="sd">    ``missing_keys`` or ``unexpected_keys``, as expected. Additions to either</span>
+<span class="sd">    set of keys will result in an error being thrown when ``strict=True``, and</span>
+<span class="sd">    clearning out both missing and unexpected keys will avoid an error.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`torch.utils.hooks.RemovableHandle`:</span>
+<span class="sd">            a handle that can be used to remove the added hook by calling</span>
+<span class="sd">            ``handle.remove()``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">hooks</span><span class="o">.</span><span class="n">RemovableHandle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">[</span><span class="n">handle</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">hook</span>
+    <span class="k">return</span> <span class="n">handle</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="GPT2RGAX.GPT.register_module">
+    <p>def <span class="ident">register_module</span>(</p><p>self, name: str, module: Union[ForwardRef(&#39;Module&#39;), NoneType])</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Alias for :func:<code>add_module</code>.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.register_module', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.GPT.register_module" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Module&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alias for :func:`add_module`.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.GPT.register_parameter">
     <p>def <span class="ident">register_parameter</span>(</p><p>self, name: str, param: Union[torch.nn.parameter.Parameter, NoneType])</p>
     </div>
@@ -10020,7 +10565,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.set_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -10055,7 +10600,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
             
   <div class="item">
     <div class="name def" id="GPT2RGAX.GPT.state_dict">
-    <p>def <span class="ident">state_dict</span>(</p><p>self, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
+    <p>def <span class="ident">state_dict</span>(</p><p>self, *args, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
     </div>
     
 
@@ -10065,6 +10610,25 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <p>Both parameters and persistent buffers (e.g. running averages) are
 included. Keys are corresponding parameter and buffer names.
 Parameters and buffers set to <code>None</code> are not included.</p>
+<p>.. warning::
+    Currently <code>state_dict()</code> also accepts positional arguments for
+    <code>destination</code>, <code>prefix</code> and <code>keep_vars</code> in order. However,
+    this is being deprecated and keyword arguments will be enforced in
+    future releases.</p>
+<p>.. warning::
+    Please avoid the use of argument <code>destination</code> as it is not
+    designed for end-users.</p>
+<p>Args:
+    destination (dict, optional): If provided, the state of module will
+        be updated into the dict and the same object is returned.
+        Otherwise, an <code>OrderedDict</code> will be created and returned.
+        Default: <code>None</code>.
+    prefix (str, optional): a prefix added to parameter and buffer
+        names to compose the keys in state_dict. Default: <code>''</code>.
+    keep_vars (bool, optional): by default the :class:<code>~torch.Tensor</code> s
+        returned in the state dict are detached from autograd. If it's
+        set to <code>True</code>, detaching will not be performed.
+        Default: <code>False</code>.</p>
 <p>Returns:
     dict:
         a dictionary containing a whole state of the module</p>
@@ -10075,11 +10639,30 @@ Parameters and buffers set to <code>None</code> are not included.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.GPT.state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.GPT.state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a whole state of the module.</span>
 <span class="sd">    Both parameters and persistent buffers (e.g. running averages) are</span>
 <span class="sd">    included. Keys are corresponding parameter and buffer names.</span>
 <span class="sd">    Parameters and buffers set to ``None`` are not included.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Currently ``state_dict()`` also accepts positional arguments for</span>
+<span class="sd">        ``destination``, ``prefix`` and ``keep_vars`` in order. However,</span>
+<span class="sd">        this is being deprecated and keyword arguments will be enforced in</span>
+<span class="sd">        future releases.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Please avoid the use of argument ``destination`` as it is not</span>
+<span class="sd">        designed for end-users.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        destination (dict, optional): If provided, the state of module will</span>
+<span class="sd">            be updated into the dict and the same object is returned.</span>
+<span class="sd">            Otherwise, an ``OrderedDict`` will be created and returned.</span>
+<span class="sd">            Default: ``None``.</span>
+<span class="sd">        prefix (str, optional): a prefix added to parameter and buffer</span>
+<span class="sd">            names to compose the keys in state_dict. Default: ``&#39;&#39;``.</span>
+<span class="sd">        keep_vars (bool, optional): by default the :class:`~torch.Tensor` s</span>
+<span class="sd">            returned in the state dict are detached from autograd. If it&#39;s</span>
+<span class="sd">            set to ``True``, detaching will not be performed.</span>
+<span class="sd">            Default: ``False``.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict:</span>
 <span class="sd">            a dictionary containing a whole state of the module</span>
@@ -10087,14 +10670,29 @@ Parameters and buffers set to <code>None</code> are not included.</p>
 <span class="sd">        &gt;&gt;&gt; module.state_dict().keys()</span>
 <span class="sd">        [&#39;bias&#39;, &#39;weight&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Remove `args` and the parsing logic when BC allows.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">keep_vars</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">keep_vars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># DeprecationWarning is ignored by default</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Positional args are being deprecated, use kwargs instead. Refer to &quot;</span>
+            <span class="s2">&quot;https://pytorch.org/docs/master/generated/torch.nn.Module.html#torch.nn.Module.state_dict&quot;</span>
+            <span class="s2">&quot; for details.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s2">&quot;_metadata&quot;</span><span class="p">):</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_to_state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_dict_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">hook_result</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">local_metadata</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">hook_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -10268,7 +10866,7 @@ tensor([[0.6122+0.j, 0.1150+0.j],
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;Complex modules are a new feature under active development whose design may change, &quot;</span>
                 <span class="s2">&quot;and some modules might not work as expected when using complex tensors as parameters or buffers. &quot;</span>
-                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
                 <span class="s2">&quot;if a complex module does not work as expected.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">convert_to_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
@@ -11238,7 +11836,7 @@ their serialized pickled form changes.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.get_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -11322,7 +11920,7 @@ correctly specify <code>target</code>.</p>
 otherwise throws an error.</p>
 <p>For example, let's say you have an <code>nn.Module</code> <code>A</code> that
 looks like this:</p>
-<p>.. code-block::text</p>
+<p>.. code-block:: text</p>
 <pre><code>A(
     (net_b): Module(
         (net_c): Module(
@@ -11364,7 +11962,7 @@ used.</p>
 <span class="sd">    otherwise throws an error.</span>
 <span class="sd">    For example, let&#39;s say you have an ``nn.Module`` ``A`` that</span>
 <span class="sd">    looks like this:</span>
-<span class="sd">    .. code-block::text</span>
+<span class="sd">    .. code-block:: text</span>
 <span class="sd">        A(</span>
 <span class="sd">            (net_b): Module(</span>
 <span class="sd">                (net_c): Module(</span>
@@ -11451,8 +12049,52 @@ used.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.MultiheadAttentionRPR.ipu">
+    <p>def <span class="ident">ipu</span>(</p><p>self: ~T, device: Union[int, torch.device, NoneType] = None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Moves all model parameters and buffers to the IPU.</p>
+<p>This also makes associated parameters and buffers different objects. So
+it should be called before constructing optimizer if the module will
+live on IPU while being optimized.</p>
+<p>.. note::
+    This method modifies the module in-place.</p>
+<p>Arguments:
+    device (int, optional): if specified, all parameters will be
+        copied to that device</p>
+<p>Returns:
+    Module: self</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.MultiheadAttentionRPR.ipu', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.MultiheadAttentionRPR.ipu" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ipu</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">device</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Moves all model parameters and buffers to the IPU.</span>
+<span class="sd">    This also makes associated parameters and buffers different objects. So</span>
+<span class="sd">    it should be called before constructing optimizer if the module will</span>
+<span class="sd">    live on IPU while being optimized.</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        This method modifies the module in-place.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        device (int, optional): if specified, all parameters will be</span>
+<span class="sd">            copied to that device</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Module: self</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">ipu</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.MultiheadAttentionRPR.load_state_dict">
-    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: &#39;OrderedDict[str, Tensor]&#39;, strict: bool = True)</p>
+    <p>def <span class="ident">load_state_dict</span>(</p><p>self, state_dict: Mapping[str, Any], strict: bool = True)</p>
     </div>
     
 
@@ -11479,7 +12121,7 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.MultiheadAttentionRPR.load_state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.MultiheadAttentionRPR.load_state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="s1">&#39;OrderedDict[str, Tensor]&#39;</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
                     <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Copies parameters and buffers from :attr:`state_dict` into</span>
 <span class="sd">    this module and its descendants. If :attr:`strict` is ``True``, then</span>
@@ -11500,12 +12142,14 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
 <span class="sd">        exists in :attr:`state_dict`, :meth:`load_state_dict` will raise a</span>
 <span class="sd">        ``RuntimeError``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected state_dict to be dict-like, got </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)))</span>
     <span class="n">missing_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">unexpected_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">error_msgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># copy state_dict so _load_from_state_dict can modify it</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="s1">&#39;_metadata&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># mypy isn&#39;t aware that &quot;_metadata&quot; exists in state_dict</span>
         <span class="n">state_dict</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">metadata</span>  <span class="c1"># type: ignore[attr-defined]</span>
@@ -11516,6 +12160,15 @@ by this module's :meth:<code>~torch.nn.Module.state_dict</code> function.</p>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">load</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="c1"># Note that the hook can modify missing_keys and unexpected_keys.</span>
+        <span class="n">incompatible_keys</span> <span class="o">=</span> <span class="n">_IncompatibleKeys</span><span class="p">(</span><span class="n">missing_keys</span><span class="p">,</span> <span class="n">unexpected_keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">incompatible_keys</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Hooks registered with ``register_load_state_dict_post_hook`` are not&quot;</span>
+                <span class="s2">&quot;expected to return new values, if incompatible_keys need to be modified,&quot;</span>
+                <span class="s2">&quot;it should be done inplace.&quot;</span>
+            <span class="p">)</span>
     <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">load</span>
     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
@@ -11706,7 +12359,7 @@ both the name of the module as well as the module itself.</p>
     memo: a memo to store the set of modules already added to the result
     prefix: a prefix that will be added to the name of the module
     remove_duplicate: whether to remove the duplicated module instances in the result
-    or not</p>
+        or not</p>
 <p>Yields:
     (string, Module): Tuple of name and module</p>
 <p>Note:
@@ -11734,7 +12387,7 @@ both the name of the module as well as the module itself.</p>
 <span class="sd">        memo: a memo to store the set of modules already added to the result</span>
 <span class="sd">        prefix: a prefix that will be added to the name of the module</span>
 <span class="sd">        remove_duplicate: whether to remove the duplicated module instances in the result</span>
-<span class="sd">        or not</span>
+<span class="sd">            or not</span>
 <span class="sd">    Yields:</span>
 <span class="sd">        (string, Module): Tuple of name and module</span>
 <span class="sd">    Note:</span>
@@ -12182,6 +12835,91 @@ of each Tensor returned by the Module's forward function.</p>
   
             
   <div class="item">
+    <div class="name def" id="GPT2RGAX.MultiheadAttentionRPR.register_load_state_dict_post_hook">
+    <p>def <span class="ident">register_load_state_dict_post_hook</span>(</p><p>self, hook)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Registers a post hook to be run after module's <code>load_state_dict</code>
+is called.</p>
+<p>It should have the following signature::
+    hook(module, incompatible_keys) -&gt; None</p>
+<p>The <code>module</code> argument is the current module that this hook is registered
+on, and the <code>incompatible_keys</code> argument is a <code>NamedTuple</code> consisting
+of attributes <code>missing_keys</code> and <code>unexpected_keys</code>. <code>missing_keys</code>
+is a <code>list</code> of <code>str</code> containing the missing keys and
+<code>unexpected_keys</code> is a <code>list</code> of <code>str</code> containing the unexpected keys.</p>
+<p>The given incompatible_keys can be modified inplace if needed.</p>
+<p>Note that the checks performed when calling :func:<code>load_state_dict</code> with
+<code>strict=True</code> are affected by modifications the hook makes to
+<code>missing_keys</code> or <code>unexpected_keys</code>, as expected. Additions to either
+set of keys will result in an error being thrown when <code>strict=True</code>, and
+clearning out both missing and unexpected keys will avoid an error.</p>
+<p>Returns:
+    :class:<code>torch.utils.hooks.RemovableHandle</code>:
+        a handle that can be used to remove the added hook by calling
+        <code>handle.remove()</code></p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.MultiheadAttentionRPR.register_load_state_dict_post_hook', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.MultiheadAttentionRPR.register_load_state_dict_post_hook" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_load_state_dict_post_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hook</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Registers a post hook to be run after module&#39;s ``load_state_dict``</span>
+<span class="sd">    is called.</span>
+<span class="sd">    It should have the following signature::</span>
+<span class="sd">        hook(module, incompatible_keys) -&gt; None</span>
+<span class="sd">    The ``module`` argument is the current module that this hook is registered</span>
+<span class="sd">    on, and the ``incompatible_keys`` argument is a ``NamedTuple`` consisting</span>
+<span class="sd">    of attributes ``missing_keys`` and ``unexpected_keys``. ``missing_keys``</span>
+<span class="sd">    is a ``list`` of ``str`` containing the missing keys and</span>
+<span class="sd">    ``unexpected_keys`` is a ``list`` of ``str`` containing the unexpected keys.</span>
+<span class="sd">    The given incompatible_keys can be modified inplace if needed.</span>
+<span class="sd">    Note that the checks performed when calling :func:`load_state_dict` with</span>
+<span class="sd">    ``strict=True`` are affected by modifications the hook makes to</span>
+<span class="sd">    ``missing_keys`` or ``unexpected_keys``, as expected. Additions to either</span>
+<span class="sd">    set of keys will result in an error being thrown when ``strict=True``, and</span>
+<span class="sd">    clearning out both missing and unexpected keys will avoid an error.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`torch.utils.hooks.RemovableHandle`:</span>
+<span class="sd">            a handle that can be used to remove the added hook by calling</span>
+<span class="sd">            ``handle.remove()``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">hooks</span><span class="o">.</span><span class="n">RemovableHandle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_load_state_dict_post_hooks</span><span class="p">[</span><span class="n">handle</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">hook</span>
+    <span class="k">return</span> <span class="n">handle</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="GPT2RGAX.MultiheadAttentionRPR.register_module">
+    <p>def <span class="ident">register_module</span>(</p><p>self, name: str, module: Union[ForwardRef(&#39;Module&#39;), NoneType])</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Alias for :func:<code>add_module</code>.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.MultiheadAttentionRPR.register_module', this);">Show source &equiv;</a></p>
+  <div id="source-GPT2RGAX.MultiheadAttentionRPR.register_module" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Module&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alias for :func:`add_module`.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="GPT2RGAX.MultiheadAttentionRPR.register_parameter">
     <p>def <span class="ident">register_parameter</span>(</p><p>self, name: str, param: Union[torch.nn.parameter.Parameter, NoneType])</p>
     </div>
@@ -12324,7 +13062,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
         <span class="s2">&quot;Reached a code path in Module.set_extra_state() that should never be called. &quot;</span>
-        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+        <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
         <span class="s2">&quot;to report this bug.&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -12359,7 +13097,7 @@ found within the <code>state_dict</code>. Implement this function and a correspo
             
   <div class="item">
     <div class="name def" id="GPT2RGAX.MultiheadAttentionRPR.state_dict">
-    <p>def <span class="ident">state_dict</span>(</p><p>self, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
+    <p>def <span class="ident">state_dict</span>(</p><p>self, *args, destination=None, prefix=&#39;&#39;, keep_vars=False)</p>
     </div>
     
 
@@ -12369,6 +13107,25 @@ found within the <code>state_dict</code>. Implement this function and a correspo
 <p>Both parameters and persistent buffers (e.g. running averages) are
 included. Keys are corresponding parameter and buffer names.
 Parameters and buffers set to <code>None</code> are not included.</p>
+<p>.. warning::
+    Currently <code>state_dict()</code> also accepts positional arguments for
+    <code>destination</code>, <code>prefix</code> and <code>keep_vars</code> in order. However,
+    this is being deprecated and keyword arguments will be enforced in
+    future releases.</p>
+<p>.. warning::
+    Please avoid the use of argument <code>destination</code> as it is not
+    designed for end-users.</p>
+<p>Args:
+    destination (dict, optional): If provided, the state of module will
+        be updated into the dict and the same object is returned.
+        Otherwise, an <code>OrderedDict</code> will be created and returned.
+        Default: <code>None</code>.
+    prefix (str, optional): a prefix added to parameter and buffer
+        names to compose the keys in state_dict. Default: <code>''</code>.
+    keep_vars (bool, optional): by default the :class:<code>~torch.Tensor</code> s
+        returned in the state dict are detached from autograd. If it's
+        set to <code>True</code>, detaching will not be performed.
+        Default: <code>False</code>.</p>
 <p>Returns:
     dict:
         a dictionary containing a whole state of the module</p>
@@ -12379,11 +13136,30 @@ Parameters and buffers set to <code>None</code> are not included.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-GPT2RGAX.MultiheadAttentionRPR.state_dict', this);">Show source &equiv;</a></p>
   <div id="source-GPT2RGAX.MultiheadAttentionRPR.state_dict" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a whole state of the module.</span>
 <span class="sd">    Both parameters and persistent buffers (e.g. running averages) are</span>
 <span class="sd">    included. Keys are corresponding parameter and buffer names.</span>
 <span class="sd">    Parameters and buffers set to ``None`` are not included.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Currently ``state_dict()`` also accepts positional arguments for</span>
+<span class="sd">        ``destination``, ``prefix`` and ``keep_vars`` in order. However,</span>
+<span class="sd">        this is being deprecated and keyword arguments will be enforced in</span>
+<span class="sd">        future releases.</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        Please avoid the use of argument ``destination`` as it is not</span>
+<span class="sd">        designed for end-users.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        destination (dict, optional): If provided, the state of module will</span>
+<span class="sd">            be updated into the dict and the same object is returned.</span>
+<span class="sd">            Otherwise, an ``OrderedDict`` will be created and returned.</span>
+<span class="sd">            Default: ``None``.</span>
+<span class="sd">        prefix (str, optional): a prefix added to parameter and buffer</span>
+<span class="sd">            names to compose the keys in state_dict. Default: ``&#39;&#39;``.</span>
+<span class="sd">        keep_vars (bool, optional): by default the :class:`~torch.Tensor` s</span>
+<span class="sd">            returned in the state dict are detached from autograd. If it&#39;s</span>
+<span class="sd">            set to ``True``, detaching will not be performed.</span>
+<span class="sd">            Default: ``False``.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict:</span>
 <span class="sd">            a dictionary containing a whole state of the module</span>
@@ -12391,14 +13167,29 @@ Parameters and buffers set to <code>None</code> are not included.</p>
 <span class="sd">        &gt;&gt;&gt; module.state_dict().keys()</span>
 <span class="sd">        [&#39;bias&#39;, &#39;weight&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Remove `args` and the parsing logic when BC allows.</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">keep_vars</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">keep_vars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># DeprecationWarning is ignored by default</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Positional args are being deprecated, use kwargs instead. Refer to &quot;</span>
+            <span class="s2">&quot;https://pytorch.org/docs/master/generated/torch.nn.Module.html#torch.nn.Module.state_dict&quot;</span>
+            <span class="s2">&quot; for details.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="n">local_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s2">&quot;_metadata&quot;</span><span class="p">):</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">local_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_to_state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_dict_hooks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">hook_result</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">local_metadata</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">hook_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -12572,7 +13363,7 @@ tensor([[0.6122+0.j, 0.1150+0.j],
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;Complex modules are a new feature under active development whose design may change, &quot;</span>
                 <span class="s2">&quot;and some modules might not work as expected when using complex tensors as parameters or buffers. &quot;</span>
-                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.md &quot;</span>
+                <span class="s2">&quot;Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml &quot;</span>
                 <span class="s2">&quot;if a complex module does not work as expected.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">convert_to_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
