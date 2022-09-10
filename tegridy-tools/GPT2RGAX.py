@@ -167,10 +167,6 @@ def train(cur_epoch, model, dataloader, loss, opt, lr_scheduler=None, num_iters=
         for batch_num, batch in enumerate(dataloader):
             time_before = time.time()
 
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
-
-            opt.zero_grad()
-
             x   = batch[0].to(get_device())
             tgt = batch[1].to(get_device())
 
@@ -182,7 +178,9 @@ def train(cur_epoch, model, dataloader, loss, opt, lr_scheduler=None, num_iters=
             out = loss.forward(y, tgt)
 
             out.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
             opt.step()
+            opt.zero_grad()
 
             if(lr_scheduler is not None):
                 lr_scheduler.step()
