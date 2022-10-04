@@ -247,6 +247,8 @@ class PerceiverAR(nn.Module):
         self.rotary_pos_emb = RotaryEmbedding(dim = max(32, dim_head // 2))
 
         self.perceive_layers  = nn.ModuleList([])
+        
+        self.token_pad = num_tokens
 
         for _ in range(perceive_depth):
             self.perceive_layers.append(nn.ModuleList([
@@ -262,6 +264,23 @@ class PerceiverAR(nn.Module):
             ]))
 
         self.to_logits = nn.Linear(dim, num_tokens, bias = False)
+        
+        
+    def compute_accuracy(self, logits, labels): 
+        out = torch.argmax(logits, dim=-1) 
+        out = out.flatten() 
+        labels = labels.flatten() 
+
+        mask = (labels != self.token_pad) 
+        out = out[mask] 
+        labels = labels[mask] 
+
+        num_right = (out == labels)
+        num_right = torch.sum(num_right).type(torch.float32)
+
+        acc = num_right / len(labels) 
+        return acc
+
 
     def forward(
         self,
@@ -305,4 +324,7 @@ class PerceiverAR(nn.Module):
             return logits
 
         labels = labels[:, self.cross_attn_seq_len:]
-        return F.cross_entropy(rearrange(logits, 'b n c -> b c n'), labels, ignore_index = 0)
+        loss = F.cross_entropy(rearrange(logits, 'b n c -> b c n'), labels, ignore_index = 0)
+        acc = self.compute_accuracy(logits, labels)
+        
+        return (loss, acc)
