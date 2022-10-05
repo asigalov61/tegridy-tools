@@ -46,8 +46,9 @@
 
 ***
 
-## (NEW) [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
-## (NEW) [GPT2RGAX](https://asigalov61.github.io/tegridy-tools/GPT2RGAX.html)
+## (NEW) [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
+## [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
+## [GPT2RGAX](https://asigalov61.github.io/tegridy-tools/GPT2RGAX.html)
 ## [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
 ## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
 ## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
