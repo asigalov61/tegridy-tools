@@ -46,7 +46,8 @@
 
 ***
 
-## (NEW) [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
+## [NEW] [LWA-Transformer](https://asigalov61.github.io/tegridy-tools/lwa_transformer.html)
+## [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
 ## [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
 ## [GPT2RGAX](https://asigalov61.github.io/tegridy-tools/GPT2RGAX.html)
 ## [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
