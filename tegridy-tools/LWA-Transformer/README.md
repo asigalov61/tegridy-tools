@@ -1,5 +1,5 @@
 # PyTorch Local Windowed Attention Transformer Implementation by lucidrains
-## [https://github.com/lucidrains/perceiver-ar-pytorch](https://github.com/lucidrains/local-attention)
+## https://github.com/lucidrains/local-attention
 
 ### Code as of 12/11/2022
 
