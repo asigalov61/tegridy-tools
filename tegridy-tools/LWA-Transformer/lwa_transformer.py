@@ -352,7 +352,7 @@ class LocalTransformer(nn.Module):
         super().__init__()
         self.token_emb = nn.Embedding(num_tokens, dim)
         self.pos_emb = nn.Embedding(max_seq_len, dim)
-
+        self.token_pad = num_tokens
         self.max_seq_len = max_seq_len
         self.layers = nn.ModuleList([])
 
@@ -418,7 +418,7 @@ class LocalTransformer(nn.Module):
         labels = labels.flatten() 
 
         mask = (labels != self.token_pad) 
-        out = out[mask] 
+        out = out[mask]
         labels = labels[mask] 
 
         num_right = (out == labels)
@@ -428,7 +428,7 @@ class LocalTransformer(nn.Module):
         
         return acc
 
-    def forward(self, x, mask = None, return_loss = False):
+    def forward(self, x, mask = None, return_loss = True):
         if return_loss:
             x, labels = x[:, :-1], x[:, 1:]
 
