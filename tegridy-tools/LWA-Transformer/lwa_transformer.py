@@ -374,10 +374,11 @@ class LocalTransformer(nn.Module):
         self,
         prime,
         seq_len,
-        temperature = 1.,
+        temperature = 0.8,
         filter_thres = 0.9,
-        min_stop_token = 0
-        verbose = True
+        min_stop_token = 0,
+        return_prime = False,
+        verbose = True,
         **kwargs
     ):
         n, device = prime.shape[1], prime.device
@@ -400,12 +401,16 @@ class LocalTransformer(nn.Module):
                 print(s, '/', len(seq_len))
 
             if min_stop_token > 0:
-              if sampled == min_stop_token:
+              if sampled >= min_stop_token:
                     if verbose: 
-                      print('Model generated min stop token at:', s, '/', seq_len)
+                      print('Model called the end of sequence at:', s, '/', seq_len)
                     break
-
-        return out[:, n:]
+        
+        if return_prime:
+          return out[:, :]
+        
+        else:
+          return out[:, n:]
 
     def compute_accuracy(self, logits, labels): 
         out = torch.argmax(logits, dim=-1) 
@@ -419,7 +424,8 @@ class LocalTransformer(nn.Module):
         num_right = (out == labels)
         num_right = torch.sum(num_right).type(torch.float32)
 
-        acc = num_right / len(labels) 
+        acc = num_right / len(labels)
+        
         return acc
 
     def forward(self, x, mask = None, return_loss = False):
