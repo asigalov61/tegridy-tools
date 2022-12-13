@@ -22,7 +22,7 @@
 import math
 
 import torch
-from torch import arccosh, nn, einsum
+from torch import nn, einsum
 import torch.nn.functional as F
 
 from einops import rearrange, repeat, pack, unpack
@@ -376,14 +376,18 @@ class LocalTransformer(nn.Module):
         seq_len,
         temperature = 1.,
         filter_thres = 0.9,
+        min_stop_token = 0
+        verbose = True
         **kwargs
     ):
         n, device = prime.shape[1], prime.device
 
         out = prime
-        gt_count = 0
 
         for s in range(seq_len):
+
+            if verbose:
+              print("Generating sequence of max length:", seq_len)
 
             logits = self.forward(out[:, -self.max_seq_len:], **kwargs)
             filtered_logits = top_k(logits[:, -1], thres = filter_thres)
@@ -391,10 +395,15 @@ class LocalTransformer(nn.Module):
             sampled = torch.multinomial(probs, 1)
             out = torch.cat((out, sampled), dim = -1)
 
-            if gt_count % 64:
-              print(gt_count, '/', len(seq_len))
+            if verbose:
+              if s % 32 == 0:
+                print(s, '/', len(seq_len))
 
-            gt_count += 1
+            if min_stop_token > 0:
+              if sampled == min_stop_token:
+                    if verbose: 
+                      print('Model generated min stop token at:', s, '/', seq_len)
+                    break
 
         return out[:, n:]
 
