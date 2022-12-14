@@ -385,12 +385,12 @@ class LocalTransformer(nn.Module):
 
         out = prime
 
+        if verbose:
+          print("Generating sequence of max length:", seq_len)
+
         for s in range(seq_len):
 
-            if verbose:
-              print("Generating sequence of max length:", seq_len)
-
-            logits = self.forward(out[:, -self.max_seq_len:], **kwargs)
+            logits = self.forward(out[:, -self.max_seq_len:], return_loss=False, **kwargs)
             filtered_logits = top_k(logits[:, -1], thres = filter_thres)
             probs = F.softmax(filtered_logits / temperature, dim = -1)
             sampled = torch.multinomial(probs, 1)
@@ -398,7 +398,7 @@ class LocalTransformer(nn.Module):
 
             if verbose:
               if s % 32 == 0:
-                print(s, '/', len(seq_len))
+                print(s, '/', seq_len)
 
             if min_stop_token > 0:
               if sampled >= min_stop_token:
@@ -414,12 +414,13 @@ class LocalTransformer(nn.Module):
 
     def compute_accuracy(self, logits, labels): 
         out = torch.argmax(logits, dim=-1) 
-        out = out.flatten() 
+        out = out.flatten()
         labels = labels.flatten() 
 
-        mask = (labels != self.token_pad) 
+        mask = (labels != self.token_pad)
+
         out = out[mask]
-        labels = labels[mask] 
+        labels = labels[mask]
 
         num_right = (out == labels)
         num_right = torch.sum(num_right).type(torch.float32)
@@ -447,10 +448,11 @@ class LocalTransformer(nn.Module):
         if not return_loss:
             return logits
 
-        logits = rearrange(logits, 'b n c -> b c n')
-        
-        loss = F.cross_entropy(logits, labels, ignore_index = self.ignore_index)
         acc = self.compute_accuracy(logits, labels)
+
+        logits = rearrange(logits, 'b n c -> b c n')
+        loss = F.cross_entropy(logits, labels, ignore_index = self.ignore_index)
+        
 
         return loss, acc
 
