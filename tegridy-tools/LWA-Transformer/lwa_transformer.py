@@ -378,6 +378,7 @@ class LocalTransformer(nn.Module):
         filter_thres = 0.9,
         min_stop_token = 0,
         return_prime = False,
+        return_acc = False,
         verbose = True,
         **kwargs
     ):
@@ -389,8 +390,11 @@ class LocalTransformer(nn.Module):
           print("Generating sequence of max length:", seq_len)
 
         for s in range(seq_len):
-
-            logits = self.forward(out[:, -self.max_seq_len:], return_loss=False, **kwargs)
+            
+            if return_acc:
+                logits, acc = self.forward(out[:, -self.max_seq_len:], return_loss=False, return_acc=return_acc, **kwargs)
+            else:              
+                logits = self.forward(out[:, -self.max_seq_len:], return_loss=False, return_acc=return_acc, **kwargs)
             filtered_logits = top_k(logits[:, -1], thres = filter_thres)
             probs = F.softmax(filtered_logits / temperature, dim = -1)
             sampled = torch.multinomial(probs, 1)
@@ -401,10 +405,23 @@ class LocalTransformer(nn.Module):
                 print(s, '/', seq_len)
 
             if min_stop_token > 0:
-              if sampled >= min_stop_token:
+              for sa in sampled:
+                  if sa >= min_stop_token:
+                    stop = True
+                    break
+                  else:
+                    stop = False
+              if stop:
                     if verbose: 
                       print('Model called the end of sequence at:', s, '/', seq_len)
                     break
+        
+        if return_acc:
+            if return_prime:
+              return out[:, :], acc
+        
+            else:
+              return out[:, n:], acc
         
         if return_prime:
           return out[:, :]
@@ -429,8 +446,11 @@ class LocalTransformer(nn.Module):
         
         return acc
 
-    def forward(self, x, mask = None, return_loss = True):
+    def forward(self, x, mask = None, return_loss = True, return_acc=False):
         if return_loss:
+            x, labels = x[:, :-1], x[:, 1:]
+        
+        if return_acc:
             x, labels = x[:, :-1], x[:, 1:]
 
         n, device = x.shape[1], x.device
@@ -444,6 +464,12 @@ class LocalTransformer(nn.Module):
             x = ff(x) + x
 
         logits = self.to_logits(x)
+        
+        if return_acc:
+            acc = self.compute_accuracy(logits, labels)
+            logits = rearrange(logits, 'b n c -> b c n')
+            
+            return logits, acc
 
         if not return_loss:
             return logits
@@ -453,7 +479,6 @@ class LocalTransformer(nn.Module):
         logits = rearrange(logits, 'b n c -> b c n')
         loss = F.cross_entropy(logits, labels, ignore_index = self.ignore_index)
         
-
         return loss, acc
 
 #===================================================================================================================
