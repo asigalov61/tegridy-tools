@@ -378,7 +378,6 @@ class LocalTransformer(nn.Module):
         filter_thres = 0.9,
         min_stop_token = 0,
         return_prime = False,
-        return_acc = False,
         verbose = True,
         **kwargs
     ):
@@ -390,11 +389,8 @@ class LocalTransformer(nn.Module):
           print("Generating sequence of max length:", seq_len)
 
         for s in range(seq_len):
-            
-            if return_acc:
-                logits, acc = self.forward(out[:, -self.max_seq_len:], return_loss=False, return_acc=return_acc, **kwargs)
-            else:              
-                logits = self.forward(out[:, -self.max_seq_len:], return_loss=False, return_acc=return_acc, **kwargs)
+             
+            logits = self.forward(out[:, -self.max_seq_len:], return_loss=False, **kwargs)
             filtered_logits = top_k(logits[:, -1], thres = filter_thres)
             probs = F.softmax(filtered_logits / temperature, dim = -1)
             sampled = torch.multinomial(probs, 1)
@@ -415,14 +411,7 @@ class LocalTransformer(nn.Module):
                     if verbose: 
                       print('Model called the end of sequence at:', s, '/', seq_len)
                     break
-        
-        if return_acc:
-            if return_prime:
-              return out[:, :], acc
-        
-            else:
-              return out[:, n:], acc
-        
+               
         if return_prime:
           return out[:, :]
         
@@ -445,12 +434,25 @@ class LocalTransformer(nn.Module):
         acc = num_right / len(labels)
         
         return acc
+    
+    def choose_best_acc(self, outy):
+    
+        losses_accs = []
 
-    def forward(self, x, mask = None, return_loss = True, return_acc=False):
+        for i in range(len(outy)):
+
+            out1 = outy[i].tolist()
+            out2 = torch.LongTensor([out1]).cuda()
+            with torch.no_grad():
+                val_loss, val_acc = self.forward(out2, return_loss = True)
+                losses_accs.append([i, val_loss.tolist(), val_acc.tolist()])
+
+        losses_accs.sort(key=lambda x: x[2], reverse=True)
+
+        return losses_accs[0]
+
+    def forward(self, x, mask = None, return_loss = True):
         if return_loss:
-            x, labels = x[:, :-1], x[:, 1:]
-        
-        if return_acc:
             x, labels = x[:, :-1], x[:, 1:]
 
         n, device = x.shape[1], x.device
@@ -464,12 +466,6 @@ class LocalTransformer(nn.Module):
             x = ff(x) + x
 
         logits = self.to_logits(x)
-        
-        if return_acc:
-            acc = self.compute_accuracy(logits, labels)
-            logits = rearrange(logits, 'b n c -> b c n')
-            
-            return logits, acc
 
         if not return_loss:
             return logits
