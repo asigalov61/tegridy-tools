@@ -449,7 +449,7 @@ class LocalTransformer(nn.Module):
 
         losses_accs.sort(key=lambda x: x[2], reverse=True)
 
-        return losses_accs[0]
+        return losses_accs
 
     def forward(self, x, mask = None, return_loss = True):
         if return_loss:
