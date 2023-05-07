@@ -416,6 +416,10 @@ class AutoregressiveWrapper(nn.Module):
 
             sample = torch.multinomial(probs, 1)
             out = torch.cat((out, sample), dim=-1)
+            
+            if verbose:
+              if s % 32 == 0:
+                print(s, '/', seq_len)
 
             if exists(eos_token):
                 is_eos_token = out == eos_token
