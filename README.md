@@ -30,12 +30,6 @@
 
 ***
 
-### Main tegridy-tools repository for large packages/modules is located here:
-
-### https://1drv.ms/u/s!Ao9gnMkvUA2KgY9Ftz4xsTyiCa4TGA?e=29eMZw
-
-***
-
 # tegridy-tools docs
 
 ***
@@ -78,4 +72,4 @@
 
 ### Project Los Angeles
 
-### Tegridy Code 2021
+### Tegridy Code 2023
