@@ -40,7 +40,7 @@
 
 ***
 
-## [NEW] X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
+## [NEW] [X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
 ## [LWA-Transformer](https://asigalov61.github.io/tegridy-tools/lwa_transformer.html)
 ## [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
 ## [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
