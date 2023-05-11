@@ -1898,7 +1898,7 @@ class AutoregressiveWrapper(nn.Module):
         min_p_pow = 2.0,
         min_p_ratio = 0.02,
         verbose=True,
-        return_prime=True,
+        return_prime=False,
         **kwargs
     ):
         device = start_tokens.device
@@ -1987,6 +1987,8 @@ class AutoregressiveWrapper(nn.Module):
             kwargs.update(self_attn_context_mask = mask)
 
         logits = self.net(inp, **kwargs)
+        
+        acc = self.compute_accuracy(logits, target)
 
         loss = F.cross_entropy(
             rearrange(logits, 'b n c -> b c n'),
@@ -1994,8 +1996,6 @@ class AutoregressiveWrapper(nn.Module):
             ignore_index = ignore_index
         )
 
-        acc = self.compute_accuracy(logits, target)
-
         return loss, acc
-
+    
 #===================================================================================================================
