@@ -1499,7 +1499,8 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
                                   number_of_ticks_per_quarter = 425,
                                   list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0],
                                   output_file_name = 'TMIDI-Composition',
-                                  text_encoding='ISO-8859-1'):
+                                  text_encoding='ISO-8859-1',
+                                  verbose=True):
 
     '''Tegridy SONG to MIDI Converter
      
@@ -1516,8 +1517,9 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
 
     Project Los Angeles
     Tegridy Code 2020'''                                  
-
-    print('Converting to MIDI. Please stand-by...')
+    
+    if verbose:
+        print('Converting to MIDI. Please stand-by...')
     
     output_header = [number_of_ticks_per_quarter, 
                     [['track_name', 0, bytes(output_signature, text_encoding)]]]                                                    
@@ -1549,7 +1551,8 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
         midi_file.write(midi_data)
         midi_file.close()
     
-    print('Done! Enjoy! :)')
+    if verbose:    
+        print('Done! Enjoy! :)')
     
     return detailed_MIDI_stats
 
