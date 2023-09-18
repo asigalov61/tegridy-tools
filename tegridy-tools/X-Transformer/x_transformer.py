@@ -1963,7 +1963,7 @@ class AutoregressiveWrapper(nn.Module):
         out = out.flatten() 
         labels = labels.flatten() 
 
-        mask = (labels != 999999) # dummy pad value / supposed to be self.token_pad / will fix later
+        mask = (labels != self.ignore_index) # can also be self.pad_value (your choice)
         out = out[mask] 
         labels = labels[mask] 
 
