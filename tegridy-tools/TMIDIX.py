@@ -278,7 +278,7 @@ then opus2score()
 '''
     return opus2score(to_millisecs(midi2opus(midi)))
 
-def midi2single_track_ms_score(midi=b'', verbose = False):
+def midi2single_track_ms_score(midi=b'', recalculate_channels = True, verbose = False):
     r'''
 Translates MIDI into a single track "score" with 16 instruments and one beat per second and one
 tick per millisecond
@@ -286,48 +286,59 @@ tick per millisecond
 
     score = midi2score(midi)
 
-    events_matrixes = []
+    if recalculate_channels:
 
-    itrack = 1
-    events_matrixes_channels = []
-    while itrack < len(score):
-        events_matrix = []
-        for event in score[itrack]:
-            if event[0] == 'note' and event[3] != 9:
-              event[3] = (16 * (itrack-1)) + event[3]
-              if event[3] not in events_matrixes_channels:
-                events_matrixes_channels.append(event[3])
+      events_matrixes = []
 
-            events_matrix.append(event)
-        events_matrixes.append(events_matrix)
-        itrack += 1
+      itrack = 1
+      events_matrixes_channels = []
+      while itrack < len(score):
+          events_matrix = []
+          for event in score[itrack]:
+              if event[0] == 'note' and event[3] != 9:
+                event[3] = (16 * (itrack-1)) + event[3]
+                if event[3] not in events_matrixes_channels:
+                  events_matrixes_channels.append(event[3])
 
-    events_matrix1 = []
-    for e in events_matrixes:
-      events_matrix1.extend(e)
+              events_matrix.append(event)
+          events_matrixes.append(events_matrix)
+          itrack += 1
 
-    if verbose:
-      if len(events_matrixes_channels) > 16:
-        print('MIDI has', len(events_matrixes_channels), 'instruments!', len(events_matrixes_channels) - 16, 'instrument(s) will be removed!')
+      events_matrix1 = []
+      for e in events_matrixes:
+        events_matrix1.extend(e)
 
-    for e in events_matrix1:
-      if e[0] == 'note' and e[3] != 9:
-        if e[3] in events_matrixes_channels[:15]:
-          if events_matrixes_channels[:15].index(e[3]) < 9:
-            e[3] = events_matrixes_channels[:15].index(e[3])
+      if verbose:
+        if len(events_matrixes_channels) > 16:
+          print('MIDI has', len(events_matrixes_channels), 'instruments!', len(events_matrixes_channels) - 16, 'instrument(s) will be removed!')
+
+      for e in events_matrix1:
+        if e[0] == 'note' and e[3] != 9:
+          if e[3] in events_matrixes_channels[:15]:
+            if events_matrixes_channels[:15].index(e[3]) < 9:
+              e[3] = events_matrixes_channels[:15].index(e[3])
+            else:
+              e[3] = events_matrixes_channels[:15].index(e[3])+1
           else:
-            e[3] = events_matrixes_channels[:15].index(e[3])+1
-        else:
-          events_matrix1.remove(e)
-      
-      if e[0] in ['patch_change', 'control_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and e[2] != 9:
-        if e[2] in [e % 16 for e in events_matrixes_channels[:15]]:
-          if [e % 16 for e in events_matrixes_channels[:15]].index(e[2]) < 9:
-            e[2] = [e % 16 for e in events_matrixes_channels[:15]].index(e[2])
+            events_matrix1.remove(e)
+        
+        if e[0] in ['patch_change', 'control_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and e[2] != 9:
+          if e[2] in [e % 16 for e in events_matrixes_channels[:15]]:
+            if [e % 16 for e in events_matrixes_channels[:15]].index(e[2]) < 9:
+              e[2] = [e % 16 for e in events_matrixes_channels[:15]].index(e[2])
+            else:
+              e[2] = [e % 16 for e in events_matrixes_channels[:15]].index(e[2])+1
           else:
-            e[2] = [e % 16 for e in events_matrixes_channels[:15]].index(e[2])+1
-        else:
-          events_matrix1.remove(e)
+            events_matrix1.remove(e)
+    
+    else:
+      events_matrix1 = []
+      itrack = 1
+     
+      while itrack < len(score):
+          for event in score[itrack]:
+            events_matrix1.append(event)
+          itrack += 1    
 
     opus = score2opus([score[0], events_matrix1])
     ms_score = opus2score(to_millisecs(opus))
