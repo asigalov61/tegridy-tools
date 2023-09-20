@@ -1555,6 +1555,53 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
         print('Done! Enjoy! :)')
     
     return detailed_MIDI_stats
+###################################################################################
+
+def Tegridy_SONG_to_Full_MIDI_Converter(SONG,
+                                        output_signature = 'Tegridy TMIDI Module', 
+                                        track_name = 'Composition Track',
+                                        number_of_ticks_per_quarter = 1000,
+                                        output_file_name = 'TMIDI-Composition',
+                                        text_encoding='ISO-8859-1',
+                                        verbose=True):
+
+    '''Tegridy SONG to Full MIDI Converter
+     
+    Input: Input SONG in Full TMIDI SONG/MIDI.py Score format
+           Output MIDI Track 0 name / MIDI Signature
+           Output MIDI Track 1 name / Composition track name
+           Number of ticks per quarter for the output MIDI
+           Output file name w/o .mid extension.
+           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+
+    Output: MIDI File
+            Detailed MIDI stats
+
+    Project Los Angeles
+    Tegridy Code 2023'''                                  
+    
+    if verbose:
+        print('Converting to MIDI. Please stand-by...')
+    
+    output_header = [number_of_ticks_per_quarter,
+                    [['set_tempo', 0, 1000000],
+                      ['track_name', 0, bytes(output_signature, text_encoding)]]]                                                    
+
+    song_track = [['track_name', 0, bytes(track_name, text_encoding)]]
+
+    output = output_header + [song_track + SONG]
+
+    midi_data = score2midi(output, text_encoding)
+    detailed_MIDI_stats = score2stats(output)
+
+    with open(output_file_name + '.mid', 'wb') as midi_file:
+        midi_file.write(midi_data)
+        midi_file.close()
+    
+    if verbose:    
+        print('Done! Enjoy! :)')
+    
+    return detailed_MIDI_stats
 
 ###################################################################################
 
