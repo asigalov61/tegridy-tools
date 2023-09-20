@@ -298,7 +298,7 @@ tick per millisecond
               if event[3] not in events_matrixes_channels:
                 events_matrixes_channels.append(event[3])
 
-            if event[0] in ['patch_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and event[2] != 9:
+            if event[0] in ['patch_change', 'control_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and event[2] != 9:
               event[2] = (event[2] * (itrack-1))
 
             events_matrix.append(event)
@@ -314,7 +314,7 @@ tick per millisecond
         print('MIDI has', len(events_matrixes_channels), 'instruments!', len(events_matrixes_channels) - 16, 'instrument(s) will be removed!')
 
     for e in events_matrix1:
-      if e[0] == 'note':
+      if e[0] == 'note' and e[3] != 9:
         if e[3] in events_matrixes_channels[:15]:
           if events_matrixes_channels[:15].index(e[3]) < 9:
             e[3] = events_matrixes_channels[:15].index(e[3])
@@ -322,7 +322,8 @@ tick per millisecond
             e[3] = events_matrixes_channels[:15].index(e[3])+1
         else:
           events_matrix1.remove(e)
-      if e[0] in ['patch_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change']:
+      
+      if e[0] in ['patch_change', 'control_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and e[2] != 9:
         if e[2] in events_matrixes_channels[:15]:
           if events_matrixes_channels[:15].index(e[2]) < 9:
             e[2] = events_matrixes_channels[:15].index(e[2])
