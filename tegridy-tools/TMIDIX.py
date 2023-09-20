@@ -315,19 +315,19 @@ tick per millisecond
 
     for e in events_matrix1:
       if e[0] == 'note':
-        if e[3] in events_matrixes_channels[:16]:
-          if events_matrixes_channels[:16].index(e[3]) < 9:
-            e[3] = events_matrixes_channels[:16].index(e[3])
+        if e[3] in events_matrixes_channels[:15]:
+          if events_matrixes_channels[:15].index(e[3]) < 9:
+            e[3] = events_matrixes_channels[:15].index(e[3])
           else:
-            e[3] = events_matrixes_channels[:16].index(e[3])+1
+            e[3] = events_matrixes_channels[:15].index(e[3])+1
         else:
           events_matrix1.remove(e)
       if e[0] in ['patch_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change']:
-        if e[2] in events_matrixes_channels[:16]:
-          if events_matrixes_channels[:16].index(e[2]) < 9:
-            e[2] = events_matrixes_channels[:16].index(e[2])
+        if e[2] in events_matrixes_channels[:15]:
+          if events_matrixes_channels[:15].index(e[2]) < 9:
+            e[2] = events_matrixes_channels[:15].index(e[2])
           else:
-            e[2] = events_matrixes_channels[:16].index(e[2])+1
+            e[2] = events_matrixes_channels[:15].index(e[2])+1
         else:
           events_matrix1.remove(e)
 
