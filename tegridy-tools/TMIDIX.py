@@ -278,6 +278,66 @@ then opus2score()
 '''
     return opus2score(to_millisecs(midi2opus(midi)))
 
+def midi2single_track_ms_score(midi=b'', verbose = False):
+    r'''
+Translates MIDI into a single track "score" with 16 instruments and one beat per second and one
+tick per millisecond
+'''
+
+    score = midi2score(midi)
+
+    events_matrixes = []
+
+    itrack = 1
+    events_matrixes_channels = []
+    while itrack < len(score):
+        events_matrix = []
+        for event in score[itrack]:
+            if event[0] == 'note' and event[3] != 9:
+              event[3] = (event[3] * (itrack-1))
+              if event[3] not in events_matrixes_channels:
+                events_matrixes_channels.append(event[3])
+
+            if event[0] in ['patch_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and event[2] != 9:
+              event[2] = (event[2] * (itrack-1))
+              if event[2] not in events_matrixes_channels:
+                events_matrixes_channels.append(event[2])
+
+            events_matrix.append(event)
+        events_matrixes.append(events_matrix)
+        itrack += 1
+
+    events_matrix1 = []
+    for e in events_matrixes:
+      events_matrix1.extend(e)
+
+    if verbose:
+      if len(events_matrixes_channels) > 16:
+        print('MIDI has', len(events_matrixes_channels), 'instruments!', len(events_matrixes_channels) - 16, 'instrument(s) will be removed!')
+
+    for e in events_matrix1:
+      if e[0] == 'note':
+        if e[3] in events_matrixes_channels[:16]:
+          if events_matrixes_channels[:16].index(e[3]) < 9:
+            e[3] = events_matrixes_channels[:16].index(e[3])
+          else:
+            e[3] = events_matrixes_channels[:16].index(e[3])+1
+        else:
+          events_matrix1.remove(e)
+      if e[0] in ['patch_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change']:
+        if e[2] in events_matrixes_channels[:16]:
+          if events_matrixes_channels[:16].index(e[2]) < 9:
+            e[2] = events_matrixes_channels[:16].index(e[2])
+          else:
+            e[2] = events_matrixes_channels[:16].index(e[2])+1
+        else:
+          events_matrix1.remove(e)
+
+    opus = score2opus([score[0], events_matrix1])
+    ms_score = opus2score(to_millisecs(opus))
+
+    return ms_score
+
 #------------------------ Other Transformations ---------------------
 
 def to_millisecs(old_opus=None, desired_time_in_ms=1):
