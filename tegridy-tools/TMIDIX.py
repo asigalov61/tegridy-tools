@@ -300,8 +300,6 @@ tick per millisecond
 
             if event[0] in ['patch_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and event[2] != 9:
               event[2] = (event[2] * (itrack-1))
-              if event[2] not in events_matrixes_channels:
-                events_matrixes_channels.append(event[2])
 
             events_matrix.append(event)
         events_matrixes.append(events_matrix)
