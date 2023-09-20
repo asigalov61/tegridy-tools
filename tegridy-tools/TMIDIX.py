@@ -294,12 +294,9 @@ tick per millisecond
         events_matrix = []
         for event in score[itrack]:
             if event[0] == 'note' and event[3] != 9:
-              event[3] = (event[3] * itrack)
+              event[3] = (16 * (itrack-1)) + event[3]
               if event[3] not in events_matrixes_channels:
                 events_matrixes_channels.append(event[3])
-
-            if event[0] in ['patch_change', 'control_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and event[2] != 9:
-              event[2] = (event[2] * itrack)
 
             events_matrix.append(event)
         events_matrixes.append(events_matrix)
@@ -324,11 +321,11 @@ tick per millisecond
           events_matrix1.remove(e)
       
       if e[0] in ['patch_change', 'control_change', 'channel_after_touch', 'key_after_touch', 'pitch_wheel_change'] and e[2] != 9:
-        if e[2] in events_matrixes_channels[:15]:
-          if events_matrixes_channels[:15].index(e[2]) < 9:
-            e[2] = events_matrixes_channels[:15].index(e[2])
+        if e[2] in [e % 16 for e in events_matrixes_channels[:15]]:
+          if [e % 16 for e in events_matrixes_channels[:15]].index(e[2]) < 9:
+            e[2] = [e % 16 for e in events_matrixes_channels[:15]].index(e[2])
           else:
-            e[2] = events_matrixes_channels[:15].index(e[2])+1
+            e[2] = [e % 16 for e in events_matrixes_channels[:15]].index(e[2])+1
         else:
           events_matrix1.remove(e)
 
