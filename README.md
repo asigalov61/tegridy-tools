@@ -46,7 +46,7 @@ from tegridy_tools import TMIDI, minGPT, markovify
 ## (DEPRECIATED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
 
 ***
-## [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
+## [NEW] [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
 ## [X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
 ## [LWA-Transformer](https://asigalov61.github.io/tegridy-tools/lwa_transformer.html)
 ## [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
