@@ -7,9 +7,12 @@
 ## (DEPRECIATED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
 
 ***
-
-## (NEW) [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
-## (NEW) [GPT2RGAX](https://asigalov61.github.io/tegridy-tools/GPT2RGAX.html)
+## [NEW] [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
+## [X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
+## [LWA-Transformer](https://asigalov61.github.io/tegridy-tools/lwa_transformer.html)
+## [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
+## [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
+## [GPT2RGAX](https://asigalov61.github.io/tegridy-tools/GPT2RGAX.html)
 ## [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
 ## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
 ## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
@@ -28,4 +31,4 @@
 
 ### Project Los Angeles
 
-### Tegridy Code 2021
+### Tegridy Code 2023
