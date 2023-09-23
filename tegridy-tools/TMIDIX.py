@@ -42,7 +42,7 @@ r'''############################################################################
 # 
 #   Or you can always download the latest full version from:
 #
-#	https://pjb.com.au/
+#   https://pjb.com.au/
 #   https://peterbillam.gitlab.io/miditools/
 #	
 #	Copyright 2020 Peter Billam
