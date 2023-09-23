@@ -41,7 +41,9 @@ r'''############################################################################
 #   Please see TMIDI 2.3/tegridy-tools repo for full MIDI.py module code
 # 
 #   Or you can always download the latest full version from:
+#
 #	https://pjb.com.au/
+#   https://peterbillam.gitlab.io/miditools/
 #	
 #	Copyright 2020 Peter Billam
 #
