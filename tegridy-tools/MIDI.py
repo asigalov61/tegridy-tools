@@ -32,6 +32,8 @@ and put it in your PYTHONPATH.  MIDI.py depends on Python3.
 There is also a call-compatible translation into Lua of this
 module: see http://www.pjb.com.au/comp/lua/MIDI.html
 
+Backup web site: https://peterbillam.gitlab.io/miditools/
+
 The "opus" is a direct translation of the midi-file-events, where
 the times are delta-times, in ticks, since the previous event.
 
