@@ -1,7 +1,7 @@
 # PyTorch x-transformers implementation by lucidrains
 ## https://github.com/lucidrains/x-transformers
 
-### Partial code as of 05/10/2023
+### Partial code as of 10/11/2023
 
 ***
 
