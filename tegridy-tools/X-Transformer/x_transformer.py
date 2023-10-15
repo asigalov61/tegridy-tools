@@ -206,7 +206,7 @@ class Attend(nn.Module):
 
         # pytorch 2.0 flash attn: q, k, v, mask, dropout, causal, softmax_scale
         
-        with torch.backends.cuda.sdp_kernel(**config._asdict()):
+        with torch.backends.cuda.sdp_kernel(enable_math=True, enable_mem_efficient=True):
             out = F.scaled_dot_product_attention(
                 q, k, v,
                 attn_mask = mask,
