@@ -24,6 +24,7 @@
 
 ***
 
+## [MIDI Synthesizer](https://asigalov61.github.io/tegridy-tools/MIDI_Synthesizer.html)
 ## [SyllablesSearch](https://asigalov61.github.io/tegridy-tools/SyllablesSearch.html)
 ## [HaystackSearch](https://asigalov61.github.io/tegridy-tools/HaystackSearch.html)
 
