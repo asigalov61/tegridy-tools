@@ -24,7 +24,8 @@
 
 ***
 
-## [NEW] [MIDI Synthesizer](https://asigalov61.github.io/tegridy-tools/MIDI_Synthesizer.html)
+## [NEW] [MIDI to Colab Audio](https://asigalov61.github.io/tegridy-tools/midi_to_colab_audio.html)
+## [MIDI Synthesizer](https://asigalov61.github.io/tegridy-tools/MIDI_Synthesizer.html)
 ## [SyllablesSearch](https://asigalov61.github.io/tegridy-tools/SyllablesSearch.html)
 ## [HaystackSearch](https://asigalov61.github.io/tegridy-tools/HaystackSearch.html)
 
