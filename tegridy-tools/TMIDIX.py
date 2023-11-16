@@ -280,7 +280,7 @@ then opus2score()
 '''
     return opus2score(to_millisecs(midi2opus(midi)))
 
-def midi2single_track_ms_score(midi=b'', recalculate_channels = True, verbose = False):
+def midi2single_track_ms_score(midi=b'', recalculate_channels = True, pass_old_timings_events= False, verbose = False):
     r'''
 Translates MIDI into a single track "score" with 16 instruments and one beat per second and one
 tick per millisecond
@@ -343,13 +343,13 @@ tick per millisecond
           itrack += 1    
 
     opus = score2opus([score[0], events_matrix1])
-    ms_score = opus2score(to_millisecs(opus))
+    ms_score = opus2score(to_millisecs(opus, pass_old_timings_events=pass_old_timings_events))
 
     return ms_score
 
 #------------------------ Other Transformations ---------------------
 
-def to_millisecs(old_opus=None, desired_time_in_ms=1):
+def to_millisecs(old_opus=None, desired_time_in_ms=1, pass_old_timings_events = False):
     r'''Recallibrates all the times in an "opus" to use one beat
 per second and one tick per millisecond.  This makes it
 hard to retrieve any information about beats or barlines,
@@ -389,7 +389,11 @@ but it does make it easy to mix different scores together.
         ticks_so_far = 0
         ms_so_far = 0.0
         previous_ms_so_far = 0.0
-        new_track = [['set_tempo',0,1000000 * desired_time_in_ms],]  # new "crochet" is 1 sec
+
+        if pass_old_timings_events:
+          new_track = [['set_tempo',0,1000000 * desired_time_in_ms],['old_tpq', 0, old_tpq]]  # new "crochet" is 1 sec
+        else:
+          new_track = [['set_tempo',0,1000000 * desired_time_in_ms],]  # new "crochet" is 1 sec
         for old_event in old_opus[itrack]:
             # detect if ticks2tempo has something before this event
             # 20160702 if ticks2tempo is at the same time, leave it
@@ -405,9 +409,19 @@ but it does make it easy to mix different scores together.
             new_event = copy.deepcopy(old_event)  # now handle the new event
             ms_so_far += (ms_per_old_tick * old_event[1] * desired_time_in_ms)
             new_event[1] = round(ms_so_far - previous_ms_so_far)
-            if old_event[0] != 'set_tempo':
-                previous_ms_so_far = ms_so_far
-                new_track.append(new_event)
+
+            if pass_old_timings_events:
+              if old_event[0] != 'set_tempo':
+                  previous_ms_so_far = ms_so_far
+                  new_track.append(new_event)
+              else:
+                  new_event[0] = 'old_set_tempo'
+                  previous_ms_so_far = ms_so_far
+                  new_track.append(new_event)
+            else:
+              if old_event[0] != 'set_tempo':
+                  previous_ms_so_far = ms_so_far
+                  new_track.append(new_event)
             ticks_so_far += event_delta_ticks
         new_opus.append(new_track)
         itrack += 1
