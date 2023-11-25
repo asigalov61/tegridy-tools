@@ -280,7 +280,7 @@ then opus2score()
 '''
     return opus2score(to_millisecs(midi2opus(midi)))
 
-def midi2single_track_ms_score(midi=b'', recalculate_channels = True, pass_old_timings_events= False, verbose = False):
+def midi2single_track_ms_score(midi=b'', recalculate_channels = True, verbose = False):
     r'''
 Translates MIDI into a single track "score" with 16 instruments and one beat per second and one
 tick per millisecond
@@ -343,13 +343,13 @@ tick per millisecond
           itrack += 1    
 
     opus = score2opus([score[0], events_matrix1])
-    ms_score = opus2score(to_millisecs(opus, pass_old_timings_events=pass_old_timings_events))
+    ms_score = opus2score(to_millisecs(opus))
 
     return ms_score
 
 #------------------------ Other Transformations ---------------------
 
-def to_millisecs(old_opus=None, desired_time_in_ms=1, pass_old_timings_events = False):
+def to_millisecs(old_opus=None, desired_time_in_ms=1):
     r'''Recallibrates all the times in an "opus" to use one beat
 per second and one tick per millisecond.  This makes it
 hard to retrieve any information about beats or barlines,
@@ -389,11 +389,7 @@ but it does make it easy to mix different scores together.
         ticks_so_far = 0
         ms_so_far = 0.0
         previous_ms_so_far = 0.0
-
-        if pass_old_timings_events:
-          new_track = [['set_tempo',0,1000000 * desired_time_in_ms],['old_tpq', 0, old_tpq]]  # new "crochet" is 1 sec
-        else:
-          new_track = [['set_tempo',0,1000000 * desired_time_in_ms],]  # new "crochet" is 1 sec
+        new_track = [['set_tempo',0,1000000 * desired_time_in_ms],]  # new "crochet" is 1 sec
         for old_event in old_opus[itrack]:
             # detect if ticks2tempo has something before this event
             # 20160702 if ticks2tempo is at the same time, leave it
@@ -409,19 +405,9 @@ but it does make it easy to mix different scores together.
             new_event = copy.deepcopy(old_event)  # now handle the new event
             ms_so_far += (ms_per_old_tick * old_event[1] * desired_time_in_ms)
             new_event[1] = round(ms_so_far - previous_ms_so_far)
-
-            if pass_old_timings_events:
-              if old_event[0] != 'set_tempo':
-                  previous_ms_so_far = ms_so_far
-                  new_track.append(new_event)
-              else:
-                  new_event[0] = 'old_set_tempo'
-                  previous_ms_so_far = ms_so_far
-                  new_track.append(new_event)
-            else:
-              if old_event[0] != 'set_tempo':
-                  previous_ms_so_far = ms_so_far
-                  new_track.append(new_event)
+            if old_event[0] != 'set_tempo':
+                previous_ms_so_far = ms_so_far
+                new_track.append(new_event)
             ticks_so_far += event_delta_ticks
         new_opus.append(new_track)
         itrack += 1
@@ -1472,6 +1458,8 @@ from difflib import SequenceMatcher as SM
 
 import statistics
 
+import matplotlib.pyplot as plt
+
 ###################################################################################
 #
 # Original TMIDI Tegridy helper functions
@@ -1703,6 +1691,90 @@ def Tegridy_ms_SONG_to_MIDI_Converter(SONG,
         print('Done! Enjoy! :)')
     
     return detailed_MIDI_stats
+
+###################################################################################
+
+def hsv_to_rgb(h, s, v):
+    if s == 0.0:
+        return v, v, v
+    i = int(h*6.0)
+    f = (h*6.0) - i
+    p = v*(1.0 - s)
+    q = v*(1.0 - s*f)
+    t = v*(1.0 - s*(1.0-f))
+    i = i%6
+    return [(v, t, p), (q, v, p), (p, v, t), (p, q, v), (t, p, v), (v, p, q)][i]
+
+def generate_colors(n):
+    return [hsv_to_rgb(i/n, 1, 1) for i in range(n)]
+
+def add_arrays(a, b):
+    return [sum(pair) for pair in zip(a, b)]
+
+#-------------------------------------------------------------------------------
+
+def plot_ms_SONG(ms_song,
+                  preview_length_in_notes=0,
+                  block_lines_times_list = None,
+                  plot_title='ms Song',
+                  max_num_colors=129, 
+                  drums_color_num=128, 
+                  plot_size=(11,4), 
+                  note_height = 0.75,
+                  show_grid_lines=False):
+
+  '''Tegridy ms SONG plotter/vizualizer'''
+
+  notes = [s for s in ms_song if s[0] == 'note']
+
+  if (len(max(notes, key=len)) != 7) and (len(min(notes, key=len)) != 7):
+    print('The song notes do not have patches information')
+    print('Ploease add patches to the notes in the song')
+
+  else:
+
+    start_times = [s[1] / 1000 for s in ms_song]
+    durations = [s[2] / 1000 for s in ms_song]
+    pitches = [s[4] for s in ms_song]
+    patches = [s[6] for s in ms_song]
+
+    colors = generate_colors(max_num_colors)
+    colors[drums_color_num] = (1, 1, 1)
+
+    pbl = ms_song[preview_length_in_notes][1] / 1000
+
+    fig, ax = plt.subplots(figsize=plot_size)
+    #fig, ax = plt.subplots()
+
+    # Create a rectangle for each note with color based on patch number
+    for start, duration, pitch, patch in zip(start_times, durations, pitches, patches):
+        rect = plt.Rectangle((start, pitch), duration, note_height, facecolor=colors[patch])
+        ax.add_patch(rect)
+
+    # Set the limits of the plot
+    ax.set_xlim([min(start_times), max(add_arrays(start_times, durations))])
+    ax.set_ylim([min(pitches)-1, max(pitches)+1])
+
+    # Set the background color to black
+    ax.set_facecolor('black')
+    fig.patch.set_facecolor('white')
+
+    if preview_length_in_notes > 0:
+      ax.axvline(x=pbl, c='white')
+
+    if block_lines_times_list:
+      for bl in block_lines_times_list:
+        ax.axvline(x=bl, c='white')
+           
+    if show_grid_lines:
+      ax.grid(color='white')
+
+    plt.xlabel('Time', c='white')
+    plt.ylabel('Pitch', c='white')
+
+    plt.title(plot_title)
+
+    plt.show()
 
 ###################################################################################
 
