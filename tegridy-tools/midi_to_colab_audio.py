@@ -2878,7 +2878,7 @@ import numpy as np
 def midi_opus_to_colab_audio(midi_opus, 
                               soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                               sample_rate=16000, # 44100
-                              volume_scale=40):
+                              volume_scale=10):
 
     def normalize_volume(matrix, factor=20):
         norm = np.linalg.norm(matrix)
@@ -2942,7 +2942,7 @@ def midi_opus_to_colab_audio(midi_opus,
 def midi_to_colab_audio(midi_file, 
                         soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                         sample_rate=16000, # 44100
-                        volume_scale=40):
+                        volume_scale=10):
 
     '''
     
