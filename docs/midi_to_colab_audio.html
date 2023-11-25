@@ -5,8 +5,7 @@
 
   
   <title>midi_to_colab_audio API documentation</title>
-  <meta name="description" content="This module offers functions:  concatenate_scores(), grep(),
-merge_scores(), mix_scores(), midi2opus..." />
+  <meta name="description" content="#===================================================================================================..." />
 
 
   <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1341,137 +1340,79 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <header id="section-intro">
   <h1 class="title"><span class="name">midi_to_colab_audio</span> module</h1>
-  <p>This module offers functions:  concatenate_scores(), grep(),
-merge_scores(), mix_scores(), midi2opus(), midi2score(), opus2midi(),
-opus2score(), play_score(), score2midi(), score2opus(), score2stats(),
-score_type(), segment(), timeshift() and to_millisecs(),
-where "midi" means the MIDI-file bytes (as can be put in a .mid file,
-or piped into aplaymidi), and "opus" and "score" are list-structures
-as inspired by Sean Burke's MIDI-Perl CPAN module.</p>
-<p>Warning: Version 6.4 is not necessarily backward-compatible with
-previous versions, in that text-data is now bytes, not strings.
-This reflects the fact that many MIDI files have text data in
-encodings other that ISO-8859-1, for example in Shift-JIS.</p>
-<p>Download MIDI.py from   http://www.pjb.com.au/midi/free/MIDI.py
-and put it in your PYTHONPATH.  MIDI.py depends on Python3.</p>
-<p>There is also a call-compatible translation into Lua of this
-module: see http://www.pjb.com.au/comp/lua/MIDI.html</p>
-<p>Backup web site: https://peterbillam.gitlab.io/miditools/</p>
-<p>The "opus" is a direct translation of the midi-file-events, where
-the times are delta-times, in ticks, since the previous event.</p>
-<p>The "score" is more human-centric; it uses absolute times, and
-combines the separate note_on and note_off events into one "note"
-event, with a duration:
- ['note', start_time, duration, channel, note, velocity] # in a "score"</p>
-<p>EVENTS (in an "opus" structure)
-     ['note_off', dtime, channel, note, velocity]       # in an "opus"
-     ['note_on', dtime, channel, note, velocity]        # in an "opus"
-     ['key_after_touch', dtime, channel, note, velocity]
-     ['control_change', dtime, channel, controller(0-127), value(0-127)]
-     ['patch_change', dtime, channel, patch]
-     ['channel_after_touch', dtime, channel, velocity]
-     ['pitch_wheel_change', dtime, channel, pitch_wheel]
-     ['text_event', dtime, text]
-     ['copyright_text_event', dtime, text]
-     ['track_name', dtime, text]
-     ['instrument_name', dtime, text]
-     ['lyric', dtime, text]
-     ['marker', dtime, text]
-     ['cue_point', dtime, text]
-     ['text_event_08', dtime, text]
-     ['text_event_09', dtime, text]
-     ['text_event_0a', dtime, text]
-     ['text_event_0b', dtime, text]
-     ['text_event_0c', dtime, text]
-     ['text_event_0d', dtime, text]
-     ['text_event_0e', dtime, text]
-     ['text_event_0f', dtime, text]
-     ['end_track', dtime]
-     ['set_tempo', dtime, tempo]
-     ['smpte_offset', dtime, hr, mn, se, fr, ff]
-     ['time_signature', dtime, nn, dd, cc, bb]
-     ['key_signature', dtime, sf, mi]
-     ['sequencer_specific', dtime, raw]
-     ['raw_meta_event', dtime, command(0-255), raw]
-     ['sysex_f0', dtime, raw]
-     ['sysex_f7', dtime, raw]
-     ['song_position', dtime, song_pos]
-     ['song_select', dtime, song_number]
-     ['tune_request', dtime]</p>
-<p>DATA TYPES
-     channel = a value 0 to 15
-     controller = 0 to 127 (see http://www.pjb.com.au/muscript/gm.html#cc )
-     dtime = time measured in "ticks", 0 to 268435455
-     velocity = a value 0 (soft) to 127 (loud)
-     note = a value 0 to 127  (middle-C is 60)
-     patch = 0 to 127 (see http://www.pjb.com.au/muscript/gm.html )
-     pitch_wheel = a value -8192 to 8191 (0x1FFF)
-     raw = bytes, of length 0 or more  (for sysex events see below)
-     sequence_number = a value 0 to 65,535 (0xFFFF)
-     song_pos = a value 0 to 16,383 (0x3FFF)
-     song_number = a value 0 to 127
-     tempo = microseconds per crochet (quarter-note), 0 to 16777215
-     text = bytes, of length 0 or more
-     ticks = the number of ticks per crochet (quarter-note)</p>
-<p>In sysex_f0 events, the raw data must not start with a \xF0 byte,
-   since this gets added automatically;
-   but it must end with an explicit \xF7 byte!
-   In the very unlikely case that you ever need to split sysex data
-   into one sysex_f0 followed by one or more sysex_f7s, then only the
-   last of those sysex_f7 events must end with the explicit \xF7 byte
-   (again, the raw data of individual sysex_f7 events must not start
-   with any \xF7 byte, since this gets added automatically).</p>
-<p>Since version 6.4, text data is in bytes, not in a ISO-8859-1 string.</p>
-<p>GOING THROUGH A SCORE WITHIN A PYTHON PROGRAM
-    channels = {2,3,5,8,13}
-    itrack = 1   # skip 1st element which is ticks
-    while itrack &lt; len(score):
-        for event in score[itrack]:
-            if event[0] == 'note':   # for example,
-                pass  # do something to all notes
-            # or, to work on events in only particular channels&hellip;
-            channel_index = MIDI.Event2channelindex.get(event[0], False)
-            if channel_index and (event[channel_index] in channels):
-                pass  # do something to channels 2,3,5,8 and 13
-        itrack += 1</p>
+  <h1 id="_1">===================================================================================================================</h1>
+<h1 id="_2"></h1>
+<h1 id="midi-to-colab-audio-python-module">MIDI to Colab AUdio Python Module</h1>
+<h1 id="_3"></h1>
+<h1 id="converts-any-midi-file-to-raw-audio-which-is-compatible">Converts any MIDI file to raw audio which is compatible</h1>
+<h1 id="with-google-colab-or-hugging-face-gradio">with Google Colab or HUgging Face Gradio</h1>
+<h1 id="_4"></h1>
+<h1 id="version-10">Version 1.0</h1>
+<h1 id="_5"></h1>
+<h1 id="includes-full-source-code-of-midi-pyfluidsynth-and-midi_synthesizer-python-modules">Includes full source code of MIDI, pyfluidsynth, and midi_synthesizer Python modules</h1>
+<h1 id="_6"></h1>
+<h1 id="original-source-code-for-all-modules-was-retrieved-on-10232023">Original source code for all modules was retrieved on 10/23/2023</h1>
+<h1 id="_7"></h1>
+<h1 id="project-los-angeles">Project Los Angeles</h1>
+<h1 id="tegridy-code-2023">Tegridy Code 2023</h1>
+<h1 id="_8"></h1>
+<h1 id="_9">===================================================================================================================</h1>
+<h1 id="_10"></h1>
+<h1 id="critical-dependencies">Critical dependencies</h1>
+<h1 id="_11"></h1>
+<h1 id="pip-install-numpy">pip install numpy</h1>
+<h1 id="sudo-apt-install-fluidsynth">sudo apt install fluidsynth</h1>
+<h1 id="_12"></h1>
+<h1 id="_13">===================================================================================================================</h1>
+<h1 id="_14"></h1>
+<h1 id="example-usage">Example usage:</h1>
+<h1 id="_15"></h1>
+<h1 id="from-midi_to_colab_audio-import-midi_to_colab_audio">from midi_to_colab_audio import midi_to_colab_audio</h1>
+<h1 id="from-ipythondisplay-import-display-audio">from IPython.display import display, Audio</h1>
+<h1 id="_16"></h1>
+<h1 id="raw_audio-midi_to_colab_audiocontentinputmid">raw_audio = midi_to_colab_audio('/content/input.mid')</h1>
+<h1 id="_17"></h1>
+<h1 id="displayaudioraw_audio-rate16000-normalizefalse">display(Audio(raw_audio, rate=16000, normalize=False))</h1>
+<h1 id="_18"></h1>
+<h1 id="_19">===================================================================================================================</h1>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio" class="source">
-    <div class="codehilite"><pre><span></span><span class="c1">#===================================================================================================================</span>
-<span class="c1">#</span>
-<span class="c1"># MIDI to Colab AUdio Python Module</span>
-<span class="c1">#</span>
-<span class="c1"># Converts any MIDI file to raw audio which is compatible </span>
-<span class="c1"># with Google Colab or HUgging Face Gradio</span>
-<span class="c1">#</span>
-<span class="c1"># Version 1.0</span>
-<span class="c1">#</span>
-<span class="c1"># Includes full source code of MIDI, pyfluidsynth, and midi_synthesizer Python modules</span>
-<span class="c1"># </span>
-<span class="c1"># Original source code for all modules was retrieved on 10/23/2023</span>
-<span class="c1">#</span>
-<span class="c1"># Project Los Angeles</span>
-<span class="c1"># Tegridy Code 2023</span>
-<span class="c1">#</span>
-<span class="c1">#===================================================================================================================</span>
-<span class="c1">#</span>
-<span class="c1"># Critical dependencies</span>
-<span class="c1">#</span>
-<span class="c1"># pip install numpy</span>
-<span class="c1"># sudo apt install fluidsynth</span>
-<span class="c1">#</span>
-<span class="c1">#===================================================================================================================</span>
-<span class="c1"># </span>
-<span class="c1"># Example usage:</span>
-<span class="c1">#</span>
-<span class="c1"># from midi_to_colab_audio import midi_to_colab_audio</span>
-<span class="c1"># from IPython.display import display, Audio</span>
-<span class="c1">#</span>
-<span class="c1"># raw_audio = midi_to_colab_audio(&#39;/content/input.mid&#39;)</span>
-<span class="c1">#</span>
-<span class="c1"># display(Audio(raw_audio, rate=16000, normalize=False))</span>
-<span class="c1">#</span>
-<span class="c1">#===================================================================================================================</span>
+    <div class="codehilite"><pre><span></span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;#===================================================================================================================</span>
+<span class="sd">#</span>
+<span class="sd"># MIDI to Colab AUdio Python Module</span>
+<span class="sd">#</span>
+<span class="sd"># Converts any MIDI file to raw audio which is compatible </span>
+<span class="sd"># with Google Colab or HUgging Face Gradio</span>
+<span class="sd">#</span>
+<span class="sd"># Version 1.0</span>
+<span class="sd">#</span>
+<span class="sd"># Includes full source code of MIDI, pyfluidsynth, and midi_synthesizer Python modules</span>
+<span class="sd"># </span>
+<span class="sd"># Original source code for all modules was retrieved on 10/23/2023</span>
+<span class="sd">#</span>
+<span class="sd"># Project Los Angeles</span>
+<span class="sd"># Tegridy Code 2023</span>
+<span class="sd">#</span>
+<span class="sd">#===================================================================================================================</span>
+<span class="sd">#</span>
+<span class="sd"># Critical dependencies</span>
+<span class="sd">#</span>
+<span class="sd"># pip install numpy</span>
+<span class="sd"># sudo apt install fluidsynth</span>
+<span class="sd">#</span>
+<span class="sd">#===================================================================================================================</span>
+<span class="sd"># </span>
+<span class="sd"># Example usage:</span>
+<span class="sd">#</span>
+<span class="sd"># from midi_to_colab_audio import midi_to_colab_audio</span>
+<span class="sd"># from IPython.display import display, Audio</span>
+<span class="sd">#</span>
+<span class="sd"># raw_audio = midi_to_colab_audio(&#39;/content/input.mid&#39;)</span>
+<span class="sd">#</span>
+<span class="sd"># display(Audio(raw_audio, rate=16000, normalize=False))</span>
+<span class="sd">#</span>
+<span class="sd">#===================================================================================================================&#39;&#39;&#39;</span>
 <span class="c1">#! /usr/bin/python3</span>
 <span class="c1"># unsupported 20091104 ...</span>
 <span class="c1">#     [&#39;set_sequence_number&#39;, dtime, sequence]</span>
@@ -4317,7 +4258,7 @@ event, with a duration:
 <span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
                               <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                               <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
@@ -4381,7 +4322,7 @@ event, with a duration:
 <span class="k">def</span> <span class="nf">midi_to_colab_audio</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> 
                         <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    </span>
@@ -5902,7 +5843,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_opus_to_colab_audio">
-    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=40)</p>
+    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10)</p>
     </div>
     
 
@@ -5914,7 +5855,7 @@ then opus2score()</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
                               <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                               <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
@@ -5984,7 +5925,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_to_colab_audio">
-    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=40)</p>
+    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10)</p>
     </div>
     
 
@@ -6000,7 +5941,7 @@ then opus2score()</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi_to_colab_audio</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> 
                         <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    </span>
