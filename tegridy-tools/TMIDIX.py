@@ -1783,8 +1783,8 @@ def plot_ms_SONG(ms_song,
     if show_grid_lines:
       ax.grid(color='white')
 
-    plt.xlabel('Time', c='white')
-    plt.ylabel('Pitch', c='white')
+    plt.xlabel('Time', c='black')
+    plt.ylabel('Pitch', c='black')
 
     plt.title(plot_title)
 
