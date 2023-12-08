@@ -2880,10 +2880,12 @@ def midi_opus_to_colab_audio(midi_opus,
                               sample_rate=16000, # 44100
                               volume_scale=10):
 
-    def normalize_volume(matrix, factor=20):
+    def normalize_volume(matrix, factor=10):
         norm = np.linalg.norm(matrix)
         matrix = matrix/norm  # normalized matrix
-        return matrix * factor
+        mult_matrix = matrix * factor
+        final_matrix = np.clip(mult_matrix, -1.0, 1.0)
+        return final_matrix
 
     ticks_per_beat = midi_opus[0]
     event_list = []
@@ -2958,10 +2960,12 @@ def midi_to_colab_audio(midi_file,
 
     midi_opus = midi2opus(open(midi_file, 'rb').read())
 
-    def normalize_volume(matrix, factor=20):
+    def normalize_volume(matrix, factor=10):
         norm = np.linalg.norm(matrix)
         matrix = matrix/norm  # normalized matrix
-        return matrix * factor
+        mult_matrix = matrix * factor
+        final_matrix = np.clip(mult_matrix, -1.0, 1.0)
+        return final_matrix
 
     ticks_per_beat = midi_opus[0]
     event_list = []
