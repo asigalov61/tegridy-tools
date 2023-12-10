@@ -3482,6 +3482,73 @@ def Tegridy_Split_List(list_to_split, split_value=0):
 
 ###################################################################################
 
+# Binary chords functions
+
+def tones_chord_to_bits(chord):
+    bits = [0] * 12
+    for num in chord:
+        bits[num] = 1
+    
+    return bits
+
+def bits_to_tones_chord(bits):
+    return [i for i, bit in enumerate(bits) if bit == 1]
+
+def shift_bits(bits, n):
+    return bits[-n:] + bits[:-n]
+
+def bits_to_int(bits, shift_bits_value=0):
+    bits = shift_bits(bits, shift_bits_value)
+    result = 0
+    for bit in bits:
+        result = (result << 1) | bit
+    
+    return result
+
+def int_to_bits(n):
+    bits = [0] * 12
+    for i in range(12):
+        bits[11 - i] = n % 2
+        n //= 2
+    
+    return bits
+
+def bad_chord(chord):
+    bad = any(b - a == 1 for a, b in zip(chord, chord[1:]))
+    if (0 in chord) and (11 in chord):
+      bad = True
+    
+    return bad
+
+def pitches_chord_to_int(pitches_chord, tones_transpose_value=0):
+
+    pitches_chord = [x for x in pitches_chord if 0 < x < 128]
+
+    if not (-12 < tones_transpose_value < 12):
+      tones_transpose_value = 0
+
+    tones_chord = sorted(list(set([c % 12 for c in sorted(list(set(pitches_chord)))])))
+    bits = tones_chord_to_bits(tones_chord)
+    integer = bits_to_int(bits, shift_bits_value=tones_transpose_value)
+
+    return integer
+
+def int_to_pitches_chord(integer, chord_base_pitch=60): 
+    if 0 < integer < 4096:
+      bits = int_to_bits(integer)
+      tones_chord = bits_to_tones_chord(bits)
+      if not bad_chord(tones_chord):
+        pitches_chord = [t+chord_base_pitch for t in tones_chord]
+        return [pitches_chord, tones_chord]
+      
+      else:
+        return 0 # Bad chord code
+    
+    else:
+      return -1 # Bad integer code
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
