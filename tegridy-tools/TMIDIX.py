@@ -3589,9 +3589,9 @@ def validate_pitches_chord(pitches_chord, return_sorted = True):
 
     return fixed_pitches_chord
 
-def validate_pitches(chord, return_sorted = True):
+def validate_pitches(chord, channel_to_check = 0, return_sorted = True):
 
-    pitches_chord = sorted(list(set([x[4] for x in chord if 0 < x[4] < 128 and x[3] != 9])))
+    pitches_chord = sorted(list(set([x[4] for x in chord if 0 < x[4] < 128 and x[3] == channel_to_check])))
 
     if pitches_chord:
 
@@ -3616,7 +3616,7 @@ def validate_pitches(chord, return_sorted = True):
         fixed_chord = []
 
         for c in chord:
-          if c[3] != 9:
+          if c[3] == channel_to_check:
             if (c[4] % 12) in fixed_tones_chord:
               fixed_chord.append(c)
           else:
@@ -3625,7 +3625,7 @@ def validate_pitches(chord, return_sorted = True):
         if return_sorted:
           fixed_chord.sort(key = lambda x: x[4], reverse=True)
       
-      return fixed_chord 
+        return fixed_chord 
 
     else:
       chord.sort(key = lambda x: x[4], reverse=True)
@@ -3689,6 +3689,153 @@ def fix_monophonic_score_durations(monophonic_score):
     fixed_score.append(monophonic_score[-1])
 
     return fixed_score
+
+###################################################################################
+
+from itertools import product
+
+ALL_CHORDS = [[0], [7], [5], [9], [2], [4], [11], [10], [8], [6], [3], [1], [0, 9], [2, 5],
+              [4, 7], [7, 10], [2, 11], [0, 3], [6, 9], [1, 4], [8, 11], [5, 8], [1, 10],
+              [3, 6], [0, 4], [5, 9], [7, 11], [0, 7], [0, 5], [2, 10], [2, 7], [2, 9],
+              [2, 6], [4, 11], [4, 9], [3, 7], [5, 10], [1, 9], [0, 8], [6, 11], [3, 11],
+              [4, 8], [3, 10], [3, 8], [1, 5], [1, 8], [1, 6], [6, 10], [3, 9], [4, 10],
+              [1, 7], [0, 6], [2, 8], [5, 11], [5, 7], [0, 10], [0, 2], [9, 11], [7, 9],
+              [2, 4], [4, 6], [3, 5], [8, 10], [6, 8], [1, 3], [1, 11], [2, 7, 11],
+              [0, 4, 7], [0, 5, 9], [2, 6, 9], [2, 5, 10], [1, 4, 9], [4, 8, 11], [3, 7, 10],
+              [0, 3, 8], [3, 6, 11], [1, 5, 8], [1, 6, 10], [0, 4, 9], [2, 5, 9], [4, 7, 11],
+              [2, 7, 10], [2, 6, 11], [0, 3, 7], [0, 5, 8], [1, 4, 8], [1, 6, 9], [3, 8, 11],
+              [1, 5, 10], [3, 6, 10], [2, 5, 11], [4, 7, 10], [3, 6, 9], [0, 6, 9],
+              [0, 3, 9], [2, 8, 11], [2, 5, 8], [1, 7, 10], [1, 4, 7], [0, 3, 6], [1, 4, 10],
+              [5, 8, 11], [2, 5, 7], [0, 7, 10], [0, 2, 9], [0, 3, 5], [6, 9, 11], [4, 7, 9],
+              [2, 4, 11], [5, 8, 10], [1, 3, 10], [1, 4, 6], [3, 6, 8], [1, 8, 11],
+              [5, 7, 11], [0, 4, 10], [3, 5, 9], [0, 2, 6], [1, 7, 9], [0, 7, 9], [5, 7, 10],
+              [2, 8, 10], [3, 9, 11], [0, 2, 5], [2, 4, 8], [2, 4, 7], [0, 2, 7], [2, 7, 9],
+              [4, 9, 11], [4, 6, 9], [1, 3, 7], [2, 4, 9], [0, 5, 7], [0, 3, 10], [2, 9, 11],
+              [0, 5, 10], [0, 6, 8], [4, 6, 10], [4, 6, 11], [1, 4, 11], [6, 8, 11],
+              [1, 5, 11], [1, 6, 11], [1, 8, 10], [1, 6, 8], [3, 5, 8], [3, 8, 10],
+              [1, 3, 8], [3, 5, 10], [1, 3, 6], [2, 5, 7, 10], [0, 3, 7, 10], [1, 4, 8, 11],
+              [2, 4, 7, 11], [0, 4, 7, 9], [0, 2, 5, 9], [2, 6, 9, 11], [1, 5, 8, 10],
+              [0, 3, 5, 8], [3, 6, 8, 11], [1, 3, 6, 10], [1, 4, 6, 9], [1, 5, 9], [0, 4, 8],
+              [2, 6, 10], [3, 7, 11], [0, 3, 6, 9], [2, 5, 8, 11], [1, 4, 7, 10],
+              [2, 5, 7, 11], [0, 2, 6, 9], [0, 4, 7, 10], [2, 4, 8, 11], [0, 3, 5, 9],
+              [1, 4, 7, 9], [3, 6, 9, 11], [2, 5, 8, 10], [1, 4, 6, 10], [0, 3, 6, 8],
+              [1, 3, 7, 10], [1, 5, 8, 11], [2, 4, 10], [5, 9, 11], [1, 5, 7], [0, 2, 8],
+              [0, 4, 6], [1, 7, 11], [3, 7, 9], [1, 3, 9], [7, 9, 11], [5, 7, 9], [0, 6, 10],
+              [0, 2, 10], [2, 6, 8], [0, 2, 4], [4, 8, 10], [1, 9, 11], [2, 4, 6],
+              [3, 5, 11], [3, 5, 7], [0, 8, 10], [4, 6, 8], [1, 3, 11], [6, 8, 10],
+              [1, 3, 5], [0, 2, 5, 10], [0, 5, 7, 9], [0, 3, 8, 10], [0, 2, 4, 7],
+              [4, 6, 8, 11], [3, 5, 7, 10], [2, 7, 9, 11], [2, 4, 6, 9], [1, 6, 8, 10],
+              [1, 4, 9, 11], [1, 3, 5, 8], [1, 3, 6, 11], [2, 5, 9, 11], [2, 4, 7, 10],
+              [0, 2, 5, 8], [1, 5, 7, 10], [0, 4, 6, 9], [1, 3, 6, 9], [0, 3, 6, 10],
+              [2, 6, 8, 11], [0, 2, 7, 9], [1, 4, 8, 10], [0, 3, 7, 9], [3, 5, 8, 11],
+              [0, 5, 7, 10], [0, 2, 5, 7], [1, 4, 7, 11], [2, 4, 7, 9], [0, 3, 5, 10],
+              [4, 6, 9, 11], [1, 4, 6, 11], [2, 4, 9, 11], [1, 6, 8, 11], [1, 3, 6, 8],
+              [1, 3, 8, 10], [3, 5, 8, 10], [4, 7, 9, 11], [0, 2, 7, 10], [2, 5, 7, 9],
+              [0, 2, 4, 9], [1, 6, 9, 11], [2, 4, 6, 11], [0, 3, 5, 7], [0, 5, 8, 10],
+              [1, 4, 6, 8], [1, 3, 5, 10], [1, 3, 8, 11], [3, 6, 8, 10], [0, 2, 5, 7, 10],
+              [0, 2, 4, 7, 9], [0, 2, 5, 7, 9], [1, 3, 7, 9], [1, 4, 6, 9, 11],
+              [1, 3, 6, 8, 11], [3, 5, 9, 11], [1, 3, 6, 8, 10], [1, 4, 6, 8, 11],
+              [1, 3, 5, 8, 10], [2, 4, 6, 9, 11], [2, 4, 8, 10], [2, 4, 7, 9, 11],
+              [0, 3, 5, 7, 10], [1, 5, 7, 11], [0, 2, 6, 8], [0, 3, 5, 8, 10], [0, 4, 6, 10],
+              [1, 3, 5, 9], [1, 5, 7, 9], [2, 6, 8, 10], [3, 7, 9, 11], [0, 2, 4, 8],
+              [0, 4, 6, 8], [0, 4, 8, 10], [2, 4, 6, 10], [1, 3, 7, 11], [0, 2, 6, 10],
+              [1, 5, 9, 11], [3, 5, 7, 11], [1, 7, 9, 11], [0, 2, 4, 6], [1, 3, 9, 11],
+              [0, 2, 4, 10], [5, 7, 9, 11], [2, 4, 6, 8], [0, 2, 8, 10], [3, 5, 7, 9],
+              [1, 3, 5, 7], [4, 6, 8, 10], [0, 6, 8, 10], [1, 3, 5, 11], [0, 3, 6, 8, 10],
+              [0, 2, 4, 6, 9], [1, 4, 7, 9, 11], [2, 4, 6, 8, 11], [1, 3, 6, 9, 11],
+              [1, 3, 5, 8, 11], [0, 2, 5, 8, 10], [1, 4, 6, 8, 10], [0, 3, 5, 7, 9],
+              [2, 5, 7, 9, 11], [1, 3, 5, 7, 10], [0, 2, 4, 7, 10], [1, 3, 5, 7, 9],
+              [1, 3, 5, 9, 11], [1, 5, 7, 9, 11], [1, 3, 7, 9, 11], [3, 5, 7, 9, 11],
+              [2, 4, 6, 8, 10], [0, 4, 6, 8, 10], [0, 2, 6, 8, 10], [1, 3, 5, 7, 11],
+              [0, 2, 4, 8, 10], [0, 2, 4, 6, 8], [0, 2, 4, 6, 10]]
+
+def find_exact_match_variable_length(list_of_lists, target_list, uncertain_indices):
+    # Infer possible values for each uncertain index
+    possible_values = {idx: set() for idx in uncertain_indices}
+    for sublist in list_of_lists:
+        for idx in uncertain_indices:
+            if idx < len(sublist):
+                possible_values[idx].add(sublist[idx])
+    
+    # Generate all possible combinations for the uncertain elements
+    uncertain_combinations = product(*(possible_values[idx] for idx in uncertain_indices))
+    
+    for combination in uncertain_combinations:
+        # Create a copy of the target list and update the uncertain elements
+        test_list = target_list[:]
+        for idx, value in zip(uncertain_indices, combination):
+            test_list[idx] = value
+        
+        # Check if the modified target list is an exact match in the list of lists
+        # Only consider sublists that are at least as long as the target list
+        for sublist in list_of_lists:
+            if len(sublist) >= len(test_list) and sublist[:len(test_list)] == test_list:
+                return sublist  # Return the matching sublist
+    
+    return None  # No exact match found
+
+
+def advanced_validate_chord_pitches(chord, channel_to_check = 0, return_sorted = True):
+
+    pitches_chord = sorted(list(set([x[4] for x in chord if 0 < x[4] < 128 and x[3] == channel_to_check])))
+
+    if pitches_chord:
+
+      tones_chord = sorted(list(set([c % 12 for c in sorted(list(set(pitches_chord)))])))
+
+      if not bad_chord(tones_chord):
+        if return_sorted:
+          chord.sort(key = lambda x: x[4], reverse=True)
+        return chord
+
+      else:
+        bad_chord_indices = list(set([i for s in [[tones_chord.index(a), tones_chord.index(b)] for a, b in zip(tones_chord, tones_chord[1:]) if b-a == 1] for i in s]))
+        
+        good_tones_chord = find_exact_match_variable_length(ALL_CHORDS, tones_chord, bad_chord_indices)
+        
+        if good_tones_chord is not None:
+        
+          fixed_chord = []
+
+          for c in chord:
+            if c[3] == channel_to_check:
+              if (c[4] % 12) in good_tones_chord:
+                fixed_chord.append(c)
+            else:
+              fixed_chord.append(c)
+
+          if return_sorted:
+            fixed_chord.sort(key = lambda x: x[4], reverse=True)
+
+        else:
+
+          if 0 in tones_chord and 11 in tones_chord:
+            tones_chord.remove(0)
+
+          fixed_tones = [[a, b] for a, b in zip(tones_chord, tones_chord[1:]) if b-a != 1]
+
+          fixed_tones_chord = []
+          for f in fixed_tones:
+            fixed_tones_chord.extend(f)
+          fixed_tones_chord = list(set(fixed_tones_chord))
+          
+          fixed_chord = []
+
+          for c in chord:
+            if c[3] == channel_to_check:
+              if (c[4] % 12) in fixed_tones_chord:
+                fixed_chord.append(c)
+            else:
+              fixed_chord.append(c)
+
+          if return_sorted:
+            fixed_chord.sort(key = lambda x: x[4], reverse=True)     
+      
+      return fixed_chord 
+
+    else:
+      chord.sort(key = lambda x: x[4], reverse=True)
+      return chord
 
 ###################################################################################
 
