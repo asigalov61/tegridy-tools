@@ -3549,6 +3549,149 @@ def int_to_pitches_chord(integer, chord_base_pitch=60):
 
 ###################################################################################
 
+def bad_chord(chord):
+    bad = any(b - a == 1 for a, b in zip(chord, chord[1:]))
+    if (0 in chord) and (11 in chord):
+      bad = True
+    
+    return bad
+
+def validate_pitches_chord(pitches_chord, return_sorted = True):
+
+    pitches_chord = sorted(list(set([x for x in pitches_chord if 0 < x < 128])))
+
+    tones_chord = sorted(list(set([c % 12 for c in sorted(list(set(pitches_chord)))])))
+
+    if not bad_chord(tones_chord):
+      if return_sorted:
+        pitches_chord.sort(reverse=True)
+      return pitches_chord
+    
+    else:
+      if 0 in tones_chord and 11 in tones_chord:
+        tones_chord.remove(0)
+
+      fixed_tones = [[a, b] for a, b in zip(tones_chord, tones_chord[1:]) if b-a != 1]
+
+      fixed_tones_chord = []
+      for f in fixed_tones:
+        fixed_tones_chord.extend(f)
+      fixed_tones_chord = list(set(fixed_tones_chord))
+      
+      fixed_pitches_chord = []
+
+      for p in pitches_chord:
+        if (p % 12) in fixed_tones_chord:
+          fixed_pitches_chord.append(p)
+
+      if return_sorted:
+        fixed_pitches_chord.sort(reverse=True)
+
+    return fixed_pitches_chord
+
+def validate_pitches(chord, return_sorted = True):
+
+    pitches_chord = sorted(list(set([x[4] for x in chord if 0 < x[4] < 128 and x[3] != 9])))
+
+    if pitches_chord:
+
+      tones_chord = sorted(list(set([c % 12 for c in sorted(list(set(pitches_chord)))])))
+
+      if not bad_chord(tones_chord):
+        if return_sorted:
+          chord.sort(key = lambda x: x[4], reverse=True)
+        return chord
+      
+      else:
+        if 0 in tones_chord and 11 in tones_chord:
+          tones_chord.remove(0)
+
+        fixed_tones = [[a, b] for a, b in zip(tones_chord, tones_chord[1:]) if b-a != 1]
+
+        fixed_tones_chord = []
+        for f in fixed_tones:
+          fixed_tones_chord.extend(f)
+        fixed_tones_chord = list(set(fixed_tones_chord))
+        
+        fixed_chord = []
+
+        for c in chord:
+          if c[3] != 9:
+            if (c[4] % 12) in fixed_tones_chord:
+              fixed_chord.append(c)
+          else:
+            fixed_chord.append(c)
+
+        if return_sorted:
+          fixed_chord.sort(key = lambda x: x[4], reverse=True)
+      
+      return fixed_chord 
+
+    else:
+      chord.sort(key = lambda x: x[4], reverse=True)
+      return chord
+
+def adjust_score_velocities(score, max_velocity):
+
+    min_velocity = min([c[5] for c in score])
+    max_velocity_all_channels = max([c[5] for c in score])
+    min_velocity_ratio = min_velocity / max_velocity_all_channels
+
+    max_channel_velocity = max([c[5] for c in score])
+    if max_channel_velocity < min_velocity:
+        factor = max_velocity / min_velocity
+    else:
+        factor = max_velocity / max_channel_velocity
+    for i in range(len(score)):
+        score[i][5] = int(score[i][5] * factor)
+
+def chordify_score(score):
+
+    chords = []
+    cho = []
+
+    pt = score[0][1]
+
+    for e in score:
+
+      if e[1] == pt:
+        cho.append(e)
+      else:
+        if len(cho) > 0:
+          chords.append(cho)
+
+        cho = []
+        cho.append(e)
+
+      pt = e[1]
+
+    if len(cho) > 0:
+      chords.append(cho)
+
+    return chords
+
+def fix_monophonic_score_durations(monophonic_score):
+  
+    fixed_score = []
+
+    for i in range(len(monophonic_score)-1):
+      note = monophonic_score[i]
+
+      nmt = monophonic_score[i+1][1]
+
+      if note[1]+note[2] >= nmt:
+        note_dur = nmt-note[1]-1
+      else:
+        note_dur = note[2]
+
+      fixed_score.append([note[0], note[1], note_dur, note[3], note[4], note[5]])
+
+    fixed_score.append(monophonic_score[-1])
+
+    return fixed_score
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
