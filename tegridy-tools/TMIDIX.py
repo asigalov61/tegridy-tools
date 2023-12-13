@@ -3839,6 +3839,43 @@ def advanced_validate_chord_pitches(chord, channel_to_check = 0, return_sorted =
 
 ###################################################################################
 
+def analyze_score_pitches(score, channels_to_analyze=[0]):
+
+  analysis = {}
+
+  score_notes = [s for s in score if s[3] in channels_to_analyze]
+
+  cscore = chordify_score(score_notes)
+
+  chords_tones = []
+
+  all_tones = []
+
+  all_chords_good = True
+
+  bad_chords = []
+
+  for c in cscore:
+    tones = sorted(list(set([t[4] % 12 for t in c])))
+    chords_tones.append(tones)
+    all_tones.extend(tones)
+
+    if tones not in ALL_CHORDS:
+      all_chords_good = False
+      bad_chords.append(tones)
+
+  analysis['Number of notes'] = len(score_notes)
+  analysis['Number of chords'] = len(cscore)
+  analysis['Score tones'] = sorted(list(set(all_tones)))
+  analysis['Shortest chord'] = sorted(min(chords_tones, key=len))
+  analysis['Longest chord'] = sorted(max(chords_tones, key=len))
+  analysis['All chords good'] = all_chords_good
+  analysis['Bad chords'] = bad_chords
+
+  return analysis
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
