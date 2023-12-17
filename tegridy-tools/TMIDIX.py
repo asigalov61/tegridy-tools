@@ -3950,7 +3950,8 @@ def tones_chord_to_pitches(tones_chord, base_pitch=60):
 def advanced_score_processor(raw_score, 
                               patches_to_analyze=list(range(129)), 
                               return_score_analysis=True, 
-                              return_enhanced_score=False, 
+                              return_enhanced_score=False,
+                              return_enhanced_score_notes=False, 
                               return_chordified_enhanced_score=False,
                               return_score_tones_chords=False
                             ):
@@ -4079,7 +4080,7 @@ def advanced_score_processor(raw_score,
   else:
     analysis['Error'] = 'Provided score does not have specified patches to analyse'
     analysis['Provided patches to analyse'] = sorted(patches_to_analyze)
-    analysis['Patches present in the score'] = sorted(set(all_score_patches))
+    analysis['Patches present in the score'] = sorted(set(all_score_patches)) 
 
   if return_score_tones_chords:
     cscore = chordify_score(score_notes)
@@ -4097,7 +4098,10 @@ def advanced_score_processor(raw_score,
 
   if return_enhanced_score:
     requested_data.append(enhanced_single_track_score)
-  
+
+  if return_enhanced_score_notes:
+    requested_data.append(score_notes)
+    
   if return_chordified_enhanced_score and cscore:
     requested_data.append(cscore)
 
