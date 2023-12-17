@@ -4074,7 +4074,7 @@ def advanced_score_processor(raw_score,
         analysis['Longest chord'] = sorted(max(chords_tones, key=len))
       analysis['All chords good'] = all_chords_good
       analysis['Number of bad chords'] = bad_chords_count
-      analysis['Bad chords'] = sorted(set(tuple(bc) for bc in bad_chords))
+      analysis['Bad chords'] = sorted([list(c) for c in set(tuple(bc) for bc in bad_chords)])
 
   else:
     analysis['Error'] = 'Provided score does not have specified patches to analyse'
