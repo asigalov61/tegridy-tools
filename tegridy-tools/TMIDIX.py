@@ -3951,8 +3951,10 @@ def advanced_score_processor(raw_score,
                               patches_to_analyze=list(range(129)), 
                               return_score_analysis=True, 
                               return_enhanced_score=False,
-                              return_enhanced_score_notes=False, 
+                              return_enhanced_score_notes=False,
+                              return_enhanced_monophonic_melody=False, 
                               return_chordified_enhanced_score=False,
+                              return_chordified_enhanced_score_with_lyrics=False,
                               return_score_tones_chords=False
                             ):
 
@@ -4080,7 +4082,30 @@ def advanced_score_processor(raw_score,
   else:
     analysis['Error'] = 'Provided score does not have specified patches to analyse'
     analysis['Provided patches to analyse'] = sorted(patches_to_analyze)
-    analysis['Patches present in the score'] = sorted(set(all_score_patches)) 
+    analysis['Patches present in the score'] = sorted(set(all_score_patches))
+
+  if return_enhanced_monophonic_melody:
+
+    score_notes_copy = copy.deepcopy(score_notes)
+    chordified_score_notes = chordify_score(score_notes_copy)
+
+    melody = [c[0] for c in chordified_score_notes]
+
+    fixed_melody = []
+
+    for i in range(len(melody)-1):
+      note = melody[i]
+      nmt = melody[i+1][1]
+
+      if note[1]+note[2] >= nmt:
+        note_dur = nmt-note[1]-1
+      else:
+        note_dur = note[2]
+
+      melody[i][2] = note_dur
+
+      fixed_melody.append(melody[i])
+    fixed_melody.append(melody[-1])
 
   if return_score_tones_chords:
     cscore = chordify_score(score_notes)
@@ -4088,6 +4113,10 @@ def advanced_score_processor(raw_score,
       tones_chord = sorted(set([t[4] % 12 for t in c if t[3] != 9]))
       if tones_chord:
         tones_chords.append(tones_chord)
+
+  if return_chordified_enhanced_score_with_lyrics:
+    score_with_lyrics = [e for e in enhanced_single_track_score if e[0] in ['note', 'text_event', 'lyric']]
+    chordified_enhanced_score_with_lyrics = chordify_score(score_with_lyrics)
   
   # Returned data
 
@@ -4101,9 +4130,15 @@ def advanced_score_processor(raw_score,
 
   if return_enhanced_score_notes:
     requested_data.append(score_notes)
+
+  if return_enhanced_monophonic_melody:
+    requested_data.append(fixed_melody)
     
   if return_chordified_enhanced_score and cscore:
     requested_data.append(cscore)
+
+  if return_chordified_enhanced_score_with_lyrics and chordified_enhanced_score_with_lyrics:
+    requested_data.append(chordified_enhanced_score_with_lyrics)
 
   if return_score_tones_chords:
     requested_data.append(tones_chords)
