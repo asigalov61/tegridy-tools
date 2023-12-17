@@ -2878,7 +2878,9 @@ import numpy as np
 def midi_opus_to_colab_audio(midi_opus, 
                               soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                               sample_rate=16000, # 44100
-                              volume_scale=10):
+                              volume_scale=10,
+                              output_for_gradio=False
+                              ):
 
     def normalize_volume(matrix, factor=10):
         norm = np.linalg.norm(matrix)
@@ -2938,13 +2940,18 @@ def midi_opus_to_colab_audio(midi_opus,
     ss = ss.swapaxes(1, 0)
 
     raw_audio = normalize_volume(ss, volume_scale)
+
+    if output_for_gradio:
+      raw_audio = np.transpose(raw_audio)
     
     return raw_audio
 
 def midi_to_colab_audio(midi_file, 
                         soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                         sample_rate=16000, # 44100
-                        volume_scale=10):
+                        volume_scale=10,
+                        output_for_gradio=False
+                        ):
 
     '''
     
@@ -3018,6 +3025,9 @@ def midi_to_colab_audio(midi_file,
     ss = ss.swapaxes(1, 0)
 
     raw_audio = normalize_volume(ss, volume_scale)
+
+    if output_for_gradio:
+      raw_audio = np.transpose(raw_audio)
     
     return raw_audio
     
