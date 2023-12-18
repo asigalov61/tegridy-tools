@@ -4859,30 +4859,135 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)):</span>
         <span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">chordify_score</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">chordify_score</span><span class="p">(</span><span class="n">score</span><span class="p">,</span>
+                  <span class="n">return_choridfied_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">return_detected_score_information</span><span class="o">=</span><span class="kc">False</span>
+                  <span class="p">):</span>
 
-    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">score</span><span class="p">:</span>
+    
+      <span class="n">num_tracks</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="n">single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">score_num_ticks</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">pt</span> <span class="o">=</span> <span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">score</span><span class="p">:</span>
+        <span class="n">score_type</span> <span class="o">=</span> <span class="s1">&#39;MIDI_PY&#39;</span>
+        <span class="n">score_num_ticks</span> <span class="o">=</span> <span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">pt</span><span class="p">:</span>
-        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">score</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
+              <span class="n">single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
+      
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-          <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+        <span class="n">score_type</span> <span class="o">=</span> <span class="s1">&#39;CUSTOM&#39;</span>
+        <span class="n">single_track_score</span> <span class="o">=</span> <span class="n">score</span>
 
-        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">single_track_score</span> <span class="ow">and</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        
+        <span class="k">try</span><span class="p">:</span>
 
-      <span class="n">pt</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+            <span class="n">single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">score_timings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">]</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">score_timings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+          <span class="n">is_score_time_absolute</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">sct</span><span class="p">:</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sct</span><span class="p">,</span> <span class="n">sct</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
 
-    <span class="k">return</span> <span class="n">chords</span>
+          <span class="n">score_timings_type</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+          <span class="k">if</span> <span class="n">is_score_time_absolute</span><span class="p">(</span><span class="n">score_timings</span><span class="p">):</span>
+            <span class="n">score_timings_type</span> <span class="o">=</span> <span class="s1">&#39;ABS&#39;</span>
+
+            <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="n">score_type</span> <span class="o">==</span> <span class="s1">&#39;MIDI_PY&#39;</span><span class="p">:</span>
+              <span class="n">pe</span> <span class="o">=</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">pe</span> <span class="o">=</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">:</span>
+              
+              <span class="k">if</span> <span class="n">score_type</span> <span class="o">==</span> <span class="s1">&#39;MIDI_PY&#39;</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">ptime</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ptime</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+              <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="n">ptime</span><span class="p">:</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+              
+              <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+                <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+              <span class="n">pe</span> <span class="o">=</span> <span class="n">e</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">score_timings_type</span> <span class="o">=</span> <span class="s1">&#39;REL&#39;</span>
+            
+            <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">:</span>
+              
+              <span class="k">if</span> <span class="n">score_type</span> <span class="o">==</span> <span class="s1">&#39;MIDI_PY&#39;</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+              <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+              
+              <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+                <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+
+          <span class="n">requested_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+          <span class="k">if</span> <span class="n">return_detected_score_information</span><span class="p">:</span>
+            
+            <span class="n">detected_score_information</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score type&#39;</span><span class="p">,</span> <span class="n">score_type</span><span class="p">])</span>
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score timings type&#39;</span><span class="p">,</span> <span class="n">score_timings_type</span><span class="p">])</span>
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score tpq&#39;</span><span class="p">,</span> <span class="n">score_num_ticks</span><span class="p">])</span>
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score number of tracks&#39;</span><span class="p">,</span> <span class="n">num_tracks</span><span class="p">])</span>
+            
+            <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detected_score_information</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">return_choridfied_score</span> <span class="ow">and</span> <span class="n">return_detected_score_information</span><span class="p">:</span>
+            <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">return_choridfied_score</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">return_detected_score_information</span><span class="p">:</span>
+            <span class="n">requested_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+          <span class="k">return</span> <span class="n">requested_data</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error!&#39;</span><span class="p">)</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Check score for consistency and compatibility!&#39;</span><span class="p">)</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception detected:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
 
 <span class="k">def</span> <span class="nf">fix_monophonic_score_durations</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">):</span>
   
@@ -5169,198 +5274,233 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">return_enhanced_monophonic_melody</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                               <span class="n">return_chordified_enhanced_score</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">return_chordified_enhanced_score_with_lyrics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">return_score_tones_chords</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="n">return_score_tones_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">return_text_and_lyric_events</span><span class="o">=</span><span class="kc">False</span>
                             <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;TMIDIX Advanced Score Processor&#39;&#39;&#39;</span>
-  
-  <span class="c1"># Initial processing</span>
 
-  <span class="n">raw_score_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">raw_score</span><span class="p">)</span>
+  <span class="c1"># Score data types detection</span>
 
-  <span class="n">basic_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">num_tracks</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">if</span> <span class="n">raw_score</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_score</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
 
-  <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score_copy</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">raw_score_copy</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
-        <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-      <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="n">num_ticks</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">num_tracks</span> <span class="o">=</span> <span class="mi">1</span>
 
-  <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-  <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+      <span class="n">basic_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">enhanced_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-  <span class="n">all_score_patches</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">num_patch_changes</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+          <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Check score for errors and compatibility!&#39;</span><span class="p">]</span>
 
-  <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">basic_single_track_score</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">:</span>
-          <span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-          <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-          <span class="n">num_patch_changes</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
-          <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
-          <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
+          <span class="n">basic_single_track_score</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">raw_score</span><span class="p">)</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">num_ticks</span> <span class="o">=</span> <span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">raw_score</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
+              <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
-                <span class="k">if</span> <span class="p">([</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]):</span>
+      <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">enhanced_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+      <span class="n">all_score_patches</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">num_patch_changes</span> <span class="o">=</span> <span class="mi">0</span>
+
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">basic_single_track_score</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">:</span>
+              <span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+              <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+              <span class="n">num_patch_changes</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+              <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
+              <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
+              <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="p">([</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]):</span>
+                        <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
                     <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">]:</span>
+          <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">]:</span>
-      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-  <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-  <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-  <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+      <span class="c1"># Analysis and chordification</span>
 
-  <span class="c1"># Analysis and chordification</span>
+      <span class="n">cscore</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">cescore</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">chords_tones</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">tones_chords</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">all_tones</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">True</span>
+      <span class="n">bad_chords</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">bad_chords_count</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">num_text_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">num_other_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">True</span>
 
-  <span class="n">cscore</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">chords_tones</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">tones_chords</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">all_tones</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">True</span>
-  <span class="n">bad_chords</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">bad_chords_count</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">num_text_events</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">num_other_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="p">{}</span>
 
-  <span class="n">analysis</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span><span class="p">]</span>
+      <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
 
-  <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span><span class="p">]</span>
-  <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">return_text_and_lyric_events</span><span class="p">:</span>
+        <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
+        
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+          <span class="k">except</span><span class="p">:</span>
+            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
+          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+              <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
 
-    <span class="k">if</span> <span class="n">return_score_analysis</span><span class="p">:</span>
+        <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
 
-      <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-      
-      <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
-      
-      <span class="n">text_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;text_event&#39;</span><span class="p">]</span>
-      <span class="n">num_text_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_events</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_score_analysis</span><span class="p">:</span>
 
-      <span class="n">lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]</span>
-      <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lyric_events</span><span class="p">)</span>
+          <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+          
+          <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
+          
+          <span class="n">text_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;text_event&#39;</span><span class="p">]</span>
+          <span class="n">num_text_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_events</span><span class="p">)</span>
 
-      <span class="n">other_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
-      <span class="n">num_other_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_events</span><span class="p">)</span>
-      
-      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
-        <span class="n">tones</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
+          <span class="n">lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]</span>
+          <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lyric_events</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">tones</span><span class="p">:</span>
-          <span class="n">chords_tones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
-          <span class="n">all_tones</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
+          <span class="n">other_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
+          <span class="n">num_other_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_events</span><span class="p">)</span>
+          
+          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+            <span class="n">tones</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
-          <span class="k">if</span> <span class="n">tones</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS</span><span class="p">:</span>
-            <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">bad_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
-            <span class="n">bad_chords_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">tones</span><span class="p">:</span>
+              <span class="n">chords_tones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
+              <span class="n">all_tones</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
 
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of tracks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_tracks</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of all events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of patch change events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_patch_changes</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of text events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_text_events</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of lyric events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_lyric_events</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of other events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_other_events</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score notes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cscore</span><span class="p">)</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score patches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_patches</span><span class="p">))</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score pitches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_pitches</span><span class="p">))</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score tones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_tones</span><span class="p">))</span>
-      <span class="k">if</span> <span class="n">chords_tones</span><span class="p">:</span>
-        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Shortest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
-        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Longest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;All chords good&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_chords_good</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bad_chords_count</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chords</span><span class="p">)])</span>
+              <span class="k">if</span> <span class="n">tones</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS</span><span class="p">:</span>
+                <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">bad_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
+                <span class="n">bad_chords_count</span> <span class="o">+=</span> <span class="mi">1</span>
+          
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of ticks per quarter note&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_ticks</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of tracks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_tracks</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of all events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of patch change events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_patch_changes</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of text events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_text_events</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of lyric events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_lyric_events</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;All text and lyric events Latin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_and_lyric_events_latin</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of other events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_other_events</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score notes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cscore</span><span class="p">)</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score patches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_patches</span><span class="p">))</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score pitches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_pitches</span><span class="p">))</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score tones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_tones</span><span class="p">))</span>
+          <span class="k">if</span> <span class="n">chords_tones</span><span class="p">:</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Shortest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Longest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;All chords good&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_chords_good</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bad_chords_count</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chords</span><span class="p">)])</span>
 
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Provided score does not have specified patches to analyse&#39;</span>
-    <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Provided patches to analyse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">patches_to_analyze</span><span class="p">)</span>
-    <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Patches present in the score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_score_patches</span><span class="p">))</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span><span class="p">:</span>
-
-    <span class="n">score_notes_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-    <span class="n">chordified_score_notes</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes_copy</span><span class="p">)</span>
-
-    <span class="n">melody</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score_notes</span><span class="p">]</span>
-
-    <span class="n">fixed_melody</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">note</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-      <span class="n">nmt</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-
-      <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Provided score does not have specified patches to analyse&#39;</span>
+        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Provided patches to analyse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">patches_to_analyze</span><span class="p">)</span>
+        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Patches present in the score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_score_patches</span><span class="p">))</span>
 
-      <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">note_dur</span>
+      <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span><span class="p">:</span>
 
-      <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">score_notes_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+        <span class="n">chordified_score_notes</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes_copy</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">return_score_tones_chords</span><span class="p">:</span>
-    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
-      <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
-      <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
-        <span class="n">tones_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+        <span class="n">melody</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score_notes</span><span class="p">]</span>
 
-  <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
-    <span class="n">score_with_lyrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
-    <span class="n">chordified_enhanced_score_with_lyrics</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_with_lyrics</span><span class="p">)</span>
+        <span class="n">fixed_melody</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+          <span class="n">note</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+          <span class="n">nmt</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+          <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
+            <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+          <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">note_dur</span>
+
+          <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="k">if</span> <span class="n">return_score_tones_chords</span><span class="p">:</span>
+        <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+          <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
+          <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">tones_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
+        <span class="n">score_with_lyrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
+        <span class="n">chordified_enhanced_score_with_lyrics</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_with_lyrics</span><span class="p">)</span>
+      
+      <span class="c1"># Returned data</span>
+
+      <span class="n">requested_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">if</span> <span class="n">return_score_analysis</span> <span class="ow">and</span> <span class="n">analysis</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">analysis</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+      <span class="k">if</span> <span class="n">return_enhanced_score</span> <span class="ow">and</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_enhanced_score_notes</span> <span class="ow">and</span> <span class="n">score_notes</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span> <span class="ow">and</span> <span class="n">fixed_melody</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fixed_melody</span><span class="p">)</span>
+        
+      <span class="k">if</span> <span class="n">return_chordified_enhanced_score</span> <span class="ow">and</span> <span class="n">cescore</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cescore</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span> <span class="ow">and</span> <span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_score_tones_chords</span> <span class="ow">and</span> <span class="n">tones_chords</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chords</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_text_and_lyric_events</span> <span class="ow">and</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_and_lyric_events</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">requested_data</span>
   
-  <span class="c1"># Returned data</span>
-
-  <span class="n">requested_data</span> <span class="o">=</span> <span class="p">[]</span>
-
-  <span class="k">if</span> <span class="n">return_score_analysis</span> <span class="ow">and</span> <span class="n">analysis</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">analysis</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_score</span> <span class="ow">and</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_score_notes</span> <span class="ow">and</span> <span class="n">score_notes</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span> <span class="ow">and</span> <span class="n">fixed_melody</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fixed_melody</span><span class="p">)</span>
-    
-  <span class="k">if</span> <span class="n">return_chordified_enhanced_score</span> <span class="ow">and</span> <span class="n">cescore</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cescore</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span> <span class="ow">and</span> <span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_score_tones_chords</span> <span class="ow">and</span> <span class="n">tones_chords</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chords</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="n">requested_data</span>
-
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Check score for errors and compatibility!&#39;</span><span class="p">]</span>
 <span class="c1">###################################################################################</span>
 
 <span class="c1"># This is the end of the TMIDI X Python module</span>
@@ -8107,7 +8247,7 @@ Tegridy Code 2020</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.advanced_score_processor">
-    <p>def <span class="ident">advanced_score_processor</span>(</p><p>raw_score, patches_to_analyze=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128], return_score_analysis=True, return_enhanced_score=False, return_enhanced_score_notes=False, return_enhanced_monophonic_melody=False, return_chordified_enhanced_score=False, return_chordified_enhanced_score_with_lyrics=False, return_score_tones_chords=False)</p>
+    <p>def <span class="ident">advanced_score_processor</span>(</p><p>raw_score, patches_to_analyze=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128], return_score_analysis=True, return_enhanced_score=False, return_enhanced_score_notes=False, return_enhanced_monophonic_melody=False, return_chordified_enhanced_score=False, return_chordified_enhanced_score_with_lyrics=False, return_score_tones_chords=False, return_text_and_lyric_events=False)</p>
     </div>
     
 
@@ -8125,197 +8265,233 @@ Tegridy Code 2020</p></div>
                               <span class="n">return_enhanced_monophonic_melody</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                               <span class="n">return_chordified_enhanced_score</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">return_chordified_enhanced_score_with_lyrics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">return_score_tones_chords</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="n">return_score_tones_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">return_text_and_lyric_events</span><span class="o">=</span><span class="kc">False</span>
                             <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;TMIDIX Advanced Score Processor&#39;&#39;&#39;</span>
-  
-  <span class="c1"># Initial processing</span>
 
-  <span class="n">raw_score_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">raw_score</span><span class="p">)</span>
+  <span class="c1"># Score data types detection</span>
 
-  <span class="n">basic_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">num_tracks</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">if</span> <span class="n">raw_score</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_score</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
 
-  <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score_copy</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">raw_score_copy</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
-        <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-      <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="n">num_ticks</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">num_tracks</span> <span class="o">=</span> <span class="mi">1</span>
 
-  <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-  <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+      <span class="n">basic_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">enhanced_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-  <span class="n">all_score_patches</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">num_patch_changes</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+          <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Check score for errors and compatibility!&#39;</span><span class="p">]</span>
 
-  <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">basic_single_track_score</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">:</span>
-          <span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-          <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-          <span class="n">num_patch_changes</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
-          <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
-          <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
+          <span class="n">basic_single_track_score</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">raw_score</span><span class="p">)</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">num_ticks</span> <span class="o">=</span> <span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">raw_score</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
+              <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
-                <span class="k">if</span> <span class="p">([</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]):</span>
+      <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">enhanced_single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+      <span class="n">all_score_patches</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">num_patch_changes</span> <span class="o">=</span> <span class="mi">0</span>
+
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">basic_single_track_score</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">:</span>
+              <span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+              <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+              <span class="n">num_patch_changes</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+              <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
+              <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">patches</span><span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">event</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
+              <span class="n">all_score_patches</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">128</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="p">([</span><span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">enhanced_single_track_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]):</span>
+                        <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
                     <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">]:</span>
+          <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">]:</span>
-      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-  <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-  <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-  <span class="n">enhanced_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+      <span class="c1"># Analysis and chordification</span>
 
-  <span class="c1"># Analysis and chordification</span>
+      <span class="n">cscore</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">cescore</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">chords_tones</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">tones_chords</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">all_tones</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">True</span>
+      <span class="n">bad_chords</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">bad_chords_count</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">num_text_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">num_other_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">True</span>
 
-  <span class="n">cscore</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">chords_tones</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">tones_chords</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">all_tones</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">True</span>
-  <span class="n">bad_chords</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">bad_chords_count</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">num_text_events</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">num_other_events</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="p">{}</span>
 
-  <span class="n">analysis</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span><span class="p">]</span>
+      <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
 
-  <span class="n">score_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span><span class="p">]</span>
-  <span class="n">score_patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">return_text_and_lyric_events</span><span class="p">:</span>
+        <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
+        
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+          <span class="k">except</span><span class="p">:</span>
+            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
+          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+              <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
 
-    <span class="k">if</span> <span class="n">return_score_analysis</span><span class="p">:</span>
+        <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
 
-      <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-      
-      <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
-      
-      <span class="n">text_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;text_event&#39;</span><span class="p">]</span>
-      <span class="n">num_text_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_events</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_score_analysis</span><span class="p">:</span>
 
-      <span class="n">lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]</span>
-      <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lyric_events</span><span class="p">)</span>
+          <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+          
+          <span class="n">score_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">sn</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">]</span>
+          
+          <span class="n">text_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;text_event&#39;</span><span class="p">]</span>
+          <span class="n">num_text_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_events</span><span class="p">)</span>
 
-      <span class="n">other_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
-      <span class="n">num_other_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_events</span><span class="p">)</span>
-      
-      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
-        <span class="n">tones</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
+          <span class="n">lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]</span>
+          <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lyric_events</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">tones</span><span class="p">:</span>
-          <span class="n">chords_tones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
-          <span class="n">all_tones</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
+          <span class="n">other_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
+          <span class="n">num_other_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_events</span><span class="p">)</span>
+          
+          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+            <span class="n">tones</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
-          <span class="k">if</span> <span class="n">tones</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS</span><span class="p">:</span>
-            <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">bad_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
-            <span class="n">bad_chords_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">tones</span><span class="p">:</span>
+              <span class="n">chords_tones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
+              <span class="n">all_tones</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
 
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of tracks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_tracks</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of all events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of patch change events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_patch_changes</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of text events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_text_events</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of lyric events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_lyric_events</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of other events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_other_events</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score notes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cscore</span><span class="p">)</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score patches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_patches</span><span class="p">))</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score pitches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_pitches</span><span class="p">))</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score tones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_tones</span><span class="p">))</span>
-      <span class="k">if</span> <span class="n">chords_tones</span><span class="p">:</span>
-        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Shortest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
-        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Longest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;All chords good&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_chords_good</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bad_chords_count</span>
-      <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chords</span><span class="p">)])</span>
+              <span class="k">if</span> <span class="n">tones</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS</span><span class="p">:</span>
+                <span class="n">all_chords_good</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">bad_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones</span><span class="p">)</span>
+                <span class="n">bad_chords_count</span> <span class="o">+=</span> <span class="mi">1</span>
+          
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of ticks per quarter note&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_ticks</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of tracks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_tracks</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of all events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of patch change events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_patch_changes</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of text events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_text_events</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of lyric events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_lyric_events</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;All text and lyric events Latin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_and_lyric_events_latin</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of other events&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_other_events</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score notes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of score chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cscore</span><span class="p">)</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score patches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_patches</span><span class="p">))</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score pitches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">score_pitches</span><span class="p">))</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Score tones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_tones</span><span class="p">))</span>
+          <span class="k">if</span> <span class="n">chords_tones</span><span class="p">:</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Shortest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Longest chord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">chords_tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;All chords good&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_chords_good</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Number of bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bad_chords_count</span>
+          <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chords</span><span class="p">)])</span>
 
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Provided score does not have specified patches to analyse&#39;</span>
-    <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Provided patches to analyse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">patches_to_analyze</span><span class="p">)</span>
-    <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Patches present in the score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_score_patches</span><span class="p">))</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span><span class="p">:</span>
-
-    <span class="n">score_notes_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-    <span class="n">chordified_score_notes</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes_copy</span><span class="p">)</span>
-
-    <span class="n">melody</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score_notes</span><span class="p">]</span>
-
-    <span class="n">fixed_melody</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">note</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-      <span class="n">nmt</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-
-      <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Provided score does not have specified patches to analyse&#39;</span>
+        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Provided patches to analyse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">patches_to_analyze</span><span class="p">)</span>
+        <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Patches present in the score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_score_patches</span><span class="p">))</span>
 
-      <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">note_dur</span>
+      <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span><span class="p">:</span>
 
-      <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">score_notes_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+        <span class="n">chordified_score_notes</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes_copy</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">return_score_tones_chords</span><span class="p">:</span>
-    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
-      <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
-      <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
-        <span class="n">tones_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+        <span class="n">melody</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score_notes</span><span class="p">]</span>
 
-  <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
-    <span class="n">score_with_lyrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
-    <span class="n">chordified_enhanced_score_with_lyrics</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_with_lyrics</span><span class="p">)</span>
+        <span class="n">fixed_melody</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+          <span class="n">note</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+          <span class="n">nmt</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+          <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
+            <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+          <span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">note_dur</span>
+
+          <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">fixed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="k">if</span> <span class="n">return_score_tones_chords</span><span class="p">:</span>
+        <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+          <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
+          <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">tones_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
+        <span class="n">score_with_lyrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
+        <span class="n">chordified_enhanced_score_with_lyrics</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">score_with_lyrics</span><span class="p">)</span>
+      
+      <span class="c1"># Returned data</span>
+
+      <span class="n">requested_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">if</span> <span class="n">return_score_analysis</span> <span class="ow">and</span> <span class="n">analysis</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">analysis</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+      <span class="k">if</span> <span class="n">return_enhanced_score</span> <span class="ow">and</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_enhanced_score_notes</span> <span class="ow">and</span> <span class="n">score_notes</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span> <span class="ow">and</span> <span class="n">fixed_melody</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fixed_melody</span><span class="p">)</span>
+        
+      <span class="k">if</span> <span class="n">return_chordified_enhanced_score</span> <span class="ow">and</span> <span class="n">cescore</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cescore</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span> <span class="ow">and</span> <span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_score_tones_chords</span> <span class="ow">and</span> <span class="n">tones_chords</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chords</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">return_text_and_lyric_events</span> <span class="ow">and</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_and_lyric_events</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">requested_data</span>
   
-  <span class="c1"># Returned data</span>
-
-  <span class="n">requested_data</span> <span class="o">=</span> <span class="p">[]</span>
-
-  <span class="k">if</span> <span class="n">return_score_analysis</span> <span class="ow">and</span> <span class="n">analysis</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">analysis</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_score</span> <span class="ow">and</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_score_notes</span> <span class="ow">and</span> <span class="n">score_notes</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_enhanced_monophonic_melody</span> <span class="ow">and</span> <span class="n">fixed_melody</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fixed_melody</span><span class="p">)</span>
-    
-  <span class="k">if</span> <span class="n">return_chordified_enhanced_score</span> <span class="ow">and</span> <span class="n">cescore</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cescore</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_chordified_enhanced_score_with_lyrics</span> <span class="ow">and</span> <span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chordified_enhanced_score_with_lyrics</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">return_score_tones_chords</span> <span class="ow">and</span> <span class="n">tones_chords</span><span class="p">:</span>
-    <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tones_chords</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="n">requested_data</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Check score for errors and compatibility!&#39;</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -8531,7 +8707,7 @@ Tegridy Code 2020</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.chordify_score">
-    <p>def <span class="ident">chordify_score</span>(</p><p>score)</p>
+    <p>def <span class="ident">chordify_score</span>(</p><p>score, return_choridfied_score=True, return_detected_score_information=False)</p>
     </div>
     
 
@@ -8540,30 +8716,135 @@ Tegridy Code 2020</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.chordify_score', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.chordify_score" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">chordify_score</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">chordify_score</span><span class="p">(</span><span class="n">score</span><span class="p">,</span>
+                  <span class="n">return_choridfied_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">return_detected_score_information</span><span class="o">=</span><span class="kc">False</span>
+                  <span class="p">):</span>
 
-    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">score</span><span class="p">:</span>
+    
+      <span class="n">num_tracks</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="n">single_track_score</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">score_num_ticks</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">pt</span> <span class="o">=</span> <span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">score</span><span class="p">:</span>
+        <span class="n">score_type</span> <span class="o">=</span> <span class="s1">&#39;MIDI_PY&#39;</span>
+        <span class="n">score_num_ticks</span> <span class="o">=</span> <span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">pt</span><span class="p">:</span>
-        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">score</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
+              <span class="n">single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
+      
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-          <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+        <span class="n">score_type</span> <span class="o">=</span> <span class="s1">&#39;CUSTOM&#39;</span>
+        <span class="n">single_track_score</span> <span class="o">=</span> <span class="n">score</span>
 
-        <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">single_track_score</span> <span class="ow">and</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        
+        <span class="k">try</span><span class="p">:</span>
 
-      <span class="n">pt</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+            <span class="n">single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">score_timings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">]</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">score_timings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+          <span class="n">is_score_time_absolute</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">sct</span><span class="p">:</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sct</span><span class="p">,</span> <span class="n">sct</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
 
-    <span class="k">return</span> <span class="n">chords</span>
+          <span class="n">score_timings_type</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+          <span class="k">if</span> <span class="n">is_score_time_absolute</span><span class="p">(</span><span class="n">score_timings</span><span class="p">):</span>
+            <span class="n">score_timings_type</span> <span class="o">=</span> <span class="s1">&#39;ABS&#39;</span>
+
+            <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="n">score_type</span> <span class="o">==</span> <span class="s1">&#39;MIDI_PY&#39;</span><span class="p">:</span>
+              <span class="n">pe</span> <span class="o">=</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">pe</span> <span class="o">=</span> <span class="n">single_track_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">:</span>
+              
+              <span class="k">if</span> <span class="n">score_type</span> <span class="o">==</span> <span class="s1">&#39;MIDI_PY&#39;</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">ptime</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ptime</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+              <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="n">ptime</span><span class="p">:</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+              
+              <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+                <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+              <span class="n">pe</span> <span class="o">=</span> <span class="n">e</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">score_timings_type</span> <span class="o">=</span> <span class="s1">&#39;REL&#39;</span>
+            
+            <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">single_track_score</span><span class="p">:</span>
+              
+              <span class="k">if</span> <span class="n">score_type</span> <span class="o">==</span> <span class="s1">&#39;MIDI_PY&#39;</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+              <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+              
+              <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+                <span class="n">cho</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">cho</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cho</span><span class="p">)</span>
+
+          <span class="n">requested_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+          <span class="k">if</span> <span class="n">return_detected_score_information</span><span class="p">:</span>
+            
+            <span class="n">detected_score_information</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score type&#39;</span><span class="p">,</span> <span class="n">score_type</span><span class="p">])</span>
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score timings type&#39;</span><span class="p">,</span> <span class="n">score_timings_type</span><span class="p">])</span>
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score tpq&#39;</span><span class="p">,</span> <span class="n">score_num_ticks</span><span class="p">])</span>
+            <span class="n">detected_score_information</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;Score number of tracks&#39;</span><span class="p">,</span> <span class="n">num_tracks</span><span class="p">])</span>
+            
+            <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detected_score_information</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">return_choridfied_score</span> <span class="ow">and</span> <span class="n">return_detected_score_information</span><span class="p">:</span>
+            <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">return_choridfied_score</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">return_detected_score_information</span><span class="p">:</span>
+            <span class="n">requested_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span>
+
+          <span class="k">return</span> <span class="n">requested_data</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error!&#39;</span><span class="p">)</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Check score for consistency and compatibility!&#39;</span><span class="p">)</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception detected:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
   </div>
