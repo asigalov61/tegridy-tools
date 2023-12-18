@@ -5300,7 +5300,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">num_ticks</span> <span class="o">=</span> <span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">raw_score</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
-              <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+              <span class="n">ev</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+              <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
             <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
 
       <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -5383,7 +5384,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
 
-        <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+        <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="n">num_ticks</span><span class="p">,</span> <span class="n">enhanced_single_track_score</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">return_score_analysis</span><span class="p">:</span>
 
@@ -5479,7 +5480,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">analysis</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 
       <span class="k">if</span> <span class="n">return_enhanced_score</span> <span class="ow">and</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
-        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">num_ticks</span><span class="p">,</span> <span class="n">enhanced_single_track_score</span><span class="p">])</span>
 
       <span class="k">if</span> <span class="n">return_enhanced_score_notes</span> <span class="ow">and</span> <span class="n">score_notes</span><span class="p">:</span>
         <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
@@ -8293,7 +8294,8 @@ Tegridy Code 2020</p></div>
         <span class="n">num_ticks</span> <span class="o">=</span> <span class="n">raw_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">while</span> <span class="n">num_tracks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_score</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">raw_score</span><span class="p">[</span><span class="n">num_tracks</span><span class="p">]:</span>
-              <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+              <span class="n">ev</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+              <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
             <span class="n">num_tracks</span> <span class="o">+=</span> <span class="mi">1</span>
 
       <span class="n">basic_single_track_score</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span> <span class="k">else</span> <span class="mi">128</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -8376,7 +8378,7 @@ Tegridy Code 2020</p></div>
 
       <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
 
-        <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+        <span class="n">cescore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="n">num_ticks</span><span class="p">,</span> <span class="n">enhanced_single_track_score</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">return_score_analysis</span><span class="p">:</span>
 
@@ -8472,7 +8474,7 @@ Tegridy Code 2020</p></div>
         <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">analysis</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 
       <span class="k">if</span> <span class="n">return_enhanced_score</span> <span class="ow">and</span> <span class="n">enhanced_single_track_score</span><span class="p">:</span>
-        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enhanced_single_track_score</span><span class="p">)</span>
+        <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">num_ticks</span><span class="p">,</span> <span class="n">enhanced_single_track_score</span><span class="p">])</span>
 
       <span class="k">if</span> <span class="n">return_enhanced_score_notes</span> <span class="ow">and</span> <span class="n">score_notes</span><span class="p">:</span>
         <span class="n">requested_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_notes</span><span class="p">)</span>
