@@ -5359,7 +5359,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="n">num_other_events</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">True</span>
+      <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">None</span>
 
       <span class="n">analysis</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -5369,15 +5369,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="k">if</span> <span class="n">return_text_and_lyric_events</span><span class="p">:</span>
         <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
         
-        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
-          <span class="k">try</span><span class="p">:</span>
-            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-          <span class="k">except</span><span class="p">:</span>
-            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+          <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">True</span>
+          <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+            <span class="k">except</span><span class="p">:</span>
+              <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tle</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
-              <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tle</span><span class="p">:</span>
+              <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+                <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">False</span>
 
       <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
 
@@ -8350,7 +8352,7 @@ Tegridy Code 2020</p></div>
       <span class="n">num_lyric_events</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="n">num_other_events</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">True</span>
+      <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">None</span>
 
       <span class="n">analysis</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -8360,15 +8362,17 @@ Tegridy Code 2020</p></div>
       <span class="k">if</span> <span class="n">return_text_and_lyric_events</span><span class="p">:</span>
         <span class="n">text_and_lyric_events</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_single_track_score</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;text_event&#39;</span><span class="p">,</span> <span class="s1">&#39;lyric&#39;</span><span class="p">]]</span>
         
-        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
-          <span class="k">try</span><span class="p">:</span>
-            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-          <span class="k">except</span><span class="p">:</span>
-            <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+          <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">True</span>
+          <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">text_and_lyric_events</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+            <span class="k">except</span><span class="p">:</span>
+              <span class="n">tle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tle</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
-              <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tle</span><span class="p">:</span>
+              <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+                <span class="n">text_and_lyric_events_latin</span> <span class="o">=</span> <span class="kc">False</span>
 
       <span class="k">if</span> <span class="p">(</span><span class="n">return_chordified_enhanced_score</span> <span class="ow">or</span> <span class="n">return_score_analysis</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">patches_to_analyze</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">score_patches</span><span class="p">):</span>
 
