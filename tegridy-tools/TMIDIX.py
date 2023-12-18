@@ -4145,7 +4145,7 @@ def advanced_score_processor(raw_score,
       num_lyric_events = 0
       num_other_events = 0
       text_and_lyric_events = []
-      text_and_lyric_events_latin = True
+      text_and_lyric_events_latin = None
 
       analysis = {}
 
@@ -4155,15 +4155,17 @@ def advanced_score_processor(raw_score,
       if return_text_and_lyric_events:
         text_and_lyric_events = [e for e in enhanced_single_track_score if e[0] in ['text_event', 'lyric']]
         
-        for e in text_and_lyric_events:
-          try:
-            tle = str(e[2].decode())
-          except:
-            tle = str(e[2])
+        if text_and_lyric_events:
+          text_and_lyric_events_latin = True
+          for e in text_and_lyric_events:
+            try:
+              tle = str(e[2].decode())
+            except:
+              tle = str(e[2])
 
-          for c in tle:
-            if not 0 <= ord(c) < 128:
-              text_and_lyric_events_latin = False
+            for c in tle:
+              if not 0 <= ord(c) < 128:
+                text_and_lyric_events_latin = False
 
       if (return_chordified_enhanced_score or return_score_analysis) and any(elem in patches_to_analyze for elem in score_patches):
 
