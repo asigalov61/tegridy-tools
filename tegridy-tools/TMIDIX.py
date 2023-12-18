@@ -4086,7 +4086,8 @@ def advanced_score_processor(raw_score,
         num_ticks = raw_score[0]
         while num_tracks < len(raw_score):
             for event in raw_score[num_tracks]:
-              basic_single_track_score.append(event)
+              ev = copy.deepcopy(event)
+              basic_single_track_score.append(ev)
             num_tracks += 1
 
       basic_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
@@ -4169,7 +4170,7 @@ def advanced_score_processor(raw_score,
 
       if (return_chordified_enhanced_score or return_score_analysis) and any(elem in patches_to_analyze for elem in score_patches):
 
-        cescore = chordify_score(enhanced_single_track_score)
+        cescore = chordify_score([num_ticks, enhanced_single_track_score])
 
         if return_score_analysis:
 
@@ -4265,7 +4266,7 @@ def advanced_score_processor(raw_score,
         requested_data.append([[k, v] for k, v in analysis.items()])
 
       if return_enhanced_score and enhanced_single_track_score:
-        requested_data.append(enhanced_single_track_score)
+        requested_data.append([num_ticks, enhanced_single_track_score])
 
       if return_enhanced_score_notes and score_notes:
         requested_data.append(score_notes)
