@@ -4007,7 +4007,7 @@ def advanced_score_processor(raw_score,
     if event[0] not in ['note', 'patch_change']:
       enhanced_single_track_score.append(event)
 
-  enhanced_single_track_score.sort(key=lambda x: x[6] if x[0] == 'note' else 128)
+  enhanced_single_track_score.sort(key=lambda x: x[6] if x[0] == 'note' else -1)
   enhanced_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
   enhanced_single_track_score.sort(key=lambda x: x[1])
 
@@ -4034,9 +4034,11 @@ def advanced_score_processor(raw_score,
 
   if (return_chordified_enhanced_score or return_score_analysis) and any(elem in patches_to_analyze for elem in score_patches):
 
-    cscore = chordify_score(score_notes)
+    cescore = chordify_score(enhanced_single_track_score)
 
     if return_score_analysis:
+
+      cscore = chordify_score(score_notes)
       
       score_pitches = [sn[4] for sn in score_notes]
       
@@ -4125,22 +4127,22 @@ def advanced_score_processor(raw_score,
   if return_score_analysis and analysis:
     requested_data.append([[k, v] for k, v in analysis.items()])
 
-  if return_enhanced_score:
+  if return_enhanced_score and enhanced_single_track_score:
     requested_data.append(enhanced_single_track_score)
 
-  if return_enhanced_score_notes:
+  if return_enhanced_score_notes and score_notes:
     requested_data.append(score_notes)
 
-  if return_enhanced_monophonic_melody:
+  if return_enhanced_monophonic_melody and fixed_melody:
     requested_data.append(fixed_melody)
     
-  if return_chordified_enhanced_score and cscore:
-    requested_data.append(cscore)
+  if return_chordified_enhanced_score and cescore:
+    requested_data.append(cescore)
 
   if return_chordified_enhanced_score_with_lyrics and chordified_enhanced_score_with_lyrics:
     requested_data.append(chordified_enhanced_score_with_lyrics)
 
-  if return_score_tones_chords:
+  if return_score_tones_chords and tones_chords:
     requested_data.append(tones_chords)
 
   return requested_data
