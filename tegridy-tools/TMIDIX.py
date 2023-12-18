@@ -3645,30 +3645,135 @@ def adjust_score_velocities(score, max_velocity):
     for i in range(len(score)):
         score[i][5] = int(score[i][5] * factor)
 
-def chordify_score(score):
+def chordify_score(score,
+                  return_choridfied_score=True,
+                  return_detected_score_information=False
+                  ):
 
-    chords = []
-    cho = []
+    if score:
+    
+      num_tracks = 1
+      single_track_score = []
+      score_num_ticks = 0
 
-    pt = score[0][1]
+      if type(score[0]) == int and len(score) > 1:
 
-    for e in score:
+        score_type = 'MIDI_PY'
+        score_num_ticks = score[0]
 
-      if e[1] == pt:
-        cho.append(e)
+        while num_tracks < len(score):
+            for event in score[num_tracks]:
+              single_track_score.append(event)
+            num_tracks += 1
+      
       else:
-        if len(cho) > 0:
-          chords.append(cho)
+        score_type = 'CUSTOM'
+        single_track_score = score
 
-        cho = []
-        cho.append(e)
+      if single_track_score and single_track_score[0]:
+        
+        try:
 
-      pt = e[1]
+          if type(single_track_score[0][0]) == str or single_track_score[0][0] == 'note':
+            single_track_score.sort(key = lambda x: x[1])
+            score_timings = [s[1] for s in single_track_score]
+          else:
+            score_timings = [s[0] for s in single_track_score]
 
-    if len(cho) > 0:
-      chords.append(cho)
+          is_score_time_absolute = lambda sct: all(x <= y for x, y in zip(sct, sct[1:]))
 
-    return chords
+          score_timings_type = ''
+
+          if is_score_time_absolute(score_timings):
+            score_timings_type = 'ABS'
+
+            chords = []
+            cho = []
+
+            if score_type == 'MIDI_PY':
+              pe = single_track_score[0]
+            else:
+              pe = single_track_score[0]
+
+            for e in single_track_score:
+              
+              if score_type == 'MIDI_PY':
+                time = e[1]
+                ptime = pe[1]
+              else:
+                time = e[0]
+                ptime = pe[0]
+
+              if time == ptime:
+                cho.append(e)
+              
+              else:
+                if len(cho) > 0:
+                  chords.append(cho)
+                cho = []
+                cho.append(e)
+
+              pe = e
+
+            if len(cho) > 0:
+              chords.append(cho)
+
+          else:
+            score_timings_type = 'REL'
+            
+            chords = []
+            cho = []
+
+            for e in single_track_score:
+              
+              if score_type == 'MIDI_PY':
+                time = e[1]
+              else:
+                time = e[0]
+
+              if time == 0:
+                cho.append(e)
+              
+              else:
+                if len(cho) > 0:
+                  chords.append(cho)
+                cho = []
+                cho.append(e)
+
+            if len(cho) > 0:
+              chords.append(cho)
+
+          requested_data = []
+
+          if return_detected_score_information:
+            
+            detected_score_information = []
+
+            detected_score_information.append(['Score type', score_type])
+            detected_score_information.append(['Score timings type', score_timings_type])
+            detected_score_information.append(['Score tpq', score_num_ticks])
+            detected_score_information.append(['Score number of tracks', num_tracks])
+            
+            requested_data.append(detected_score_information)
+
+          if return_choridfied_score and return_detected_score_information:
+            requested_data.append(chords)
+
+          if return_choridfied_score and not return_detected_score_information:
+            requested_data.extend(chords)
+
+          return requested_data
+
+        except Exception as e:
+          print('Error!')
+          print('Check score for consistency and compatibility!')
+          print('Exception detected:', e)
+
+      else:
+        return None
+
+    else:
+      return None
 
 def fix_monophonic_score_durations(monophonic_score):
   
@@ -3955,198 +4060,233 @@ def advanced_score_processor(raw_score,
                               return_enhanced_monophonic_melody=False, 
                               return_chordified_enhanced_score=False,
                               return_chordified_enhanced_score_with_lyrics=False,
-                              return_score_tones_chords=False
+                              return_score_tones_chords=False,
+                              return_text_and_lyric_events=False
                             ):
 
   '''TMIDIX Advanced Score Processor'''
-  
-  # Initial processing
 
-  raw_score_copy = copy.deepcopy(raw_score)
+  # Score data types detection
 
-  basic_single_track_score = []
-  num_tracks = 1
+  if raw_score and type(raw_score) == list:
 
-  while num_tracks < len(raw_score_copy):
-      for event in raw_score_copy[num_tracks]:
-        basic_single_track_score.append(event)
-      num_tracks += 1
+      num_ticks = 0
+      num_tracks = 1
 
-  basic_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
-  basic_single_track_score.sort(key=lambda x: x[1])
+      basic_single_track_score = []
 
-  enhanced_single_track_score = []
-  patches = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  all_score_patches = []
-  num_patch_changes = 0
+      if type(raw_score[0]) != int:
+        if len(raw_score[0]) < 5 and type(raw_score[0][0]) != str:
+          return ['Check score for errors and compatibility!']
 
-  for event in basic_single_track_score:
-    if event[0] == 'patch_change':
-          patches[event[2]] = event[3]
-          enhanced_single_track_score.append(event)
-          num_patch_changes += 1
-
-    if event[0] == 'note':
-        if event[3] != 9:
-          event.extend([patches[event[3]]])
-          all_score_patches.extend([patches[event[3]]])
         else:
-          event.extend([128])
-          all_score_patches.extend([128])
+          basic_single_track_score = copy.deepcopy(raw_score)
+      
+      else:
+        num_ticks = raw_score[0]
+        while num_tracks < len(raw_score):
+            for event in raw_score[num_tracks]:
+              basic_single_track_score.append(event)
+            num_tracks += 1
 
-        if enhanced_single_track_score:
-            if (event[1] == enhanced_single_track_score[-1][1]):
-                if ([event[3], event[4]] != enhanced_single_track_score[-1][3:5]):
+      basic_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
+      basic_single_track_score.sort(key=lambda x: x[1])
+
+      enhanced_single_track_score = []
+      patches = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      all_score_patches = []
+      num_patch_changes = 0
+
+      for event in basic_single_track_score:
+        if event[0] == 'patch_change':
+              patches[event[2]] = event[3]
+              enhanced_single_track_score.append(event)
+              num_patch_changes += 1
+
+        if event[0] == 'note':
+            if event[3] != 9:
+              event.extend([patches[event[3]]])
+              all_score_patches.extend([patches[event[3]]])
+            else:
+              event.extend([128])
+              all_score_patches.extend([128])
+
+            if enhanced_single_track_score:
+                if (event[1] == enhanced_single_track_score[-1][1]):
+                    if ([event[3], event[4]] != enhanced_single_track_score[-1][3:5]):
+                        enhanced_single_track_score.append(event)
+                else:
                     enhanced_single_track_score.append(event)
+
             else:
                 enhanced_single_track_score.append(event)
 
-        else:
-            enhanced_single_track_score.append(event)
+        if event[0] not in ['note', 'patch_change']:
+          enhanced_single_track_score.append(event)
 
-    if event[0] not in ['note', 'patch_change']:
-      enhanced_single_track_score.append(event)
+      enhanced_single_track_score.sort(key=lambda x: x[6] if x[0] == 'note' else -1)
+      enhanced_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
+      enhanced_single_track_score.sort(key=lambda x: x[1])
 
-  enhanced_single_track_score.sort(key=lambda x: x[6] if x[0] == 'note' else -1)
-  enhanced_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
-  enhanced_single_track_score.sort(key=lambda x: x[1])
+      # Analysis and chordification
 
-  # Analysis and chordification
+      cscore = []
+      cescore = []
+      chords_tones = []
+      tones_chords = []
+      all_tones = []
+      all_chords_good = True
+      bad_chords = []
+      bad_chords_count = 0
+      score_notes = []
+      score_pitches = []
+      score_patches = []
+      num_text_events = 0
+      num_lyric_events = 0
+      num_other_events = 0
+      text_and_lyric_events = []
+      text_and_lyric_events_latin = True
 
-  cscore = []
-  chords_tones = []
-  tones_chords = []
-  all_tones = []
-  all_chords_good = True
-  bad_chords = []
-  bad_chords_count = 0
-  score_notes = []
-  score_pitches = []
-  score_patches = []
-  num_text_events = 0
-  num_lyric_events = 0
-  num_other_events = 0
+      analysis = {}
 
-  analysis = {}
+      score_notes = [s for s in enhanced_single_track_score if s[0] == 'note' and s[6] in patches_to_analyze]
+      score_patches = [sn[6] for sn in score_notes]
 
-  score_notes = [s for s in enhanced_single_track_score if s[0] == 'note' and s[6] in patches_to_analyze]
-  score_patches = [sn[6] for sn in score_notes]
+      if return_text_and_lyric_events:
+        text_and_lyric_events = [e for e in enhanced_single_track_score if e[0] in ['text_event', 'lyric']]
+        
+        for e in text_and_lyric_events:
+          try:
+            tle = str(e[2].decode())
+          except:
+            tle = str(e[2])
 
-  if (return_chordified_enhanced_score or return_score_analysis) and any(elem in patches_to_analyze for elem in score_patches):
+          for c in tle:
+            if not 0 <= ord(c) < 128:
+              text_and_lyric_events_latin = False
 
-    cescore = chordify_score(enhanced_single_track_score)
+      if (return_chordified_enhanced_score or return_score_analysis) and any(elem in patches_to_analyze for elem in score_patches):
 
-    if return_score_analysis:
+        cescore = chordify_score(enhanced_single_track_score)
 
-      cscore = chordify_score(score_notes)
-      
-      score_pitches = [sn[4] for sn in score_notes]
-      
-      text_events = [e for e in enhanced_single_track_score if e[0] == 'text_event']
-      num_text_events = len(text_events)
+        if return_score_analysis:
 
-      lyric_events = [e for e in enhanced_single_track_score if e[0] == 'lyric']
-      num_lyric_events = len(lyric_events)
+          cscore = chordify_score(score_notes)
+          
+          score_pitches = [sn[4] for sn in score_notes]
+          
+          text_events = [e for e in enhanced_single_track_score if e[0] == 'text_event']
+          num_text_events = len(text_events)
 
-      other_events = [e for e in enhanced_single_track_score if e[0] not in ['note', 'patch_change', 'text_event', 'lyric']]
-      num_other_events = len(other_events)
-      
-      for c in cscore:
-        tones = sorted(set([t[4] % 12 for t in c if t[3] != 9]))
+          lyric_events = [e for e in enhanced_single_track_score if e[0] == 'lyric']
+          num_lyric_events = len(lyric_events)
 
-        if tones:
-          chords_tones.append(tones)
-          all_tones.extend(tones)
+          other_events = [e for e in enhanced_single_track_score if e[0] not in ['note', 'patch_change', 'text_event', 'lyric']]
+          num_other_events = len(other_events)
+          
+          for c in cscore:
+            tones = sorted(set([t[4] % 12 for t in c if t[3] != 9]))
 
-          if tones not in ALL_CHORDS:
-            all_chords_good = False
-            bad_chords.append(tones)
-            bad_chords_count += 1
+            if tones:
+              chords_tones.append(tones)
+              all_tones.extend(tones)
 
-      analysis['Number of tracks'] = num_tracks
-      analysis['Number of all events'] = len(enhanced_single_track_score)
-      analysis['Number of patch change events'] = num_patch_changes
-      analysis['Number of text events'] = num_text_events
-      analysis['Number of lyric events'] = num_lyric_events
-      analysis['Number of other events'] = num_other_events
-      analysis['Number of score notes'] = len(score_notes)
-      analysis['Number of score chords'] = len(cscore)
-      analysis['Score patches'] = sorted(set(score_patches))
-      analysis['Score pitches'] = sorted(set(score_pitches))
-      analysis['Score tones'] = sorted(set(all_tones))
-      if chords_tones:
-        analysis['Shortest chord'] = sorted(min(chords_tones, key=len))
-        analysis['Longest chord'] = sorted(max(chords_tones, key=len))
-      analysis['All chords good'] = all_chords_good
-      analysis['Number of bad chords'] = bad_chords_count
-      analysis['Bad chords'] = sorted([list(c) for c in set(tuple(bc) for bc in bad_chords)])
+              if tones not in ALL_CHORDS:
+                all_chords_good = False
+                bad_chords.append(tones)
+                bad_chords_count += 1
+          
+          analysis['Number of ticks per quarter note'] = num_ticks
+          analysis['Number of tracks'] = num_tracks
+          analysis['Number of all events'] = len(enhanced_single_track_score)
+          analysis['Number of patch change events'] = num_patch_changes
+          analysis['Number of text events'] = num_text_events
+          analysis['Number of lyric events'] = num_lyric_events
+          analysis['All text and lyric events Latin'] = text_and_lyric_events_latin
+          analysis['Number of other events'] = num_other_events
+          analysis['Number of score notes'] = len(score_notes)
+          analysis['Number of score chords'] = len(cscore)
+          analysis['Score patches'] = sorted(set(score_patches))
+          analysis['Score pitches'] = sorted(set(score_pitches))
+          analysis['Score tones'] = sorted(set(all_tones))
+          if chords_tones:
+            analysis['Shortest chord'] = sorted(min(chords_tones, key=len))
+            analysis['Longest chord'] = sorted(max(chords_tones, key=len))
+          analysis['All chords good'] = all_chords_good
+          analysis['Number of bad chords'] = bad_chords_count
+          analysis['Bad chords'] = sorted([list(c) for c in set(tuple(bc) for bc in bad_chords)])
 
-  else:
-    analysis['Error'] = 'Provided score does not have specified patches to analyse'
-    analysis['Provided patches to analyse'] = sorted(patches_to_analyze)
-    analysis['Patches present in the score'] = sorted(set(all_score_patches))
-
-  if return_enhanced_monophonic_melody:
-
-    score_notes_copy = copy.deepcopy(score_notes)
-    chordified_score_notes = chordify_score(score_notes_copy)
-
-    melody = [c[0] for c in chordified_score_notes]
-
-    fixed_melody = []
-
-    for i in range(len(melody)-1):
-      note = melody[i]
-      nmt = melody[i+1][1]
-
-      if note[1]+note[2] >= nmt:
-        note_dur = nmt-note[1]-1
       else:
-        note_dur = note[2]
+        analysis['Error'] = 'Provided score does not have specified patches to analyse'
+        analysis['Provided patches to analyse'] = sorted(patches_to_analyze)
+        analysis['Patches present in the score'] = sorted(set(all_score_patches))
 
-      melody[i][2] = note_dur
+      if return_enhanced_monophonic_melody:
 
-      fixed_melody.append(melody[i])
-    fixed_melody.append(melody[-1])
+        score_notes_copy = copy.deepcopy(score_notes)
+        chordified_score_notes = chordify_score(score_notes_copy)
 
-  if return_score_tones_chords:
-    cscore = chordify_score(score_notes)
-    for c in cscore:
-      tones_chord = sorted(set([t[4] % 12 for t in c if t[3] != 9]))
-      if tones_chord:
-        tones_chords.append(tones_chord)
+        melody = [c[0] for c in chordified_score_notes]
 
-  if return_chordified_enhanced_score_with_lyrics:
-    score_with_lyrics = [e for e in enhanced_single_track_score if e[0] in ['note', 'text_event', 'lyric']]
-    chordified_enhanced_score_with_lyrics = chordify_score(score_with_lyrics)
+        fixed_melody = []
+
+        for i in range(len(melody)-1):
+          note = melody[i]
+          nmt = melody[i+1][1]
+
+          if note[1]+note[2] >= nmt:
+            note_dur = nmt-note[1]-1
+          else:
+            note_dur = note[2]
+
+          melody[i][2] = note_dur
+
+          fixed_melody.append(melody[i])
+        fixed_melody.append(melody[-1])
+
+      if return_score_tones_chords:
+        cscore = chordify_score(score_notes)
+        for c in cscore:
+          tones_chord = sorted(set([t[4] % 12 for t in c if t[3] != 9]))
+          if tones_chord:
+            tones_chords.append(tones_chord)
+
+      if return_chordified_enhanced_score_with_lyrics:
+        score_with_lyrics = [e for e in enhanced_single_track_score if e[0] in ['note', 'text_event', 'lyric']]
+        chordified_enhanced_score_with_lyrics = chordify_score(score_with_lyrics)
+      
+      # Returned data
+
+      requested_data = []
+
+      if return_score_analysis and analysis:
+        requested_data.append([[k, v] for k, v in analysis.items()])
+
+      if return_enhanced_score and enhanced_single_track_score:
+        requested_data.append(enhanced_single_track_score)
+
+      if return_enhanced_score_notes and score_notes:
+        requested_data.append(score_notes)
+
+      if return_enhanced_monophonic_melody and fixed_melody:
+        requested_data.append(fixed_melody)
+        
+      if return_chordified_enhanced_score and cescore:
+        requested_data.append(cescore)
+
+      if return_chordified_enhanced_score_with_lyrics and chordified_enhanced_score_with_lyrics:
+        requested_data.append(chordified_enhanced_score_with_lyrics)
+
+      if return_score_tones_chords and tones_chords:
+        requested_data.append(tones_chords)
+
+      if return_text_and_lyric_events and text_and_lyric_events:
+        requested_data.append(text_and_lyric_events)
+
+      return requested_data
   
-  # Returned data
-
-  requested_data = []
-
-  if return_score_analysis and analysis:
-    requested_data.append([[k, v] for k, v in analysis.items()])
-
-  if return_enhanced_score and enhanced_single_track_score:
-    requested_data.append(enhanced_single_track_score)
-
-  if return_enhanced_score_notes and score_notes:
-    requested_data.append(score_notes)
-
-  if return_enhanced_monophonic_melody and fixed_melody:
-    requested_data.append(fixed_melody)
-    
-  if return_chordified_enhanced_score and cescore:
-    requested_data.append(cescore)
-
-  if return_chordified_enhanced_score_with_lyrics and chordified_enhanced_score_with_lyrics:
-    requested_data.append(chordified_enhanced_score_with_lyrics)
-
-  if return_score_tones_chords and tones_chords:
-    requested_data.append(tones_chords)
-
-  return requested_data
-
+  else:
+    return ['Check score for errors and compatibility!']
 ###################################################################################
 
 # This is the end of the TMIDI X Python module
