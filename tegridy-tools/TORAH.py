@@ -5989,7 +5989,7 @@ TORAH_SEFERS = [
 
 def torah_weekly_portion_getter(torah_portion_name='Bereshit'):
   
-  twpn = [t[0] for t in TORAH_WEEKLY_PORTIONS]
+  twpn = [t[0].title() for t in TORAH_WEEKLY_PORTIONS]
 
   if torah_portion_name.title() in twpn:
     twpi = twpn.index(torah_portion_name.title())
@@ -6027,7 +6027,7 @@ def torah_weekly_portion_getter(torah_portion_name='Bereshit'):
 
 def torah_decalogue_portion_getter(torah_portion_name='Shemot Oshrth Hdbrim'):
   
-  twpn = [t[0] for t in TORAH_DECALOGUE_PORTIONS]
+  twpn = [t[0].title() for t in TORAH_DECALOGUE_PORTIONS]
 
   if torah_portion_name.title() in twpn:
     twpi = twpn.index(torah_portion_name.title())
