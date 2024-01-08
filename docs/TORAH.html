@@ -1072,6 +1072,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
+    <li class="mono"><a href="#TORAH.torah_books_chapter_getter">torah_books_chapter_getter</a></li>
     <li class="mono"><a href="#TORAH.torah_decalogue_portion_getter">torah_decalogue_portion_getter</a></li>
     <li class="mono"><a href="#TORAH.torah_weekly_portion_getter">torah_weekly_portion_getter</a></li>
   </ul>
@@ -7203,6 +7204,52 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="kc">None</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">torah_books_chapter_getter</span><span class="p">(</span><span class="n">torah_book_name</span><span class="o">=</span><span class="s1">&#39;Genesis&#39;</span><span class="p">,</span> <span class="n">torah_book_chapter_number</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">torah_book_name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="ow">in</span> <span class="n">TORAH_BOOKS</span><span class="p">:</span>
+    <span class="n">tbni</span> <span class="o">=</span> <span class="n">TORAH_BOOKS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">torah_book_name</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">tbni</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+  <span class="k">if</span> <span class="n">tbni</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+
+    <span class="n">tbct</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">TORAH_TEXT_CLV</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">tbni</span><span class="o">+</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">torah_book_chapter_number</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">tbct</span><span class="p">:</span>
+
+      <span class="n">tbc</span> <span class="o">=</span> <span class="s1">&#39;The Law (Torah)</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="n">tbc</span> <span class="o">+=</span> <span class="s1">&#39;Book of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">TORAH_BOOKS</span><span class="p">[</span><span class="n">tbni</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">TORAH_SEFERS</span><span class="p">[</span><span class="n">tbni</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="n">tbc</span> <span class="o">+=</span> <span class="s1">&#39;Chapter &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">torah_book_chapter_number</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+      <span class="n">tbc</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tbct</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">TORAH_BOOKS</span><span class="p">[</span><span class="n">tbni</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="n">TORAH_SEFERS</span><span class="p">[</span><span class="n">tbni</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;Chapter&#39;</span><span class="p">,</span> <span class="n">torah_book_chapter_number</span><span class="p">],</span> <span class="n">tbc</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Torah book chapter number was not found!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+      <span class="n">chaps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">TORAH_TEXT_CLV</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">tbni</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+      
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Valid&#39;</span><span class="p">,</span> <span class="n">TORAH_BOOKS</span><span class="p">[</span><span class="n">tbni</span><span class="p">],</span> <span class="s1">&#39;chapter numbers are:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">chaps</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">chaps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="kc">None</span>
+
+  <span class="k">else</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Torah book name was not found!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Valid Torah books names are:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">TORAH_BOOKS</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># This is the end of TORAH Python Module</span>
 <span class="c1">#</span>
@@ -7257,6 +7304,68 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
+      
+  <div class="item">
+    <div class="name def" id="TORAH.torah_books_chapter_getter">
+    <p>def <span class="ident">torah_books_chapter_getter</span>(</p><p>torah_book_name=&#39;Genesis&#39;, torah_book_chapter_number=1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TORAH.torah_books_chapter_getter', this);">Show source &equiv;</a></p>
+  <div id="source-TORAH.torah_books_chapter_getter" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">torah_books_chapter_getter</span><span class="p">(</span><span class="n">torah_book_name</span><span class="o">=</span><span class="s1">&#39;Genesis&#39;</span><span class="p">,</span> <span class="n">torah_book_chapter_number</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">torah_book_name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="ow">in</span> <span class="n">TORAH_BOOKS</span><span class="p">:</span>
+    <span class="n">tbni</span> <span class="o">=</span> <span class="n">TORAH_BOOKS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">torah_book_name</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">tbni</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+  <span class="k">if</span> <span class="n">tbni</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+
+    <span class="n">tbct</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">TORAH_TEXT_CLV</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">tbni</span><span class="o">+</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">torah_book_chapter_number</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">tbct</span><span class="p">:</span>
+
+      <span class="n">tbc</span> <span class="o">=</span> <span class="s1">&#39;The Law (Torah)</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="n">tbc</span> <span class="o">+=</span> <span class="s1">&#39;Book of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">TORAH_BOOKS</span><span class="p">[</span><span class="n">tbni</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">TORAH_SEFERS</span><span class="p">[</span><span class="n">tbni</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span>
+      <span class="n">tbc</span> <span class="o">+=</span> <span class="s1">&#39;Chapter &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">torah_book_chapter_number</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+      <span class="n">tbc</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tbct</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">TORAH_BOOKS</span><span class="p">[</span><span class="n">tbni</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="n">TORAH_SEFERS</span><span class="p">[</span><span class="n">tbni</span><span class="p">]],</span> <span class="p">[</span><span class="s1">&#39;Chapter&#39;</span><span class="p">,</span> <span class="n">torah_book_chapter_number</span><span class="p">],</span> <span class="n">tbc</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Torah book chapter number was not found!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+      <span class="n">chaps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">TORAH_TEXT_CLV</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">tbni</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+      
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Valid&#39;</span><span class="p">,</span> <span class="n">TORAH_BOOKS</span><span class="p">[</span><span class="n">tbni</span><span class="p">],</span> <span class="s1">&#39;chapter numbers are:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">chaps</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">chaps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="kc">None</span>
+
+  <span class="k">else</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Torah book name was not found!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Valid Torah books names are:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">TORAH_BOOKS</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
       
   <div class="item">
     <div class="name def" id="TORAH.torah_decalogue_portion_getter">
