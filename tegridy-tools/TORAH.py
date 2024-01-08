@@ -6062,6 +6062,52 @@ def torah_decalogue_portion_getter(torah_portion_name='Shemot Oshrth Hdbrim'):
     return None
 
 ###################################################################################
+
+def torah_books_chapter_getter(torah_book_name='Genesis', torah_book_chapter_number=1):
+
+  if torah_book_name.title() in TORAH_BOOKS:
+    tbni = TORAH_BOOKS.index(torah_book_name.title())
+
+  else:
+    tbni = -1
+
+  if tbni != -1:
+
+    tbct = [t[3]+'\n' for t in TORAH_TEXT_CLV if int(t[0]) == tbni+1 and int(t[1]) == torah_book_chapter_number]
+
+    if tbct:
+
+      tbc = 'The Law (Torah)\n'
+      tbc += 'Book of ' + str(TORAH_BOOKS[tbni]) + ' (' + str(TORAH_SEFERS[tbni]) + ')\n'
+      tbc += 'Chapter ' + str(torah_book_chapter_number) + '\n\n'
+
+      tbc += ''.join(tbct)
+
+      return [TORAH_BOOKS[tbni]] + [TORAH_SEFERS[tbni]], ['Chapter', torah_book_chapter_number], tbc
+
+    else:
+
+      print('Torah book chapter number was not found!\n')
+
+      chaps = sorted(set([int(t[1]) for t in TORAH_TEXT_CLV if int(t[0]) == tbni+1]))
+      
+      print('Valid', TORAH_BOOKS[tbni], 'chapter numbers are:', str(chaps[0]), '--', str(chaps[-1]), '\n')
+
+      return None
+
+  else:
+
+    print('Torah book name was not found!\n')
+    print('Valid Torah books names are:\n')
+
+    for n in TORAH_BOOKS:
+      print(str(n))
+    
+    print('')
+
+    return None
+
+###################################################################################
 #
 # This is the end of TORAH Python Module
 #
