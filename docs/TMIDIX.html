@@ -1116,11 +1116,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.bad_chord">bad_chord</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_int">bits_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_tones_chord">bits_to_tones_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.check_and_fix_chord">check_and_fix_chord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
+    <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
     <li class="mono"><a href="#TMIDIX.generate_colors">generate_colors</a></li>
+    <li class="mono"><a href="#TMIDIX.generate_tones_chords_progression">generate_tones_chords_progression</a></li>
     <li class="mono"><a href="#TMIDIX.grep">grep</a></li>
     <li class="mono"><a href="#TMIDIX.group_sublists_by_length">group_sublists_by_length</a></li>
     <li class="mono"><a href="#TMIDIX.hsv_to_rgb">hsv_to_rgb</a></li>
@@ -1136,6 +1139,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.pitches_to_tones_chord">pitches_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.play_score">play_score</a></li>
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
+    <li class="mono"><a href="#TMIDIX.replace_bad_tones_chord">replace_bad_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.score2midi">score2midi</a></li>
     <li class="mono"><a href="#TMIDIX.score2opus">score2opus</a></li>
     <li class="mono"><a href="#TMIDIX.score2stats">score2stats</a></li>
@@ -5504,6 +5508,136 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Check score for errors and compatibility!&#39;</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">replace_bad_tones_chord</span><span class="p">(</span><span class="n">bad_tones_chord</span><span class="p">):</span>
+  <span class="n">bad_chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+  <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bad_tones_chord</span><span class="p">:</span>
+    <span class="n">bad_chord_p</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+  <span class="n">match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">good_chords</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS</span><span class="p">:</span>
+    <span class="n">good_chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+      <span class="n">good_chord_p</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">good_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">)</span>
+    <span class="n">match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">,</span> <span class="n">bad_chord_p</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">))</span>
+
+  <span class="n">best_good_chord</span> <span class="o">=</span> <span class="n">good_chords</span><span class="p">[</span><span class="n">match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">))]</span>
+
+  <span class="n">replaced_chord</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_good_chord</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">best_good_chord</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+     <span class="n">replaced_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">replaced_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">check_and_fix_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> 
+                        <span class="n">channel_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                        <span class="n">pitch_index</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">chord_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">chord_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">chord_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">pitch_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord_notes</span><span class="p">]</span>
+  <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord_pitches</span><span class="p">]))</span>
+  <span class="n">good_tones_chord</span> <span class="o">=</span> <span class="n">replace_bad_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">bad_tones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">good_tones_chord</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="n">bad_tones</span><span class="p">:</span>
+
+    <span class="n">fixed_chord</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chord_notes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">pitch_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bad_tones</span><span class="p">:</span>
+        <span class="n">fixed_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">fixed_chord</span> <span class="o">+=</span> <span class="n">chord_drums</span>
+
+    <span class="k">return</span> <span class="n">fixed_chord</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">chord</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_similar_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
+                             <span class="n">max_match_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                             <span class="n">randomize_chords_matches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                             <span class="n">custom_chords_list</span><span class="o">=</span><span class="p">[]):</span>
+  <span class="n">chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+  <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+    <span class="n">chord_p</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+  <span class="n">match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">good_chords</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">custom_chords_list</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">custom_chords_list</span><span class="p">)])</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ALL_CHORDS</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">randomize_chords_matches</span><span class="p">:</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">CHORDS</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+    <span class="n">good_chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+      <span class="n">good_chord_p</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">good_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">)</span>
+    <span class="n">match_ratio</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">,</span> <span class="n">chord_p</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">match_ratio</span> <span class="o">&lt;</span> <span class="n">max_match_threshold</span><span class="p">:</span>
+      <span class="n">match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match_ratio</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="n">best_good_chord</span> <span class="o">=</span> <span class="n">good_chords</span><span class="p">[</span><span class="n">match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">))]</span>
+
+  <span class="n">similar_chord</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_good_chord</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">best_good_chord</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+     <span class="n">similar_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">similar_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">generate_tones_chords_progression</span><span class="p">(</span><span class="n">number_of_chords_to_generate</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+                                      <span class="n">start_tones_chord</span><span class="o">=</span><span class="p">[],</span> 
+                                      <span class="n">custom_chords_list</span><span class="o">=</span><span class="p">[]):</span>
+
+  <span class="k">if</span> <span class="n">start_tones_chord</span><span class="p">:</span>
+    <span class="n">start_chord</span> <span class="o">=</span> <span class="n">start_tones_chord</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">start_chord</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ALL_CHORDS</span><span class="p">)</span>
+
+  <span class="n">chord</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">chords_progression</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_chord</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_chords_to_generate</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chord</span><span class="p">:</span>
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">start_chord</span>
+
+    <span class="k">if</span> <span class="n">custom_chords_list</span><span class="p">:</span>
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">find_similar_tones_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> <span class="n">randomize_chords_matches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">custom_chords_list</span><span class="o">=</span><span class="n">custom_chords_list</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">find_similar_tones_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> <span class="n">randomize_chords_matches</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">chords_progression</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">chords_progression</span>
+
 <span class="c1">###################################################################################</span>
 
 <span class="c1"># This is the end of the TMIDI X Python module</span>
@@ -8712,6 +8846,50 @@ Tegridy Code 2020</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.check_and_fix_chord">
+    <p>def <span class="ident">check_and_fix_chord</span>(</p><p>chord, channel_index=3, pitch_index=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.check_and_fix_chord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.check_and_fix_chord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_and_fix_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> 
+                        <span class="n">channel_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                        <span class="n">pitch_index</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">chord_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">chord_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">chord_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">pitch_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord_notes</span><span class="p">]</span>
+  <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chord_pitches</span><span class="p">]))</span>
+  <span class="n">good_tones_chord</span> <span class="o">=</span> <span class="n">replace_bad_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">bad_tones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">good_tones_chord</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="n">bad_tones</span><span class="p">:</span>
+
+    <span class="n">fixed_chord</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chord_notes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">pitch_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bad_tones</span><span class="p">:</span>
+        <span class="n">fixed_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">fixed_chord</span> <span class="o">+=</span> <span class="n">chord_drums</span>
+
+    <span class="k">return</span> <span class="n">fixed_chord</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">chord</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.chordify_score">
     <p>def <span class="ident">chordify_score</span>(</p><p>score, return_choridfied_score=True, return_detected_score_information=False)</p>
     </div>
@@ -8931,6 +9109,64 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.find_similar_tones_chord">
+    <p>def <span class="ident">find_similar_tones_chord</span>(</p><p>tones_chord, max_match_threshold=1, randomize_chords_matches=False, custom_chords_list=[])</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_similar_tones_chord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_similar_tones_chord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_similar_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
+                             <span class="n">max_match_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                             <span class="n">randomize_chords_matches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                             <span class="n">custom_chords_list</span><span class="o">=</span><span class="p">[]):</span>
+  <span class="n">chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+  <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+    <span class="n">chord_p</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+  <span class="n">match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">good_chords</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">custom_chords_list</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">custom_chords_list</span><span class="p">)])</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ALL_CHORDS</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">randomize_chords_matches</span><span class="p">:</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">CHORDS</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+    <span class="n">good_chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+      <span class="n">good_chord_p</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">good_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">)</span>
+    <span class="n">match_ratio</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">,</span> <span class="n">chord_p</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">match_ratio</span> <span class="o">&lt;</span> <span class="n">max_match_threshold</span><span class="p">:</span>
+      <span class="n">match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match_ratio</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="n">best_good_chord</span> <span class="o">=</span> <span class="n">good_chords</span><span class="p">[</span><span class="n">match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">))]</span>
+
+  <span class="n">similar_chord</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_good_chord</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">best_good_chord</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+     <span class="n">similar_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">similar_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.fix_monophonic_score_durations">
     <p>def <span class="ident">fix_monophonic_score_durations</span>(</p><p>monophonic_score)</p>
     </div>
@@ -8981,6 +9217,50 @@ The type of track (opus or score) is autodetected.</p></div>
   <div id="source-TMIDIX.generate_colors" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate_colors</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">hsv_to_rgb</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.generate_tones_chords_progression">
+    <p>def <span class="ident">generate_tones_chords_progression</span>(</p><p>number_of_chords_to_generate=100, start_tones_chord=[], custom_chords_list=[])</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.generate_tones_chords_progression', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.generate_tones_chords_progression" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generate_tones_chords_progression</span><span class="p">(</span><span class="n">number_of_chords_to_generate</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+                                      <span class="n">start_tones_chord</span><span class="o">=</span><span class="p">[],</span> 
+                                      <span class="n">custom_chords_list</span><span class="o">=</span><span class="p">[]):</span>
+
+  <span class="k">if</span> <span class="n">start_tones_chord</span><span class="p">:</span>
+    <span class="n">start_chord</span> <span class="o">=</span> <span class="n">start_tones_chord</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">start_chord</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ALL_CHORDS</span><span class="p">)</span>
+
+  <span class="n">chord</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">chords_progression</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_chord</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_chords_to_generate</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chord</span><span class="p">:</span>
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">start_chord</span>
+
+    <span class="k">if</span> <span class="n">custom_chords_list</span><span class="p">:</span>
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">find_similar_tones_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> <span class="n">randomize_chords_matches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">custom_chords_list</span><span class="o">=</span><span class="n">custom_chords_list</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">find_similar_tones_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> <span class="n">randomize_chords_matches</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">chords_progression</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">chords_progression</span>
 </pre></div>
 
   </div>
@@ -9646,6 +9926,48 @@ see opus2midi() and score2opus().</p></div>
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.replace_bad_tones_chord">
+    <p>def <span class="ident">replace_bad_tones_chord</span>(</p><p>bad_tones_chord)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.replace_bad_tones_chord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.replace_bad_tones_chord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">replace_bad_tones_chord</span><span class="p">(</span><span class="n">bad_tones_chord</span><span class="p">):</span>
+  <span class="n">bad_chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+  <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bad_tones_chord</span><span class="p">:</span>
+    <span class="n">bad_chord_p</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+  <span class="n">match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">good_chords</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS</span><span class="p">:</span>
+    <span class="n">good_chord_p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">12</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+      <span class="n">good_chord_p</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">good_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">)</span>
+    <span class="n">match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">,</span> <span class="n">bad_chord_p</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_chord_p</span><span class="p">))</span>
+
+  <span class="n">best_good_chord</span> <span class="o">=</span> <span class="n">good_chords</span><span class="p">[</span><span class="n">match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">))]</span>
+
+  <span class="n">replaced_chord</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_good_chord</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">best_good_chord</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+     <span class="n">replaced_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">replaced_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
 </pre></div>
 
   </div>
