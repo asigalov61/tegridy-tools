@@ -4290,6 +4290,136 @@ def advanced_score_processor(raw_score,
   
   else:
     return ['Check score for errors and compatibility!']
+
+###################################################################################
+
+import random
+import copy
+
+###################################################################################
+
+def replace_bad_tones_chord(bad_tones_chord):
+  bad_chord_p = [0] * 12
+  for b in bad_tones_chord:
+    bad_chord_p[b] = 1
+
+  match_ratios = []
+  good_chords = []
+  for c in ALL_CHORDS:
+    good_chord_p = [0] * 12
+    for cc in c:
+      good_chord_p[cc] = 1
+
+    good_chords.append(good_chord_p)
+    match_ratios.append(sum(i == j for i, j in zip(good_chord_p, bad_chord_p)) / len(good_chord_p))
+
+  best_good_chord = good_chords[match_ratios.index(max(match_ratios))]
+
+  replaced_chord = []
+  for i in range(len(best_good_chord)):
+    if best_good_chord[i] == 1:
+     replaced_chord.append(i)
+
+  return [replaced_chord, max(match_ratios)]
+
+###################################################################################
+
+def check_and_fix_chord(chord, 
+                        channel_index=3, 
+                        pitch_index=4):
+
+  chord_notes = [x for x in chord if x[channel_index] != 9]
+  chord_drums = [x for x in chord if x[channel_index] == 9]
+  chord_pitches = [x[pitch_index] for x in chord_notes]
+  tones_chord = sorted(set([x % 12 for x in chord_pitches]))
+  good_tones_chord = replace_bad_tones_chord(tones_chord)[0]
+  bad_tones = list(set(tones_chord) ^ set(good_tones_chord))
+
+  if bad_tones:
+
+    fixed_chord = []
+
+    for c in chord_notes:
+      if (c[pitch_index] % 12) not in bad_tones:
+        fixed_chord.append(c)
+
+    fixed_chord += chord_drums
+
+    return fixed_chord
+
+  else:
+    return chord
+
+###################################################################################
+
+def find_similar_tones_chord(tones_chord, 
+                             max_match_threshold=1, 
+                             randomize_chords_matches=False, 
+                             custom_chords_list=[]):
+  chord_p = [0] * 12
+  for b in tones_chord:
+    chord_p[b] = 1
+
+  match_ratios = []
+  good_chords = []
+
+  if custom_chords_list:
+    CHORDS = copy.deepcopy([list(x) for x in set(tuple(t) for t in custom_chords_list)])
+  else:
+    CHORDS = copy.deepcopy(ALL_CHORDS)
+
+  if randomize_chords_matches:
+    random.shuffle(CHORDS)
+
+  for c in CHORDS:
+    good_chord_p = [0] * 12
+    for cc in c:
+      good_chord_p[cc] = 1
+
+    good_chords.append(good_chord_p)
+    match_ratio = sum(i == j for i, j in zip(good_chord_p, chord_p)) / len(good_chord_p)
+    if match_ratio < max_match_threshold:
+      match_ratios.append(match_ratio)
+    else:
+      match_ratios.append(0)
+
+  best_good_chord = good_chords[match_ratios.index(max(match_ratios))]
+
+  similar_chord = []
+  for i in range(len(best_good_chord)):
+    if best_good_chord[i] == 1:
+     similar_chord.append(i)
+
+  return [similar_chord, max(match_ratios)]
+
+###################################################################################
+
+def generate_tones_chords_progression(number_of_chords_to_generate=100, 
+                                      start_tones_chord=[], 
+                                      custom_chords_list=[]):
+
+  if start_tones_chord:
+    start_chord = start_tones_chord
+  else:
+    start_chord = random.choice(ALL_CHORDS)
+
+  chord = []
+
+  chords_progression = [start_chord]
+
+  for i in range(number_of_chords_to_generate):
+    if not chord:
+      chord = start_chord
+
+    if custom_chords_list:
+      chord = find_similar_tones_chord(chord, randomize_chords_matches=True, custom_chords_list=custom_chords_list)[0]
+    else:
+      chord = find_similar_tones_chord(chord, randomize_chords_matches=True)[0]
+    
+    chords_progression.append(chord)
+
+  return chords_progression
+
 ###################################################################################
 
 # This is the end of the TMIDI X Python module
