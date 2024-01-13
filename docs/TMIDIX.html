@@ -1113,6 +1113,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.advanced_score_processor">advanced_score_processor</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_validate_chord_pitches">advanced_validate_chord_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.analyze_score_pitches">analyze_score_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.ascii_texts_search">ascii_texts_search</a></li>
     <li class="mono"><a href="#TMIDIX.bad_chord">bad_chord</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_int">bits_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_tones_chord">bits_to_tones_chord</a></li>
@@ -5640,6 +5641,71 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">ascii_texts_search</span><span class="p">(</span><span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;text1&#39;</span><span class="p">,</span> <span class="s1">&#39;text2&#39;</span><span class="p">,</span> <span class="s1">&#39;text3&#39;</span><span class="p">],</span> 
+                       <span class="n">search_query</span> <span class="o">=</span> <span class="s1">&#39;Once upon a time...&#39;</span><span class="p">,</span> 
+                       <span class="n">deterministic_matching</span> <span class="o">=</span> <span class="kc">False</span>
+                       <span class="p">):</span>
+  
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">deterministic_matching</span><span class="p">:</span>
+      <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+
+    <span class="n">clean_texts</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+      <span class="n">text_words_list</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+      <span class="n">clean_text_words_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text_words_list</span><span class="p">:</span>
+        <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+          <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
+            <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
+        <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+          <span class="n">clean_text_words_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+      <span class="n">clean_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clean_text_words_list</span><span class="p">)</span>
+
+    <span class="n">text_search_query</span> <span class="o">=</span> <span class="n">search_query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+    <span class="n">clean_text_search_query</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text_search_query</span><span class="p">:</span>
+      <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+      <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
+          <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
+      <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">clean_text_search_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">clean_texts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">clean_text_search_query</span><span class="p">:</span>
+      <span class="n">texts_match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">words_match_indexes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">clean_texts</span><span class="p">:</span>
+        <span class="n">word_match_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">wmis</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clean_text_search_query</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">word_match_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">wmis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">wmis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">words_match_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wmis</span><span class="p">)</span>
+        <span class="n">words_match_indexes_consequtive</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wmis</span><span class="p">,</span> <span class="n">wmis</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+        <span class="k">if</span> <span class="n">words_match_indexes_consequtive</span><span class="p">:</span>
+          <span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word_match_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">clean_text_search_query</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word_match_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">clean_text_search_query</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">texts_match_ratios</span><span class="p">:</span>    
+        <span class="n">max_text_match_ratio</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">texts_match_ratios</span><span class="p">)</span>
+        <span class="n">max_match_ratio_text</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
+        <span class="n">max_text_words_match_indexes</span> <span class="o">=</span> <span class="n">words_match_indexes</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">max_match_ratio_text</span><span class="p">,</span> <span class="n">max_text_match_ratio</span><span class="p">,</span> <span class="n">max_text_words_match_indexes</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -8765,6 +8831,87 @@ Tegridy Code 2020</p></div>
   <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;Bad chords&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bad_chords</span>
 
   <span class="k">return</span> <span class="n">analysis</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.ascii_texts_search">
+    <p>def <span class="ident">ascii_texts_search</span>(</p><p>texts=[&#39;text1&#39;, &#39;text2&#39;, &#39;text3&#39;], search_query=&#39;Once upon a time...&#39;, deterministic_matching=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.ascii_texts_search', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.ascii_texts_search" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ascii_texts_search</span><span class="p">(</span><span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;text1&#39;</span><span class="p">,</span> <span class="s1">&#39;text2&#39;</span><span class="p">,</span> <span class="s1">&#39;text3&#39;</span><span class="p">],</span> 
+                       <span class="n">search_query</span> <span class="o">=</span> <span class="s1">&#39;Once upon a time...&#39;</span><span class="p">,</span> 
+                       <span class="n">deterministic_matching</span> <span class="o">=</span> <span class="kc">False</span>
+                       <span class="p">):</span>
+  
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">deterministic_matching</span><span class="p">:</span>
+      <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+
+    <span class="n">clean_texts</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+      <span class="n">text_words_list</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+      <span class="n">clean_text_words_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text_words_list</span><span class="p">:</span>
+        <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+          <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
+            <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
+        <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+          <span class="n">clean_text_words_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+      <span class="n">clean_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clean_text_words_list</span><span class="p">)</span>
+
+    <span class="n">text_search_query</span> <span class="o">=</span> <span class="n">search_query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+    <span class="n">clean_text_search_query</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text_search_query</span><span class="p">:</span>
+      <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+      <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
+          <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
+      <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">clean_text_search_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">clean_texts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">clean_text_search_query</span><span class="p">:</span>
+      <span class="n">texts_match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">words_match_indexes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">clean_texts</span><span class="p">:</span>
+        <span class="n">word_match_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">wmis</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clean_text_search_query</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">word_match_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">wmis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">wmis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">words_match_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wmis</span><span class="p">)</span>
+        <span class="n">words_match_indexes_consequtive</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wmis</span><span class="p">,</span> <span class="n">wmis</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+        <span class="k">if</span> <span class="n">words_match_indexes_consequtive</span><span class="p">:</span>
+          <span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word_match_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">clean_text_search_query</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word_match_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">clean_text_search_query</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">texts_match_ratios</span><span class="p">:</span>    
+        <span class="n">max_text_match_ratio</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">texts_match_ratios</span><span class="p">)</span>
+        <span class="n">max_match_ratio_text</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
+        <span class="n">max_text_words_match_indexes</span> <span class="o">=</span> <span class="n">words_match_indexes</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
+
+      <span class="k">return</span> <span class="p">[</span><span class="n">max_match_ratio_text</span><span class="p">,</span> <span class="n">max_text_match_ratio</span><span class="p">,</span> <span class="n">max_text_words_match_indexes</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
   </div>
