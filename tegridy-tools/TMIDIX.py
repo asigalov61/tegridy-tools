@@ -4470,11 +4470,12 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
 
         words_match_indexes.append(wmis)
         words_match_indexes_consequtive = all(abs(b) - abs(a) == 1 for a, b in zip(wmis, wmis[1:]))
+        words_match_indexes_consequtive_ratio = sum([abs(b) - abs(a) == 1 for a, b in zip(wmis, wmis[1:])]) / len(wmis)
 
         if words_match_indexes_consequtive:
           texts_match_ratios.append(word_match_count / len(clean_text_search_query))
         else:
-          texts_match_ratios.append(word_match_count / len(clean_text_search_query) / 2)
+          texts_match_ratios.append(word_match_count / len(clean_text_search_query) * words_match_indexes_consequtive_ratio)
 
       if texts_match_ratios:    
         max_text_match_ratio = max(texts_match_ratios)
