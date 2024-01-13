@@ -4475,7 +4475,7 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
         if words_match_indexes_consequtive:
           texts_match_ratios.append(word_match_count / len(clean_text_search_query))
         else:
-          texts_match_ratios.append(word_match_count / len(clean_text_search_query) * words_match_indexes_consequtive_ratio)
+          texts_match_ratios.append(((word_match_count / len(clean_text_search_query)) + words_match_indexes_consequtive_ratio) / 2)
 
       if texts_match_ratios:    
         max_text_match_ratio = max(texts_match_ratios)
@@ -4486,6 +4486,27 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
     else:
       return None
 
+###################################################################################
+
+def ascii_text_words_counter(ascii_text):
+
+    text_words_list = ascii_text.split(chr(32))
+    
+    clean_text_words_list = []
+    for w in text_words_list:
+      wo = ''
+      for ww in w.lower():
+        if 96 < ord(ww) < 123:
+          wo += ww
+      if wo != '':
+        clean_text_words_list.append(wo)
+
+    hist = {}
+    for i in clean_text_words_list:
+        hist[i] = hist.get(i, 0) + 1
+
+    return len(clean_text_words_list), hist, clean_text_words_list
+    
 ###################################################################################
 
 # This is the end of the TMIDI X Python module
