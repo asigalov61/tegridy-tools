@@ -4422,26 +4422,28 @@ def generate_tones_chords_progression(number_of_chords_to_generate=100,
 
 ###################################################################################
 
-def ascii_texts_search(texts = ['text1', 'text2', 'text3'], 
-                       search_query = 'Once upon a time...', 
+def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
+                       search_query = 'Once upon a time...',
                        deterministic_matching = False
                        ):
-  
+
     if not deterministic_matching:
       random.shuffle(texts)
 
     clean_texts = []
 
     for t in texts:
-      text_words_list = t.split(chr(32))
+      text_words_list = [at.split(chr(32)) for at in t.split(chr(10))]
+      
       clean_text_words_list = []
-      for w in text_words_list:
-        wo = ''
-        for ww in w.lower():
-          if 96 < ord(ww) < 123:
-            wo += ww
-        if wo != '':
-          clean_text_words_list.append(wo)
+      for twl in text_words_list:
+        for w in twl:
+          wo = ''
+          for ww in w.lower():
+            if 96 < ord(ww) < 123:
+              wo += ww
+          if wo != '':
+            clean_text_words_list.append(wo)
       clean_texts.append(clean_text_words_list)
 
     text_search_query = search_query.split(chr(32))
@@ -4477,12 +4479,13 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
         else:
           texts_match_ratios.append(((word_match_count / len(clean_text_search_query)) + words_match_indexes_consequtive_ratio) / 2)
 
-      if texts_match_ratios:    
+      if texts_match_ratios:
         max_text_match_ratio = max(texts_match_ratios)
         max_match_ratio_text = texts[texts_match_ratios.index(max_text_match_ratio)]
         max_text_words_match_indexes = words_match_indexes[texts_match_ratios.index(max_text_match_ratio)]
 
       return [max_match_ratio_text, max_text_match_ratio, max_text_words_match_indexes]
+    
     else:
       return None
 
@@ -4490,22 +4493,25 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
 
 def ascii_text_words_counter(ascii_text):
 
-    text_words_list = ascii_text.split(chr(32))
-    
+    text_words_list = [at.split(chr(32)) for at in ascii_text.split(chr(10))]
+
     clean_text_words_list = []
-    for w in text_words_list:
-      wo = ''
-      for ww in w.lower():
-        if 96 < ord(ww) < 123:
-          wo += ww
-      if wo != '':
-        clean_text_words_list.append(wo)
+    for twl in text_words_list:
+      for w in twl:
+        wo = ''
+        for ww in w.lower():
+          if 96 < ord(ww) < 123:
+            wo += ww
+        if wo != '':
+          clean_text_words_list.append(wo)
 
-    hist = {}
+    words = {}
     for i in clean_text_words_list:
-        hist[i] = hist.get(i, 0) + 1
+        words[i] = words.get(i, 0) + 1
 
-    return len(clean_text_words_list), hist, clean_text_words_list
+    words_sorted = dict(sorted(words.items(), key=lambda item: item[1], reverse=True))
+
+    return len(clean_text_words_list), words_sorted, clean_text_words_list
     
 ###################################################################################
 
