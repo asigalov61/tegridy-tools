@@ -4422,6 +4422,71 @@ def generate_tones_chords_progression(number_of_chords_to_generate=100,
 
 ###################################################################################
 
+def ascii_texts_search(texts = ['text1', 'text2', 'text3'], 
+                       search_query = 'Once upon a time...', 
+                       deterministic_matching = False
+                       ):
+  
+    if not deterministic_matching:
+      random.shuffle(texts)
+
+    clean_texts = []
+
+    for t in texts:
+      text_words_list = t.split(chr(32))
+      clean_text_words_list = []
+      for w in text_words_list:
+        wo = ''
+        for ww in w.lower():
+          if 96 < ord(ww) < 123:
+            wo += ww
+        if wo != '':
+          clean_text_words_list.append(wo)
+      clean_texts.append(clean_text_words_list)
+
+    text_search_query = search_query.split(chr(32))
+    clean_text_search_query = []
+    for w in text_search_query:
+      wo = ''
+      for ww in w.lower():
+        if 96 < ord(ww) < 123:
+          wo += ww
+      if wo != '':
+        clean_text_search_query.append(wo)
+
+    if clean_texts[0] and clean_text_search_query:
+      texts_match_ratios = []
+      words_match_indexes = []
+      for t in clean_texts:
+        word_match_count = 0
+        wmis = []
+
+        for c in clean_text_search_query:
+          if c in t:
+            word_match_count += 1
+            wmis.append(t.index(c))
+          else:
+            wmis.append(-1)
+
+        words_match_indexes.append(wmis)
+        words_match_indexes_consequtive = all(abs(b) - abs(a) == 1 for a, b in zip(wmis, wmis[1:]))
+
+        if words_match_indexes_consequtive:
+          texts_match_ratios.append(word_match_count / len(clean_text_search_query))
+        else:
+          texts_match_ratios.append(word_match_count / len(clean_text_search_query) / 2)
+
+      if texts_match_ratios:    
+        max_text_match_ratio = max(texts_match_ratios)
+        max_match_ratio_text = texts[texts_match_ratios.index(max_text_match_ratio)]
+        max_text_words_match_indexes = words_match_indexes[texts_match_ratios.index(max_text_match_ratio)]
+
+      return [max_match_ratio_text, max_text_match_ratio, max_text_words_match_indexes]
+    else:
+      return None
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
