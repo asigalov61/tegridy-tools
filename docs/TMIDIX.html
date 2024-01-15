@@ -5658,23 +5658,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">clean_text_words_list</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">twl</span> <span class="ow">in</span> <span class="n">text_words_list</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">twl</span><span class="p">:</span>
-          <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-          <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
-              <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
-          <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="n">clean_text_words_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+          <span class="n">clean_text_words_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">())))</span>
+          
       <span class="n">clean_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clean_text_words_list</span><span class="p">)</span>
 
-    <span class="n">text_search_query</span> <span class="o">=</span> <span class="n">search_query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+    <span class="n">text_search_query</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">search_query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">))]</span>
     <span class="n">clean_text_search_query</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text_search_query</span><span class="p">:</span>
-      <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-      <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-        <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
-          <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
-      <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">clean_text_search_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="p">:</span>
+        <span class="n">clean_text_search_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">,</span> <span class="n">ww</span><span class="o">.</span><span class="n">lower</span><span class="p">())))</span>
 
     <span class="k">if</span> <span class="n">clean_texts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">clean_text_search_query</span><span class="p">:</span>
       <span class="n">texts_match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8935,23 +8927,15 @@ Tegridy Code 2020</p></div>
       <span class="n">clean_text_words_list</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">twl</span> <span class="ow">in</span> <span class="n">text_words_list</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">twl</span><span class="p">:</span>
-          <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-          <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
-              <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
-          <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="n">clean_text_words_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+          <span class="n">clean_text_words_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">())))</span>
+          
       <span class="n">clean_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clean_text_words_list</span><span class="p">)</span>
 
-    <span class="n">text_search_query</span> <span class="o">=</span> <span class="n">search_query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+    <span class="n">text_search_query</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">search_query</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">))]</span>
     <span class="n">clean_text_search_query</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text_search_query</span><span class="p">:</span>
-      <span class="n">wo</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-      <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-        <span class="k">if</span> <span class="mi">96</span> <span class="o">&lt;</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ww</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">123</span><span class="p">:</span>
-          <span class="n">wo</span> <span class="o">+=</span> <span class="n">ww</span>
-      <span class="k">if</span> <span class="n">wo</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">clean_text_search_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wo</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">ww</span> <span class="ow">in</span> <span class="n">w</span><span class="p">:</span>
+        <span class="n">clean_text_search_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">,</span> <span class="n">ww</span><span class="o">.</span><span class="n">lower</span><span class="p">())))</span>
 
     <span class="k">if</span> <span class="n">clean_texts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">clean_text_search_query</span><span class="p">:</span>
       <span class="n">texts_match_ratios</span> <span class="o">=</span> <span class="p">[]</span>
