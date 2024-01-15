@@ -4427,12 +4427,15 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
                        deterministic_matching = False
                        ):
 
+    texts_copy = texts
+
     if not deterministic_matching:
-      random.shuffle(texts)
+      texts_copy = copy.deepcopy(texts)
+      random.shuffle(texts_copy)
 
     clean_texts = []
 
-    for t in texts:
+    for t in texts_copy:
       text_words_list = [at.split(chr(32)) for at in t.split(chr(10))]
       
       clean_text_words_list = []
@@ -4473,7 +4476,7 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
 
       if texts_match_ratios:
         max_text_match_ratio = max(texts_match_ratios)
-        max_match_ratio_text = texts[texts_match_ratios.index(max_text_match_ratio)]
+        max_match_ratio_text = texts_copy[texts_match_ratios.index(max_text_match_ratio)]
         max_text_words_match_indexes = words_match_indexes[texts_match_ratios.index(max_text_match_ratio)]
 
       return [max_match_ratio_text, max_text_match_ratio, max_text_words_match_indexes]

@@ -1,4 +1,4 @@
-#===================================================================================================================
+r'''#===================================================================================================================
 #
 # MIDI to Colab AUdio Python Module
 #
@@ -47,7 +47,6 @@
 # could break compatiblity, but there's not much else you can do to fix the bug
 # https://en.wikipedia.org/wiki/Shift_JIS
 
-r'''
 This module offers functions:  concatenate_scores(), grep(),
 merge_scores(), mix_scores(), midi2opus(), midi2score(), opus2midi(),
 opus2score(), play_score(), score2midi(), score2opus(), score2stats(),
@@ -2936,13 +2935,13 @@ def midi_opus_to_colab_audio(midi_opus,
         if max_val != 0:
             ss = (ss / max_val) * np.iinfo(np.int16).max
     ss = ss.astype(np.int16)
-
+    
+    if output_for_gradio:
+      return ss
+    
     ss = ss.swapaxes(1, 0)
 
     raw_audio = normalize_volume(ss, volume_scale)
-
-    if output_for_gradio:
-      raw_audio = np.transpose(raw_audio)
     
     return raw_audio
 
@@ -3022,12 +3021,12 @@ def midi_to_colab_audio(midi_file,
             ss = (ss / max_val) * np.iinfo(np.int16).max
     ss = ss.astype(np.int16)
 
+    if output_for_gradio:
+      return ss
+
     ss = ss.swapaxes(1, 0)
 
     raw_audio = normalize_volume(ss, volume_scale)
-
-    if output_for_gradio:
-      raw_audio = np.transpose(raw_audio)
     
     return raw_audio
     
