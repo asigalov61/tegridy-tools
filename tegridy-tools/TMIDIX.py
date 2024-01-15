@@ -4424,8 +4424,8 @@ def generate_tones_chords_progression(number_of_chords_to_generate=100,
 
 def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
                        search_query = 'Once upon a time...',
-                       deterministic_matching = False
-                       ):
+                       deterministic_matching = False,
+                       fast_search=True):
 
     if not deterministic_matching:
       random.shuffle(texts)
@@ -4443,7 +4443,11 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
             if 96 < ord(ww) < 123:
               wo += ww
           if wo != '':
-            clean_text_words_list.append(wo)
+            if fast_search:
+              if wo not in clean_text_words_list:
+                clean_text_words_list.append(wo)
+            else:
+              clean_text_words_list.append(wo)
       clean_texts.append(clean_text_words_list)
 
     text_search_query = search_query.split(chr(32))
@@ -4454,7 +4458,11 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
         if 96 < ord(ww) < 123:
           wo += ww
       if wo != '':
-        clean_text_search_query.append(wo)
+        if fast_search:
+          if wo not in clean_text_search_query:
+            clean_text_search_query.append(wo)
+        else:
+          clean_text_search_query.append(wo)
 
     if clean_texts[0] and clean_text_search_query:
       texts_match_ratios = []
