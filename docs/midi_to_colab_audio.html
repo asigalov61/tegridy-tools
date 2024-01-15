@@ -1375,6 +1375,111 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="displayaudioraw_audio-rate16000-normalizefalse">display(Audio(raw_audio, rate=16000, normalize=False))</h1>
 <h1 id="_18"></h1>
 <h1 id="_19">===================================================================================================================</h1>
+<h1 id="usrbinpython3">! /usr/bin/python3</h1>
+<h1 id="unsupported-20091104">unsupported 20091104 &hellip;</h1>
+<h1 id="set_sequence_number-dtime-sequence">['set_sequence_number', dtime, sequence]</h1>
+<h1 id="raw_data-dtime-raw">['raw_data', dtime, raw]</h1>
+<h1 id="20150914-jimbo1qaz-midipy-strbytes-bug-report">20150914   jimbo1qaz   MIDI.py str/bytes bug report</h1>
+<h1 id="i-found-a-midi-file-which-had-shift-jis-titles-when-midipy-decodes-it-as">I found a MIDI file which had Shift-JIS titles. When midi.py decodes it as</h1>
+<h1 id="latin-1-it-produces-a-string-which-cannot-even-be-accessed-without-raising">latin-1, it produces a string which cannot even be accessed without raising</h1>
+<h1 id="a-unicodedecodeerror-maybe-when-converting-raw-byte-strings-from-midi">a UnicodeDecodeError.  Maybe, when converting raw byte strings from MIDI,</h1>
+<h1 id="you-should-keep-them-as-bytes-not-improperly-decode-them-however-this">you should keep them as bytes, not improperly decode them.  However, this</h1>
+<h1 id="would-change-the-api-ie-text-a-string-of-0-or-more-bytes-it">would change the API.  (ie: text = a "string" ? of 0 or more bytes).  It</h1>
+<h1 id="could-break-compatiblity-but-theres-not-much-else-you-can-do-to-fix-the-bug">could break compatiblity, but there's not much else you can do to fix the bug</h1>
+<h1 id="httpsenwikipediaorgwikishift_jis">https://en.wikipedia.org/wiki/Shift_JIS</h1>
+<p>This module offers functions:  concatenate_scores(), grep(),
+merge_scores(), mix_scores(), midi2opus(), midi2score(), opus2midi(),
+opus2score(), play_score(), score2midi(), score2opus(), score2stats(),
+score_type(), segment(), timeshift() and to_millisecs(),
+where "midi" means the MIDI-file bytes (as can be put in a .mid file,
+or piped into aplaymidi), and "opus" and "score" are list-structures
+as inspired by Sean Burke's MIDI-Perl CPAN module.</p>
+<p>Warning: Version 6.4 is not necessarily backward-compatible with
+previous versions, in that text-data is now bytes, not strings.
+This reflects the fact that many MIDI files have text data in
+encodings other that ISO-8859-1, for example in Shift-JIS.</p>
+<p>Download MIDI.py from   http://www.pjb.com.au/midi/free/MIDI.py
+and put it in your PYTHONPATH.  MIDI.py depends on Python3.</p>
+<p>There is also a call-compatible translation into Lua of this
+module: see http://www.pjb.com.au/comp/lua/MIDI.html</p>
+<p>Backup web site: https://peterbillam.gitlab.io/miditools/</p>
+<p>The "opus" is a direct translation of the midi-file-events, where
+the times are delta-times, in ticks, since the previous event.</p>
+<p>The "score" is more human-centric; it uses absolute times, and
+combines the separate note_on and note_off events into one "note"
+event, with a duration:
+ ['note', start_time, duration, channel, note, velocity] # in a "score"</p>
+<p>EVENTS (in an "opus" structure)
+     ['note_off', dtime, channel, note, velocity]       # in an "opus"
+     ['note_on', dtime, channel, note, velocity]        # in an "opus"
+     ['key_after_touch', dtime, channel, note, velocity]
+     ['control_change', dtime, channel, controller(0-127), value(0-127)]
+     ['patch_change', dtime, channel, patch]
+     ['channel_after_touch', dtime, channel, velocity]
+     ['pitch_wheel_change', dtime, channel, pitch_wheel]
+     ['text_event', dtime, text]
+     ['copyright_text_event', dtime, text]
+     ['track_name', dtime, text]
+     ['instrument_name', dtime, text]
+     ['lyric', dtime, text]
+     ['marker', dtime, text]
+     ['cue_point', dtime, text]
+     ['text_event_08', dtime, text]
+     ['text_event_09', dtime, text]
+     ['text_event_0a', dtime, text]
+     ['text_event_0b', dtime, text]
+     ['text_event_0c', dtime, text]
+     ['text_event_0d', dtime, text]
+     ['text_event_0e', dtime, text]
+     ['text_event_0f', dtime, text]
+     ['end_track', dtime]
+     ['set_tempo', dtime, tempo]
+     ['smpte_offset', dtime, hr, mn, se, fr, ff]
+     ['time_signature', dtime, nn, dd, cc, bb]
+     ['key_signature', dtime, sf, mi]
+     ['sequencer_specific', dtime, raw]
+     ['raw_meta_event', dtime, command(0-255), raw]
+     ['sysex_f0', dtime, raw]
+     ['sysex_f7', dtime, raw]
+     ['song_position', dtime, song_pos]
+     ['song_select', dtime, song_number]
+     ['tune_request', dtime]</p>
+<p>DATA TYPES
+     channel = a value 0 to 15
+     controller = 0 to 127 (see http://www.pjb.com.au/muscript/gm.html#cc )
+     dtime = time measured in "ticks", 0 to 268435455
+     velocity = a value 0 (soft) to 127 (loud)
+     note = a value 0 to 127  (middle-C is 60)
+     patch = 0 to 127 (see http://www.pjb.com.au/muscript/gm.html )
+     pitch_wheel = a value -8192 to 8191 (0x1FFF)
+     raw = bytes, of length 0 or more  (for sysex events see below)
+     sequence_number = a value 0 to 65,535 (0xFFFF)
+     song_pos = a value 0 to 16,383 (0x3FFF)
+     song_number = a value 0 to 127
+     tempo = microseconds per crochet (quarter-note), 0 to 16777215
+     text = bytes, of length 0 or more
+     ticks = the number of ticks per crochet (quarter-note)</p>
+<p>In sysex_f0 events, the raw data must not start with a \xF0 byte,
+   since this gets added automatically;
+   but it must end with an explicit \xF7 byte!
+   In the very unlikely case that you ever need to split sysex data
+   into one sysex_f0 followed by one or more sysex_f7s, then only the
+   last of those sysex_f7 events must end with the explicit \xF7 byte
+   (again, the raw data of individual sysex_f7 events must not start
+   with any \xF7 byte, since this gets added automatically).</p>
+<p>Since version 6.4, text data is in bytes, not in a ISO-8859-1 string.</p>
+<p>GOING THROUGH A SCORE WITHIN A PYTHON PROGRAM
+    channels = {2,3,5,8,13}
+    itrack = 1   # skip 1st element which is ticks
+    while itrack &lt; len(score):
+        for event in score[itrack]:
+            if event[0] == 'note':   # for example,
+                pass  # do something to all notes
+            # or, to work on events in only particular channels&hellip;
+            channel_index = MIDI.Event2channelindex.get(event[0], False)
+            if channel_index and (event[channel_index] in channels):
+                pass  # do something to channels 2,3,5,8 and 13
+        itrack += 1</p>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio" class="source">
@@ -1412,22 +1517,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#</span>
 <span class="sd"># display(Audio(raw_audio, rate=16000, normalize=False))</span>
 <span class="sd">#</span>
-<span class="sd">#===================================================================================================================&#39;&#39;&#39;</span>
-<span class="c1">#! /usr/bin/python3</span>
-<span class="c1"># unsupported 20091104 ...</span>
-<span class="c1">#     [&#39;set_sequence_number&#39;, dtime, sequence]</span>
-<span class="c1">#     [&#39;raw_data&#39;, dtime, raw]</span>
+<span class="sd">#===================================================================================================================</span>
+<span class="sd">#! /usr/bin/python3</span>
+<span class="sd"># unsupported 20091104 ...</span>
+<span class="sd">#     [&#39;set_sequence_number&#39;, dtime, sequence]</span>
+<span class="sd">#     [&#39;raw_data&#39;, dtime, raw]</span>
 
-<span class="c1"># 20150914   jimbo1qaz   MIDI.py str/bytes bug report</span>
-<span class="c1"># I found a MIDI file which had Shift-JIS titles. When midi.py decodes it as</span>
-<span class="c1"># latin-1, it produces a string which cannot even be accessed without raising</span>
-<span class="c1"># a UnicodeDecodeError.  Maybe, when converting raw byte strings from MIDI,</span>
-<span class="c1"># you should keep them as bytes, not improperly decode them.  However, this</span>
-<span class="c1"># would change the API.  (ie: text = a &quot;string&quot; ? of 0 or more bytes).  It</span>
-<span class="c1"># could break compatiblity, but there&#39;s not much else you can do to fix the bug</span>
-<span class="c1"># https://en.wikipedia.org/wiki/Shift_JIS</span>
+<span class="sd"># 20150914   jimbo1qaz   MIDI.py str/bytes bug report</span>
+<span class="sd"># I found a MIDI file which had Shift-JIS titles. When midi.py decodes it as</span>
+<span class="sd"># latin-1, it produces a string which cannot even be accessed without raising</span>
+<span class="sd"># a UnicodeDecodeError.  Maybe, when converting raw byte strings from MIDI,</span>
+<span class="sd"># you should keep them as bytes, not improperly decode them.  However, this</span>
+<span class="sd"># would change the API.  (ie: text = a &quot;string&quot; ? of 0 or more bytes).  It</span>
+<span class="sd"># could break compatiblity, but there&#39;s not much else you can do to fix the bug</span>
+<span class="sd"># https://en.wikipedia.org/wiki/Shift_JIS</span>
 
-<span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">This module offers functions:  concatenate_scores(), grep(),</span>
 <span class="sd">merge_scores(), mix_scores(), midi2opus(), midi2score(), opus2midi(),</span>
 <span class="sd">opus2score(), play_score(), score2midi(), score2opus(), score2stats(),</span>
@@ -4258,12 +4362,16 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
                               <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                               <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">/</span><span class="n">norm</span>  <span class="c1"># normalized matrix</span>
-        <span class="k">return</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">mult_matrix</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">final_matrix</span>
 
     <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4312,7 +4420,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-
+    
+    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">ss</span>
+    
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
@@ -4322,7 +4433,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">midi_to_colab_audio</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> 
                         <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                        <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    </span>
@@ -4338,10 +4451,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">midi_opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">/</span><span class="n">norm</span>  <span class="c1"># normalized matrix</span>
-        <span class="k">return</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">mult_matrix</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">final_matrix</span>
 
     <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4390,6 +4505,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">ss</span>
 
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -5843,7 +5961,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_opus_to_colab_audio">
-    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10)</p>
+    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10, output_for_gradio=False)</p>
     </div>
     
 
@@ -5855,12 +5973,16 @@ then opus2score()</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
                               <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                               <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+                              <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">/</span><span class="n">norm</span>  <span class="c1"># normalized matrix</span>
-        <span class="k">return</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">mult_matrix</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">final_matrix</span>
 
     <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -5909,7 +6031,10 @@ then opus2score()</p></div>
         <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-
+    
+    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">ss</span>
+    
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
@@ -5925,7 +6050,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_to_colab_audio">
-    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10)</p>
+    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10, output_for_gradio=False)</p>
     </div>
     
 
@@ -5941,7 +6066,9 @@ then opus2score()</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi_to_colab_audio</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> 
                         <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+                        <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                        <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    </span>
@@ -5957,10 +6084,12 @@ then opus2score()</p></div>
 
     <span class="n">midi_opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">/</span><span class="n">norm</span>  <span class="c1"># normalized matrix</span>
-        <span class="k">return</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">mult_matrix</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">*</span> <span class="n">factor</span>
+        <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">final_matrix</span>
 
     <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6009,6 +6138,9 @@ then opus2score()</p></div>
         <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">ss</span>
 
     <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 

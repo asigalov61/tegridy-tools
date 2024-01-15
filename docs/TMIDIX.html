@@ -5647,12 +5647,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                        <span class="n">deterministic_matching</span> <span class="o">=</span> <span class="kc">False</span>
                        <span class="p">):</span>
 
+    <span class="n">texts_copy</span> <span class="o">=</span> <span class="n">texts</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">deterministic_matching</span><span class="p">:</span>
-      <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+      <span class="n">texts_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+      <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">texts_copy</span><span class="p">)</span>
 
     <span class="n">clean_texts</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts_copy</span><span class="p">:</span>
       <span class="n">text_words_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">))]</span>
       
       <span class="n">clean_text_words_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -5693,7 +5696,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       <span class="k">if</span> <span class="n">texts_match_ratios</span><span class="p">:</span>
         <span class="n">max_text_match_ratio</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">texts_match_ratios</span><span class="p">)</span>
-        <span class="n">max_match_ratio_text</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
+        <span class="n">max_match_ratio_text</span> <span class="o">=</span> <span class="n">texts_copy</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
         <span class="n">max_text_words_match_indexes</span> <span class="o">=</span> <span class="n">words_match_indexes</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
 
       <span class="k">return</span> <span class="p">[</span><span class="n">max_match_ratio_text</span><span class="p">,</span> <span class="n">max_text_match_ratio</span><span class="p">,</span> <span class="n">max_text_words_match_indexes</span><span class="p">]</span>
@@ -8916,12 +8919,15 @@ Tegridy Code 2020</p></div>
                        <span class="n">deterministic_matching</span> <span class="o">=</span> <span class="kc">False</span>
                        <span class="p">):</span>
 
+    <span class="n">texts_copy</span> <span class="o">=</span> <span class="n">texts</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">deterministic_matching</span><span class="p">:</span>
-      <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+      <span class="n">texts_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+      <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">texts_copy</span><span class="p">)</span>
 
     <span class="n">clean_texts</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">texts_copy</span><span class="p">:</span>
       <span class="n">text_words_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">))]</span>
       
       <span class="n">clean_text_words_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8962,7 +8968,7 @@ Tegridy Code 2020</p></div>
 
       <span class="k">if</span> <span class="n">texts_match_ratios</span><span class="p">:</span>
         <span class="n">max_text_match_ratio</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">texts_match_ratios</span><span class="p">)</span>
-        <span class="n">max_match_ratio_text</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
+        <span class="n">max_match_ratio_text</span> <span class="o">=</span> <span class="n">texts_copy</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
         <span class="n">max_text_words_match_indexes</span> <span class="o">=</span> <span class="n">words_match_indexes</span><span class="p">[</span><span class="n">texts_match_ratios</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_text_match_ratio</span><span class="p">)]</span>
 
       <span class="k">return</span> <span class="p">[</span><span class="n">max_match_ratio_text</span><span class="p">,</span> <span class="n">max_text_match_ratio</span><span class="p">,</span> <span class="n">max_text_words_match_indexes</span><span class="p">]</span>
