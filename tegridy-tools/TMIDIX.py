@@ -4424,8 +4424,8 @@ def generate_tones_chords_progression(number_of_chords_to_generate=100,
 
 def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
                        search_query = 'Once upon a time...',
-                       deterministic_matching = False,
-                       fast_search=True):
+                       deterministic_matching = False
+                       ):
 
     if not deterministic_matching:
       random.shuffle(texts)
@@ -4438,31 +4438,15 @@ def ascii_texts_search(texts = ['text1', 'text2', 'text3'],
       clean_text_words_list = []
       for twl in text_words_list:
         for w in twl:
-          wo = ''
-          for ww in w.lower():
-            if 96 < ord(ww) < 123:
-              wo += ww
-          if wo != '':
-            if fast_search:
-              if wo not in clean_text_words_list:
-                clean_text_words_list.append(wo)
-            else:
-              clean_text_words_list.append(wo)
+          clean_text_words_list.append(''.join(filter(str.isalpha, w.lower())))
+          
       clean_texts.append(clean_text_words_list)
 
-    text_search_query = search_query.split(chr(32))
+    text_search_query = [at.split(chr(32)) for at in search_query.split(chr(10))]
     clean_text_search_query = []
     for w in text_search_query:
-      wo = ''
-      for ww in w.lower():
-        if 96 < ord(ww) < 123:
-          wo += ww
-      if wo != '':
-        if fast_search:
-          if wo not in clean_text_search_query:
-            clean_text_search_query.append(wo)
-        else:
-          clean_text_search_query.append(wo)
+      for ww in w:
+        clean_text_search_query.append(''.join(filter(str.isalpha, ww.lower())))
 
     if clean_texts[0] and clean_text_search_query:
       texts_match_ratios = []
