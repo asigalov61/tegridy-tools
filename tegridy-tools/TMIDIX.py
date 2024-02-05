@@ -3852,7 +3852,8 @@ ALL_CHORDS = [[0], [7], [5], [9], [2], [4], [11], [10], [8], [6], [3], [1], [0, 
               [2, 5, 7, 9, 11], [1, 3, 5, 7, 10], [0, 2, 4, 7, 10], [1, 3, 5, 7, 9],
               [1, 3, 5, 9, 11], [1, 5, 7, 9, 11], [1, 3, 7, 9, 11], [3, 5, 7, 9, 11],
               [2, 4, 6, 8, 10], [0, 4, 6, 8, 10], [0, 2, 6, 8, 10], [1, 3, 5, 7, 11],
-              [0, 2, 4, 8, 10], [0, 2, 4, 6, 8], [0, 2, 4, 6, 10]]
+              [0, 2, 4, 8, 10], [0, 2, 4, 6, 8], [0, 2, 4, 6, 10], [0, 2, 4, 6, 8, 10],
+              [1, 3, 5, 7, 9, 11]]
 
 def find_exact_match_variable_length(list_of_lists, target_list, uncertain_indices):
     # Infer possible values for each uncertain index
@@ -3981,7 +3982,7 @@ def analyze_score_pitches(score, channels_to_analyze=[0]):
 
 ###################################################################################
 
-ALL_CHORDS_GROUPED = [
+ALL_CHORDS_GROUPED = [[[1, 3, 5, 7, 9, 11], [0, 2, 4, 6, 8, 10]],
     [[0, 2, 5, 7, 10], [0, 2, 4, 7, 9], [0, 2, 5, 7, 9], [1, 4, 6, 9, 11],
     [1, 3, 6, 8, 11], [1, 3, 6, 8, 10], [1, 4, 6, 8, 11], [1, 3, 5, 8, 10],
     [2, 4, 6, 9, 11], [2, 4, 7, 9, 11], [0, 3, 5, 7, 10], [0, 3, 5, 8, 10],
@@ -4508,6 +4509,33 @@ def ascii_text_words_counter(ascii_text):
 
     return len(clean_text_words_list), words_sorted, clean_text_words_list
     
+###################################################################################
+
+def check_and_fix_tones_chord(tones_chord):
+
+    lst = tones_chord
+
+    if len(lst) == 2:
+      if lst[1] - lst[0] == 1:
+        return [lst[-1]]
+      else:
+        if 0 in lst and 11 in lst:
+          lst.remove(0)
+        return lst
+
+    non_consecutive = [lst[0]]
+
+    if len(lst) > 2: 
+      for i in range(1, len(lst) - 1):
+          if lst[i-1] + 1 != lst[i] and lst[i] + 1 != lst[i+1]:
+              non_consecutive.append(lst[i])
+      non_consecutive.append(lst[-1])
+
+    if 0 in non_consecutive and 11 in non_consecutive:
+      non_consecutive.remove(0)
+
+    return non_consecutive
+
 ###################################################################################
 
 # This is the end of the TMIDI X Python module
