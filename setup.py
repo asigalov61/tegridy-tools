@@ -2,16 +2,17 @@ from setuptools import setup
 
 setup(
     name='tegridy-tools',
-    version='1.0.1',    
+    version='2.14.2024',    
     description='All tegridy-tools as python modules',
     url='https://github.com/asigalov61/tegridy-tools',
     keywords="tegridy tools midi artificial intelligence machine learning deep learning",
     author='Aleksandr Sigalov',
-    author_email='asigalov61@hotmail.com',
+    author_email='No public email atm',
     license='Apache 2.0',
-    packages=['tegridy_tools'],
+    packages=find_packages(),
     install_requires=['tqdm',
-                      'numpy',                     
+                      'numpy',
+                      'matplotlib',                 
                       ],
 
     classifiers=[
@@ -25,6 +26,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9"
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10"
     ],
 )
