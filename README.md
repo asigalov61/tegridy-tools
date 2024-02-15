@@ -10,7 +10,7 @@
 ### Recommended and required for the latest version of the modules/files: 
 
 ```
-git clone https://github.com/asigalov61/tegridy-tools
+git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 ```
 
 ***
@@ -73,11 +73,11 @@ from tegridy_tools import TMIDI, minGPT, markovify
 ***
 
 ```bibtex
-@inproceedings{lev2021tegridytools,
+@inproceedings{lev2024tegridytools,
     title       = {tegridy-tools: Symbolic Music NLP Artificial Intelligence Toolkit},
     author      = {Aleksandr Lev},
     booktitle   = {GitHub},
-    year        = {2023},
+    year        = {2024},
 }
 ```
 ***
