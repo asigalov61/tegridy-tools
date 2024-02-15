@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='tegridy_tools',
+    name='tegridy-tools',
     version='2.14.2024',    
     description='All tegridy-tools as python modules',
     url='https://github.com/asigalov61/tegridy-tools',
