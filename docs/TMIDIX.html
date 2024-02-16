@@ -1121,6 +1121,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.check_and_fix_chord">check_and_fix_chord</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_tones_chord">check_and_fix_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
+    <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
@@ -2682,6 +2683,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
 
@@ -5756,6 +5758,29 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">non_consecutive</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">non_consecutive</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">create_similarity_matrix</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">matrix_length</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">matrix_length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">sim_matrix</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">matrix_length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">sim_matrix</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">:</span>
+      <span class="n">sim_matrix</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">similarity_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">))]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">)):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">similarity_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">similarity_matrix</span><span class="p">,</span> <span class="n">sim_matrix</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -9311,6 +9336,45 @@ Tegridy Code 2020</p></div>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.create_similarity_matrix">
+    <p>def <span class="ident">create_similarity_matrix</span>(</p><p>list_of_values, matrix_length=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.create_similarity_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.create_similarity_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">create_similarity_matrix</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">matrix_length</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">matrix_length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">sim_matrix</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">matrix_length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">sim_matrix</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">:</span>
+      <span class="n">sim_matrix</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">similarity_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">))]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">)):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">similarity_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">similarity_matrix</span><span class="p">,</span> <span class="n">sim_matrix</span>
 </pre></div>
 
   </div>

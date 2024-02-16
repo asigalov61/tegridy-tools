@@ -4358,12 +4358,16 @@ event, with a duration:
 <span class="c1">#===============================================================================</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">wave</span>
 
 <span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
                               <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                               <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
                               <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                               <span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -4373,68 +4377,95 @@ event, with a duration:
         <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">final_matrix</span>
 
-    <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-        <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
-            <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
-            <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
-            <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
 
-    <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
-    <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
-    <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
-        <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
-            <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+      <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+          <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
+              <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
+              <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
+              <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">ss</span>
-    
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+      <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+      <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
+      <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+          <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
+          <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
+          <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
+              <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
-    <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">raw_audio</span>
+      <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+          <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">trim_silence</span><span class="p">:</span>
+          <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span> <span class="o">*</span> <span class="n">silence_threshold</span>
+          <span class="n">exceeded_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+          <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">):</span> 
+              <span class="n">last_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[:</span><span class="n">last_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ss</span>
+      
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+      <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="n">write_audio_to_WAV</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">r_audio</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">write_audio_to_WAV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setsampwidth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setnchannels</span><span class="p">(</span><span class="n">r_audio</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">writeframes</span><span class="p">(</span><span class="n">r_audio</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">raw_audio</span>
+  
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
 
 <span class="k">def</span> <span class="nf">midi_to_colab_audio</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> 
                         <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
                         <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                        <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                        <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span>
                         <span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
@@ -4449,8 +4480,6 @@ event, with a duration:
 <span class="sd">    </span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="n">midi_opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-
     <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">/</span><span class="n">norm</span>  <span class="c1"># normalized matrix</span>
@@ -4458,62 +4487,90 @@ event, with a duration:
         <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">final_matrix</span>
 
-    <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-        <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
-            <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
-            <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
-            <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">midi_opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
-    <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
-    <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
-    <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
-        <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
-            <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
 
-    <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+      <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+          <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
+              <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
+              <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
+              <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">ss</span>
+      <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+      <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+      <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
+      <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+          <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
+          <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
+          <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
+              <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+          <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
 
-    <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">raw_audio</span>
+      <span class="k">if</span> <span class="n">trim_silence</span><span class="p">:</span>
+          <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span> <span class="o">*</span> <span class="n">silence_threshold</span>
+          <span class="n">exceeded_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+          <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">):</span> 
+              <span class="n">last_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[:</span><span class="n">last_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ss</span>
+
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+      <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">write_audio_to_WAV</span><span class="p">:</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">midi_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.wav&#39;</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">r_audio</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setsampwidth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setnchannels</span><span class="p">(</span><span class="n">r_audio</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">writeframes</span><span class="p">(</span><span class="n">r_audio</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">raw_audio</span>
+  
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
     
 <span class="c1">#===================================================================================================================</span>
 </pre></div>
@@ -5961,7 +6018,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_opus_to_colab_audio">
-    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10, output_for_gradio=False)</p>
+    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10, trim_silence=True, silence_threshold=0.1, output_for_gradio=False, write_audio_to_WAV=&#39;&#39;)</p>
     </div>
     
 
@@ -5974,7 +6031,10 @@ then opus2score()</p></div>
                               <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                               <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
                               <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                               <span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -5984,62 +6044,86 @@ then opus2score()</p></div>
         <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">final_matrix</span>
 
-    <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-        <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
-            <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
-            <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
-            <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
 
-    <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
-    <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
-    <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
-        <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
-            <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+      <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+          <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
+              <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
+              <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
+              <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">ss</span>
-    
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+      <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+      <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
+      <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+          <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
+          <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
+          <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
+              <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
-    <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">raw_audio</span>
+      <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+          <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">trim_silence</span><span class="p">:</span>
+          <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span> <span class="o">*</span> <span class="n">silence_threshold</span>
+          <span class="n">exceeded_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+          <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">):</span> 
+              <span class="n">last_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[:</span><span class="n">last_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ss</span>
+      
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+      <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="n">write_audio_to_WAV</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">r_audio</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">write_audio_to_WAV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setsampwidth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setnchannels</span><span class="p">(</span><span class="n">r_audio</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">writeframes</span><span class="p">(</span><span class="n">r_audio</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">raw_audio</span>
+  
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
   </div>
@@ -6050,7 +6134,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_to_colab_audio">
-    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10, output_for_gradio=False)</p>
+    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_scale=10, trim_silence=True, silence_threshold=0.1, output_for_gradio=False, write_audio_to_WAV=False)</p>
     </div>
     
 
@@ -6067,7 +6151,10 @@ then opus2score()</p></div>
                         <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
                         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
                         <span class="n">volume_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                        <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                        <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span>
                         <span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
@@ -6082,8 +6169,6 @@ then opus2score()</p></div>
 <span class="sd">    </span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="n">midi_opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-
     <span class="k">def</span> <span class="nf">normalize_volume</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">/</span><span class="n">norm</span>  <span class="c1"># normalized matrix</span>
@@ -6091,62 +6176,90 @@ then opus2score()</p></div>
         <span class="n">final_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">mult_matrix</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">final_matrix</span>
 
-    <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-        <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
-            <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
-            <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
-            <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
-    <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">midi_opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">midi_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
-    <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
-    <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
-    <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
-        <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
-        <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
-            <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
 
-    <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+      <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">track_idx</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+          <span class="n">abs_t</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
+              <span class="n">abs_t</span> <span class="o">+=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">event_new</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">event</span><span class="p">]</span>
+              <span class="n">event_new</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_t</span>
+              <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_new</span><span class="p">)</span>
+      <span class="n">event_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">ss</span>
+      <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># default 120 bpm</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+      <span class="n">fl</span> <span class="o">=</span> <span class="n">Synth</span><span class="p">(</span><span class="n">samplerate</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+      <span class="n">sfid</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">sfload</span><span class="p">(</span><span class="n">soundfont_path</span><span class="p">)</span>
+      <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+          <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_list</span><span class="p">:</span>
+          <span class="n">name</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="n">sample_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">sample_len</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">last_t</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">)</span> <span class="o">*</span> <span class="n">tempo</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">))</span> <span class="o">*</span> <span class="n">sample_rate</span><span class="p">)</span>
+          <span class="n">last_t</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">sample_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">sample</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">sample_len</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sample_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">ss</span><span class="p">,</span> <span class="n">sample</span><span class="p">])</span>
+          <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;set_tempo&quot;</span><span class="p">:</span>
+              <span class="n">tempo</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;patch_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;control_change&quot;</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteon</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_off&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;note_on&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+              <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+              <span class="n">fl</span><span class="o">.</span><span class="n">noteoff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">fl</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+          <span class="k">if</span> <span class="n">max_val</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="n">ss</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
 
-    <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">raw_audio</span>
+      <span class="k">if</span> <span class="n">trim_silence</span><span class="p">:</span>
+          <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">))</span> <span class="o">*</span> <span class="n">silence_threshold</span>
+          <span class="n">exceeded_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+          <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">):</span> 
+              <span class="n">last_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">exceeded_thresh</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[:</span><span class="n">last_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">output_for_gradio</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ss</span>
+
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+      <span class="n">raw_audio</span> <span class="o">=</span> <span class="n">normalize_volume</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">volume_scale</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">write_audio_to_WAV</span><span class="p">:</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">midi_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.wav&#39;</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">r_audio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">r_audio</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setsampwidth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">setnchannels</span><span class="p">(</span><span class="n">r_audio</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">writeframes</span><span class="p">(</span><span class="n">r_audio</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="n">raw_audio</span>
+  
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
   </div>
