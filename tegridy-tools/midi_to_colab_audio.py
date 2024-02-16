@@ -2873,12 +2873,16 @@ def raw_audio_string(data):
 #===============================================================================
 
 import numpy as np
+import wave
 
 def midi_opus_to_colab_audio(midi_opus, 
                               soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                               sample_rate=16000, # 44100
                               volume_scale=10,
-                              output_for_gradio=False
+                              trim_silence=True,
+                              silence_threshold=0.1,
+                              output_for_gradio=False,
+                              write_audio_to_WAV=''
                               ):
 
     def normalize_volume(matrix, factor=10):
@@ -2888,68 +2892,95 @@ def midi_opus_to_colab_audio(midi_opus,
         final_matrix = np.clip(mult_matrix, -1.0, 1.0)
         return final_matrix
 
-    ticks_per_beat = midi_opus[0]
-    event_list = []
-    for track_idx, track in enumerate(midi_opus[1:]):
-        abs_t = 0
-        for event in track:
-            abs_t += event[1]
-            event_new = [*event]
-            event_new[1] = abs_t
-            event_list.append(event_new)
-    event_list = sorted(event_list, key=lambda e: e[1])
+    if midi_opus[1]:
 
-    tempo = int((60 / 120) * 10 ** 6)  # default 120 bpm
-    ss = np.empty((0, 2), dtype=np.int16)
-    fl = Synth(samplerate=float(sample_rate))
-    sfid = fl.sfload(soundfont_path)
-    last_t = 0
-    for c in range(16):
-        fl.program_select(c, sfid, 128 if c == 9 else 0, 0)
-    for event in event_list:
-        name = event[0]
-        sample_len = int(((event[1] / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-        sample_len -= int(((last_t / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-        last_t = event[1]
-        if sample_len > 0:
-            sample = fl.get_samples(sample_len).reshape(sample_len, 2)
-            ss = np.concatenate([ss, sample])
-        if name == "set_tempo":
-            tempo = event[2]
-        elif name == "patch_change":
-            c, p = event[2:4]
-            fl.program_select(c, sfid, 128 if c == 9 else 0, p)
-        elif name == "control_change":
-            c, cc, v = event[2:5]
-            fl.cc(c, cc, v)
-        elif name == "note_on" and event[3] > 0:
-            c, p, v = event[2:5]
-            fl.noteon(c, p, v)
-        elif name == "note_off" or (name == "note_on" and event[3] == 0):
-            c, p = event[2:4]
-            fl.noteoff(c, p)
+      ticks_per_beat = midi_opus[0]
+      event_list = []
+      for track_idx, track in enumerate(midi_opus[1:]):
+          abs_t = 0
+          for event in track:
+              abs_t += event[1]
+              event_new = [*event]
+              event_new[1] = abs_t
+              event_list.append(event_new)
+      event_list = sorted(event_list, key=lambda e: e[1])
 
-    fl.delete()
-    if ss.shape[0] > 0:
-        max_val = np.abs(ss).max()
-        if max_val != 0:
-            ss = (ss / max_val) * np.iinfo(np.int16).max
-    ss = ss.astype(np.int16)
-    
-    if output_for_gradio:
-      return ss
-    
-    ss = ss.swapaxes(1, 0)
+      tempo = int((60 / 120) * 10 ** 6)  # default 120 bpm
+      ss = np.empty((0, 2), dtype=np.int16)
+      fl = Synth(samplerate=float(sample_rate))
+      sfid = fl.sfload(soundfont_path)
+      last_t = 0
+      for c in range(16):
+          fl.program_select(c, sfid, 128 if c == 9 else 0, 0)
+      for event in event_list:
+          name = event[0]
+          sample_len = int(((event[1] / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
+          sample_len -= int(((last_t / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
+          last_t = event[1]
+          if sample_len > 0:
+              sample = fl.get_samples(sample_len).reshape(sample_len, 2)
+              ss = np.concatenate([ss, sample])
+          if name == "set_tempo":
+              tempo = event[2]
+          elif name == "patch_change":
+              c, p = event[2:4]
+              fl.program_select(c, sfid, 128 if c == 9 else 0, p)
+          elif name == "control_change":
+              c, cc, v = event[2:5]
+              fl.cc(c, cc, v)
+          elif name == "note_on" and event[3] > 0:
+              c, p, v = event[2:5]
+              fl.noteon(c, p, v)
+          elif name == "note_off" or (name == "note_on" and event[3] == 0):
+              c, p = event[2:4]
+              fl.noteoff(c, p)
 
-    raw_audio = normalize_volume(ss, volume_scale)
-    
-    return raw_audio
+      fl.delete()
+      if ss.shape[0] > 0:
+          max_val = np.abs(ss).max()
+          if max_val != 0:
+              ss = (ss / max_val) * np.iinfo(np.int16).max
+      ss = ss.astype(np.int16)
+
+      if trim_silence:
+          threshold = np.std(np.abs(ss)) * silence_threshold
+          exceeded_thresh = np.abs(ss) > threshold
+          if np.any(exceeded_thresh): 
+              last_idx = np.where(exceeded_thresh)[0][-1]
+              ss = ss[:last_idx+1]
+
+      if output_for_gradio:
+        return ss
+      
+      ss = ss.swapaxes(1, 0)
+
+      raw_audio = normalize_volume(ss, volume_scale)
+      
+      if write_audio_to_WAV != '':
+
+        r_audio = raw_audio.T
+
+        r_audio = np.int16(r_audio / np.max(np.abs(r_audio)) * 32767)
+
+        with wave.open(write_audio_to_WAV, 'w') as wf:
+            wf.setframerate(sample_rate)
+            wf.setsampwidth(2)
+            wf.setnchannels(r_audio.shape[1])
+            wf.writeframes(r_audio)
+
+      return raw_audio
+  
+    else:
+      return None
 
 def midi_to_colab_audio(midi_file, 
                         soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                         sample_rate=16000, # 44100
                         volume_scale=10,
-                        output_for_gradio=False
+                        trim_silence=True,
+                        silence_threshold=0.1,
+                        output_for_gradio=False,
+                        write_audio_to_WAV=False
                         ):
 
     '''
@@ -2964,8 +2995,6 @@ def midi_to_colab_audio(midi_file,
     
     '''
 
-    midi_opus = midi2opus(open(midi_file, 'rb').read())
-
     def normalize_volume(matrix, factor=10):
         norm = np.linalg.norm(matrix)
         matrix = matrix/norm  # normalized matrix
@@ -2973,61 +3002,89 @@ def midi_to_colab_audio(midi_file,
         final_matrix = np.clip(mult_matrix, -1.0, 1.0)
         return final_matrix
 
-    ticks_per_beat = midi_opus[0]
-    event_list = []
-    for track_idx, track in enumerate(midi_opus[1:]):
-        abs_t = 0
-        for event in track:
-            abs_t += event[1]
-            event_new = [*event]
-            event_new[1] = abs_t
-            event_list.append(event_new)
-    event_list = sorted(event_list, key=lambda e: e[1])
+    midi_opus = midi2opus(open(midi_file, 'rb').read())
 
-    tempo = int((60 / 120) * 10 ** 6)  # default 120 bpm
-    ss = np.empty((0, 2), dtype=np.int16)
-    fl = Synth(samplerate=float(sample_rate))
-    sfid = fl.sfload(soundfont_path)
-    last_t = 0
-    for c in range(16):
-        fl.program_select(c, sfid, 128 if c == 9 else 0, 0)
-    for event in event_list:
-        name = event[0]
-        sample_len = int(((event[1] / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-        sample_len -= int(((last_t / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-        last_t = event[1]
-        if sample_len > 0:
-            sample = fl.get_samples(sample_len).reshape(sample_len, 2)
-            ss = np.concatenate([ss, sample])
-        if name == "set_tempo":
-            tempo = event[2]
-        elif name == "patch_change":
-            c, p = event[2:4]
-            fl.program_select(c, sfid, 128 if c == 9 else 0, p)
-        elif name == "control_change":
-            c, cc, v = event[2:5]
-            fl.cc(c, cc, v)
-        elif name == "note_on" and event[3] > 0:
-            c, p, v = event[2:5]
-            fl.noteon(c, p, v)
-        elif name == "note_off" or (name == "note_on" and event[3] == 0):
-            c, p = event[2:4]
-            fl.noteoff(c, p)
+    if midi_opus[1]:
 
-    fl.delete()
-    if ss.shape[0] > 0:
-        max_val = np.abs(ss).max()
-        if max_val != 0:
-            ss = (ss / max_val) * np.iinfo(np.int16).max
-    ss = ss.astype(np.int16)
+      ticks_per_beat = midi_opus[0]
+      event_list = []
+      for track_idx, track in enumerate(midi_opus[1:]):
+          abs_t = 0
+          for event in track:
+              abs_t += event[1]
+              event_new = [*event]
+              event_new[1] = abs_t
+              event_list.append(event_new)
+      event_list = sorted(event_list, key=lambda e: e[1])
 
-    if output_for_gradio:
-      return ss
+      tempo = int((60 / 120) * 10 ** 6)  # default 120 bpm
+      ss = np.empty((0, 2), dtype=np.int16)
+      fl = Synth(samplerate=float(sample_rate))
+      sfid = fl.sfload(soundfont_path)
+      last_t = 0
+      for c in range(16):
+          fl.program_select(c, sfid, 128 if c == 9 else 0, 0)
+      for event in event_list:
+          name = event[0]
+          sample_len = int(((event[1] / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
+          sample_len -= int(((last_t / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
+          last_t = event[1]
+          if sample_len > 0:
+              sample = fl.get_samples(sample_len).reshape(sample_len, 2)
+              ss = np.concatenate([ss, sample])
+          if name == "set_tempo":
+              tempo = event[2]
+          elif name == "patch_change":
+              c, p = event[2:4]
+              fl.program_select(c, sfid, 128 if c == 9 else 0, p)
+          elif name == "control_change":
+              c, cc, v = event[2:5]
+              fl.cc(c, cc, v)
+          elif name == "note_on" and event[3] > 0:
+              c, p, v = event[2:5]
+              fl.noteon(c, p, v)
+          elif name == "note_off" or (name == "note_on" and event[3] == 0):
+              c, p = event[2:4]
+              fl.noteoff(c, p)
 
-    ss = ss.swapaxes(1, 0)
+      fl.delete()
+      if ss.shape[0] > 0:
+          max_val = np.abs(ss).max()
+          if max_val != 0:
+              ss = (ss / max_val) * np.iinfo(np.int16).max
+      ss = ss.astype(np.int16)
 
-    raw_audio = normalize_volume(ss, volume_scale)
-    
-    return raw_audio
+      if trim_silence:
+          threshold = np.std(np.abs(ss)) * silence_threshold
+          exceeded_thresh = np.abs(ss) > threshold
+          if np.any(exceeded_thresh): 
+              last_idx = np.where(exceeded_thresh)[0][-1]
+              ss = ss[:last_idx+1]
+
+      if output_for_gradio:
+        return ss
+
+      ss = ss.swapaxes(1, 0)
+
+      raw_audio = normalize_volume(ss, volume_scale)
+
+      if write_audio_to_WAV:
+
+        filename = midi_file.split('.')[-2] + '.wav'
+
+        r_audio = raw_audio.T
+
+        r_audio = np.int16(r_audio / np.max(np.abs(r_audio)) * 32767)
+
+        with wave.open(filename, 'w') as wf:
+            wf.setframerate(sample_rate)
+            wf.setsampwidth(2)
+            wf.setnchannels(r_audio.shape[1])
+            wf.writeframes(r_audio)
+
+      return raw_audio
+  
+    else:
+      return None
     
 #===================================================================================================================
