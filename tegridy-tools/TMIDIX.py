@@ -1461,6 +1461,7 @@ import tqdm
 
 from itertools import zip_longest
 from itertools import groupby
+from collections import Counter
 
 from operator import itemgetter
 
@@ -4535,6 +4536,29 @@ def check_and_fix_tones_chord(tones_chord):
       non_consecutive.remove(0)
 
     return non_consecutive
+
+###################################################################################
+
+def create_similarity_matrix(list_of_values, matrix_length=0):
+
+    counts = Counter(list_of_values).items()
+
+    if matrix_length > 0:
+      sim_matrix = [0] * max(matrix_length, len(list_of_values))
+    else:
+      sim_matrix = [0] * len(counts)
+
+    for c in counts:
+      sim_matrix[c[0]] = c[1]
+
+    similarity_matrix = [[0] * len(sim_matrix) for _ in range(len(sim_matrix))]
+
+    for i in range(len(sim_matrix)):
+      for j in range(len(sim_matrix)):
+        if max(sim_matrix[i], sim_matrix[j]) != 0:
+          similarity_matrix[i][j] = min(sim_matrix[i], sim_matrix[j]) / max(sim_matrix[i], sim_matrix[j])
+
+    return similarity_matrix, sim_matrix
 
 ###################################################################################
 
