@@ -5020,19 +5020,41 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
     <span class="n">fixed_score</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">note</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
 
-      <span class="n">nmt</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-      <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">nmt</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
-      <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">note_dur</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">new_note</span> <span class="o">=</span> <span class="p">[</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">note_dur</span><span class="p">]</span> <span class="o">+</span> <span class="n">note</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+
+        <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_note</span><span class="p">)</span>
+
+      <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">nmt</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">new_note</span> <span class="o">=</span> <span class="p">[</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">note_dur</span><span class="p">]</span> <span class="o">+</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+        <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_note</span><span class="p">)</span>
+
+      <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> 
 
     <span class="k">return</span> <span class="n">fixed_score</span>
 
@@ -9691,19 +9713,41 @@ The type of track (opus or score) is autodetected.</p></div>
   
     <span class="n">fixed_score</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">note</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
 
-      <span class="n">nmt</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-      <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">nmt</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
-      <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">note_dur</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">new_note</span> <span class="o">=</span> <span class="p">[</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">note_dur</span><span class="p">]</span> <span class="o">+</span> <span class="n">note</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+
+        <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_note</span><span class="p">)</span>
+
+      <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">nmt</span> <span class="o">=</span> <span class="n">monophonic_score</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nmt</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">nmt</span><span class="o">-</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">note_dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">new_note</span> <span class="o">=</span> <span class="p">[</span><span class="n">note</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">note_dur</span><span class="p">]</span> <span class="o">+</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+        <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_note</span><span class="p">)</span>
+
+      <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> 
 
     <span class="k">return</span> <span class="n">fixed_score</span>
 </pre></div>
