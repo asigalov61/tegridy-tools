@@ -174,7 +174,7 @@ Translates a "score" into MIDI, using score2opus() then opus2midi()
 
 #--------------------------- Decoding stuff ------------------------
 
-def midi2opus(midi=b''):
+def midi2opus(midi=b'', do_not_check_MIDI_signature=False):
     r'''Translates MIDI into a "opus".  For a description of the
 "opus" format, see opus2midi()
 '''
@@ -186,7 +186,8 @@ def midi2opus(midi=b''):
     if id != b'MThd':
         _warn("midi2opus: midi starts with "+str(id)+" instead of 'MThd'")
         _clean_up_warnings()
-        return [1000,[],]
+        if do_not_check_MIDI_signature == False:
+          return [1000,[],]
     [length, format, tracks_expected, ticks] = struct.unpack(
      '>IHHH', bytes(my_midi[4:14]))
     if length != 6:
@@ -266,27 +267,38 @@ see opus2midi() and score2opus().
     _clean_up_warnings()
     return score
 
-def midi2score(midi=b''):
+def midi2score(midi=b'', do_not_check_MIDI_signature=False):
     r'''
 Translates MIDI into a "score", using midi2opus() then opus2score()
 '''
-    return opus2score(midi2opus(midi))
+    return opus2score(midi2opus(midi, do_not_check_MIDI_signature))
 
-def midi2ms_score(midi=b''):
+def midi2ms_score(midi=b'', do_not_check_MIDI_signature=False):
     r'''
 Translates MIDI into a "score" with one beat per second and one
 tick per millisecond, using midi2opus() then to_millisecs()
 then opus2score()
 '''
-    return opus2score(to_millisecs(midi2opus(midi)))
+    return opus2score(to_millisecs(midi2opus(midi, do_not_check_MIDI_signature)))
 
-def midi2single_track_ms_score(midi=b'', recalculate_channels = True, pass_old_timings_events= False, verbose = False):
+def midi2single_track_ms_score(midi_path_or_bytes, 
+                                recalculate_channels = False, 
+                                pass_old_timings_events= False, 
+                                verbose = False, 
+                                do_not_check_MIDI_signature=False
+                                ):
     r'''
 Translates MIDI into a single track "score" with 16 instruments and one beat per second and one
 tick per millisecond
 '''
 
-    score = midi2score(midi)
+    if type(midi_path_or_bytes) == bytes:
+      midi_data = midi_path_or_bytes
+
+    elif type(midi_path_or_bytes) == str:
+      midi_data = open(midi_path_or_bytes, 'rb').read() 
+
+    score = midi2score(midi_data, do_not_check_MIDI_signature)
 
     if recalculate_channels:
 
@@ -1736,7 +1748,9 @@ def plot_ms_SONG(ms_song,
                   drums_color_num=128, 
                   plot_size=(11,4), 
                   note_height = 0.75,
-                  show_grid_lines=False):
+                  show_grid_lines=False,
+                  return_plt = False
+                  ):
 
   '''Tegridy ms SONG plotter/vizualizer'''
 
@@ -1784,10 +1798,13 @@ def plot_ms_SONG(ms_song,
     if show_grid_lines:
       ax.grid(color='white')
 
-    plt.xlabel('Time', c='black')
+    plt.xlabel('Time (ms)', c='black')
     plt.ylabel('Pitch', c='black')
 
     plt.title(plot_title)
+
+    if return_plt:
+      return plt
 
     plt.show()
 
@@ -4056,10 +4073,10 @@ def tones_chord_to_pitches(tones_chord, base_pitch=60):
 
 def advanced_score_processor(raw_score, 
                               patches_to_analyze=list(range(129)), 
-                              return_score_analysis=True, 
+                              return_score_analysis=False,
                               return_enhanced_score=False,
                               return_enhanced_score_notes=False,
-                              return_enhanced_monophonic_melody=False, 
+                              return_enhanced_monophonic_melody=False,
                               return_chordified_enhanced_score=False,
                               return_chordified_enhanced_score_with_lyrics=False,
                               return_score_tones_chords=False,
@@ -4327,30 +4344,39 @@ def replace_bad_tones_chord(bad_tones_chord):
 ###################################################################################
 
 def check_and_fix_chord(chord, 
-                        channel_index=3, 
-                        pitch_index=4):
+                        channel_index=3,
+                        pitch_index=4
+                        ):
 
-  chord_notes = [x for x in chord if x[channel_index] != 9]
-  chord_drums = [x for x in chord if x[channel_index] == 9]
-  chord_pitches = [x[pitch_index] for x in chord_notes]
-  tones_chord = sorted(set([x % 12 for x in chord_pitches]))
-  good_tones_chord = replace_bad_tones_chord(tones_chord)[0]
-  bad_tones = list(set(tones_chord) ^ set(good_tones_chord))
+    tones_chord = sorted(set([t[pitch_index] % 12 for t in chord if t[channel_index] != 9]))
 
-  if bad_tones:
+    notes_events = [t for t in chord if t[channel_index] != 9]
+    notes_events.sort(key=lambda x: x[pitch_index], reverse=True)
 
-    fixed_chord = []
+    drums_events = [t for t in chord if t[channel_index] == 9]
 
-    for c in chord_notes:
-      if (c[pitch_index] % 12) not in bad_tones:
-        fixed_chord.append(c)
+    checked_and_fixed_chord = []
 
-    fixed_chord += chord_drums
+    if tones_chord:
+        
+        new_tones_chord = check_and_fix_tones_chord(tones_chord, high_pitch=notes_events[0][4])
+        
+        if len(notes_events) > 1:
+            checked_and_fixed_chord.extend([notes_events[0]])
+            for cc in notes_events[1:]:
+                if cc[channel_index] != 9:
+                    if (cc[pitch_index] % 12) in new_tones_chord:
+                        checked_and_fixed_chord.extend([cc])
+            checked_and_fixed_chord.extend(drums_events)
+        else:
+            
+            checked_and_fixed_chord.extend([notes_events[0]])
+    else:
+        checked_and_fixed_chord.extend(chord)
 
-    return fixed_chord
+    checked_and_fixed_chord.sort(key=lambda x: x[pitch_index], reverse=True)
 
-  else:
-    return chord
+    return checked_and_fixed_chord
 
 ###################################################################################
 
@@ -4512,30 +4538,61 @@ def ascii_text_words_counter(ascii_text):
     
 ###################################################################################
 
-def check_and_fix_tones_chord(tones_chord):
+def check_and_fix_tones_chord(tones_chord, high_pitch=0):
+
+    def find_closest_tone(tones, tone):
+      return min(tones, key=lambda x:abs(x-tone))
 
     lst = tones_chord
 
+    if 0 < high_pitch < 128: 
+      ht = high_pitch % 12
+    else:
+      ht = 12
+
+    cht = find_closest_tone(lst, ht)
+
     if len(lst) == 2:
       if lst[1] - lst[0] == 1:
-        return [lst[-1]]
+        return [cht]
       else:
         if 0 in lst and 11 in lst:
-          lst.remove(0)
+          if find_closest_tone([0, 11], cht) == 11:
+            lst.remove(0)
+          else:
+            lst.remove(11)
         return lst
 
-    non_consecutive = [lst[0]]
+    non_consecutive = []
 
     if len(lst) > 2: 
-      for i in range(1, len(lst) - 1):
-          if lst[i-1] + 1 != lst[i] and lst[i] + 1 != lst[i+1]:
-              non_consecutive.append(lst[i])
-      non_consecutive.append(lst[-1])
+      for i in range(0, len(lst) - 1):
+          if lst[i] + 1 != lst[i+1]:
+            non_consecutive.append(lst[i])
+      if lst[-1] - lst[-2] > 1:
+        non_consecutive.append(lst[-1])
 
-    if 0 in non_consecutive and 11 in non_consecutive:
-      non_consecutive.remove(0)
+    if cht not in non_consecutive:
+      non_consecutive.append(cht)
+      non_consecutive.sort()
+      if any(abs(non_consecutive[i+1] - non_consecutive[i]) == 1 for i in range(len(non_consecutive) - 1)):
+        final_list = [x for x in non_consecutive if x == cht or abs(x - cht) > 1]
+      else:
+        final_list = non_consecutive
 
-    return non_consecutive
+    else:
+      final_list = non_consecutive
+
+    if 0 in final_list and 11 in final_list:
+      if find_closest_tone([0, 11], cht) == 11:
+        final_list.remove(0)
+      else:
+        final_list.remove(11)
+
+    if cht in final_list or ht in final_list:
+      return final_list
+    else:
+      return ['Error']
 
 ###################################################################################
 
@@ -4559,6 +4616,31 @@ def create_similarity_matrix(list_of_values, matrix_length=0):
           similarity_matrix[i][j] = min(sim_matrix[i], sim_matrix[j]) / max(sim_matrix[i], sim_matrix[j])
 
     return similarity_matrix, sim_matrix
+
+###################################################################################
+
+def augment_enhanced_score_notes(enhanced_score_notes,
+                                  timings_divider=16,
+                                  full_sorting=True,
+                                  timings_shift=0,
+                                  pitch_shift=0
+                                ):
+
+    esn = copy.deepcopy(enhanced_score_notes)
+
+    for e in esn:
+      e[1] = int(e[1] / timings_divider) + timings_shift
+      e[2] = int(e[2] / timings_divider) + timings_shift
+      e[4] = e[4] + pitch_shift
+
+    if full_sorting:
+
+      # Sorting by patch, pitch, then by start-time
+      esn.sort(key=lambda x: x[6])
+      esn.sort(key=lambda x: x[4], reverse=True)
+      esn.sort(key=lambda x: x[1])
+
+    return esn
 
 ###################################################################################
 
