@@ -3797,19 +3797,41 @@ def fix_monophonic_score_durations(monophonic_score):
   
     fixed_score = []
 
-    for i in range(len(monophonic_score)-1):
-      note = monophonic_score[i]
+    if monophonic_score[0][0] == 'note':
 
-      nmt = monophonic_score[i+1][1]
+      for i in range(len(monophonic_score)-1):
+        note = monophonic_score[i]
 
-      if note[1]+note[2] >= nmt:
-        note_dur = nmt-note[1]-1
-      else:
-        note_dur = note[2]
+        nmt = monophonic_score[i+1][1]
 
-      fixed_score.append([note[0], note[1], note_dur, note[3], note[4], note[5]])
+        if note[1]+note[2] >= nmt:
+          note_dur = nmt-note[1]-1
+        else:
+          note_dur = note[2]
 
-    fixed_score.append(monophonic_score[-1])
+        new_note = [note[0], note[1], note_dur] + note[3:]
+
+        fixed_score.append(new_note)
+
+      fixed_score.append(monophonic_score[-1])
+
+    elif type(monophonic_score[0][0]) == int:
+
+      for i in range(len(monophonic_score)-1):
+        note = monophonic_score[i]
+
+        nmt = monophonic_score[i+1][0]
+
+        if note[0]+note[1] >= nmt:
+          note_dur = nmt-note[0]-1
+        else:
+          note_dur = note[1]
+
+        new_note = [note[0], note_dur] + note[2:]
+
+        fixed_score.append(new_note)
+
+      fixed_score.append(monophonic_score[-1]) 
 
     return fixed_score
 
