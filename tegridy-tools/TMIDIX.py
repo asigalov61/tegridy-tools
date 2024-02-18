@@ -4381,7 +4381,7 @@ def check_and_fix_chord(chord,
 
     if tones_chord:
         
-        new_tones_chord = check_and_fix_tones_chord(tones_chord, high_pitch=notes_events[0][pitch_index])
+        new_tones_chord = advanced_check_and_fix_tones_chord(tones_chord, high_pitch=notes_events[0][pitch_index])
 
         if new_tones_chord != tones_chord:
 
@@ -4563,10 +4563,37 @@ def ascii_text_words_counter(ascii_text):
     
 ###################################################################################
 
-def check_and_fix_tones_chord(tones_chord, high_pitch=0):
+def check_and_fix_tones_chord(tones_chord):
 
-    def find_closest_tone(tones, tone):
-      return min(tones, key=lambda x:abs(x-tone))
+    lst = tones_chord
+
+    if len(lst) == 2:
+      if lst[1] - lst[0] == 1:
+        return [lst[-1]]
+      else:
+        if 0 in lst and 11 in lst:
+          lst.remove(0)
+        return lst
+
+    non_consecutive = [lst[0]]
+
+    if len(lst) > 2: 
+      for i in range(1, len(lst) - 1):
+          if lst[i-1] + 1 != lst[i] and lst[i] + 1 != lst[i+1]:
+              non_consecutive.append(lst[i])
+      non_consecutive.append(lst[-1])
+
+    if 0 in non_consecutive and 11 in non_consecutive:
+      non_consecutive.remove(0)
+
+    return non_consecutive
+
+###################################################################################
+
+def find_closest_tone(tones, tone):
+  return min(tones, key=lambda x:abs(x-tone))
+
+def advanced_check_and_fix_tones_chord(tones_chord, high_pitch=0):
 
     lst = tones_chord
 
