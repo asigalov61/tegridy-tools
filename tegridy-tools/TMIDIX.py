@@ -4381,18 +4381,21 @@ def check_and_fix_chord(chord,
 
     if tones_chord:
         
-        new_tones_chord = check_and_fix_tones_chord(tones_chord, high_pitch=notes_events[0][4])
-        
-        if len(notes_events) > 1:
-            checked_and_fixed_chord.extend([notes_events[0]])
-            for cc in notes_events[1:]:
-                if cc[channel_index] != 9:
-                    if (cc[pitch_index] % 12) in new_tones_chord:
-                        checked_and_fixed_chord.extend([cc])
-            checked_and_fixed_chord.extend(drums_events)
+        new_tones_chord = check_and_fix_tones_chord(tones_chord, high_pitch=notes_events[0][pitch_index])
+
+        if new_tones_chord != tones_chord:
+
+          if len(notes_events) > 1:
+              checked_and_fixed_chord.extend([notes_events[0]])
+              for cc in notes_events[1:]:
+                  if cc[channel_index] != 9:
+                      if (cc[pitch_index] % 12) in new_tones_chord:
+                          checked_and_fixed_chord.extend([cc])
+              checked_and_fixed_chord.extend(drums_events)
+          else:
+              checked_and_fixed_chord.extend([notes_events[0]])
         else:
-            
-            checked_and_fixed_chord.extend([notes_events[0]])
+          checked_and_fixed_chord.extend(chord)
     else:
         checked_and_fixed_chord.extend(chord)
 
