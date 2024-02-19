@@ -20,5 +20,9 @@ melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore))
 
 ***
 
+### Make sure to also check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) dir as there are many useful and practical examples as well
+
+***
+
 ### Project Los Angeles
 ### Tegridy Code 2024
