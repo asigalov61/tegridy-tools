@@ -118,7 +118,7 @@ TMIDIX.plot_ms_SONG(output_score, plot_title=output_file_name+'.mid')
 
 ***
 
-### Make sure to also check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) dir as there are many useful and practical examples as well
+### Make sure to check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) dir for many useful and practical examples and applications
 
 ***
 
