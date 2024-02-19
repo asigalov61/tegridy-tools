@@ -1,19 +1,31 @@
 #!/bin/bash
 
+# Home dir
+cd ~
+
 # Clone the repository
 git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 
-# Change directory to the cloned repository
-cd tegridy-tools/install
+# Check for CUDA and set the requirements and setup file paths
+REQUIREMENTS_PATH="./tegridy-tools/install/requirements.txt"
+SETUP_PATH="./tegridy-tools/install/setup.py"
+if command -v nvcc &> /dev/null
+then
+    echo "CUDA is installed"
+    REQUIREMENTS_PATH="./tegridy-tools/install/requirements_cuda.txt"
+    SETUP_PATH="./tegridy-tools/install/setup_cuda.py"
+else
+    echo "CUDA is not installed"
+fi
 
 # Install Python packages
-pip install -r requirements.txt
+pip install -r $REQUIREMENTS_PATH
 
 # Install fluidsynth
 apt install fluidsynth
 
 # Run the Python script
-python setup.py
+python $SETUP_PATH
 
 # Return to the home directory
-cd
+cd ~

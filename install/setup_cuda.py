@@ -28,6 +28,9 @@ import numpy as np
 import TMIDIX
 import midi_to_colab_audio
 
+import torch
+import cupy as cp
+
 from x_transformer_1_23_2 import *
 
 import random
