@@ -10,7 +10,7 @@
 ### Recommended and required for the latest version of the modules/files: 
 
 ```
-git clone --depth 1 https://github.com/asigalov61/tegridy-tools
+!git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 ```
 
 ***
