@@ -30,6 +30,8 @@ import midi_to_colab_audio
 
 import random
 
+from IPython.display import display, Audio
+
 import locale
 locale.getpreferredencoding = lambda: "UTF-8"
 

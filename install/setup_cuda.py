@@ -35,6 +35,8 @@ from x_transformer_1_23_2 import *
 
 import random
 
+from IPython.display import display, Audio
+
 import locale
 locale.getpreferredencoding = lambda: "UTF-8"
 
