@@ -4,10 +4,10 @@ print('Setting up tegridy-tools...Please wait...')
 import sys
 import os
 
-sys.path.insert(0,'~/tegridy-tools')
-sys.path.insert(0,'~/tegridy-tools/tegridy-tools')
-sys.path.insert(0,'~/tegridy-tools/tegridy-data')
-sys.path.insert(0,'~/tegridy-tools/tegridy-tools/X-Transformer')
+sys.path.insert(0,os.getcwd()+'/tegridy-tools')
+sys.path.insert(0,os.getcwd()+'/tegridy-tools/tegridy-tools')
+sys.path.insert(0,os.getcwd()+'/tegridy-tools/tegridy-data')
+sys.path.insert(0,os.getcwd()+'/tegridy-tools/tegridy-tools/X-Transformer')
 
 import pickle
 from collections import Counter
