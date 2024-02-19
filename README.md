@@ -15,16 +15,14 @@ git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 
 ***
 
-### Hassle-free install of the latest release (not latest files): 
+### Hassle-free automatic install , setup, and all core modules imports:
 
 ```
-pip install tegridy-tools
-```
-
-### After pip install you should be able to import main modules like so:
-
-```
-from tegridy_tools import TMIDI, minGPT, markovify
+!curl -O https://raw.githubusercontent.com/asigalov61/tegridy-tools/main/install/setup.sh
+# !wget https://raw.githubusercontent.com/asigalov61/tegridy-tools/main/install/setup.sh
+!chmod +x setup.sh
+!bash setup.sh
+!rm setup.sh
 ```
 
 ***
