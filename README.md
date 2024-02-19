@@ -2,7 +2,7 @@
 
 ***
 
-## Symbolic music artificial Intelligence toolkit for rapid prototyping, design and evaluation of the symbolic music AI models, systems and architectures
+## Symbolic music artificial Intelligence toolkit for rapid prototyping, design and evaluation of the symbolic music AI architectures, systems and models
 
 ***
 
