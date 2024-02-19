@@ -14,7 +14,7 @@ git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 # Check for CUDA and set the requirements and setup file paths
 REQUIREMENTS_PATH="./tegridy-tools/install/requirements.txt"
 SETUP_PATH="tegridy-tools/install/setup.py"
-if command -v nvcc &> /dev/null
+if command -v nvidia-smi &> /dev/null
 then
     echo "CUDA is installed"
     REQUIREMENTS_PATH="./tegridy-tools/install/requirements_cuda.txt"
