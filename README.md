@@ -33,12 +33,14 @@
 
 ```
 !python ./tegridy-tools/install/setup.py
+!python ./tegridy-tools/install/setup_cuda.py
 ```
 
 #### Google Colab auto-imports/re-imports
 
 ```
 %run ./tegridy-tools/install/setup.py
+%run ./tegridy-tools/install/setup_cuda.py
 ```
 
 #### Manual imports/re-imports:
