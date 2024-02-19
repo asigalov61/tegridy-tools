@@ -2,7 +2,7 @@
 
 ***
 
-### Here is a full code-snippet for TMIDIX modules main functions
+### Here is a full code snippet for TMIDIX modules main functions
 
 ```
 input_midi = './tegridy-tools/tegridy-tools/seed2.mid'
