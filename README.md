@@ -5,9 +5,10 @@
 ## Music NLP Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) NLP Artificial Intelligence systems and architectures.
 
 ***
-## Install:
 
-### Recommended and required for the latest version of the modules/files: 
+# Install:
+
+## Recommended and required for the latest version of the modules/files: 
 
 ```
 !git clone --depth 1 https://github.com/asigalov61/tegridy-tools
@@ -15,7 +16,7 @@
 
 ***
 
-### Hassle-free automatic install , setup, and all core modules imports:
+## Hassle-free automatic install , setup, and all core modules imports:
 
 ```
 !curl -O https://raw.githubusercontent.com/asigalov61/tegridy-tools/main/install/setup.sh
@@ -27,23 +28,29 @@
 
 ***
 
-### After install you can import/re-import modules like so:
+## After install you can import/re-import modules like so:
 
-#### Standard auto-imports/re-imports
+### Standard Python auto-imports/re-imports
 
 ```
+# CPU setup and imports
 !python ./tegridy-tools/install/setup.py
+
+# GPU setup and imports
 !python ./tegridy-tools/install/setup_cuda.py
 ```
 
-#### Google Colab auto-imports/re-imports
+### Google Colab auto-imports/re-imports
 
 ```
+# CPU setup and imports
 %run ./tegridy-tools/install/setup.py
+
+# GPU setup and imports
 %run ./tegridy-tools/install/setup_cuda.py
 ```
 
-#### Manual imports/re-imports:
+### Manual imports/re-imports:
 
 ```
 import TMIDIX
@@ -54,11 +61,11 @@ import random
 
 ***
 
-### Many practical and specific Python examples, as well as the detailed Jupyter/Google Colab notebooks are available here:
+# Quick Start Guide:
 
-### [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks)
+## Start by checking out [Example code snippets and scripts](https://github.com/asigalov61/tegridy-tools/tree/main/Examples)
 
-### [Python Examples](https://github.com/asigalov61/tegridy-tools/tree/main/Examples)
+## Or you can check out many practical, specific and detailed [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks)
 
 ***
 
@@ -108,4 +115,4 @@ import random
 ***
 
 ### Project Los Angeles
-### Tegridy Code 2023
+### Tegridy Code 2024
