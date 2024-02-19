@@ -2,10 +2,10 @@
 
 ***
 
-### Music NLP Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) NLP Artificial Intelligence systems and architectures.
+## Music NLP Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) NLP Artificial Intelligence systems and architectures.
 
 ***
-### Install:
+## Install:
 
 ### Recommended and required for the latest version of the modules/files: 
 
@@ -23,6 +23,31 @@ git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 !chmod +x setup.sh
 !bash setup.sh
 !rm setup.sh
+```
+
+***
+
+### After install you can import/re-import modules like so:
+
+#### Standard auto-imports/re-imports
+
+```
+!python ./tegridy-tools/install/setup.py
+```
+
+#### Google Colab auto-imports/re-imports
+
+```
+%run ./tegridy-tools/install/setup.py
+```
+
+#### Manual imports/re-imports:
+
+```
+import TMIDIX
+import midi_to_colab_audio
+from x_transformer_1_23_2 import *
+import random
 ```
 
 ***
