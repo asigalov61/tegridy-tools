@@ -6,7 +6,7 @@
 
 ***
 
-# Install:
+# Install
 
 ## Recommended and required for the latest version of the modules/files: 
 
@@ -16,7 +16,7 @@
 
 ***
 
-## Hassle-free automatic install , setup, and all core modules imports:
+## Hassle-free automatic install , setup, and all core modules imports
 
 ```
 !curl -O https://raw.githubusercontent.com/asigalov61/tegridy-tools/main/install/setup.sh
@@ -28,7 +28,7 @@
 
 ***
 
-## After install you can import/re-import modules like so:
+## After install you can import/re-import modules like so...
 
 ### Standard Python auto-imports/re-imports
 
@@ -50,7 +50,7 @@
 %run ./tegridy-tools/install/setup_cuda.py
 ```
 
-### Manual imports/re-imports:
+### Manual imports/re-imports
 
 ```
 import TMIDIX
@@ -61,7 +61,7 @@ import random
 
 ***
 
-# Quick Start Guide:
+# Quick Start Guide
 
 ## Start by checking out [Example code snippets and scripts](https://github.com/asigalov61/tegridy-tools/tree/main/Examples)
 
