@@ -2,7 +2,7 @@
 
 ***
 
-## Music NLP Artificial Intelligence toolkit for rapid prototyping, design, and evaluation of the (Music) NLP Artificial Intelligence systems and architectures.
+## Symbolic music artificial Intelligence toolkit for rapid prototyping, design and evaluation of the symbolic music AI models, systems and architectures
 
 ***
 
