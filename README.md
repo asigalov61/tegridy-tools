@@ -63,44 +63,15 @@ import random
 
 # Quick Start Guide
 
-## Start by checking out [Example code snippets and scripts](https://github.com/asigalov61/tegridy-tools/tree/main/Examples)
+## Start by checking out [example code snippets and scripts](https://github.com/asigalov61/tegridy-tools/tree/main/Examples)
 
 ## Or you can check out many practical, specific and detailed [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks)
 
 ***
 
-# tegridy-tools docs
+# Detailed core modules documentation
 
-***
-
-## [TMIDIX](https://asigalov61.github.io/tegridy-tools/TMIDIX.html)
-
-## (DEPRECIATED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
-
-***
-## [NEW] [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
-## [X Transformer 1-23-2](https://asigalov61.github.io/tegridy-tools/x_transformer_1_23_2.html)
-## [X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
-## [LWA-Transformer](https://asigalov61.github.io/tegridy-tools/lwa_transformer.html)
-## [Perceiver-AR](https://asigalov61.github.io/tegridy-tools/Perceiver-AR.html)
-## [seq2seq](https://asigalov61.github.io/tegridy-tools/seq2seq.html)
-## [GPT2RGAX](https://asigalov61.github.io/tegridy-tools/GPT2RGAX.html)
-## [GPT2RGA](https://asigalov61.github.io/tegridy-tools/GPT2RGA.html)
-## [minGPT](https://asigalov61.github.io/tegridy-tools/minGPT.html)
-## [markovify](https://asigalov61.github.io/tegridy-tools/markovify.html)
-
-***
-
-## [ClassyMIDI](https://asigalov61.github.io/tegridy-tools/ClassyMIDI.html)
-## [TinyMIDI](https://asigalov61.github.io/tegridy-tools/TinyMIDI.html)
-
-***
-
-## [NEW] [TORAH](https://asigalov61.github.io/tegridy-tools/TORAH.html)
-## [MIDI to Colab Audio](https://asigalov61.github.io/tegridy-tools/midi_to_colab_audio.html)
-## [MIDI Synthesizer](https://asigalov61.github.io/tegridy-tools/MIDI_Synthesizer.html)
-## [SyllablesSearch](https://asigalov61.github.io/tegridy-tools/SyllablesSearch.html)
-## [HaystackSearch](https://asigalov61.github.io/tegridy-tools/HaystackSearch.html)
+## [tegridy-tools docs](https://github.com/asigalov61/tegridy-tools/tree/main/docs)
 
 ***
 
