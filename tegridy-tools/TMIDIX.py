@@ -1798,8 +1798,8 @@ def plot_ms_SONG(ms_song,
     if show_grid_lines:
       ax.grid(color='white')
 
-    plt.xlabel('Time (ms)', c='black')
-    plt.ylabel('Pitch', c='black')
+    plt.xlabel('Time (s)', c='black')
+    plt.ylabel('MIDI Pitch', c='black')
 
     plt.title(plot_title)
 
@@ -4693,6 +4693,46 @@ def augment_enhanced_score_notes(enhanced_score_notes,
       esn.sort(key=lambda x: x[1])
 
     return esn
+
+###################################################################################
+
+def extract_melody(chordified_enhanced_score, 
+                    melody_range=[60, 84], 
+                    melody_channel=0,
+                    melody_patch=0
+                  ):
+
+    melody_score = copy.deepcopy([c[0] for c in chordified_enhanced_score if c[0][3] != 9])
+    
+    for e in melody_score:
+        e[3] = melody_channel
+        e[6] = melody_patch
+
+        if e[4] < melody_range[0]:
+            e[4] = (e[4] % 12) + melody_range[0]
+            
+        if e[4] > melody_range[1]:
+            e[4] = (e[4] % 12) + melody_range[1]
+
+    return fix_monophonic_score_durations(melody_score)
+
+###################################################################################
+
+def flip_enhanced_score_notes(enhanced_score_notes):
+
+    min_pitch = min([e[4] for e in enhanced_score_notes if e[3] != 9])
+
+    fliped_score_pitches = [127 - e[4]for e in enhanced_score_notes if e[3] != 9]
+
+    delta_min_pitch = min_pitch - min([p for p in fliped_score_pitches])
+
+    output_score = copy.deepcopy(enhanced_score_notes)
+
+    for e in output_score:
+        if e[3] != 9:
+            e[4] = (127 - e[4]) + delta_min_pitch
+
+    return output_score
 
 ###################################################################################
 
