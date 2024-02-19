@@ -34,6 +34,7 @@ import random
 import locale
 locale.getpreferredencoding = lambda: "UTF-8"
 
+print('=' * 70)
 print('Done!')
 print('Enjoy!')
 print('=' * 70)
