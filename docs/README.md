@@ -7,7 +7,9 @@
 ## (DEPRECIATED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
 
 ***
-## [NEW] [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
+
+## [NEW] [X Transformer 1-27-16](https://asigalov61.github.io/tegridy-tools/x_transformer_1_27_16.html)
+## [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
 ## [X Transformer 1-23-2](https://asigalov61.github.io/tegridy-tools/x_transformer_1_23_2.html)
 ## [X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
 ## [LWA-Transformer](https://asigalov61.github.io/tegridy-tools/lwa_transformer.html)
@@ -35,4 +37,4 @@
 
 ### Project Los Angeles
 
-### Tegridy Code 2023
+### Tegridy Code 2024
