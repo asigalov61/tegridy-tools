@@ -1,5 +1,5 @@
 # PyTorch [x-transformers](https://github.com/lucidrains/x-transformers) implementation by lucidrains
-## with useful modifications as stand-alone Python module
+## with useful modifications as a stand-alone Python module
 
 ***
 
