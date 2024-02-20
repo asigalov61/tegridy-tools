@@ -31,7 +31,7 @@ import midi_to_colab_audio
 import torch
 import cupy as cp
 
-from x_transformer_1_23_2 import *
+from x_transformer_1_27_16 import *
 
 import random
 
