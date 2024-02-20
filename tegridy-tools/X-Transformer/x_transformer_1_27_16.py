@@ -3,7 +3,7 @@ r'''############################################################################
 #
 # X Trasformer Module
 #
-# Partial x-transformers code With useful modifications
+# x-transformers code With useful modifications
 #
 # Version 1.27.16
 #
