@@ -1,15 +1,22 @@
-# PyTorch x-transformers implementation by lucidrains
-## https://github.com/lucidrains/x-transformers
-
-### Partial code as of 10/11/2023
+# PyTorch [x-transformers](https://github.com/lucidrains/x-transformers) implementation by lucidrains
+## with useful modifications as stand-alone Python module
 
 ***
 
-### Dependencies:
-### 1) PyTorch (pip install torch)
-### 2) einops (pip install einops)
+## Source code retrieved on 02/20/2024
+
+***
+
+## Critical dependencies:
+### [PyTorch](https://github.com/pytorch/pytorch)
+### [einops](https://github.com/arogozhnikov/einops)
+
+```
+!pip install torch
+!pip install einops
+```
 
 ***
 
 ### Project Los Angeles
-### Tegridy Code 2023
+### Tegridy Code 2024
