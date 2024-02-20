@@ -23,6 +23,16 @@ r'''############################################################################
 # !pip install einops
 #
 #===============================================================================
+#
+# Basic use example
+#
+# from x_transformer_1_27_16 import *
+#
+# model = instantiate_x_transformer_model()
+# save_x_transformer_model(model)
+# load_x_transformer_model('model_checkpoint_1_epochs_1_steps_0_loss_1_acc.pth')
+#
+#===============================================================================
 '''
 
 ################################################################################
@@ -2997,7 +3007,7 @@ class AutoregressiveWrapper(Module):
             beta = 0.5,
             alpha = 0.1
         ),
-        cache_kv = True,
+        cache_kv = False,
         verbose=True,
         return_prime=False,
         **kwargs
@@ -3104,6 +3114,10 @@ class AutoregressiveWrapper(Module):
             # concat sample
 
             out = torch.cat((out, sample), dim=-1)
+
+            if verbose:
+              if sl % 32 == 0:
+                print(sl, '/', seq_len)
 
             if not exists(eos_token):
                 continue
@@ -3631,4 +3645,160 @@ class XValAutoregressiveWrapper(nn.Module):
 
         return loss, LossBreakdown(cross_entropy_loss, numerical_mse_loss)
 
+################################################################################
+
+################################################################################
+# Code for instantiating, saving and loading a simple model
+################################################################################
+
+import os
+import importlib
+
+#===============================================================================
+
+def instantiate_x_transformer_model(num_tokens=20000,
+                                    max_seq_len=8192,
+                                    dim=1024,
+                                    depth=32,
+                                    heads=32,
+                                    attn_flash=True,
+                                    ignore_index=-1,
+                                    verbose=True):
+    if verbose:
+      print('=' * 70)
+      print('Instantiating x-transformer model...')
+
+    model = TransformerWrapper(
+                                num_tokens = num_tokens,
+                                max_seq_len = max_seq_len,
+                                attn_layers = Decoder(
+                                                      dim = dim, 
+                                                      depth = depth, 
+                                                      heads = heads, 
+                                                      attn_flash = attn_flash
+                                                      )
+                              )
+
+    model = AutoregressiveWrapper(model, 
+                                  ignore_index=ignore_index
+                                  )
+
+    model.cuda()
+
+    if verbose:
+      print('Done!')
+      print('=' * 70)
+
+    return model
+
+#===============================================================================
+
+def save_x_transformer_model(model,
+                              checkpoint_dir='./',
+                              checkpoint_name='model_checkpoint', 
+                              number_of_tokens=20000, 
+                              ignore_index=-1, 
+                              max_seq_len=8192, 
+                              dim=1024, 
+                              depth=32, 
+                              heads=32, 
+                              use_flash_attn=True,
+                              batch_size=4,
+                              grad_acc_rate=4,
+                              learning_rate=1e-4,
+                              num_epochs=1,
+                              num_steps=1,
+                              loss=0,
+                              accuracy=1,
+                              verbose=True
+                            ):
+    
+    if verbose:
+      print('=' * 70)
+      print('Saving x-transformer model...')
+
+    checkpoint_full_name = ''
+    checkpoint_full_name += checkpoint_name + '_' 
+    checkpoint_full_name += str(num_epochs) + '_epochs_'
+    checkpoint_full_name += str(num_steps) + '_steps_'
+    checkpoint_full_name += str(loss) + '_loss_'
+    checkpoint_full_name += str(accuracy) + '_acc'
+    checkpoint_full_name += '.pth'
+
+    checkpoint_full_path_and_name = os.path.join(checkpoint_dir, checkpoint_full_name)
+
+#===============================================================================
+
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'class_name': model.__class__.__name__,
+        'class_module': model.__class__.__module__,
+        'num_tokens': number_of_tokens,
+        'max_seq_len': max_seq_len,
+        'attn_layers': {
+            'dim': dim,
+            'depth': depth,
+            'heads': heads,
+            'attn_flash': use_flash_attn
+            },
+        'batch_size': batch_size,
+        'grad_acc_rate': grad_acc_rate,
+        'learning_rate': learning_rate,
+        'ignore_index': ignore_index,
+        'num_epochs': num_epochs,
+        'num_steps': num_steps,
+        'loss': loss,
+        'accuracy': accuracy
+    }, checkpoint_full_path_and_name
+)
+
+    if verbose:
+      print('Done!')
+      print('=' * 70)
+      print('Saved model name:', checkpoint_full_name)
+      print('=' * 70)
+
+#===============================================================================
+
+def load_x_transformer_model(checkpoint_file_path,
+                             verbose=True
+                             ):
+    
+    if verbose:
+      print('=' * 70)
+      print('Loading x-transformer model...')
+
+    checkpoint = torch.load(checkpoint_file_path)
+    module = importlib.import_module(checkpoint['class_module'])
+    class_ = getattr(module, checkpoint['class_name'])
+    attn_layers = Decoder(**checkpoint['attn_layers'])
+    transformer_model = TransformerWrapper(num_tokens=checkpoint['num_tokens'],
+                                          max_seq_len=checkpoint['max_seq_len'],
+                                          attn_layers=attn_layers)
+    model = class_(transformer_model, ignore_index=checkpoint['ignore_index'])
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.cuda()
+
+    if verbose:
+      print('Done!')
+      print('=' * 70)
+      print('Model stats:')
+      print('Number of tokens:', checkpoint['num_tokens'])
+      print('Ignore index:', checkpoint['ignore_index'])
+      print('Max sequence length::', checkpoint['max_seq_len'])
+      print('Dimension:', checkpoint['attn_layers']['dim'])
+      print('Depth:', checkpoint['attn_layers']['depth'])
+      print('Number of heads:', checkpoint['attn_layers']['heads'])
+      print('Flash attention:', checkpoint['attn_layers']['attn_flash'])
+      print('Training batch size', checkpoint['batch_size'])
+      print('Training gradient accumulation rate:', checkpoint['grad_acc_rate'])
+      print('Training learining rate:', checkpoint['learning_rate'])
+      print('Number of training epochs:', checkpoint['num_epochs'])
+      print('Number of training steps:', checkpoint['num_steps'])
+      print('Model loss:', checkpoint['loss'])
+      print('Model accuracy:', checkpoint['accuracy'])
+      print('=' * 70)
+
+################################################################################
+# This is the end of x-transformer Python module
 ################################################################################
