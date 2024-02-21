@@ -5954,8 +5954,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             
-        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">12</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fix_monophonic_score_durations</span><span class="p">(</span><span class="n">melody_score</span><span class="p">)</span>
 
@@ -6078,8 +6078,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                          <span class="n">drums_patch</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
                                          <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
                                          <span class="p">):</span>
-
-  <span class="n">pitches_channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
 
   <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span>
 
@@ -10001,8 +9999,8 @@ The type of track (opus or score) is autodetected.</p></div>
         <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             
-        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">melody_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">12</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fix_monophonic_score_durations</span><span class="p">(</span><span class="n">melody_score</span><span class="p">)</span>
 </pre></div>
@@ -10911,8 +10909,6 @@ see opus2midi() and score2opus().</p></div>
                                          <span class="n">drums_patch</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
                                          <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
                                          <span class="p">):</span>
-
-  <span class="n">pitches_channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
 
   <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span>
 
