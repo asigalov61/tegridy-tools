@@ -35,7 +35,9 @@
 ```
 # CPU setup and imports
 !python ./tegridy-tools/install/setup.py
+```
 
+```
 # GPU setup and imports
 !python ./tegridy-tools/install/setup_cuda.py
 ```
@@ -45,7 +47,9 @@
 ```
 # CPU setup and imports
 %run ./tegridy-tools/install/setup.py
+```
 
+```
 # GPU setup and imports
 %run ./tegridy-tools/install/setup_cuda.py
 ```
@@ -55,7 +59,7 @@
 ```
 import TMIDIX
 import midi_to_colab_audio
-from x_transformer_1_23_2 import *
+from x_transformer_1_27_16 import *
 import random
 ```
 
