@@ -7,6 +7,8 @@
 ### MIDI input
 
 ```
+import TMIDIX
+
 #===============================================================================
 # Input MIDI file (as filepath or bytes)
 
@@ -41,6 +43,10 @@ melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore, mel
 ### MIDI output
 
 ```
+import copy
+import TMIDIX
+from IPython.display import display, Audio
+
 #===============================================================================
 # Input variables
 
