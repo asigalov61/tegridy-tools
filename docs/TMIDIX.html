@@ -1065,6 +1065,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.ALL_CHORDS_SORTED">ALL_CHORDS_SORTED</a></li>
     <li class="mono"><a href="#TMIDIX.All_events">All_events</a></li>
     <li class="mono"><a href="#TMIDIX.Event2channelindex">Event2channelindex</a></li>
+    <li class="mono"><a href="#TMIDIX.MIDI_Instruments_Families">MIDI_Instruments_Families</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_events">MIDI_events</a></li>
     <li class="mono"><a href="#TMIDIX.Meta_events">Meta_events</a></li>
     <li class="mono"><a href="#TMIDIX.Nontext_meta_events">Nontext_meta_events</a></li>
@@ -1145,6 +1146,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.midi2single_track_ms_score">midi2single_track_ms_score</a></li>
     <li class="mono"><a href="#TMIDIX.opus2midi">opus2midi</a></li>
     <li class="mono"><a href="#TMIDIX.opus2score">opus2score</a></li>
+    <li class="mono"><a href="#TMIDIX.patch_enhanced_score_notes">patch_enhanced_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.patch_list_from_enhanced_score_notes">patch_list_from_enhanced_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.patch_to_instrument_family">patch_to_instrument_family</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_chord_to_int">pitches_chord_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_to_tones_chord">pitches_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.play_score">play_score</a></li>
@@ -2884,13 +2888,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span> <span class="nf">Tegridy_ms_SONG_to_MIDI_Converter</span><span class="p">(</span><span class="n">SONG</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">Tegridy_ms_SONG_to_MIDI_Converter</span><span class="p">(</span><span class="n">ms_SONG</span><span class="p">,</span>
                                       <span class="n">output_signature</span> <span class="o">=</span> <span class="s1">&#39;Tegridy TMIDI Module&#39;</span><span class="p">,</span> 
                                       <span class="n">track_name</span> <span class="o">=</span> <span class="s1">&#39;Composition Track&#39;</span><span class="p">,</span>
                                       <span class="n">list_of_MIDI_patches</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">46</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                                       <span class="n">output_file_name</span> <span class="o">=</span> <span class="s1">&#39;TMIDI-Composition&#39;</span><span class="p">,</span>
                                       <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">,</span>
-                                      <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                                      <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                      <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                                      <span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy milisecond SONG to MIDI Converter</span>
 <span class="sd">     </span>
@@ -2900,12 +2906,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">           List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.</span>
 <span class="sd">           Output file name w/o .mid extension.</span>
 <span class="sd">           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.</span>
+<span class="sd">           Optional timings multiplier</span>
+<span class="sd">           Optional verbose output</span>
 
 <span class="sd">    Output: MIDI File</span>
 <span class="sd">            Detailed MIDI stats</span>
 
 <span class="sd">    Project Los Angeles</span>
-<span class="sd">    Tegridy Code 2020&#39;&#39;&#39;</span>                                  
+<span class="sd">    Tegridy Code 2024&#39;&#39;&#39;</span>                                  
     
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converting to MIDI. Please stand-by...&#39;</span><span class="p">)</span>
@@ -2932,6 +2940,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     <span class="p">[</span><span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">list_of_MIDI_patches</span><span class="p">[</span><span class="mi">14</span><span class="p">]],</span>
                     <span class="p">[</span><span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">list_of_MIDI_patches</span><span class="p">[</span><span class="mi">15</span><span class="p">]],</span>
                     <span class="p">[</span><span class="s1">&#39;track_name&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">track_name</span><span class="p">,</span> <span class="n">text_encoding</span><span class="p">)]]</span>
+
+    <span class="n">SONG</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ms_SONG</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">timings_multiplier</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">S</span> <span class="ow">in</span> <span class="n">SONG</span><span class="p">:</span>
+        <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
+        <span class="k">if</span> <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+          <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
 
     <span class="n">output</span> <span class="o">=</span> <span class="n">output_header</span> <span class="o">+</span> <span class="p">[</span><span class="n">patch_list</span> <span class="o">+</span> <span class="n">SONG</span><span class="p">]</span>
 
@@ -6021,6 +6037,163 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="n">MIDI_Instruments_Families</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;Piano Family&#39;</span><span class="p">,</span>
+                            <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Chromatic Percussion Family&#39;</span><span class="p">,</span>
+                            <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;Organ Family&#39;</span><span class="p">,</span>
+                            <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;Guitar Family&#39;</span><span class="p">,</span>
+                            <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;Bass Family&#39;</span><span class="p">,</span>
+                            <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;Strings Family&#39;</span><span class="p">,</span>
+                            <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;Ensemble Family&#39;</span><span class="p">,</span>
+                            <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;Brass Family&#39;</span><span class="p">,</span>
+                            <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;Reed Family&#39;</span><span class="p">,</span>
+                            <span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;Pipe Family&#39;</span><span class="p">,</span>
+                            <span class="mi">10</span><span class="p">:</span> <span class="s1">&#39;Synth Lead Family&#39;</span><span class="p">,</span>
+                            <span class="mi">11</span><span class="p">:</span> <span class="s1">&#39;Synth Pad Family&#39;</span><span class="p">,</span>
+                            <span class="mi">12</span><span class="p">:</span> <span class="s1">&#39;Synth Effects Family&#39;</span><span class="p">,</span>
+                            <span class="mi">13</span><span class="p">:</span> <span class="s1">&#39;Ethnic Family&#39;</span><span class="p">,</span>
+                            <span class="mi">14</span><span class="p">:</span> <span class="s1">&#39;Percussive Family&#39;</span><span class="p">,</span>
+                            <span class="mi">15</span><span class="p">:</span> <span class="s1">&#39;Sound Effects Family&#39;</span><span class="p">,</span>
+                            <span class="mi">16</span><span class="p">:</span> <span class="s1">&#39;Drums Family&#39;</span><span class="p">,</span>
+                            <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Unknown Family&#39;</span><span class="p">,</span>
+                            <span class="p">}</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">patch_to_instrument_family</span><span class="p">(</span><span class="n">MIDI_patch</span><span class="p">,</span> <span class="n">drums_patch</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+
+  <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">MIDI_patch</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">MIDI_patch</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span> <span class="n">MIDI_Instruments_Families</span><span class="p">[</span><span class="n">MIDI_patch</span> <span class="o">//</span> <span class="mi">8</span><span class="p">]</span>
+
+  <span class="k">elif</span> <span class="n">MIDI_patch</span> <span class="o">==</span> <span class="n">drums_patch</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">MIDI_patch</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span> <span class="n">MIDI_Instruments_Families</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">MIDI_Instruments_Families</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">patch_list_from_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span> 
+                                         <span class="n">default_patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                         <span class="n">drums_patch</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+                                         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                                         <span class="p">):</span>
+
+  <span class="n">pitches_channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+  <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span>
+
+  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span>
+              <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                    <span class="n">patches</span><span class="p">[</span><span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">patches</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+
+                  <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING! Composition has more than 15 patches!&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Conflict note number:&#39;</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Conflict channel number:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Conflict patch number:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+
+  <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">default_patch</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">]</span>
+
+  <span class="n">patches</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">drums_patch</span>
+
+  <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Composition patches&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cha&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;---&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">patches</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">patch_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span> 
+                                <span class="n">default_patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                <span class="n">drums_patch</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                                <span class="p">):</span>
+  
+    <span class="c1">#===========================================================================    </span>
+  
+    <span class="n">enhanced_score_notes_with_patch_changes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span>
+
+    <span class="n">overflow_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+              <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+          <span class="k">else</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                  <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                      <span class="n">patches</span><span class="p">[</span><span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                  <span class="k">else</span><span class="p">:</span>
+                      <span class="n">overflow_idx</span> <span class="o">=</span> <span class="n">idx</span>
+                      <span class="k">break</span>
+
+      <span class="n">enhanced_score_notes_with_patch_changes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="c1">#===========================================================================</span>
+
+    <span class="n">overflow_patches</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">overflow_idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">[</span><span class="n">overflow_idx</span><span class="p">:]):</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">overflow_patches</span><span class="p">:</span>
+              <span class="n">overflow_patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+              <span class="n">enhanced_score_notes_with_patch_changes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+
+        <span class="n">enhanced_score_notes_with_patch_changes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="c1">#===========================================================================</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">default_patch</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">]</span>
+
+    <span class="n">patches</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">drums_patch</span>
+
+    <span class="c1">#===========================================================================</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Composition patches&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cha&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;---&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">overflow_patches</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Extra composition patches&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">overflow_patches</span><span class="p">):</span>
+          <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">enhanced_score_notes_with_patch_changes</span><span class="p">,</span> <span class="n">patches</span><span class="p">,</span> <span class="n">overflow_patches</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -6066,6 +6239,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.Event2channelindex" class="name">var <span class="ident">Event2channelindex</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.MIDI_Instruments_Families" class="name">var <span class="ident">MIDI_Instruments_Families</span></p>
       
   
   <div class="source_cont">
@@ -8628,7 +8809,7 @@ Tegridy Code 2021</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter">
-    <p>def <span class="ident">Tegridy_ms_SONG_to_MIDI_Converter</span>(</p><p>SONG, output_signature=&#39;Tegridy TMIDI Module&#39;, track_name=&#39;Composition Track&#39;, list_of_MIDI_patches=[0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0], output_file_name=&#39;TMIDI-Composition&#39;, text_encoding=&#39;ISO-8859-1&#39;, verbose=True)</p>
+    <p>def <span class="ident">Tegridy_ms_SONG_to_MIDI_Converter</span>(</p><p>ms_SONG, output_signature=&#39;Tegridy TMIDI Module&#39;, track_name=&#39;Composition Track&#39;, list_of_MIDI_patches=[0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0], output_file_name=&#39;TMIDI-Composition&#39;, text_encoding=&#39;ISO-8859-1&#39;, timings_multiplier=1, verbose=True)</p>
     </div>
     
 
@@ -8640,21 +8821,25 @@ Tegridy Code 2021</p></div>
        Output MIDI Track 1 name / Composition track name
        List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.
        Output file name w/o .mid extension.
-       Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.</p>
+       Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+       Optional timings multiplier
+       Optional verbose output</p>
 <p>Output: MIDI File
         Detailed MIDI stats</p>
 <p>Project Los Angeles
-Tegridy Code 2020</p></div>
+Tegridy Code 2024</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_ms_SONG_to_MIDI_Converter</span><span class="p">(</span><span class="n">SONG</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_ms_SONG_to_MIDI_Converter</span><span class="p">(</span><span class="n">ms_SONG</span><span class="p">,</span>
                                       <span class="n">output_signature</span> <span class="o">=</span> <span class="s1">&#39;Tegridy TMIDI Module&#39;</span><span class="p">,</span> 
                                       <span class="n">track_name</span> <span class="o">=</span> <span class="s1">&#39;Composition Track&#39;</span><span class="p">,</span>
                                       <span class="n">list_of_MIDI_patches</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">46</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                                       <span class="n">output_file_name</span> <span class="o">=</span> <span class="s1">&#39;TMIDI-Composition&#39;</span><span class="p">,</span>
                                       <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">,</span>
-                                      <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                                      <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                      <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                                      <span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy milisecond SONG to MIDI Converter</span>
 <span class="sd">     </span>
@@ -8664,12 +8849,14 @@ Tegridy Code 2020</p></div>
 <span class="sd">           List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.</span>
 <span class="sd">           Output file name w/o .mid extension.</span>
 <span class="sd">           Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.</span>
+<span class="sd">           Optional timings multiplier</span>
+<span class="sd">           Optional verbose output</span>
 
 <span class="sd">    Output: MIDI File</span>
 <span class="sd">            Detailed MIDI stats</span>
 
 <span class="sd">    Project Los Angeles</span>
-<span class="sd">    Tegridy Code 2020&#39;&#39;&#39;</span>                                  
+<span class="sd">    Tegridy Code 2024&#39;&#39;&#39;</span>                                  
     
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converting to MIDI. Please stand-by...&#39;</span><span class="p">)</span>
@@ -8696,6 +8883,14 @@ Tegridy Code 2020</p></div>
                     <span class="p">[</span><span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">list_of_MIDI_patches</span><span class="p">[</span><span class="mi">14</span><span class="p">]],</span>
                     <span class="p">[</span><span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">list_of_MIDI_patches</span><span class="p">[</span><span class="mi">15</span><span class="p">]],</span>
                     <span class="p">[</span><span class="s1">&#39;track_name&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">track_name</span><span class="p">,</span> <span class="n">text_encoding</span><span class="p">)]]</span>
+
+    <span class="n">SONG</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ms_SONG</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">timings_multiplier</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">S</span> <span class="ow">in</span> <span class="n">SONG</span><span class="p">:</span>
+        <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
+        <span class="k">if</span> <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">:</span>
+          <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
 
     <span class="n">output</span> <span class="o">=</span> <span class="n">output_header</span> <span class="o">+</span> <span class="p">[</span><span class="n">patch_list</span> <span class="o">+</span> <span class="n">SONG</span><span class="p">]</span>
 
@@ -10602,6 +10797,188 @@ see opus2midi() and score2opus().</p></div>
         <span class="n">score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_track</span><span class="p">)</span>
     <span class="n">_clean_up_warnings</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.patch_enhanced_score_notes">
+    <p>def <span class="ident">patch_enhanced_score_notes</span>(</p><p>enhanced_score_notes, default_patch=0, drums_patch=9, verbose=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.patch_enhanced_score_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.patch_enhanced_score_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">patch_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span> 
+                                <span class="n">default_patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                <span class="n">drums_patch</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                                <span class="p">):</span>
+  
+    <span class="c1">#===========================================================================    </span>
+  
+    <span class="n">enhanced_score_notes_with_patch_changes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span>
+
+    <span class="n">overflow_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+              <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+          <span class="k">else</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                  <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                      <span class="n">patches</span><span class="p">[</span><span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                  <span class="k">else</span><span class="p">:</span>
+                      <span class="n">overflow_idx</span> <span class="o">=</span> <span class="n">idx</span>
+                      <span class="k">break</span>
+
+      <span class="n">enhanced_score_notes_with_patch_changes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="c1">#===========================================================================</span>
+
+    <span class="n">overflow_patches</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">overflow_idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">[</span><span class="n">overflow_idx</span><span class="p">:]):</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">overflow_patches</span><span class="p">:</span>
+              <span class="n">overflow_patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+              <span class="n">enhanced_score_notes_with_patch_changes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;patch_change&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+
+        <span class="n">enhanced_score_notes_with_patch_changes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="c1">#===========================================================================</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">default_patch</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">]</span>
+
+    <span class="n">patches</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">drums_patch</span>
+
+    <span class="c1">#===========================================================================</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Composition patches&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cha&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;---&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">overflow_patches</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Extra composition patches&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">overflow_patches</span><span class="p">):</span>
+          <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">enhanced_score_notes_with_patch_changes</span><span class="p">,</span> <span class="n">patches</span><span class="p">,</span> <span class="n">overflow_patches</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.patch_list_from_enhanced_score_notes">
+    <p>def <span class="ident">patch_list_from_enhanced_score_notes</span>(</p><p>enhanced_score_notes, default_patch=0, drums_patch=9, verbose=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.patch_list_from_enhanced_score_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.patch_list_from_enhanced_score_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">patch_list_from_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span> 
+                                         <span class="n">default_patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                         <span class="n">drums_patch</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+                                         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                                         <span class="p">):</span>
+
+  <span class="n">pitches_channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+  <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span>
+
+  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">patches</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]:</span>
+              <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                    <span class="n">patches</span><span class="p">[</span><span class="n">patches</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">patches</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+
+                  <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING! Composition has more than 15 patches!&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Conflict note number:&#39;</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Conflict channel number:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Conflict patch number:&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+
+  <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">default_patch</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">]</span>
+
+  <span class="n">patches</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">drums_patch</span>
+
+  <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Composition patches&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cha&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;---&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">patches</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.patch_to_instrument_family">
+    <p>def <span class="ident">patch_to_instrument_family</span>(</p><p>MIDI_patch, drums_patch=128)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.patch_to_instrument_family', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.patch_to_instrument_family" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">patch_to_instrument_family</span><span class="p">(</span><span class="n">MIDI_patch</span><span class="p">,</span> <span class="n">drums_patch</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+
+  <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">MIDI_patch</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">MIDI_patch</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span> <span class="n">MIDI_Instruments_Families</span><span class="p">[</span><span class="n">MIDI_patch</span> <span class="o">//</span> <span class="mi">8</span><span class="p">]</span>
+
+  <span class="k">elif</span> <span class="n">MIDI_patch</span> <span class="o">==</span> <span class="n">drums_patch</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">MIDI_patch</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span> <span class="n">MIDI_Instruments_Families</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">MIDI_Instruments_Families</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 
   </div>
