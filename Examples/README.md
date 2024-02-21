@@ -41,11 +41,6 @@ melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore, mel
 ### MIDI output
 
 ```
-import copy
-import TMIDIX
-import midi_to_colab_audio
-from IPython.display import Audio, display
-
 #===============================================================================
 # Input variables
 
@@ -60,7 +55,14 @@ print('=' * 70)
 # This is optional and you can skip this if you do not care about patches
 # Alternatively You can use TMIDIX functions to detect all composition patches
 
-patches = TMIDIX.patch_list_from_enhanced_score_notes(output_score)
+# This function will create a single track patch list (16 patches)
+# patches = TMIDIX.patch_list_from_enhanced_score_notes(output_score)
+
+# And this functions will create a full patch list (any number of patches)
+# It will also patch the score if there are more than 16 patches
+# This function is preferred and recommended
+
+output_score, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
 
 #===============================================================================
 # Converting to MIDI
@@ -70,7 +72,7 @@ detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
                                                           output_file_name = output_file_name,
                                                           track_name='Project Los Angeles',
                                                           list_of_MIDI_patches=patches,
-                                                          timings_multiplier=16
+                                                          timings_multiplier=16 # Restoring augmented timings
                                                           )
 
 #===============================================================================
