@@ -7,8 +7,6 @@
 ### MIDI input
 
 ```
-import TMIDIX
-
 #===============================================================================
 # Input MIDI file (as filepath or bytes)
 
@@ -35,9 +33,9 @@ escore_notes = TMIDIX.augment_enhanced_score_notes(escore_notes)
 cscore = TMIDIX.chordify_score([1000, escore_notes])
 
 #===============================================================================
-# Monophonic melody score with adjusted ruations
+# Monophonic melody score with adjusted durations and custom patch (40 / Violin)
 
-melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore))
+melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore, melody_patch=40))
 ```
 
 ### MIDI output
@@ -53,47 +51,26 @@ from IPython.display import Audio, display
 
 output_file_name = './melody' # output MIDI file path without extension
 output_score = copy.deepcopy(melody) # or escore_notes (any notes list in TMIDIX/MIDI score format)
-melody_patch = 40 # Violin
 
 print('=' * 70)
-#===============================================================================
-# Restoring timings back after using augment_enhanced_score_notes function
-
-for e in output_score:
-  e[1] = e[1] * 16 # start times
-  e[2] = e[2] * 16 # durations
-  e[6] = melody_patch # patches
 
 #===============================================================================
 # Creating output score patches list from the enhanced score notes
 
 # This is optional and you can skip this if you do not care about patches
-# You can use provided code to detect all composition patches
-# Alternatively you can remove the option from SONG converter below for defaults
+# Alternatively You can use TMIDIX functions to detect all composition patches
 
-patches = [-1] * 16 
-
-for e in output_score:
-    if e[3] != 9:
-        if patches[e[3]] == -1:
-            patches[e[3]] = e[6]
-        else:
-            if patches[e[3]] != e[6]:
-                if -1 in patches:
-                    patches[patches.index(-1)] = e[6]
-                else:
-                    patches[-1] = e[6]
-
-patches = [p if p != -1 else 0 for p in patches]
+patches = TMIDIX.patch_list_from_enhanced_score_notes(output_score)
 
 #===============================================================================
 # Converting to MIDI
-            
+
 detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
                                                           output_signature = 'TMIDIX MIDI Composition',
                                                           output_file_name = output_file_name,
                                                           track_name='Project Los Angeles',
-                                                          list_of_MIDI_patches=patches
+                                                          list_of_MIDI_patches=patches,
+                                                          timings_multiplier=16
                                                           )
 
 #===============================================================================
