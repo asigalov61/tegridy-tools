@@ -1656,13 +1656,15 @@ def Tegridy_SONG_to_MIDI_Converter(SONG,
 
 ###################################################################################
 
-def Tegridy_ms_SONG_to_MIDI_Converter(SONG,
+def Tegridy_ms_SONG_to_MIDI_Converter(ms_SONG,
                                       output_signature = 'Tegridy TMIDI Module', 
                                       track_name = 'Composition Track',
                                       list_of_MIDI_patches = [0, 24, 32, 40, 42, 46, 56, 71, 73, 0, 0, 0, 0, 0, 0, 0],
                                       output_file_name = 'TMIDI-Composition',
                                       text_encoding='ISO-8859-1',
-                                      verbose=True):
+                                      timings_multiplier=1,
+                                      verbose=True
+                                      ):
 
     '''Tegridy milisecond SONG to MIDI Converter
      
@@ -1672,12 +1674,14 @@ def Tegridy_ms_SONG_to_MIDI_Converter(SONG,
            List of 16 MIDI patch numbers for output MIDI. Def. is MuseNet compatible patches.
            Output file name w/o .mid extension.
            Optional text encoding if you are working with text_events/lyrics. This is especially useful for Karaoke. Please note that anything but ISO-8859-1 is a non-standard way of encoding text_events according to MIDI specs.
+           Optional timings multiplier
+           Optional verbose output
 
     Output: MIDI File
             Detailed MIDI stats
 
     Project Los Angeles
-    Tegridy Code 2020'''                                  
+    Tegridy Code 2024'''                                  
     
     if verbose:
         print('Converting to MIDI. Please stand-by...')
@@ -1704,6 +1708,14 @@ def Tegridy_ms_SONG_to_MIDI_Converter(SONG,
                     ['patch_change', 0, 14, list_of_MIDI_patches[14]],
                     ['patch_change', 0, 15, list_of_MIDI_patches[15]],
                     ['track_name', 0, bytes(track_name, text_encoding)]]
+
+    SONG = copy.deepcopy(ms_SONG)
+
+    if timings_multiplier != 1:
+      for S in SONG:
+        S[1] = S[1] * timings_multiplier
+        if S[0] == 'note':
+          S[2] = S[2] * timings_multiplier
 
     output = output_header + [patch_list + SONG]
 
@@ -4790,6 +4802,163 @@ ALL_CHORDS_SORTED = [[0], [0, 2], [0, 3], [0, 4], [0, 2, 4], [0, 5], [0, 2, 5], 
                     [5, 8, 11], [5, 9, 11], [5, 7, 9, 11], [6], [6, 8], [6, 9], [6, 10],
                     [6, 8, 10], [6, 11], [6, 8, 11], [6, 9, 11], [7], [7, 9], [7, 10], [7, 11],
                     [7, 9, 11], [8], [8, 10], [8, 11], [9], [9, 11], [10], [11]]
+
+###################################################################################
+
+MIDI_Instruments_Families = {
+                            0: 'Piano Family',
+                            1: 'Chromatic Percussion Family',
+                            2: 'Organ Family',
+                            3: 'Guitar Family',
+                            4: 'Bass Family',
+                            5: 'Strings Family',
+                            6: 'Ensemble Family',
+                            7: 'Brass Family',
+                            8: 'Reed Family',
+                            9: 'Pipe Family',
+                            10: 'Synth Lead Family',
+                            11: 'Synth Pad Family',
+                            12: 'Synth Effects Family',
+                            13: 'Ethnic Family',
+                            14: 'Percussive Family',
+                            15: 'Sound Effects Family',
+                            16: 'Drums Family',
+                            -1: 'Unknown Family',
+                            }
+
+###################################################################################
+
+def patch_to_instrument_family(MIDI_patch, drums_patch=128):
+
+  if 0 <= MIDI_patch < 128:
+    return MIDI_patch // 8, MIDI_Instruments_Families[MIDI_patch // 8]
+
+  elif MIDI_patch == drums_patch:
+    return MIDI_patch // 8, MIDI_Instruments_Families[16]
+
+  else:
+    return -1, MIDI_Instruments_Families[-1]
+
+###################################################################################
+
+def patch_list_from_enhanced_score_notes(enhanced_score_notes, 
+                                         default_patch=0, 
+                                         drums_patch=9,
+                                         verbose=False
+                                         ):
+
+  pitches_channels = list(range(9)) + list(range(10, 16))
+
+  patches = [-1] * 16
+
+  for idx, e in enumerate(enhanced_score_notes):
+    if e[3] != 9:
+        if patches[e[3]] == -1:
+            patches[e[3]] = e[6]
+        else:
+            if patches[e[3]] != e[6]:
+              if e[6] in patches:
+                e[3] = patches.index(e[6])
+              else:
+                if -1 in patches:
+                    patches[patches.index(-1)] = e[6]
+                else:
+                  patches[-1] = e[6]
+
+                  if verbose:
+                    print('=' * 70)
+                    print('WARNING! Composition has more than 15 patches!')
+                    print('Conflict note number:', idx)
+                    print('Conflict channel number:', e[3])
+                    print('Conflict patch number:', e[6])
+
+  patches = [p if p != -1 else default_patch for p in patches]
+
+  patches[9] = drums_patch
+
+  if verbose:
+    print('=' * 70)
+    print('Composition patches')
+    print('=' * 70)
+    for c, p in enumerate(patches):
+      print('Cha', str(c).zfill(2), '---', str(p).zfill(3), Number2patch[p])
+    print('=' * 70)
+
+  return patches
+
+###################################################################################
+
+def patch_enhanced_score_notes(enhanced_score_notes, 
+                                default_patch=0, 
+                                drums_patch=9,
+                                verbose=False
+                                ):
+  
+    #===========================================================================    
+  
+    enhanced_score_notes_with_patch_changes = []
+
+    patches = [-1] * 16
+
+    overflow_idx = -1
+
+    for idx, e in enumerate(enhanced_score_notes):
+      if e[3] != 9:
+          if patches[e[3]] == -1:
+              patches[e[3]] = e[6]
+          else:
+              if patches[e[3]] != e[6]:
+                if e[6] in patches:
+                  e[3] = patches.index(e[6])
+                else:
+                  if -1 in patches:
+                      patches[patches.index(-1)] = e[6]
+                  else:
+                      overflow_idx = idx
+                      break
+
+      enhanced_score_notes_with_patch_changes.append(e)
+
+    #===========================================================================
+
+    overflow_patches = []
+
+    if overflow_idx != -1:
+      for idx, e in enumerate(enhanced_score_notes[overflow_idx:]):
+        if e[3] != 9:
+          if e[6] not in patches:
+            if e[6] not in overflow_patches:
+              overflow_patches.append(e[6])
+              enhanced_score_notes_with_patch_changes.append(['patch_change', e[1], e[3], e[6]])
+          else:
+            e[3] = patches.index(e[6])
+
+        enhanced_score_notes_with_patch_changes.append(e)
+
+    #===========================================================================
+
+    patches = [p if p != -1 else default_patch for p in patches]
+
+    patches[9] = drums_patch
+
+    #===========================================================================
+
+    if verbose:
+      print('=' * 70)
+      print('Composition patches')
+      print('=' * 70)
+      for c, p in enumerate(patches):
+        print('Cha', str(c).zfill(2), '---', str(p).zfill(3), Number2patch[p])
+      print('=' * 70)
+
+      if overflow_patches:
+        print('Extra composition patches')
+        print('=' * 70)
+        for c, p in enumerate(overflow_patches):
+          print(str(p).zfill(3), Number2patch[p])
+        print('=' * 70)
+
+    return enhanced_score_notes_with_patch_changes, patches, overflow_patches
 
 ###################################################################################
 
