@@ -1,3 +1,5 @@
+# https://huggingface.co/spaces/asigalov61/Advanced-MIDI-Renderer
+
 import argparse
 import glob
 import os.path
@@ -71,7 +73,7 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     
     print('Done!')
     print('=' * 70)
-    print('Input MIDI metadata:', meta_data)
+    print('Input MIDI metadata:', meta_data[:5])
     print('=' * 70)
     print('Processing...Please wait...')
 
@@ -82,7 +84,7 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
         output_score = copy.deepcopy(escore)
 
     elif render_type == "Extract melody":
-        output_score = TMIDIX.extract_melody(cscore, melody_range=[48, 72])
+        output_score = TMIDIX.extract_melody(cscore, melody_range=[48, 84])
 
     elif render_type == "Transform":
         output_score = TMIDIX.flip_enhanced_score_notes(escore)
@@ -102,18 +104,15 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     print('Done processing!')
     print('=' * 70)
     
-    print('Recalculating timings...')
+    print('Repatching if needed...')
     print('=' * 70)
-    
-    for e in output_score:
-        e[1] = e[1] * 16
-        e[2] = e[2] * 16
 
-        if -1 < custom_render_patch < 128:
+    if -1 < custom_render_patch < 128:
+        for e in output_score:
             if e[3] != 9:
                 e[6] = custom_render_patch
         
-    print('Done recalculating timings!')
+    print('Done repatching!')
     print('=' * 70)
     
     print('Sample output events', output_score[:5])
@@ -124,27 +123,14 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
 
     if render_type != "Render as-is":
 
-        patches = [-1] * 16
-        patches[9] = 9
-        
-        for e in output_score:
-            if e[3] != 9:
-                if patches[e[3]] == -1:
-                    patches[e[3]] = e[6]
-                else:
-                    if patches[e[3]] != e[6]:
-                        if -1 in patches:
-                            patches[patches.index(-1)] = e[6]
-                        else:
-                            patches[-1] = e[6]
-    
-        patches = [p if p != -1 else 0 for p in patches]
+        SONG, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
                     
-        detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
+        detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(SONG,
                                                                   output_signature = 'Advanced MIDI Renderer',
                                                                   output_file_name = fn1,
                                                                   track_name='Project Los Angeles',
-                                                                  list_of_MIDI_patches=patches
+                                                                  list_of_MIDI_patches=patches,
+                                                                  timings_multiplier=16
                                                                   )
 
     else:
@@ -189,7 +175,7 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     print('Output MIDI file name:', output_midi)
     print('Output MIDI title:', output_midi_title)
     print('Output MIDI hash:', output_midi_md5)
-    print('Output MIDI summary:', output_midi_summary)
+    print('Output MIDI summary:', output_midi_summary[:5])
     print('=' * 70) 
     
 
