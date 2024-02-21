@@ -4722,8 +4722,8 @@ def extract_melody(chordified_enhanced_score,
         if e[4] < melody_range[0]:
             e[4] = (e[4] % 12) + melody_range[0]
             
-        if e[4] > melody_range[1]:
-            e[4] = (e[4] % 12) + melody_range[1]
+        if e[4] >= melody_range[1]:
+            e[4] = (e[4] % 12) + (melody_range[1]-12)
 
     return fix_monophonic_score_durations(melody_score)
 
@@ -4846,8 +4846,6 @@ def patch_list_from_enhanced_score_notes(enhanced_score_notes,
                                          drums_patch=9,
                                          verbose=False
                                          ):
-
-  pitches_channels = list(range(9)) + list(range(10, 16))
 
   patches = [-1] * 16
 
