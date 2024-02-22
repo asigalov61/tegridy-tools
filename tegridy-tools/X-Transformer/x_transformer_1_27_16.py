@@ -21,16 +21,7 @@ r'''############################################################################
 #
 # !pip install torch
 # !pip install einops
-#
-#===============================================================================
-#
-# Basic use example
-#
-# from x_transformer_1_27_16 import *
-#
-# model = instantiate_x_transformer_model()
-# save_x_transformer_model(model)
-# load_x_transformer_model('model_checkpoint_1_epochs_1_steps_0_loss_1_acc.pth')
+# !pip install matplotlib
 #
 #===============================================================================
 '''
@@ -3055,7 +3046,11 @@ class AutoregressiveWrapper(Module):
 
         # sampling up to seq_len
 
+        
+
         for sl in range(seq_len):
+          
+          try:
 
             if restrict_to_max_seq_len:
                 max_len_exceeded = out.shape[-1] > max_seq_len
@@ -3128,6 +3123,14 @@ class AutoregressiveWrapper(Module):
               if verbose: 
                 print('Model called the end of sequence at:', sl, '/', seq_len)
               break
+
+          except KeyboardInterrupt:
+            print('Stopping generation...')
+            break
+          
+          except Exception as e:
+            print('Error:', e)
+            break
 
         if exists(eos_token):
             # mask out everything after the eos tokens
@@ -3656,11 +3659,11 @@ import importlib
 
 #===============================================================================
 
-def instantiate_x_transformer_model(num_tokens=20000,
-                                    max_seq_len=8192,
+def instantiate_x_transformer_model(max_seq_len,
+                                    num_tokens,
                                     dim=1024,
-                                    depth=32,
-                                    heads=32,
+                                    depth=4,
+                                    heads=8,
                                     attn_flash=True,
                                     ignore_index=-1,
                                     verbose=True):
@@ -3683,7 +3686,10 @@ def instantiate_x_transformer_model(num_tokens=20000,
                                   ignore_index=ignore_index
                                   )
 
-    model.cuda()
+    if torch.cuda.is_available():
+      model.cuda()
+    else:
+      model.cpu()
 
     if verbose:
       print('Done!')
@@ -3694,14 +3700,12 @@ def instantiate_x_transformer_model(num_tokens=20000,
 #===============================================================================
 
 def save_x_transformer_model(model,
-                              checkpoint_dir='./',
-                              checkpoint_name='model_checkpoint', 
-                              number_of_tokens=20000, 
-                              ignore_index=-1, 
-                              max_seq_len=8192, 
+                              number_of_tokens,
+                              max_seq_len,
                               dim=1024, 
-                              depth=32, 
-                              heads=32, 
+                              depth=4, 
+                              heads=8,
+                              ignore_index=-1,
                               use_flash_attn=True,
                               batch_size=4,
                               grad_acc_rate=4,
@@ -3710,6 +3714,8 @@ def save_x_transformer_model(model,
                               num_steps=1,
                               loss=0,
                               accuracy=1,
+                              checkpoint_dir='./',
+                              checkpoint_name='model_checkpoint',
                               verbose=True
                             ):
     
@@ -3777,7 +3783,11 @@ def load_x_transformer_model(checkpoint_file_path,
                                           attn_layers=attn_layers)
     model = class_(transformer_model, ignore_index=checkpoint['ignore_index'])
     model.load_state_dict(checkpoint['model_state_dict'])
-    model.cuda()
+
+    if torch.cuda.is_available():
+      model.cuda()
+    else:
+      model.cpu()
 
     if verbose:
       print('Done!')
@@ -3799,6 +3809,367 @@ def load_x_transformer_model(checkpoint_file_path,
       print('Model accuracy:', checkpoint['accuracy'])
       print('=' * 70)
 
+      return model
+
 ################################################################################
+
+def generate_from_x_transformer_model(model=None, 
+                                      num_tokens_to_generate=32,
+                                      prime_tokens_list=[0],
+                                      return_prime=False,
+                                      batch_size=1,
+                                      temperature=0.9,
+                                      precision='bfloat16',
+                                      device='cuda',
+                                      verbose=True
+                                      ):
+  
+    if model is not None:
+    
+      device_options = ['cuda', 'cpu', 'cuda:0']
+      
+      if device not in device_options or not torch.cuda.is_available():
+        device_type = 'cpu'
+      else:
+        device_type = device
+      
+      precision_options = ['float32', 'bfloat16', 'float16']
+
+      if precision == 'bfloat16' and device_type != 'cpu' and not torch.cuda.is_bf16_supported():
+        precision = 'float16'
+
+      if precision in precision_options:
+        ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[precision]
+      else:
+        ptdtype = torch.bfloat16
+
+      ctx = torch.amp.autocast(device_type=device_type, dtype=ptdtype)
+
+      model.to(device_type)
+
+      model.eval()
+
+      if verbose:
+        print('=' * 70)
+        print('Generation information')
+        print('=' * 70)
+        print('Device:', device)
+        print('Precision:', precision)
+        print('=' * 70)
+        print('Prime tokens sample:', prime_tokens_list[:10])
+        print('=' * 70)
+        print('Model will generate', batch_size, 'batches', num_tokens_to_generate, 'tokens each', )
+        print('Total number of tokens to generate:', num_tokens_to_generate * batch_size)
+        print('=' * 70)
+        print('Model temeperature', temperature)
+        print('=' * 70)
+
+      input = torch.tensor([prime_tokens_list] * batch_size, dtype=torch.long, device=device_type)
+
+      with ctx:
+        out = model.generate(input,
+                              num_tokens_to_generate,
+                              temperature=temperature,
+                              return_prime=return_prime,
+                              verbose=verbose
+                            )
+      if verbose:  
+        print('=' * 70)
+        print('Done!')
+        print('=' * 70)
+
+      return out.tolist()
+    
+    else:
+      print('=' * 70)
+      print('Please check the model!')
+      print('=' * 70)
+
+################################################################################
+
+from torch.utils.data import Dataset
+
+class X_Transformer_Dataset(Dataset):
+    def __init__(self, data, seq_len, batch_size):
+        super().__init__()
+        self.data = data
+        self.seq_len = seq_len
+        self.batch_size = batch_size
+
+    def __getitem__(self, index):
+
+        full_seq = torch.Tensor(self.data[index][:self.seq_len+1]).long()
+
+        return full_seq.cuda()
+
+    def __len__(self):
+        return (len(self.data) // self.batch_size) * self.batch_size
+
+################################################################################
+
+import tqdm
+import pickle
+import matplotlib.pyplot as plt
+
+#===============================================================================
+
+def save_data(data, filename):
+    with open(filename, 'wb') as f:
+      pickle.dump(data, f)
+
+def cycle_train_data(loader):
+    while True:
+        for data in loader:
+            yield data
+
+def default_output_func(output):
+    print(output)
+
+#===============================================================================
+
+def train_x_transformer_model(model,
+                              model_sequence_length,
+                              model_number_of_tokens,
+                              model_name,
+                              training_data,
+                              model_ignore_index=-1,
+                              model_dimension=1024,
+                              model_depth=4,
+                              model_number_of_heads=8,
+                              model_uses_flash_attention=True,
+                              training_data_batch_size=1,
+                              training_learning_rate=1e-4,
+                              accumulate_gradients_every=4,
+                              number_of_training_epochs=1,
+                              validate_every=100,
+                              save_every=500,
+                              generate_every=100,
+                              generate_length=100,
+                              generate_num_prime_tokens=512,
+                              generate_output_custom_func=default_output_func,
+                              print_stats_every=20,
+                              device='cuda',
+                              precision='float16',
+                              clip_grad_norm_value=1.0,
+                              scaler_enabled=True,
+                              save_directory='./',
+                              plot_statistics=True,
+                              verbose=True
+                              ):
+
+    #===========================================================================
+
+    device_options = ['cuda', 'cpu', 'cuda:0']
+    
+    if device not in device_options or not torch.cuda.is_available():
+      device_type = 'cpu'
+    else:
+      device_type = device
+    
+    precision_options = ['float32', 'bfloat16', 'float16']
+
+    if precision == 'bfloat16' and device_type != 'cpu' and not torch.cuda.is_bf16_supported():
+      precision = 'float16'
+
+    if precision in precision_options:
+      ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[precision]
+    else:
+      ptdtype = torch.bfloat16
+
+    ctx = torch.amp.autocast(device_type=device_type, dtype=ptdtype)
+
+    model.to(device_type)
+
+    optim = torch.optim.Adam(model.parameters(), lr=training_learning_rate)
+
+    scaler = torch.cuda.amp.GradScaler(enabled=scaler_enabled)
+
+    #===========================================================================
+
+    train_losses = []
+    val_losses = []
+
+    train_accs = []
+    val_accs = []
+
+    nsteps = 0
+
+    for ep in range(number_of_training_epochs):
+
+      print('=' * 70)
+      print('Epoch #', ep)
+      print('=' * 70)
+
+      random.shuffle(training_data)
+
+      train_dataset = X_Transformer_Dataset(training_data, model_sequence_length, training_data_batch_size)
+      val_dataset   = X_Transformer_Dataset(training_data, model_sequence_length, training_data_batch_size)
+      train_loader  = cycle_train_data(DataLoader(train_dataset, batch_size = training_data_batch_size))
+      val_loader    = cycle_train_data(DataLoader(val_dataset, batch_size = training_data_batch_size))
+
+      NUM_BATCHES = len(training_data) // training_data_batch_size // accumulate_gradients_every
+
+      for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10., desc='Training'):
+          model.train()
+
+          for __ in range(accumulate_gradients_every):
+              with ctx:
+                  loss, acc = model(next(train_loader))
+              loss = loss / accumulate_gradients_every
+              scaler.scale(loss).backward(torch.ones(loss.shape).cuda())
+
+          if i % print_stats_every == 0:
+              print(f'Training loss: {loss.mean().item() * accumulate_gradients_every}')
+              print(f'Training acc: {acc.mean().item()}')
+
+          train_losses.append(loss.mean().item() * accumulate_gradients_every)
+          train_accs.append(acc.mean().item())
+
+          scaler.unscale_(optim)
+          torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad_norm_value)
+          scaler.step(optim)
+          scaler.update()
+          optim.zero_grad(set_to_none=True)
+
+          nsteps += 1
+
+          if i % validate_every == 0:
+            model.eval()
+            with torch.no_grad():
+              with ctx:
+                val_loss, val_acc = model(next(val_loader))
+
+                print(f'Validation loss: {val_loss.mean().item()}')
+                print(f'Validation acc: {val_acc.mean().item()}')
+
+                val_losses.append(val_loss.mean().item())
+                val_accs.append(val_acc.mean().item())
+
+                if plot_statistics:
+
+                  print('Plotting training loss graph...')
+
+                  tr_loss_list = train_losses
+                  plt.plot([i for i in range(len(tr_loss_list))] ,tr_loss_list, 'b')
+                  plt.show()
+                  plt.close()
+                  print('Done!')
+
+                  print('Plotting training acc graph...')
+
+                  tr_loss_list = train_accs
+                  plt.plot([i for i in range(len(tr_loss_list))] ,tr_loss_list, 'b')
+                  plt.show()
+                  plt.close()
+                  print('Done!')
+
+                  print('Plotting validation loss graph...')
+                  tr_loss_list = val_losses
+                  plt.plot([i for i in range(len(tr_loss_list))] ,tr_loss_list, 'b')
+                  plt.show()
+                  plt.close()
+                  print('Done!')
+
+                  print('Plotting validation acc graph...')
+                  tr_loss_list = val_accs
+                  plt.plot([i for i in range(len(tr_loss_list))] ,tr_loss_list, 'b')
+                  plt.show()
+                  plt.close()
+                  print('Done!')
+          
+          #=====================================================================
+
+          if i % generate_every == 0:
+            model.eval()
+
+            inp = random.choice(val_dataset)[:generate_num_prime_tokens]
+
+            print(inp)
+
+            with ctx:
+
+                sample = model.generate(inp[None, ...], generate_length)
+
+            generate_output_custom_func(sample.tolist())
+
+          #=====================================================================
+
+          if i % save_every == 0:
+
+              print('Saving model progress. Please wait...')
+              print('model_checkpoint_' + str(nsteps) + '_steps_' + str(round(float(train_losses[-1]), 4)) + '_loss_' + str(round(float(train_accs[-1]), 4)) + '_acc.pth')
+
+              fname = save_directory+'/model_checkpoint_' + str(nsteps) + '_steps_' + str(round(float(train_losses[-1]), 4)) + '_loss_' + str(round(float(train_accs[-1]), 4)) + '_acc.pth'
+
+              save_x_transformer_model(model, 
+                                       checkpoint_dir=save_directory, 
+                                       checkpoint_name=model_name,
+                                       number_of_tokens=model_number_of_tokens,
+                                       ignore_index=model_ignore_index,
+                                       max_seq_len=model_sequence_length,
+                                       dim=model_dimension,
+                                       depth=model_depth,
+                                       heads=model_number_of_heads,
+                                       use_flash_attn=model_uses_flash_attention,
+                                       batch_size=training_data_batch_size,
+                                       grad_acc_rate=accumulate_gradients_every,
+                                       learning_rate=training_learning_rate,
+                                       num_epochs=number_of_training_epochs,
+                                       num_steps=nsteps,
+                                       loss=str(round(float(train_losses[-1]), 4)),
+                                       accuracy=str(round(float(train_accs[-1]), 4)),
+                                       verbose=verbose)
+
+              data = [train_losses, train_accs, val_losses, val_accs]
+
+              save_data(data, save_directory+'losses_accuracies.pickle')
+
+              print('Done!')
+
+    #===========================================================================
+
+    print('Saving model progress. Please wait...')
+    print('model_checkpoint_' + str(nsteps) + '_steps_' + str(round(float(train_losses[-1]), 4)) + '_loss_' + str(round(float(train_accs[-1]), 4)) + '_acc.pth')
+
+    fname = save_directory+'model_checkpoint_' + str(nsteps) + '_steps_' + str(round(float(train_losses[-1]), 4)) + '_loss_' + str(round(float(train_accs[-1]), 4)) + '_acc.pth'
+
+    torch.save(model.state_dict(), fname)
+
+    print('Done!')
+
+    data = [train_losses, train_accs, val_losses, val_accs]
+
+    save_data(data, save_directory+'losses_accuracies')
+
+    # Save training loss graph
+
+    plt.plot([i for i in range(len(train_losses))] ,train_losses, 'b')
+    plt.savefig(save_directory+'training_loss_graph.png')
+    plt.close()
+    print('Done!')
+
+    # Save training acc graph
+
+    plt.plot([i for i in range(len(train_accs))] ,train_accs, 'b')
+    plt.savefig(save_directory+'training_accuracy_graph.png')
+    plt.close()
+    print('Done!')
+
+    # Save validation loss graph
+
+    plt.plot([i for i in range(len(val_losses))] ,val_losses, 'b')
+    plt.savefig(save_directory+'validation_loss_graph.png')
+    plt.close()
+    print('Done!')
+
+    # Save validation acc graph
+
+    plt.plot([i for i in range(len(val_accs))] ,val_accs, 'b')
+    plt.savefig(save_directory+'validation_accuracy_graph.png')
+    plt.close()
+    print('Done!')
+    
+################################################################################
+
 # This is the end of x-transformer Python module
 ################################################################################
