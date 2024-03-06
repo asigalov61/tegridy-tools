@@ -45,6 +45,7 @@ melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore, mel
 ```
 import copy
 import TMIDIX
+import midi_to_colab_audio
 from IPython.display import display, Audio
 
 #===============================================================================
