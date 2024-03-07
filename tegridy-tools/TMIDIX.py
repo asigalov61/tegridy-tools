@@ -4723,7 +4723,7 @@ def extract_melody(chordified_enhanced_score,
                     melody_range=[48, 84], 
                     melody_channel=0,
                     melody_patch=0,
-                    melody_velocity=110,
+                    melody_velocity=0,
                     stacked_melody=False,
                     stacked_melody_base_pitch=60
                   ):
@@ -4737,15 +4737,25 @@ def extract_melody(chordified_enhanced_score,
       
       melody_score = []
       for i, chord in enumerate(chordified_enhanced_score):
-          melody_score.append(['note', chord[0][1], chord[0][2], melody_channel, stacked_melody_base_pitch+(stack_list([p % 12 for p in all_pitches_chords[i]]) % 12), melody_velocity, melody_patch])
+
+        if melody_velocity > 0:
+          vel = melody_velocity
+        else:
+          vel = chord[0][5]
+
+        melody_score.append(['note', chord[0][1], chord[0][2], melody_channel, stacked_melody_base_pitch+(stack_list([p % 12 for p in all_pitches_chords[i]]) % 12), vel, melody_patch])
   
     else:
 
       melody_score = copy.deepcopy([c[0] for c in chordified_enhanced_score if c[0][3] != 9])
       
       for e in melody_score:
+        
           e[3] = melody_channel
-          e[5] = melody_velocity
+
+          if melody_velocity > 0:
+            e[5] = melody_velocity
+
           e[6] = melody_patch
 
           if e[4] < melody_range[0]:
