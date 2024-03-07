@@ -4737,7 +4737,7 @@ def extract_melody(chordified_enhanced_score,
       
       melody_score = []
       for i, chord in enumerate(chordified_enhanced_score):
-          melody_score.append(['note', chord[0][1], chord[0][2], melody_channel, stacked_melody_base_pitch+(stack_list(sorted(all_pitches_chords[i])) % 12), melody_velocity, melody_patch])
+          melody_score.append(['note', chord[0][1], chord[0][2], melody_channel, stacked_melody_base_pitch+(stack_list([p % 12 for p in all_pitches_chords[i]]) % 12), melody_velocity, melody_patch])
   
     else:
 
