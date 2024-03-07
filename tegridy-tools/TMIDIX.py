@@ -4707,23 +4707,52 @@ def augment_enhanced_score_notes(enhanced_score_notes,
 
 ###################################################################################
 
+def stack_list(lst, base=12):
+    return sum(j * base**i for i, j in enumerate(lst[::-1]))
+
+def destack_list(num, base=12):
+    lst = []
+    while num:
+        lst.append(num % base)
+        num //= base
+    return lst[::-1]
+
+###################################################################################
+
 def extract_melody(chordified_enhanced_score, 
-                    melody_range=[60, 84], 
+                    melody_range=[48, 84], 
                     melody_channel=0,
-                    melody_patch=0
+                    melody_patch=0,
+                    melody_velocity=110,
+                    stacked_melody=False,
+                    stacked_melody_base_pitch=60
                   ):
 
-    melody_score = copy.deepcopy([c[0] for c in chordified_enhanced_score if c[0][3] != 9])
-    
-    for e in melody_score:
-        e[3] = melody_channel
-        e[6] = melody_patch
+    if stacked_melody:
 
-        if e[4] < melody_range[0]:
-            e[4] = (e[4] % 12) + melody_range[0]
-            
-        if e[4] >= melody_range[1]:
-            e[4] = (e[4] % 12) + (melody_range[1]-12)
+      
+      all_pitches_chords = []
+      for e in chordified_enhanced_score:
+        all_pitches_chords.append(sorted(set([p[4] for p in e]), reverse=True))
+      
+      melody_score = []
+      for i, chord in enumerate(chordified_enhanced_score):
+          melody_score.append(['note', chord[0][1], chord[0][2], melody_channel, stacked_melody_base_pitch+(stack_list(sorted(all_pitches_chords[i])) % 12), melody_velocity, melody_patch])
+  
+    else:
+
+      melody_score = copy.deepcopy([c[0] for c in chordified_enhanced_score if c[0][3] != 9])
+      
+      for e in melody_score:
+          e[3] = melody_channel
+          e[5] = melody_velocity
+          e[6] = melody_patch
+
+          if e[4] < melody_range[0]:
+              e[4] = (e[4] % 12) + melody_range[0]
+              
+          if e[4] >= melody_range[1]:
+              e[4] = (e[4] % 12) + (melody_range[1]-12)
 
     return fix_monophonic_score_durations(melody_score)
 
