@@ -1125,6 +1125,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.check_and_fix_chord">check_and_fix_chord</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_tones_chord">check_and_fix_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
+    <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.destack_list">destack_list</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
@@ -1134,6 +1135,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
     <li class="mono"><a href="#TMIDIX.flip_enhanced_score_notes">flip_enhanced_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.frame_monophonic_melody">frame_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.generate_colors">generate_colors</a></li>
     <li class="mono"><a href="#TMIDIX.generate_tones_chords_progression">generate_tones_chords_progression</a></li>
     <li class="mono"><a href="#TMIDIX.grep">grep</a></li>
@@ -6233,6 +6235,59 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">create_enhanced_monophonic_melody</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">):</span>
+
+    <span class="n">enhanced_monophonic_melody</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+
+      <span class="n">enhanced_monophonic_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">monophonic_melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+        
+        <span class="n">delta_time</span> <span class="o">=</span> <span class="n">monophonic_melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">enhanced_monophonic_melody</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;silence&#39;</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">delta_time</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+        
+    <span class="n">enhanced_monophonic_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">enhanced_monophonic_melody</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">frame_monophonic_melody</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">,</span> <span class="n">min_frame_time_threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+    <span class="n">mzip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">monophonic_melody</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+    <span class="n">times_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">([(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+
+    <span class="n">mc_time</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">times_counts</span> <span class="k">if</span> <span class="n">item</span> <span class="o">&gt;=</span> <span class="n">min_frame_time_threshold</span><span class="p">),</span> <span class="n">min_frame_time_threshold</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">mc_time</span><span class="p">)</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="n">mc_time</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">monophonic_melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="n">mc_time</span><span class="p">]</span>
+
+    <span class="n">framed_melody</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">):</span>
+      
+      <span class="n">stime</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">count</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      
+      <span class="k">if</span> <span class="n">count</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+
+          <span class="n">new_note</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+          <span class="n">new_note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">stime</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">mc_time</span><span class="p">)</span>
+          <span class="n">new_note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mc_time</span>
+          <span class="n">framed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_note</span><span class="p">)</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">framed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">framed_melody</span><span class="p">,</span> <span class="n">mc_time</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -9948,6 +10003,41 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.create_enhanced_monophonic_melody">
+    <p>def <span class="ident">create_enhanced_monophonic_melody</span>(</p><p>monophonic_melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.create_enhanced_monophonic_melody', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.create_enhanced_monophonic_melody" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">create_enhanced_monophonic_melody</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">):</span>
+
+    <span class="n">enhanced_monophonic_melody</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+
+      <span class="n">enhanced_monophonic_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">monophonic_melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+        
+        <span class="n">delta_time</span> <span class="o">=</span> <span class="n">monophonic_melody</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">enhanced_monophonic_melody</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;silence&#39;</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">delta_time</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">note</span><span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+        
+    <span class="n">enhanced_monophonic_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">enhanced_monophonic_melody</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.create_similarity_matrix">
     <p>def <span class="ident">create_similarity_matrix</span>(</p><p>list_of_values, matrix_length=0)</p>
     </div>
@@ -10312,6 +10402,56 @@ The type of track (opus or score) is autodetected.</p></div>
             <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">127</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="n">delta_min_pitch</span>
 
     <span class="k">return</span> <span class="n">output_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.frame_monophonic_melody">
+    <p>def <span class="ident">frame_monophonic_melody</span>(</p><p>monophonic_melody, min_frame_time_threshold=10)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.frame_monophonic_melody', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.frame_monophonic_melody" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">frame_monophonic_melody</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">,</span> <span class="n">min_frame_time_threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+    <span class="n">mzip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">monophonic_melody</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+    <span class="n">times_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">([(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+
+    <span class="n">mc_time</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">times_counts</span> <span class="k">if</span> <span class="n">item</span> <span class="o">&gt;=</span> <span class="n">min_frame_time_threshold</span><span class="p">),</span> <span class="n">min_frame_time_threshold</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">mc_time</span><span class="p">)</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="n">mc_time</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">monophonic_melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="n">mc_time</span><span class="p">]</span>
+
+    <span class="n">framed_melody</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">monophonic_melody</span><span class="p">):</span>
+      
+      <span class="n">stime</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">count</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      
+      <span class="k">if</span> <span class="n">count</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+
+          <span class="n">new_note</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+          <span class="n">new_note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">stime</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">mc_time</span><span class="p">)</span>
+          <span class="n">new_note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mc_time</span>
+          <span class="n">framed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_note</span><span class="p">)</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">framed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">framed_melody</span><span class="p">,</span> <span class="n">mc_time</span><span class="p">]</span>
 </pre></div>
 
   </div>
