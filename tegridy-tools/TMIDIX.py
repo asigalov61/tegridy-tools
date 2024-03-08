@@ -5026,8 +5026,6 @@ def frame_monophonic_melody(monophonic_melody, min_frame_time_threshold=10):
 
     mc_time = next((item for item, count in times_counts if item >= min_frame_time_threshold), min_frame_time_threshold)
 
-    print(mc_time)
-
     times = [(b[1]-a[1]) // mc_time for a, b in mzip] + [monophonic_melody[-1][2] // mc_time]
 
     framed_melody = []
