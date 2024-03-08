@@ -4999,6 +4999,59 @@ def patch_enhanced_score_notes(enhanced_score_notes,
 
 ###################################################################################
 
+def create_enhanced_monophonic_melody(monophonic_melody):
+
+    enhanced_monophonic_melody = []
+
+    for i, note in enumerate(monophonic_melody[:-1]):
+
+      enhanced_monophonic_melody.append(note)
+
+      if note[1]+note[2] < monophonic_melody[i+1][1]:
+        
+        delta_time = monophonic_melody[i+1][1] - (note[1]+note[2])
+        enhanced_monophonic_melody.append(['silence', note[1]+note[2], delta_time, note[3], 0, 0, note[6]])
+        
+    enhanced_monophonic_melody.append(monophonic_melody[-1])
+
+    return enhanced_monophonic_melody
+
+###################################################################################
+
+def frame_monophonic_melody(monophonic_melody, min_frame_time_threshold=10):
+
+    mzip = list(zip(monophonic_melody[:-1], monophonic_melody[1:]))
+
+    times_counts = Counter([(b[1]-a[1]) for a, b in mzip]).most_common()
+
+    mc_time = next((item for item, count in times_counts if item >= min_frame_time_threshold), min_frame_time_threshold)
+
+    print(mc_time)
+
+    times = [(b[1]-a[1]) // mc_time for a, b in mzip] + [monophonic_melody[-1][2] // mc_time]
+
+    framed_melody = []
+
+    for i, note in enumerate(monophonic_melody):
+      
+      stime = note[1]
+      count = times[i]
+      
+      if count != 0:
+        for j in range(count):
+
+          new_note = copy.deepcopy(note)
+          new_note[1] = stime + (j * mc_time)
+          new_note[2] = mc_time
+          framed_melody.append(new_note)
+      
+      else:
+        framed_melody.append(note)
+
+    return [framed_melody, mc_time]
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
