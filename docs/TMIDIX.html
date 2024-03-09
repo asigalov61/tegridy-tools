@@ -1127,6 +1127,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.delta_score_notes">delta_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.destack_list">destack_list</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
@@ -6262,8 +6263,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">mc_time</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">times_counts</span> <span class="k">if</span> <span class="n">item</span> <span class="o">&gt;=</span> <span class="n">min_frame_time_threshold</span><span class="p">),</span> <span class="n">min_frame_time_threshold</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">mc_time</span><span class="p">)</span>
-
     <span class="n">times</span> <span class="o">=</span> <span class="p">[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="n">mc_time</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">monophonic_melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="n">mc_time</span><span class="p">]</span>
 
     <span class="n">framed_melody</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6285,6 +6284,47 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">framed_melody</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">framed_melody</span><span class="p">,</span> <span class="n">mc_time</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">delta_score_notes</span><span class="p">(</span><span class="n">score_notes</span><span class="p">,</span> 
+                      <span class="n">timings_clip_value</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> 
+                      <span class="n">even_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">compress_timings</span><span class="o">=</span><span class="kc">False</span>
+                      <span class="p">):</span>
+
+  <span class="n">delta_score</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">pe</span> <span class="o">=</span> <span class="n">score_notes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">:</span>
+
+    <span class="n">note</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">time</span> <span class="o">=</span>  <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">even_timings</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">time</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">time</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="n">dur</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dur</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">timings_clip_value</span><span class="p">,</span> <span class="n">time</span><span class="p">))</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">timings_clip_value</span><span class="p">,</span> <span class="n">dur</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">compress_timings</span><span class="p">:</span>
+      <span class="n">time</span> <span class="o">/=</span> <span class="mi">2</span>
+      <span class="n">dur</span> <span class="o">/=</span> <span class="mi">2</span>
+
+    <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dur</span><span class="p">)</span>
+
+    <span class="n">delta_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">n</span>
+
+  <span class="k">return</span> <span class="n">delta_score</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -10077,6 +10117,63 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.delta_score_notes">
+    <p>def <span class="ident">delta_score_notes</span>(</p><p>score_notes, timings_clip_value=255, even_timings=False, compress_timings=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.delta_score_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.delta_score_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">delta_score_notes</span><span class="p">(</span><span class="n">score_notes</span><span class="p">,</span> 
+                      <span class="n">timings_clip_value</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> 
+                      <span class="n">even_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">compress_timings</span><span class="o">=</span><span class="kc">False</span>
+                      <span class="p">):</span>
+
+  <span class="n">delta_score</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">pe</span> <span class="o">=</span> <span class="n">score_notes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">score_notes</span><span class="p">:</span>
+
+    <span class="n">note</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">time</span> <span class="o">=</span>  <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">even_timings</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">time</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">time</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="n">dur</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dur</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">timings_clip_value</span><span class="p">,</span> <span class="n">time</span><span class="p">))</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">timings_clip_value</span><span class="p">,</span> <span class="n">dur</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">compress_timings</span><span class="p">:</span>
+      <span class="n">time</span> <span class="o">/=</span> <span class="mi">2</span>
+      <span class="n">dur</span> <span class="o">/=</span> <span class="mi">2</span>
+
+    <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dur</span><span class="p">)</span>
+
+    <span class="n">delta_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">n</span>
+
+  <span class="k">return</span> <span class="n">delta_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.destack_list">
     <p>def <span class="ident">destack_list</span>(</p><p>num, base=12)</p>
     </div>
@@ -10428,8 +10525,6 @@ The type of track (opus or score) is autodetected.</p></div>
     <span class="n">times_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">([(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
 
     <span class="n">mc_time</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">times_counts</span> <span class="k">if</span> <span class="n">item</span> <span class="o">&gt;=</span> <span class="n">min_frame_time_threshold</span><span class="p">),</span> <span class="n">min_frame_time_threshold</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="n">mc_time</span><span class="p">)</span>
 
     <span class="n">times</span> <span class="o">=</span> <span class="p">[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="n">mc_time</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mzip</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">monophonic_melody</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="n">mc_time</span><span class="p">]</span>
 
