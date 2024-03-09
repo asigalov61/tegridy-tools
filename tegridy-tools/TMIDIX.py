@@ -5050,6 +5050,47 @@ def frame_monophonic_melody(monophonic_melody, min_frame_time_threshold=10):
 
 ###################################################################################
 
+def delta_score_notes(score_notes, 
+                      timings_clip_value=255, 
+                      even_timings=False,
+                      compress_timings=False
+                      ):
+
+  delta_score = []
+
+  pe = score_notes[0]
+
+  for n in score_notes:
+
+    note = copy.deepcopy(n)
+
+    time =  n[1] - pe[1]
+    dur = n[2]
+
+    if even_timings:
+      if time != 0 and time % 2 != 0:
+        time += 1
+      if dur % 2 != 0:
+        dur += 1
+
+    time = max(0, min(timings_clip_value, time))
+    dur = max(0, min(timings_clip_value, dur))
+
+    if compress_timings:
+      time /= 2
+      dur /= 2
+
+    note[1] = int(time)
+    note[2] = int(dur)
+
+    delta_score.append(note)
+
+    pe = n
+
+  return delta_score
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
