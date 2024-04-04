@@ -1816,7 +1816,7 @@ def plot_ms_SONG(ms_song,
     plt.title(plot_title)
 
     if return_plt:
-      return plt
+      return fig
 
     plt.show()
 
