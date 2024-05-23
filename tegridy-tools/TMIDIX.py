@@ -5091,6 +5091,44 @@ def delta_score_notes(score_notes,
 
 ###################################################################################
 
+def check_and_fix_chords_in_chordified_score(chordified_score,
+                                             channels_index=3,
+                                             pitches_index=4
+                                             ):
+  fixed_chordified_score = []
+
+  bad_chords_counter = 0
+
+  for c in chordified_score:
+
+    tones_chord = sorted(set([t[pitches_index] % 12 for t in c if t[channels_index] != 9]))
+
+    if tones_chord:
+
+        if tones_chord not in TMIDIX.ALL_CHORDS_SORTED:
+          bad_chords_counter += 1
+
+        while tones_chord not in TMIDIX.ALL_CHORDS_SORTED:
+          tones_chord.pop(0)
+
+    new_chord = []
+
+    c.sort(key = lambda x: x[pitches_index], reverse=True)
+
+    for e in c:
+      if e[channels_index] != 9:
+        if e[pitches_index] % 12 in tones_chord:
+          new_chord.append(e)
+
+      else:
+        new_chord.append(e)
+
+    fixed_chordified_score.append(new_chord)
+
+  return fixed_chordified_score, bad_chords_counter
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
