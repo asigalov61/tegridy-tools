@@ -5105,10 +5105,10 @@ def check_and_fix_chords_in_chordified_score(chordified_score,
 
     if tones_chord:
 
-        if tones_chord not in TMIDIX.ALL_CHORDS_SORTED:
+        if tones_chord not in ALL_CHORDS_SORTED:
           bad_chords_counter += 1
 
-        while tones_chord not in TMIDIX.ALL_CHORDS_SORTED:
+        while tones_chord not in ALL_CHORDS_SORTED:
           tones_chord.pop(0)
 
     new_chord = []
