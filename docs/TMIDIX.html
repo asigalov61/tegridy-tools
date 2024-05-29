@@ -6457,6 +6457,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">add_melody_to_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span>
                                       <span class="n">melody_start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                      <span class="n">melody_start_chord</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                       <span class="n">melody_notes_min_duration</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                       <span class="n">melody_notes_max_duration</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
                                       <span class="n">melody_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -6487,7 +6488,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">pt</span> <span class="o">=</span> <span class="n">melody_start_time</span>
 
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">[:</span><span class="n">melody_start_chord</span><span class="p">]:</span>
+      <span class="n">acc_score</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">[</span><span class="n">melody_start_chord</span><span class="p">:]:</span>
 
       <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]</span>
 
@@ -9296,7 +9300,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.add_melody_to_enhanced_score_notes">
-    <p>def <span class="ident">add_melody_to_enhanced_score_notes</span>(</p><p>enhanced_score_notes, melody_start_time=0, melody_notes_min_duration=-1, melody_notes_max_duration=255, melody_octave=5, melody_channel=3, melody_patch=40, melody_max_velocity=110, acc_max_velocity=90, pass_drums=True)</p>
+    <p>def <span class="ident">add_melody_to_enhanced_score_notes</span>(</p><p>enhanced_score_notes, melody_start_time=0, melody_start_chord=0, melody_notes_min_duration=-1, melody_notes_max_duration=255, melody_octave=5, melody_channel=3, melody_patch=40, melody_max_velocity=110, acc_max_velocity=90, pass_drums=True)</p>
     </div>
     
 
@@ -9307,6 +9311,7 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.add_melody_to_enhanced_score_notes" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add_melody_to_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span>
                                       <span class="n">melody_start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                      <span class="n">melody_start_chord</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                       <span class="n">melody_notes_min_duration</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                       <span class="n">melody_notes_max_duration</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
                                       <span class="n">melody_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -9337,7 +9342,10 @@ Tegridy Code 2024</p></div>
 
     <span class="n">pt</span> <span class="o">=</span> <span class="n">melody_start_time</span>
 
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">[:</span><span class="n">melody_start_chord</span><span class="p">]:</span>
+      <span class="n">acc_score</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">[</span><span class="n">melody_start_chord</span><span class="p">:]:</span>
 
       <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]</span>
 
