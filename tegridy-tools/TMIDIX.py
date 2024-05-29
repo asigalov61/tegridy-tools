@@ -5212,6 +5212,7 @@ def ordered_set(seq):
 
 def add_melody_to_enhanced_score_notes(enhanced_score_notes,
                                       melody_start_time=0,
+                                      melody_start_chord=0,
                                       melody_notes_min_duration=-1,
                                       melody_notes_max_duration=255,
                                       melody_octave=5,
@@ -5242,7 +5243,10 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
 
     pt = melody_start_time
 
-    for c in cscore:
+    for c in cscore[:melody_start_chord]:
+      acc_score.extend(c)
+
+    for c in cscore[melody_start_chord:]:
 
       durs = [d[2] if d[3] != 9 else -1 for d in c]
 
