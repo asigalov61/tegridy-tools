@@ -5210,6 +5210,85 @@ def ordered_set(seq):
 
 ###################################################################################
 
+def add_melody_to_enhanced_score_notes(enhanced_score_notes,
+                                      melody_start_time=0,
+                                      melody_notes_min_duration=-1,
+                                      melody_notes_max_duration=255,
+                                      melody_octave=5,
+                                      melody_channel=3,
+                                      melody_patch=40,
+                                      melody_max_velocity=110,
+                                      acc_max_velocity=90,
+                                      pass_drums=True
+                                      ):
+  
+    if pass_drums:
+      score = copy.deepcopy(enhanced_score_notes)
+    else:
+      score = [e for e in copy.deepcopy(enhanced_score_notes) if e[3] !=9]
+
+    if melody_notes_min_duration > 0:
+      min_duration = melody_notes_min_duration
+    else:
+      durs = [d[2] for d in score]
+      min_duration = Counter(durs).most_common()[0][0]
+
+    adjust_score_velocities(score, acc_max_velocity)
+
+    cscore = chordify_score([1000, score])
+
+    melody_score = []
+    acc_score = []
+
+    pt = melody_start_time
+
+    for c in cscore:
+
+      durs = [d[2] if d[3] != 9 else -1 for d in c]
+
+      if not all(d == -1 for d in durs):
+        ndurs = [d for d in durs if d != -1]
+        avg_dur = (sum(ndurs) / len(ndurs)) / 2
+        best_dur = min(durs, key=lambda x:abs(x-avg_dur))
+        pidx = durs.index(best_dur)
+
+        cc = copy.deepcopy(c[pidx])
+
+        if c[0][1] >= pt - 4 and best_dur >= min_duration:
+
+          cc[3] = melody_channel
+          cc[4] = (melody_octave * 12) + (c[pidx][4] % 12)
+          cc[5] = 100 + ((c[pidx][4] % 12) * 2)
+          cc[6] = melody_patch
+
+          melody_score.append(cc)
+          acc_score.extend(c)
+
+          pt = c[0][1]+c[pidx][2]
+
+        else:
+          acc_score.extend(c)
+
+      else:
+        acc_score.extend(c)
+
+    for i, m in enumerate(melody_score[1:]):
+      melody_score[i][2] = min(melody_notes_max_duration, m[1] - melody_score[i][1] - 1)
+
+    adjust_score_velocities(melody_score, melody_max_velocity)
+
+    final_score = sorted(melody_score + acc_score, key=lambda x: (x[1], -x[4]))
+
+    return final_score
+    
+###################################################################################
+
+def find_paths(list_of_lists, path=[]):
+    if not list_of_lists:
+        return [path]
+    return [p for sublist in list_of_lists[0] for p in find_paths(list_of_lists[1:], path+[sublist])]
+
+###################################################################################
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
