@@ -1163,6 +1163,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.pitches_to_tones_chord">pitches_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.play_score">play_score</a></li>
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
+    <li class="mono"><a href="#TMIDIX.recalculate_score_timings">recalculate_score_timings</a></li>
     <li class="mono"><a href="#TMIDIX.replace_bad_tones_chord">replace_bad_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.score2midi">score2midi</a></li>
     <li class="mono"><a href="#TMIDIX.score2opus">score2opus</a></li>
@@ -6533,6 +6534,26 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">find_paths</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">path</span><span class="o">+</span><span class="p">[</span><span class="n">sublist</span><span class="p">])]</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">recalculate_score_timings</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+  <span class="n">rscore</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+
+  <span class="n">pe</span> <span class="o">=</span> <span class="n">rscore</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">abs_time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">rscore</span><span class="p">:</span>
+
+    <span class="n">dtime</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
+    <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_time</span>
+    
+  <span class="k">return</span> <span class="n">rscore</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -11962,6 +11983,41 @@ see opus2midi() and score2opus().</p></div>
       <span class="k">return</span> <span class="n">fig</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.recalculate_score_timings">
+    <p>def <span class="ident">recalculate_score_timings</span>(</p><p>score, start_time=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.recalculate_score_timings', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.recalculate_score_timings" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">recalculate_score_timings</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+  <span class="n">rscore</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+
+  <span class="n">pe</span> <span class="o">=</span> <span class="n">rscore</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">abs_time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">rscore</span><span class="p">:</span>
+
+    <span class="n">dtime</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
+    <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_time</span>
+    
+  <span class="k">return</span> <span class="n">rscore</span>
 </pre></div>
 
   </div>
