@@ -5289,6 +5289,26 @@ def find_paths(list_of_lists, path=[]):
     return [p for sublist in list_of_lists[0] for p in find_paths(list_of_lists[1:], path+[sublist])]
 
 ###################################################################################
+
+def recalculate_score_timings(score, start_time=0):
+
+  rscore = copy.deepcopy(score)
+
+  pe = rscore[0]
+
+  abs_time = start_time
+
+  for e in rscore:
+
+    dtime = e[1] - pe[1]
+    pe = copy.deepcopy(e)
+    abs_time += dtime
+    e[1] = abs_time
+    
+  return rscore
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
