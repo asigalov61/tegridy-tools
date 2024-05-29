@@ -5129,6 +5129,87 @@ def check_and_fix_chords_in_chordified_score(chordified_score,
 
 ###################################################################################
 
+from itertools import combinations, groupby
+
+###################################################################################
+
+def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
+                                                      channels_index=3,
+                                                      pitches_index=4,
+                                                      skip_drums=False
+                                                      ):
+  fixed_chordified_score = []
+
+  bad_chords_counter = 0
+
+  for c in chordified_score:
+
+    tones_chord = sorted(set([t[pitches_index] % 12 for t in c if t[channels_index] != 9]))
+
+    if tones_chord:
+
+        if tones_chord not in ALL_CHORDS_SORTED:
+          
+          pitches_chord = sorted(set([p[pitches_index] for p in c if p[channels_index] != 9]), reverse=True)
+          
+          if len(tones_chord) == 2:
+            tones_counts = Counter([p % 12 for p in pitches_chord]).most_common()
+
+            if tones_counts[0][1] > 1:
+              tones_chord = [tones_counts[0][0]]
+            elif tones_counts[1][1] > 1:
+              tones_chord = [tones_counts[1][0]]
+            else:
+              tones_chord = [pitches_chord[0] % 12]
+
+          else:
+            tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
+
+            for co in tones_chord_combs:
+              if co in ALL_CHORDS_SORTED:
+                tones_chord = co
+                break
+
+          bad_chords_counter += 1
+
+    new_chord = []
+
+    c.sort(key = lambda x: x[pitches_index], reverse=True)
+
+    for e in c:
+      if e[channels_index] != 9:
+        if e[pitches_index] % 12 in tones_chord:
+          new_chord.append(e)
+
+      else:
+        if not skip_drums:
+          new_chord.append(e)
+
+    fixed_chordified_score.append(new_chord)
+
+  return fixed_chordified_score, bad_chords_counter
+
+###################################################################################
+
+def score_chord_to_tones_chord(chord,
+                               channels_index=3,
+                               pitches_index=4):
+
+  return sorted(set([p[4] % 12 for p in chord if p[channels_index] != 9]))
+
+###################################################################################
+
+def grouped_set(seq):
+  return [k for k, v in groupby(seq)]
+
+###################################################################################
+
+def ordered_set(seq):
+  dic = {}
+  return [k for k, v in dic.fromkeys(seq).items()]
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
