@@ -108,6 +108,10 @@ def AddMelody(input_midi, input_channel, input_patch, input_start_chord):
         output_midi_summary = str(output_score[:3])
         output_midi = str(new_fn)
         output_audio = (16000, audio)
+
+        for o in output_score:
+            o[1] *= 16
+            o[2] *= 16
         
         output_plot = TMIDIX.plot_ms_SONG(output_score, plot_title=output_midi_title, return_plt=True)
     
