@@ -5293,7 +5293,8 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
       e[4] = (melody_base_octave * 12) + smoothed[i]
 
     for i, m in enumerate(smoothed_melody[1:]):
-      smoothed_melody[i][2] = min(melody_notes_max_duration, m[1] - smoothed_melody[i][1] - 1)
+      if m[1] - smoothed_melody[i][1]-1 < melody_notes_max_duration:
+        smoothed_melody[i][2] = m[1] - smoothed_melody[i][1] - 1
 
     adjust_score_velocities(smoothed_melody, melody_max_velocity)
 
