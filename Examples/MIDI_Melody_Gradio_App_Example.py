@@ -89,7 +89,7 @@ def AddMelody(input_midi, input_channel, input_patch, input_start_chord):
                                                                   timings_multiplier=16
                                                                   )
         
-        new_fn = fn
+        new_fn = fn1+'.mid'
                 
         
         audio = midi_to_colab_audio(new_fn, 
