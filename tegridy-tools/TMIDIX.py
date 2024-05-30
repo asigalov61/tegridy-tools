@@ -5215,7 +5215,7 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
                                       melody_start_chord=0,
                                       melody_notes_min_duration=-1,
                                       melody_notes_max_duration=255,
-                                      melody_octave=5,
+                                      melody_base_octave=5,
                                       melody_channel=3,
                                       melody_patch=40,
                                       melody_max_velocity=110,
@@ -5261,7 +5261,7 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
         if c[0][1] >= pt - 4 and best_dur >= min_duration:
 
           cc[3] = melody_channel
-          cc[4] = (melody_octave * 12) + (c[pidx][4] % 12)
+          cc[4] = (c[pidx][4] % 24)
           cc[5] = 100 + ((c[pidx][4] % 12) * 2)
           cc[6] = melody_patch
 
@@ -5276,12 +5276,28 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
       else:
         acc_score.extend(c)
 
-    for i, m in enumerate(melody_score[1:]):
-      melody_score[i][2] = min(melody_notes_max_duration, m[1] - melody_score[i][1] - 1)
+    values = [e[4] % 24 for e in melody_score]
+    smoothed = [values[0]]
+    for i in range(1, len(values)):
+        if abs(smoothed[-1] - values[i]) >= 12:
+            if smoothed[-1] < values[i]:
+                smoothed.append(values[i] - 12)
+            else:
+                smoothed.append(values[i] + 12)
+        else:
+            smoothed.append(values[i])
 
-    adjust_score_velocities(melody_score, melody_max_velocity)
+    smoothed_melody = copy.deepcopy(melody_score)
 
-    final_score = sorted(melody_score + acc_score, key=lambda x: (x[1], -x[4]))
+    for i, e in enumerate(smoothed_melody):
+      e[4] = (melody_base_octave * 12) + smoothed[i]
+
+    for i, m in enumerate(smoothed_melody[1:]):
+      smoothed_melody[i][2] = min(melody_notes_max_duration, m[1] - smoothed_melody[i][1] - 1)
+
+    adjust_score_velocities(smoothed_melody, melody_max_velocity)
+
+    final_score = sorted(smoothed_melody + acc_score, key=lambda x: (x[1], -x[4]))
 
     return final_score
     
