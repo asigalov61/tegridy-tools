@@ -6437,10 +6437,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">score_chord_to_tones_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span>
+                               <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 
-  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([(</span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -6460,6 +6461,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                       <span class="n">melody_start_chord</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                       <span class="n">melody_notes_min_duration</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                       <span class="n">melody_notes_max_duration</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
+                                      <span class="n">melody_duration_overlap_tolerance</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                      <span class="n">melody_avg_duration_divider</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                                       <span class="n">melody_base_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                                       <span class="n">melody_channel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                       <span class="n">melody_patch</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
@@ -6497,13 +6500,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">durs</span><span class="p">):</span>
         <span class="n">ndurs</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">durs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">avg_dur</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ndurs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ndurs</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">avg_dur</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ndurs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ndurs</span><span class="p">))</span> <span class="o">/</span> <span class="n">melody_avg_duration_divider</span>
         <span class="n">best_dur</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">durs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">avg_dur</span><span class="p">))</span>
         <span class="n">pidx</span> <span class="o">=</span> <span class="n">durs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">best_dur</span><span class="p">)</span>
 
         <span class="n">cc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">pidx</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pt</span> <span class="o">-</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">best_dur</span> <span class="o">&gt;=</span> <span class="n">min_duration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pt</span> <span class="o">-</span> <span class="n">melody_duration_overlap_tolerance</span> <span class="ow">and</span> <span class="n">best_dur</span> <span class="o">&gt;=</span> <span class="n">min_duration</span><span class="p">:</span>
 
           <span class="n">cc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">melody_channel</span>
           <span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">pidx</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">24</span><span class="p">)</span>
@@ -6538,8 +6541,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">melody_base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">smoothed</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-      <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">melody_notes_max_duration</span><span class="p">:</span>
-        <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">melody_notes_max_duration</span><span class="p">:</span>
+        <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">adjust_score_velocities</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">,</span> <span class="n">melody_max_velocity</span><span class="p">)</span>
 
@@ -9317,7 +9320,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.add_melody_to_enhanced_score_notes">
-    <p>def <span class="ident">add_melody_to_enhanced_score_notes</span>(</p><p>enhanced_score_notes, melody_start_time=0, melody_start_chord=0, melody_notes_min_duration=-1, melody_notes_max_duration=255, melody_base_octave=5, melody_channel=3, melody_patch=40, melody_max_velocity=110, acc_max_velocity=90, pass_drums=True)</p>
+    <p>def <span class="ident">add_melody_to_enhanced_score_notes</span>(</p><p>enhanced_score_notes, melody_start_time=0, melody_start_chord=0, melody_notes_min_duration=-1, melody_notes_max_duration=255, melody_duration_overlap_tolerance=4, melody_avg_duration_divider=2, melody_base_octave=5, melody_channel=3, melody_patch=40, melody_max_velocity=110, acc_max_velocity=90, pass_drums=True)</p>
     </div>
     
 
@@ -9331,6 +9334,8 @@ Tegridy Code 2024</p></div>
                                       <span class="n">melody_start_chord</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                       <span class="n">melody_notes_min_duration</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                       <span class="n">melody_notes_max_duration</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
+                                      <span class="n">melody_duration_overlap_tolerance</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                      <span class="n">melody_avg_duration_divider</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                                       <span class="n">melody_base_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                                       <span class="n">melody_channel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                       <span class="n">melody_patch</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
@@ -9368,13 +9373,13 @@ Tegridy Code 2024</p></div>
 
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">durs</span><span class="p">):</span>
         <span class="n">ndurs</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">durs</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">avg_dur</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ndurs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ndurs</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">avg_dur</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ndurs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ndurs</span><span class="p">))</span> <span class="o">/</span> <span class="n">melody_avg_duration_divider</span>
         <span class="n">best_dur</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">durs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">avg_dur</span><span class="p">))</span>
         <span class="n">pidx</span> <span class="o">=</span> <span class="n">durs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">best_dur</span><span class="p">)</span>
 
         <span class="n">cc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">pidx</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pt</span> <span class="o">-</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">best_dur</span> <span class="o">&gt;=</span> <span class="n">min_duration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pt</span> <span class="o">-</span> <span class="n">melody_duration_overlap_tolerance</span> <span class="ow">and</span> <span class="n">best_dur</span> <span class="o">&gt;=</span> <span class="n">min_duration</span><span class="p">:</span>
 
           <span class="n">cc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">melody_channel</span>
           <span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">pidx</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">24</span><span class="p">)</span>
@@ -9409,8 +9414,8 @@ Tegridy Code 2024</p></div>
       <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">melody_base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">smoothed</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-      <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">melody_notes_max_duration</span><span class="p">:</span>
-        <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">melody_notes_max_duration</span><span class="p">:</span>
+        <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">smoothed_melody</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">adjust_score_velocities</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">,</span> <span class="n">melody_max_velocity</span><span class="p">)</span>
 
@@ -12392,7 +12397,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.score_chord_to_tones_chord">
-    <p>def <span class="ident">score_chord_to_tones_chord</span>(</p><p>chord, channels_index=3, pitches_index=4)</p>
+    <p>def <span class="ident">score_chord_to_tones_chord</span>(</p><p>chord, transpose_value=0, channels_index=3, pitches_index=4)</p>
     </div>
     
 
@@ -12402,10 +12407,11 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.score_chord_to_tones_chord', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.score_chord_to_tones_chord" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score_chord_to_tones_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span>
+                               <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 
-  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([(</span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">chord</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 </pre></div>
 
   </div>
