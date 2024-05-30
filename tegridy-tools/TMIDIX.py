@@ -5192,10 +5192,11 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 ###################################################################################
 
 def score_chord_to_tones_chord(chord,
+                               transpose_value=0,
                                channels_index=3,
                                pitches_index=4):
 
-  return sorted(set([p[4] % 12 for p in chord if p[channels_index] != 9]))
+  return sorted(set([(p[4]+transpose_value) % 12 for p in chord if p[channels_index] != 9]))
 
 ###################################################################################
 
@@ -5215,6 +5216,8 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
                                       melody_start_chord=0,
                                       melody_notes_min_duration=-1,
                                       melody_notes_max_duration=255,
+                                      melody_duration_overlap_tolerance=4,
+                                      melody_avg_duration_divider=2,
                                       melody_base_octave=5,
                                       melody_channel=3,
                                       melody_patch=40,
@@ -5252,13 +5255,13 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
 
       if not all(d == -1 for d in durs):
         ndurs = [d for d in durs if d != -1]
-        avg_dur = (sum(ndurs) / len(ndurs)) / 2
+        avg_dur = (sum(ndurs) / len(ndurs)) / melody_avg_duration_divider
         best_dur = min(durs, key=lambda x:abs(x-avg_dur))
         pidx = durs.index(best_dur)
 
         cc = copy.deepcopy(c[pidx])
 
-        if c[0][1] >= pt - 4 and best_dur >= min_duration:
+        if c[0][1] >= pt - melody_duration_overlap_tolerance and best_dur >= min_duration:
 
           cc[3] = melody_channel
           cc[4] = (c[pidx][4] % 24)
@@ -5293,8 +5296,8 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
       e[4] = (melody_base_octave * 12) + smoothed[i]
 
     for i, m in enumerate(smoothed_melody[1:]):
-      if m[1] - smoothed_melody[i][1]-1 < melody_notes_max_duration:
-        smoothed_melody[i][2] = m[1] - smoothed_melody[i][1] - 1
+      if m[1] - smoothed_melody[i][1] < melody_notes_max_duration:
+        smoothed_melody[i][2] = m[1] - smoothed_melody[i][1]
 
     adjust_score_velocities(smoothed_melody, melody_max_velocity)
 
