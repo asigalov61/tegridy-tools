@@ -83,13 +83,13 @@ def AddMelody(input_midi, input_channel, input_patch, input_start_chord):
 
         detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
                                                                   output_signature = 'MIDI Melody',
-                                                                  output_file_name = fn,
+                                                                  output_file_name = fn1,
                                                                   track_name='Project Los Angeles',
                                                                   list_of_MIDI_patches=patches,
                                                                   timings_multiplier=16
                                                                   )
         
-        new_fn = fn+'.mid'
+        new_fn = fn
                 
         
         audio = midi_to_colab_audio(new_fn, 
