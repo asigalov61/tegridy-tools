@@ -5136,11 +5136,17 @@ from itertools import combinations, groupby
 def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
                                                       channels_index=3,
                                                       pitches_index=4,
+                                                      use_filtered_chords=True,
                                                       skip_drums=False
                                                       ):
   fixed_chordified_score = []
 
   bad_chords_counter = 0
+
+  if use_filtered_chords:
+    CHORDS = ALL_CHORDS_FILTERED
+  else:
+    CHORDS = ALL_CHORDS_SORTED
 
   for c in chordified_score:
 
@@ -5148,7 +5154,7 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 
     if tones_chord:
 
-        if tones_chord not in ALL_CHORDS_SORTED:
+        if tones_chord not in CHORDS:
           
           pitches_chord = sorted(set([p[pitches_index] for p in c if p[channels_index] != 9]), reverse=True)
           
@@ -5166,7 +5172,7 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
             tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
 
             for co in tones_chord_combs:
-              if co in ALL_CHORDS_SORTED:
+              if co in CHORDS:
                 tones_chord = co
                 break
 
