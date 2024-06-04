@@ -42,12 +42,14 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch):
 
         tclen = len(tones_chord)
 
+        tchord = tones_chord
+
         if len(cg) > tclen:
-          tones_chord = tones_chord + [random.choice(tones_chord) for _ in range(len(cg)-tclen)]
+          tchord = tones_chord + [random.choice(tones_chord) for _ in range(len(cg)-tclen)]
 
         for i, cc in enumerate(cg):
           c = copy.deepcopy(cc)
-          c[4] = ((c[4] // 12) * 12) +tones_chord[i]
+          c[4] = ((c[4] // 12) * 12) + tchord[i]
           c[5] += c[4] % 12
           cho.append(c)
 
