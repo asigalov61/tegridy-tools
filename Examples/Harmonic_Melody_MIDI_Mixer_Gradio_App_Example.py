@@ -30,12 +30,14 @@ def pitches_counts(melody_score):
 
   count = 0
   pp = pitches[0]
+    
   for p in pitches:
     if p == pp:
+      pcounts.append(count)
       count += 1
     else:
+      count = 0
       pcounts.append(count)
-      count = 1
     pp = p
 
   return pcounts
@@ -59,8 +61,6 @@ def find_similar_song(songs, src_melody):
     for i, c in enumerate(src_pcount):
       if c == trg_pcount[i]:
         pcount += 1
-      else:
-        break
 
     ratios.append(pcount / len(src_pcount))
 
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
     soundfont = "SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2"
     
-    all_songs = TMIDIX.Tegridy_Any_Pickle_File_Reader('Monster_52905_Mono_Melodies_MIDI_Dataset')
+    all_songs = TMIDIX.Tegridy_Any_Pickle_File_Reader('Monster_Mono_Melodies_MIDI_Dataset_65536_32_256')
     print('=' * 70)
     
     app = gr.Blocks()
