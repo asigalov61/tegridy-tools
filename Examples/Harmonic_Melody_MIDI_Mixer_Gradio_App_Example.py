@@ -12,7 +12,6 @@ import copy
 import gradio as gr
 
 import random
-import tqdm
 
 from midi_to_colab_audio import midi_to_colab_audio
 import TMIDIX
@@ -21,6 +20,57 @@ import matplotlib.pyplot as plt
 
 in_space = os.getenv("SYSTEM") == "spaces"
          
+# =================================================================================================
+
+def pitches_counts(melody_score):
+
+  pitches = [p[4] for p in melody_score]
+
+  pcounts = []
+
+  count = 0
+  pp = pitches[0]
+  for p in pitches:
+    if p == pp:
+      count += 1
+    else:
+      pcounts.append(count)
+      count = 1
+    pp = p
+
+  return pcounts
+
+# =================================================================================================
+
+def find_similar_song(songs, src_melody):
+
+  src_pcount = pitches_counts(src_melody)
+
+  ratios = []
+
+  for s in songs:
+    patch = s[1]
+
+    trg_melody = [e for e in s[3] if e[6] == patch]
+    trg_pcount = pitches_counts(trg_melody)
+
+    pcount = 0
+
+    for i, c in enumerate(src_pcount):
+      if c == trg_pcount[i]:
+        pcount += 1
+      else:
+        break
+
+    ratios.append(pcount / len(src_pcount))
+
+  max_ratio = max(ratios)
+
+  print(max_ratio)
+  print(ratios.count(1.0))
+
+  return songs[ratios.index(max_ratio)]
+
 # =================================================================================================
 
 def mix_chord(chord, tones_chord, mel_patch, mel_pitch):
@@ -60,7 +110,7 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch):
 
 # =================================================================================================
 
-def MixMelody(input_midi):
+def MixMelody(input_midi, input_find_best_match):
     print('=' * 70)
     print('Req start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     start_time = reqtime.time()
@@ -72,6 +122,7 @@ def MixMelody(input_midi):
 
     print('-' * 70)
     print('Input file name:', fn)
+    print('Find best matches', input_find_best_match)
     print('-' * 70)
 
     #===============================================================================
@@ -101,16 +152,22 @@ def MixMelody(input_midi):
         
         matched_songs = [a for a in all_songs if a[2] == max(32, len(src_melody))]
         
+        random.shuffle(matched_songs)
+
+        if input_find_best_match:
+            new_song = find_similar_song(matched_songs, src_melody)
+        else:
+            new_song = random.choice(matched_songs)
         
-        new_song = random.choice(matched_songs)
-            
         print('Selected Monster Mono Melodies MIDI:', new_song[0])
         print('Selected melody instrument:', TMIDIX.Number2patch[new_song[1]], '(', new_song[1], ')')
         print('Melody notes count:', new_song[2])
+        print('Matched melodies pool count', len(matched_songs))
         
         MIDI_Summary = 'Selected Monster Mono Melodies MIDI: ' + str(new_song[0]) + '\n'
         MIDI_Summary += 'Selected melody instrument: ' + str(TMIDIX.Number2patch[new_song[1]]) + ' (' + str(new_song[1]) + ')' + '\n'
-        MIDI_Summary += 'Melody notes count: ' + str(new_song[2])
+        MIDI_Summary += 'Melody notes count: ' + str(new_song[2]) + '\n'
+        MIDI_Summary += 'Matched melodies pool count: ' + str(len(matched_songs))
 
         fn1 += '_' + str(new_song[0]) + '_' + str(TMIDIX.Number2patch[new_song[1]]) + '_' + str(new_song[1]) + '_' + str(new_song[2])
         
@@ -237,6 +294,7 @@ if __name__ == "__main__":
         gr.Markdown("## Upload your MIDI or select a sample example MIDI below")
         
         input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
+        input_find_best_match = gr.Checkbox(label="Find best match", value=True)
         
         run_btn = gr.Button("mix melody", variant="primary")
 
@@ -249,14 +307,14 @@ if __name__ == "__main__":
         output_midi = gr.File(label="Output MIDI file", file_types=[".mid"])
 
 
-        run_event = run_btn.click(MixMelody, [input_midi],
+        run_event = run_btn.click(MixMelody, [input_midi, input_find_best_match],
                                   [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
 
         gr.Examples(
-            [["Abracadabra-Sample-Melody.mid"], 
-             ["Sparks-Fly-Sample-Melody.mid"],
+            [["Abracadabra-Sample-Melody.mid", True], 
+             ["Sparks-Fly-Sample-Melody.mid", True],
             ],
-            [input_midi],
+            [input_midi, input_find_best_match],
             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot],
             MixMelody,
             cache_examples=True,
