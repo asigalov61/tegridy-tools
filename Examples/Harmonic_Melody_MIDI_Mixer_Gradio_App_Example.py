@@ -66,7 +66,7 @@ def find_similar_song(songs, src_melody):
 
   max_ratio = max(ratios)
 
-  return songs[ratios.index(max_ratio)], max_ratio
+  return songs[ratios.index(max_ratio)], max_ratio, ratios.count(max_ratio)
 
 # =================================================================================================
 
@@ -167,9 +167,10 @@ def MixMelody(input_midi, input_find_best_match, input_adjust_melody_notes_durat
         random.shuffle(matched_songs)
 
         max_match_ratio = -1
+        max_match_ratios_count = len(matched_songs)
 
         if input_find_best_match:
-            new_song, max_match_ratio = find_similar_song(matched_songs, src_melody)
+            new_song, max_match_ratio, max_match_ratios_count = find_similar_song(matched_songs, src_melody)
         else:
             new_song = random.choice(matched_songs)
         
@@ -177,13 +178,13 @@ def MixMelody(input_midi, input_find_best_match, input_adjust_melody_notes_durat
         print('Selected melody match ratio:', max_match_ratio)
         print('Selected melody instrument:', TMIDIX.Number2patch[new_song[1]], '(', new_song[1], ')')
         print('Melody notes count:', new_song[2])
-        print('Matched melodies pool count', len(matched_songs))
+        print('Matched melodies pool count', max_match_ratios_count)
         
         MIDI_Summary = 'Selected Monster Mono Melodies MIDI: ' + str(new_song[0]) + '\n'
         MIDI_Summary += 'Selected melody match ratio: ' + str(max_match_ratio) + '\n'
         MIDI_Summary += 'Selected melody instrument: ' + str(TMIDIX.Number2patch[new_song[1]]) + ' (' + str(new_song[1]) + ')' + '\n'
         MIDI_Summary += 'Melody notes count: ' + str(new_song[2]) + '\n'
-        MIDI_Summary += 'Matched melodies pool count: ' + str(len(matched_songs))
+        MIDI_Summary += 'Matched melodies pool count: ' + str(max_match_ratios_count)
 
         fn1 += '_' + str(new_song[0]) + '_' + str(TMIDIX.Number2patch[new_song[1]]) + '_' + str(new_song[1]) + '_' + str(new_song[2])
         
@@ -202,7 +203,7 @@ def MixMelody(input_midi, input_find_best_match, input_adjust_melody_notes_durat
         mixed_song = []
         
         midx = 0
-        next_note_dtime = 511
+        next_note_dtime = 255
         
         for i, c in enumerate(cscore):
             cho = copy.deepcopy(c)
