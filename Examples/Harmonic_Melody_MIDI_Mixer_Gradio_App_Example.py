@@ -29,12 +29,12 @@ def pitches_counts(melody_score):
   pcounts = []
 
   count = 0
-  pp = pitches[0]
+  pp = -1
     
   for p in pitches:
     if p == pp:
-      pcounts.append(count)
       count += 1
+      pcounts.append(count)
     else:
       count = 0
       pcounts.append(count)
@@ -66,14 +66,11 @@ def find_similar_song(songs, src_melody):
 
   max_ratio = max(ratios)
 
-  print(max_ratio)
-  print(ratios.count(1.0))
-
-  return songs[ratios.index(max_ratio)]
+  return songs[ratios.index(max_ratio)], max_ratio
 
 # =================================================================================================
 
-def mix_chord(chord, tones_chord, mel_patch, mel_pitch):
+def mix_chord(chord, tones_chord, mel_patch, mel_pitch, next_note_dtime):
 
   cho = []
 
@@ -81,10 +78,17 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch):
 
     if k != 128:
       if k == mel_patch:
+          
         cg = list(g)
+          
         c = copy.deepcopy(cg[0])
+          
+        if cg[0][2] > next_note_dtime:
+            c[2] = next_note_dtime
+            
         c[4] = mel_pitch
         c[5] = 105 + (mel_pitch % 12)
+          
         cho.append(c)
 
       else:
@@ -98,9 +102,15 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch):
           tchord = tones_chord + [random.choice(tones_chord) for _ in range(len(cg)-tclen)]
 
         for i, cc in enumerate(cg):
+            
           c = copy.deepcopy(cc)
+            
+          if cc[2] > next_note_dtime:
+              c[2] = next_note_dtime
+              
           c[4] = ((c[4] // 12) * 12) + tchord[i]
           c[5] += c[4] % 12
+            
           cho.append(c)
 
     else:
@@ -154,17 +164,21 @@ def MixMelody(input_midi, input_find_best_match):
         
         random.shuffle(matched_songs)
 
+        max_match_ratio = -1
+
         if input_find_best_match:
-            new_song = find_similar_song(matched_songs, src_melody)
+            new_song, max_match_ratio = find_similar_song(matched_songs, src_melody)
         else:
             new_song = random.choice(matched_songs)
         
         print('Selected Monster Mono Melodies MIDI:', new_song[0])
+        print('Selected melody match ratio:', max_match_ratio)
         print('Selected melody instrument:', TMIDIX.Number2patch[new_song[1]], '(', new_song[1], ')')
         print('Melody notes count:', new_song[2])
         print('Matched melodies pool count', len(matched_songs))
         
         MIDI_Summary = 'Selected Monster Mono Melodies MIDI: ' + str(new_song[0]) + '\n'
+        MIDI_Summary += 'Selected melody match ratio: ' + str(max_match_ratio) + '\n'
         MIDI_Summary += 'Selected melody instrument: ' + str(TMIDIX.Number2patch[new_song[1]]) + ' (' + str(new_song[1]) + ')' + '\n'
         MIDI_Summary += 'Melody notes count: ' + str(new_song[2]) + '\n'
         MIDI_Summary += 'Matched melodies pool count: ' + str(len(matched_songs))
@@ -187,19 +201,30 @@ def MixMelody(input_midi, input_find_best_match):
         
         midx = 0
         
-        for c in cscore:
+        for i, c in enumerate(cscore):
             cho = copy.deepcopy(c)
             
             patches = sorted(set([e[6] for e in c]))
             
             if trg_patch in patches:
-                
-                mixed_song.extend(mix_chord(c, src_harm_tones_chords[midx], trg_patch, src_melody_pitches[midx]))
+
+                if midx < len(src_melody)-1:
+                    next_note_dtime = src_melody[midx+1][1] - src_melody[midx][1]
+                else:
+                    next_note_dtime = 255
+                    
+                mixed_song.extend(mix_chord(c, src_harm_tones_chords[midx], trg_patch, src_melody_pitches[midx], next_note_dtime))
                 
                 midx += 1
             
             else:
-                mixed_song.extend(mix_chord(cho, src_harm_tones_chords[midx], trg_patch, src_melody_pitches[midx]))
+
+                if i < len(cscore)-1:
+                    next_note_dtime = cscore[i+1][0][1] - cscore[i][0][1]
+                else:
+                    next_note_dtime = 255
+                
+                mixed_song.extend(mix_chord(cho, src_harm_tones_chords[midx], trg_patch, src_melody_pitches[midx], next_note_dtime))
 
             if midx == len(src_melody):
                 break      
@@ -253,7 +278,7 @@ def MixMelody(input_midi, input_find_best_match):
     
         print('Output MIDI file name:', output_midi)
         print('Output MIDI title:', output_midi_title)
-        print('Output MIDI summary:', '')
+        print('Output MIDI summary:', MIDI_Summary)
         print('=' * 70) 
         
     
