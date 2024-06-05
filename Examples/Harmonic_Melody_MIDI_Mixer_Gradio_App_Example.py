@@ -120,7 +120,7 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch, next_note_dtime):
 
 # =================================================================================================
 
-def MixMelody(input_midi, input_find_best_match):
+def MixMelody(input_midi, input_find_best_match, input_adjust_melody_notes_durations, input_adjust_accompaniment_notes_durations):
     print('=' * 70)
     print('Req start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     start_time = reqtime.time()
@@ -133,6 +133,8 @@ def MixMelody(input_midi, input_find_best_match):
     print('-' * 70)
     print('Input file name:', fn)
     print('Find best matches', input_find_best_match)
+    print('Adjust melody notes durations:', input_adjust_melody_notes_durations)
+    print('Adjust accompaniment notes durations:', input_adjust_accompaniment_notes_durations)
     print('-' * 70)
 
     #===============================================================================
@@ -200,6 +202,7 @@ def MixMelody(input_midi, input_find_best_match):
         mixed_song = []
         
         midx = 0
+        next_note_dtime = 511
         
         for i, c in enumerate(cscore):
             cho = copy.deepcopy(c)
@@ -208,21 +211,22 @@ def MixMelody(input_midi, input_find_best_match):
             
             if trg_patch in patches:
 
-                if midx < len(src_melody)-1:
-                    next_note_dtime = src_melody[midx+1][1] - src_melody[midx][1]
-                else:
-                    next_note_dtime = 255
+                if input_adjust_melody_notes_durations:
+                    if midx < len(src_melody)-1:
+                        next_note_dtime = src_melody[midx+1][1] - src_melody[midx][1]
+                    else:
+                        next_note_dtime = 255
                     
                 mixed_song.extend(mix_chord(c, src_harm_tones_chords[midx], trg_patch, src_melody_pitches[midx], next_note_dtime))
                 
                 midx += 1
             
             else:
-
-                if i < len(cscore)-1:
-                    next_note_dtime = cscore[i+1][0][1] - cscore[i][0][1]
-                else:
-                    next_note_dtime = 255
+                if input_adjust_accompaniment_notes_durations:
+                    if i < len(cscore)-1:
+                        next_note_dtime = cscore[i+1][0][1] - cscore[i][0][1]
+                    else:
+                        next_note_dtime = 255
                 
                 mixed_song.extend(mix_chord(cho, src_harm_tones_chords[midx], trg_patch, src_melody_pitches[midx], next_note_dtime))
 
@@ -320,6 +324,8 @@ if __name__ == "__main__":
         
         input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
         input_find_best_match = gr.Checkbox(label="Find best match", value=True)
+        input_adjust_melody_notes_durations = gr.Checkbox(label="Adjust melody notes durations", value=True)
+        input_adjust_accompaniment_notes_durations = gr.Checkbox(label="Adjust accompaniment notes durations", value=True)
         
         run_btn = gr.Button("mix melody", variant="primary")
 
@@ -332,14 +338,14 @@ if __name__ == "__main__":
         output_midi = gr.File(label="Output MIDI file", file_types=[".mid"])
 
 
-        run_event = run_btn.click(MixMelody, [input_midi, input_find_best_match],
+        run_event = run_btn.click(MixMelody, [input_midi, input_find_best_match, input_adjust_melody_notes_durations, input_adjust_accompaniment_notes_durations],
                                   [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
 
         gr.Examples(
-            [["Abracadabra-Sample-Melody.mid", True], 
-             ["Sparks-Fly-Sample-Melody.mid", True],
+            [["Abracadabra-Sample-Melody.mid", True, True, True], 
+             ["Sparks-Fly-Sample-Melody.mid", True, True, True],
             ],
-            [input_midi, input_find_best_match],
+            [input_midi, input_find_best_match, input_adjust_melody_notes_durations, input_adjust_accompaniment_notes_durations],
             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot],
             MixMelody,
             cache_examples=True,
