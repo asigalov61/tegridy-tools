@@ -1142,6 +1142,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
+    <li class="mono"><a href="#TMIDIX.flatten">flatten</a></li>
     <li class="mono"><a href="#TMIDIX.flip_enhanced_score_notes">flip_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.frame_monophonic_melody">frame_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.generate_colors">generate_colors</a></li>
@@ -6387,11 +6388,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                                       <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                       <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                                                       <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
                                                       <span class="p">):</span>
   <span class="n">fixed_chordified_score</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="n">bad_chords_counter</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">duplicate_pitches_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
   <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
@@ -6400,6 +6403,22 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score</span><span class="p">:</span>
 
+    <span class="k">if</span> <span class="n">remove_duplicate_pitches</span><span class="p">:</span>
+
+      <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+      <span class="n">dpitches</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+      <span class="n">ddchord</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dpitches</span><span class="p">:</span>
+          <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+          <span class="n">dpitches</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">duplicate_pitches_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+      <span class="n">c</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ddchord</span><span class="p">)</span>
+      
     <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
     <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
@@ -6443,7 +6462,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">fixed_chordified_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_chord</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">fixed_chordified_score</span><span class="p">,</span> <span class="n">bad_chords_counter</span>
+  <span class="k">return</span> <span class="n">fixed_chordified_score</span><span class="p">,</span> <span class="n">bad_chords_counter</span><span class="p">,</span> <span class="n">duplicate_pitches_counter</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -6675,6 +6694,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">mel_chunks</span><span class="p">,</span> <span class="p">[[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mel_chunks</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mel_chunks</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">list_of_lists</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -9588,7 +9612,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.advanced_check_and_fix_chords_in_chordified_score">
-    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, use_filtered_chords=True, skip_drums=False)</p>
+    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, use_filtered_chords=True, remove_duplicate_pitches=True, skip_drums=False)</p>
     </div>
     
 
@@ -9601,11 +9625,13 @@ Tegridy Code 2024</p></div>
                                                       <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                       <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                                                       <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
                                                       <span class="p">):</span>
   <span class="n">fixed_chordified_score</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="n">bad_chords_counter</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">duplicate_pitches_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
   <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
@@ -9614,6 +9640,22 @@ Tegridy Code 2024</p></div>
 
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score</span><span class="p">:</span>
 
+    <span class="k">if</span> <span class="n">remove_duplicate_pitches</span><span class="p">:</span>
+
+      <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+      <span class="n">dpitches</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+      <span class="n">ddchord</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dpitches</span><span class="p">:</span>
+          <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+          <span class="n">dpitches</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">duplicate_pitches_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+      
+      <span class="n">c</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ddchord</span><span class="p">)</span>
+      
     <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
     <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
@@ -9657,7 +9699,7 @@ Tegridy Code 2024</p></div>
 
     <span class="n">fixed_chordified_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_chord</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">fixed_chordified_score</span><span class="p">,</span> <span class="n">bad_chords_counter</span>
+  <span class="k">return</span> <span class="n">fixed_chordified_score</span><span class="p">,</span> <span class="n">bad_chords_counter</span><span class="p">,</span> <span class="n">duplicate_pitches_counter</span>
 </pre></div>
 
   </div>
@@ -11108,6 +11150,27 @@ The type of track (opus or score) is autodetected.</p></div>
       <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> 
 
     <span class="k">return</span> <span class="n">fixed_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.flatten">
+    <p>def <span class="ident">flatten</span>(</p><p>list_of_lists)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.flatten', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.flatten" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">list_of_lists</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
 </pre></div>
 
   </div>
