@@ -5136,6 +5136,7 @@ from itertools import combinations, groupby
 def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
                                                       channels_index=3,
                                                       pitches_index=4,
+                                                      patches_index=6,
                                                       use_filtered_chords=True,
                                                       remove_duplicate_pitches=True,
                                                       skip_drums=False
@@ -5156,15 +5157,20 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 
       c.sort(key = lambda x: x[pitches_index], reverse=True)
 
-      dpitches = set()
+      seen = set()
       ddchord = []
 
       for cc in c:
-        if cc[pitches_index] not in dpitches:
-          ddchord.append(cc)
-          dpitches.add(cc[pitches_index])
+        if cc[channels_index] != 9:
+
+          if tuple([cc[pitches_index], cc[patches_index]]) not in seen:
+            ddchord.append(cc)
+            seen.add(tuple([cc[pitches_index], cc[patches_index]]))
+          else:
+            duplicate_pitches_counter += 1
+        
         else:
-          duplicate_pitches_counter += 1
+          ddchord.append(cc)
       
       c = copy.deepcopy(ddchord)
       
@@ -5458,7 +5464,7 @@ def enhanced_delta_score_notes(enhanced_score_notes,
 
   delta_score = []
 
-  pe = ['note', max(0, start_time)]
+  pe = ['note', max(0, enhanced_score_notes[0][1]-start_time)]
 
   for e in enhanced_score_notes:
 
@@ -5485,13 +5491,15 @@ def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
                                               tokenize_velocities=True,
                                               tokenize_patches=True,
                                               score_timings_range=256,
-                                              max_seq_len=8193,
+                                              max_seq_len=-1,
                                               seq_pad_value=-1
                                               ):
   
   
   
   score_tokens_ints_seq = []
+
+  tokens_shifts = [-1] * 7
 
   for d in enhanced_delta_score_notes:
 
@@ -5500,31 +5508,38 @@ def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
 
     if tokenize_start_times:
       seq.append(d[0])
+      tokens_shifts[0] = shift
       shift += score_timings_range
 
     if tokenize_durations:
       seq.append(d[1]+shift)
+      tokens_shifts[1] = shift
       shift += score_timings_range
 
     if tokenize_channels:
+      tokens_shifts[2] = shift
       seq.append(d[2]+shift)
       shift += 16
     
     if tokenize_pitches:
+      tokens_shifts[3] = shift
       seq.append(d[3]+shift)
       shift += 128
     
     if tokenize_velocities:
+      tokens_shifts[4] = shift
       seq.append(d[4]+shift)
       shift += 128
 
     if tokenize_velocities:
+      tokens_shifts[5] = shift
       seq.append(d[5]+shift)
       shift += 129
 
+    tokens_shifts[6] = shift
     score_tokens_ints_seq.append(seq)
 
-  flat_score_tokens_ints_seq = flatten(score_tokens_ints_seq)
+  final_score_tokens_ints_seq = flatten(score_tokens_ints_seq)
 
   if max_seq_len > -1:
     final_score_tokens_ints_seq = flat_score_tokens_ints_seq[:max_seq_len]
@@ -5534,7 +5549,7 @@ def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
 
   return [score_tokens_ints_seq,
           final_score_tokens_ints_seq, 
-          shift,
+          tokens_shifts,
           seq_pad_value, 
           max_seq_len,
           len(score_tokens_ints_seq),
