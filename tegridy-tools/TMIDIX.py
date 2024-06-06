@@ -5477,6 +5477,72 @@ def enhanced_delta_score_notes(enhanced_score_notes,
 
 ###################################################################################
 
+def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
+                                              tokenize_start_times=True,
+                                              tokenize_durations=True,
+                                              tokenize_channels=True,
+                                              tokenize_pitches=True,
+                                              tokenize_velocities=True,
+                                              tokenize_patches=True,
+                                              score_timings_range=256,
+                                              max_seq_len=8193,
+                                              seq_pad_value=-1
+                                              ):
+  
+  
+  
+  score_tokens_ints_seq = []
+
+  for d in enhanced_delta_score_notes:
+
+    seq = []
+    shift = 0
+
+    if tokenize_start_times:
+      seq.append(d[0])
+      shift += score_timings_range
+
+    if tokenize_durations:
+      seq.append(d[1]+shift)
+      shift += score_timings_range
+
+    if tokenize_channels:
+      seq.append(d[2]+shift)
+      shift += 16
+    
+    if tokenize_pitches:
+      seq.append(d[3]+shift)
+      shift += 128
+    
+    if tokenize_velocities:
+      seq.append(d[4]+shift)
+      shift += 128
+
+    if tokenize_velocities:
+      seq.append(d[5]+shift)
+      shift += 129
+
+    score_tokens_ints_seq.append(seq)
+
+  flat_score_tokens_ints_seq = flatten(score_tokens_ints_seq)
+
+  if max_seq_len > -1:
+    final_score_tokens_ints_seq = flat_score_tokens_ints_seq[:max_seq_len]
+
+  if seq_pad_value > -1:
+    final_score_tokens_ints_seq += [seq_pad_value] * (max_seq_len - len(final_score_tokens_ints_seq))
+
+  return [score_tokens_ints_seq,
+          final_score_tokens_ints_seq, 
+          shift,
+          seq_pad_value, 
+          max_seq_len,
+          len(score_tokens_ints_seq),
+          len(final_score_tokens_ints_seq)
+          ]
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
