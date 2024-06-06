@@ -102,6 +102,88 @@ display(Audio(midi_audio, rate=16000, normalize=False))
 TMIDIX.plot_ms_SONG(output_score, plot_title=output_file_name+'.mid')
 ```
 
+### Advanced MIDI processing
+
+```
+import TMIDIX
+
+#===============================================================================
+# Input MIDI file (as filepath or bytes)
+
+input_midi = './tegridy-tools/tegridy-tools/seed-lyrics.mid'
+
+#===============================================================================
+# Raw single-track ms score
+
+raw_score = TMIDIX.midi2single_track_ms_score(input_midi)
+
+#===============================================================================
+# Enhanced score notes
+
+escore_notes = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
+
+#===============================================================================
+# Augmented enhanced score notes
+
+escore_notes = TMIDIX.augment_enhanced_score_notes(escore_notes)
+
+#===============================================================================
+# Let's say we have a melody with patch 1 (Bright Acoustic Piano)
+
+mel_patch = 1
+
+#===============================================================================
+# Splitting enhanced score into melody and accompaniment scores...
+
+mel_score = [e for e in escore_notes if e[6] == mel_patch]
+acc_score = [e for e in escore_notes if e[6] != mel_patch]
+
+#===============================================================================
+# If both scores present...
+
+if mel_score and acc_score:
+
+  #=============================================================================
+  # Making sure that melody score is monophonic...
+
+  mel_score = [c[0] for c in TMIDIX.chordify_score([1000, mel_score])]
+
+  #=============================================================================
+  # Making sure that notes do not overlap...
+
+  fixed_mel_score = TMIDIX.fix_monophonic_score_durations(mel_score)
+
+  #=============================================================================
+  # Making sure that accompaniment score consists of only good chords...
+
+  fixed_acc_score = TMIDIX.flatten(TMIDIX.advanced_check_and_fix_chords_in_chordified_score(TMIDIX.chordify_score([1000, acc_score]))[0])
+
+  #=============================================================================
+  # Combining melody and accompaniment scores back into one score...
+
+  fixed_escore_notes = sorted(fixed_mel_score+fixed_acc_score, key=lambda x: (x[1], x[4]))
+
+  #=============================================================================
+  # Resetting score timings to start from zero...
+
+  recalculated_escore_notes = TMIDIX.recalculate_score_timings(fixed_escore_notes)
+
+  #=============================================================================
+  # Converting absolute score timings into relative timings...
+
+  delta_escore_notes = TMIDIX.enhanced_delta_score_notes(recalculated_escore_notes)
+
+  #=============================================================================
+  # Processing delta enhanced score into integer tokens seq...
+
+  tokenized_delta_enhanced_score = TMIDIX.basic_enhanced_delta_score_notes_tokenizer(delta_escore_notes)
+
+  #=============================================================================
+  # Double-checking that tokens seq is good and within range...
+  
+  assert min(tokenized_delta_enhanced_score[1]) >= 0 and max(tokenized_delta_enhanced_score[1]) < tokenized_delta_enhanced_score[2], print('Bad seq!!! Check seq!!!')
+```
+
 ***
 
 ### Make sure to check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) dir for many useful and practical examples and applications
