@@ -1174,6 +1174,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.score2stats">score2stats</a></li>
     <li class="mono"><a href="#TMIDIX.score_chord_to_tones_chord">score_chord_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.shift_bits">shift_bits</a></li>
+    <li class="mono"><a href="#TMIDIX.split_melody">split_melody</a></li>
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
@@ -6636,6 +6637,44 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">song</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">split_melody</span><span class="p">(</span><span class="n">enhanced_melody_score_notes</span><span class="p">,</span> 
+                 <span class="n">split_time</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> 
+                 <span class="n">max_score_time</span><span class="o">=</span><span class="mi">255</span>
+                 <span class="p">):</span>
+
+  <span class="n">mel_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">split_time</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+
+    <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_score_time</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_melody_score_notes</span><span class="p">]</span>
+    <span class="n">stime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">stime</span> <span class="o">=</span> <span class="n">split_time</span>
+
+  <span class="n">pe</span> <span class="o">=</span> <span class="n">enhanced_melody_score_notes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">chu</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_melody_score_notes</span><span class="p">:</span>
+    <span class="n">dtime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_score_time</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="n">dtime</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">durs</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">chu</span><span class="p">:</span>
+        <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
+      <span class="n">chu</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">chu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">chu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">e</span>
+
+  <span class="k">if</span> <span class="n">chu</span><span class="p">:</span>
+    <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">mel_chunks</span><span class="p">,</span> <span class="p">[[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mel_chunks</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mel_chunks</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -12565,6 +12604,60 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <div id="source-TMIDIX.shift_bits" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">shift_bits</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">bits</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span> <span class="o">+</span> <span class="n">bits</span><span class="p">[:</span><span class="o">-</span><span class="n">n</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.split_melody">
+    <p>def <span class="ident">split_melody</span>(</p><p>enhanced_melody_score_notes, split_time=-1, max_score_time=255)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.split_melody', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.split_melody" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">split_melody</span><span class="p">(</span><span class="n">enhanced_melody_score_notes</span><span class="p">,</span> 
+                 <span class="n">split_time</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> 
+                 <span class="n">max_score_time</span><span class="o">=</span><span class="mi">255</span>
+                 <span class="p">):</span>
+
+  <span class="n">mel_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">split_time</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+
+    <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_score_time</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_melody_score_notes</span><span class="p">]</span>
+    <span class="n">stime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">stime</span> <span class="o">=</span> <span class="n">split_time</span>
+
+  <span class="n">pe</span> <span class="o">=</span> <span class="n">enhanced_melody_score_notes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">chu</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_melody_score_notes</span><span class="p">:</span>
+    <span class="n">dtime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_score_time</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="n">dtime</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">durs</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">chu</span><span class="p">:</span>
+        <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
+      <span class="n">chu</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">chu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">chu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">e</span>
+
+  <span class="k">if</span> <span class="n">chu</span><span class="p">:</span>
+    <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">mel_chunks</span><span class="p">,</span> <span class="p">[[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mel_chunks</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mel_chunks</span><span class="p">)</span>
 </pre></div>
 
   </div>
