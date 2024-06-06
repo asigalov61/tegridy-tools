@@ -5137,11 +5137,13 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
                                                       channels_index=3,
                                                       pitches_index=4,
                                                       use_filtered_chords=True,
+                                                      remove_duplicate_pitches=True,
                                                       skip_drums=False
                                                       ):
   fixed_chordified_score = []
 
   bad_chords_counter = 0
+  duplicate_pitches_counter = 0
 
   if use_filtered_chords:
     CHORDS = ALL_CHORDS_FILTERED
@@ -5150,6 +5152,22 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 
   for c in chordified_score:
 
+    if remove_duplicate_pitches:
+
+      c.sort(key = lambda x: x[pitches_index], reverse=True)
+
+      dpitches = set()
+      ddchord = []
+
+      for cc in c:
+        if cc[pitches_index] not in dpitches:
+          ddchord.append(cc)
+          dpitches.add(cc[pitches_index])
+        else:
+          duplicate_pitches_counter += 1
+      
+      c = copy.deepcopy(ddchord)
+      
     tones_chord = sorted(set([t[pitches_index] % 12 for t in c if t[channels_index] != 9]))
 
     if tones_chord:
@@ -5193,7 +5211,7 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 
     fixed_chordified_score.append(new_chord)
 
-  return fixed_chordified_score, bad_chords_counter
+  return fixed_chordified_score, bad_chords_counter, duplicate_pitches_counter
 
 ###################################################################################
 
@@ -5425,6 +5443,11 @@ def split_melody(enhanced_melody_score_notes,
     mel_chunks.append(chu)
 
   return mel_chunks, [[m[0][1], m[-1][1]] for m in mel_chunks], len(mel_chunks)
+
+###################################################################################
+
+def flatten(list_of_lists):
+  return [x for y in list_of_lists for x in y]
 
 ###################################################################################
 
