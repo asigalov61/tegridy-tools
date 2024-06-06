@@ -5451,6 +5451,32 @@ def flatten(list_of_lists):
 
 ###################################################################################
 
+def enhanced_delta_score_notes(enhanced_score_notes,
+                               start_time=0,
+                               max_score_time=255
+                               ):
+
+  delta_score = []
+
+  pe = ['note', max(0, start_time)]
+
+  for e in enhanced_score_notes:
+
+    dtime = max(0, min(max_score_time, e[1]-pe[1]))
+    dur = max(1, min(max_score_time, e[2]))
+    cha = max(0, min(15, e[3]))
+    ptc = max(1, min(127, e[4]))
+    vel = max(1, min(127, e[5]))
+    pat = max(0, min(128, e[6]))
+
+    delta_score.append([dtime, dur, cha, ptc, vel, pat])
+
+    pe = e
+
+  return delta_score
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
