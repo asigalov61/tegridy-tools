@@ -5390,6 +5390,44 @@ def harmonize_enhanced_melody_score_notes(enhanced_melody_score_notes):
 
 ###################################################################################
 
+def split_melody(enhanced_melody_score_notes, 
+                 split_time=-1, 
+                 max_score_time=255
+                 ):
+
+  mel_chunks = []
+
+  if split_time == -1:
+
+    durs = [max(0, min(max_score_time, e[2])) for e in enhanced_melody_score_notes]
+    stime = max(durs)
+    
+  else:
+    stime = split_time
+
+  pe = enhanced_melody_score_notes[0]
+  chu = []
+  
+  for e in enhanced_melody_score_notes:
+    dtime = max(0, min(max_score_time, e[1]-pe[1]))
+
+    if dtime > max(durs):
+      if chu:
+        mel_chunks.append(chu)
+      chu = []
+      chu.append(e)
+    else:
+      chu.append(e)
+
+    pe = e
+
+  if chu:
+    mel_chunks.append(chu)
+
+  return mel_chunks, [[m[0][1], m[-1][1]] for m in mel_chunks], len(mel_chunks)
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
