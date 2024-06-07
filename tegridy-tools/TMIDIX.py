@@ -5531,7 +5531,7 @@ def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
       seq.append(d[4]+shift)
       shift += 128
 
-    if tokenize_velocities:
+    if tokenize_patches:
       tokens_shifts[5] = shift
       seq.append(d[5]+shift)
       shift += 129
@@ -5555,6 +5555,50 @@ def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
           len(score_tokens_ints_seq),
           len(final_score_tokens_ints_seq)
           ]
+
+###################################################################################
+
+def basic_enhanced_delta_score_notes_detokenizer(tokenized_seq, 
+                                                 tokens_shifts, 
+                                                 timings_multiplier=16
+                                                 ):
+
+  song_f = []
+
+  time = 0
+  dur = 16
+  channel = 0
+  pitch = 60
+  vel = 90
+  pat = 0
+
+  note_seq_len = len([t for t in tokens_shifts if t > -1])-1
+  tok_shifts_idxs = [i for i in range(len(tokens_shifts[:-1])) if tokens_shifts[i] > - 1]
+
+  song = []
+
+  for i in range(0, len(tokenized_seq), note_seq_len):
+    note = tokenized_seq[i:i+note_seq_len]
+    song.append(note)
+
+  for note in song:
+    for i, idx in enumerate(tok_shifts_idxs):
+      if idx == 0:
+        time += (note[i]-tokens_shifts[0]) * timings_multiplier
+      elif idx == 1:
+        dur = (note[i]-tokens_shifts[1]) * timings_multiplier
+      elif idx == 2:
+        channel = (note[i]-tokens_shifts[2])
+      elif idx == 3:
+        pitch = (note[i]-tokens_shifts[3])
+      elif idx == 4:
+        vel = (note[i]-tokens_shifts[4])
+      elif idx == 5:
+        pat = (note[i]-tokens_shifts[5])
+
+    song_f.append(['note', time, dur, channel, pitch, vel, pat ])
+
+  return song_f
 
 ###################################################################################
 
