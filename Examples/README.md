@@ -113,6 +113,11 @@ import TMIDIX
 input_midi = './tegridy-tools/tegridy-tools/seed-lyrics.mid'
 
 #===============================================================================
+# Output MIDI file
+
+output_file_name = './song' # output MIDI file path without extension
+
+#===============================================================================
 # Raw single-track ms score
 
 raw_score = TMIDIX.midi2single_track_ms_score(input_midi)
@@ -176,12 +181,30 @@ if mel_score and acc_score:
   #=============================================================================
   # Processing delta enhanced score into integer tokens seq...
 
-  tokenized_delta_enhanced_score = TMIDIX.basic_enhanced_delta_score_notes_tokenizer(delta_escore_notes)
+  tokenized_data = TMIDIX.basic_enhanced_delta_score_notes_tokenizer(delta_escore_notes)
+
+  final_score_tokens_ints_seq = tokenized_data[1]
+  tokens_shifts = tokenized_data[2]
 
   #=============================================================================
   # Double-checking that tokens seq is good and within range...
   
-  assert min(tokenized_delta_enhanced_score[1]) >= 0 and max(tokenized_delta_enhanced_score[1]) < tokenized_delta_enhanced_score[2], print('Bad seq!!! Check seq!!!')
+  assert min(final_score_tokens_ints_seq) >= 0, print('Bad seq!!! Check seq!!!')
+  assert max(final_score_tokens_ints_seq) < tokens_shifts[-1], print('Bad seq!!! Check seq!!!')
+
+  #===============================================================================
+  # Converting tokenized score seq back to MIDI...
+
+  output_score = TMIDIX.basic_enhanced_delta_score_notes_detokenizer(final_score_tokens_ints_seq, tokens_shifts)
+
+  output_score, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
+
+  detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
+                                                            output_signature = 'TMIDIX MIDI Composition',
+                                                            output_file_name = output_file_name,
+                                                            track_name='Project Los Angeles',
+                                                            list_of_MIDI_patches=patches
+                                                           )
 ```
 
 ***
