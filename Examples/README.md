@@ -189,7 +189,7 @@ if mel_score and acc_score:
   #=============================================================================
   # Double-checking that tokens seq is good and within range...
   
-  assert min(final_score_tokens_ints_seq) >= 0, print('Bad seq!!! Check seq!!!')
+  assert min(final_score_tokens_ints_seq) >= tokens_shifts[0], print('Bad seq!!! Check seq!!!')
   assert max(final_score_tokens_ints_seq) < tokens_shifts[-1], print('Bad seq!!! Check seq!!!')
 
   #===============================================================================
