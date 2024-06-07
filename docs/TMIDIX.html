@@ -1125,6 +1125,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.ascii_texts_search">ascii_texts_search</a></li>
     <li class="mono"><a href="#TMIDIX.augment_enhanced_score_notes">augment_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.bad_chord">bad_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.basic_enhanced_delta_score_notes_detokenizer">basic_enhanced_delta_score_notes_detokenizer</a></li>
     <li class="mono"><a href="#TMIDIX.basic_enhanced_delta_score_notes_tokenizer">basic_enhanced_delta_score_notes_tokenizer</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_int">bits_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_tones_chord">bits_to_tones_chord</a></li>
@@ -6389,6 +6390,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">advanced_check_and_fix_chords_in_chordified_score</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">,</span>
                                                       <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                       <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                      <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
                                                       <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
@@ -6409,15 +6411,20 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-      <span class="n">dpitches</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+      <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
       <span class="n">ddchord</span> <span class="o">=</span> <span class="p">[]</span>
 
       <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dpitches</span><span class="p">:</span>
-          <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-          <span class="n">dpitches</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+
+          <span class="k">if</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]]))</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">duplicate_pitches_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">duplicate_pitches_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
       
       <span class="n">c</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ddchord</span><span class="p">)</span>
       
@@ -6711,7 +6718,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">delta_score</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">pe</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_time</span><span class="p">)]</span>
+  <span class="n">pe</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">enhanced_score_notes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">start_time</span><span class="p">)]</span>
 
   <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_score_notes</span><span class="p">:</span>
 
@@ -6738,13 +6745,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                               <span class="n">tokenize_velocities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                               <span class="n">tokenize_patches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                               <span class="n">score_timings_range</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-                                              <span class="n">max_seq_len</span><span class="o">=</span><span class="mi">8193</span><span class="p">,</span>
+                                              <span class="n">max_seq_len</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                               <span class="n">seq_pad_value</span><span class="o">=-</span><span class="mi">1</span>
                                               <span class="p">):</span>
   
   
   
   <span class="n">score_tokens_ints_seq</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">tokens_shifts</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">7</span>
 
   <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">enhanced_delta_score_notes</span><span class="p">:</span>
 
@@ -6753,31 +6762,38 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="k">if</span> <span class="n">tokenize_start_times</span><span class="p">:</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="n">score_timings_range</span>
 
     <span class="k">if</span> <span class="n">tokenize_durations</span><span class="p">:</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="n">score_timings_range</span>
 
     <span class="k">if</span> <span class="n">tokenize_channels</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">16</span>
     
     <span class="k">if</span> <span class="n">tokenize_pitches</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">128</span>
     
     <span class="k">if</span> <span class="n">tokenize_velocities</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">128</span>
 
-    <span class="k">if</span> <span class="n">tokenize_velocities</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tokenize_patches</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">129</span>
 
+    <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
     <span class="n">score_tokens_ints_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
 
-  <span class="n">flat_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">)</span>
+  <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">max_seq_len</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
     <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flat_score_tokens_ints_seq</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="p">]</span>
@@ -6787,12 +6803,56 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="k">return</span> <span class="p">[</span><span class="n">score_tokens_ints_seq</span><span class="p">,</span>
           <span class="n">final_score_tokens_ints_seq</span><span class="p">,</span> 
-          <span class="n">shift</span><span class="p">,</span>
+          <span class="n">tokens_shifts</span><span class="p">,</span>
           <span class="n">seq_pad_value</span><span class="p">,</span> 
           <span class="n">max_seq_len</span><span class="p">,</span>
           <span class="nb">len</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">),</span>
           <span class="nb">len</span><span class="p">(</span><span class="n">final_score_tokens_ints_seq</span><span class="p">)</span>
           <span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">basic_enhanced_delta_score_notes_detokenizer</span><span class="p">(</span><span class="n">tokenized_seq</span><span class="p">,</span> 
+                                                 <span class="n">tokens_shifts</span><span class="p">,</span> 
+                                                 <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">16</span>
+                                                 <span class="p">):</span>
+
+  <span class="n">song_f</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">dur</span> <span class="o">=</span> <span class="mi">16</span>
+  <span class="n">channel</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">pitch</span> <span class="o">=</span> <span class="mi">60</span>
+  <span class="n">vel</span> <span class="o">=</span> <span class="mi">90</span>
+  <span class="n">pat</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="n">note_seq_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokens_shifts</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span>
+  <span class="n">tok_shifts_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens_shifts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="k">if</span> <span class="n">tokens_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+  <span class="n">song</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenized_seq</span><span class="p">),</span> <span class="n">note_seq_len</span><span class="p">):</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="n">tokenized_seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">note_seq_len</span><span class="p">]</span>
+    <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">song</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tok_shifts_idxs</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dur</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">pat</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+    <span class="n">song_f</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">pat</span> <span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">song_f</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -9706,7 +9766,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.advanced_check_and_fix_chords_in_chordified_score">
-    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, use_filtered_chords=True, remove_duplicate_pitches=True, skip_drums=False)</p>
+    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, patches_index=6, use_filtered_chords=True, remove_duplicate_pitches=True, skip_drums=False)</p>
     </div>
     
 
@@ -9718,6 +9778,7 @@ Tegridy Code 2024</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">advanced_check_and_fix_chords_in_chordified_score</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">,</span>
                                                       <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                       <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                      <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
                                                       <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
@@ -9738,15 +9799,20 @@ Tegridy Code 2024</p></div>
 
       <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-      <span class="n">dpitches</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+      <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
       <span class="n">ddchord</span> <span class="o">=</span> <span class="p">[]</span>
 
       <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dpitches</span><span class="p">:</span>
-          <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-          <span class="n">dpitches</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+
+          <span class="k">if</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]]))</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">duplicate_pitches_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">duplicate_pitches_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="n">ddchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
       
       <span class="n">c</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ddchord</span><span class="p">)</span>
       
@@ -10451,8 +10517,68 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.basic_enhanced_delta_score_notes_detokenizer">
+    <p>def <span class="ident">basic_enhanced_delta_score_notes_detokenizer</span>(</p><p>tokenized_seq, tokens_shifts, timings_multiplier=16)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.basic_enhanced_delta_score_notes_detokenizer', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.basic_enhanced_delta_score_notes_detokenizer" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">basic_enhanced_delta_score_notes_detokenizer</span><span class="p">(</span><span class="n">tokenized_seq</span><span class="p">,</span> 
+                                                 <span class="n">tokens_shifts</span><span class="p">,</span> 
+                                                 <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">16</span>
+                                                 <span class="p">):</span>
+
+  <span class="n">song_f</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">dur</span> <span class="o">=</span> <span class="mi">16</span>
+  <span class="n">channel</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">pitch</span> <span class="o">=</span> <span class="mi">60</span>
+  <span class="n">vel</span> <span class="o">=</span> <span class="mi">90</span>
+  <span class="n">pat</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="n">note_seq_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokens_shifts</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span>
+  <span class="n">tok_shifts_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens_shifts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="k">if</span> <span class="n">tokens_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+  <span class="n">song</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenized_seq</span><span class="p">),</span> <span class="n">note_seq_len</span><span class="p">):</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="n">tokenized_seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">note_seq_len</span><span class="p">]</span>
+    <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">song</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tok_shifts_idxs</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dur</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">timings_multiplier</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+      <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">pat</span> <span class="o">=</span> <span class="p">(</span><span class="n">note</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+    <span class="n">song_f</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">pat</span> <span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">song_f</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.basic_enhanced_delta_score_notes_tokenizer">
-    <p>def <span class="ident">basic_enhanced_delta_score_notes_tokenizer</span>(</p><p>enhanced_delta_score_notes, tokenize_start_times=True, tokenize_durations=True, tokenize_channels=True, tokenize_pitches=True, tokenize_velocities=True, tokenize_patches=True, score_timings_range=256, max_seq_len=8193, seq_pad_value=-1)</p>
+    <p>def <span class="ident">basic_enhanced_delta_score_notes_tokenizer</span>(</p><p>enhanced_delta_score_notes, tokenize_start_times=True, tokenize_durations=True, tokenize_channels=True, tokenize_pitches=True, tokenize_velocities=True, tokenize_patches=True, score_timings_range=256, max_seq_len=-1, seq_pad_value=-1)</p>
     </div>
     
 
@@ -10469,13 +10595,15 @@ Tegridy Code 2024</p></div>
                                               <span class="n">tokenize_velocities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                               <span class="n">tokenize_patches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                               <span class="n">score_timings_range</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-                                              <span class="n">max_seq_len</span><span class="o">=</span><span class="mi">8193</span><span class="p">,</span>
+                                              <span class="n">max_seq_len</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                               <span class="n">seq_pad_value</span><span class="o">=-</span><span class="mi">1</span>
                                               <span class="p">):</span>
   
   
   
   <span class="n">score_tokens_ints_seq</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">tokens_shifts</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">7</span>
 
   <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">enhanced_delta_score_notes</span><span class="p">:</span>
 
@@ -10484,31 +10612,38 @@ Tegridy Code 2024</p></div>
 
     <span class="k">if</span> <span class="n">tokenize_start_times</span><span class="p">:</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="n">score_timings_range</span>
 
     <span class="k">if</span> <span class="n">tokenize_durations</span><span class="p">:</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="n">score_timings_range</span>
 
     <span class="k">if</span> <span class="n">tokenize_channels</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">16</span>
     
     <span class="k">if</span> <span class="n">tokenize_pitches</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">128</span>
     
     <span class="k">if</span> <span class="n">tokenize_velocities</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">128</span>
 
-    <span class="k">if</span> <span class="n">tokenize_velocities</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tokenize_patches</span><span class="p">:</span>
+      <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
       <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span>
       <span class="n">shift</span> <span class="o">+=</span> <span class="mi">129</span>
 
+    <span class="n">tokens_shifts</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
     <span class="n">score_tokens_ints_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
 
-  <span class="n">flat_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">)</span>
+  <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">max_seq_len</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
     <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flat_score_tokens_ints_seq</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="p">]</span>
@@ -10518,7 +10653,7 @@ Tegridy Code 2024</p></div>
 
   <span class="k">return</span> <span class="p">[</span><span class="n">score_tokens_ints_seq</span><span class="p">,</span>
           <span class="n">final_score_tokens_ints_seq</span><span class="p">,</span> 
-          <span class="n">shift</span><span class="p">,</span>
+          <span class="n">tokens_shifts</span><span class="p">,</span>
           <span class="n">seq_pad_value</span><span class="p">,</span> 
           <span class="n">max_seq_len</span><span class="p">,</span>
           <span class="nb">len</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">),</span>
@@ -11054,7 +11189,7 @@ Tegridy Code 2024</p></div>
 
   <span class="n">delta_score</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">pe</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_time</span><span class="p">)]</span>
+  <span class="n">pe</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">enhanced_score_notes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">start_time</span><span class="p">)]</span>
 
   <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_score_notes</span><span class="p">:</span>
 
