@@ -29,6 +29,7 @@ from typing import Optional, Tuple
 import torch
 from torch import nn, einsum, Tensor
 import torch.nn.functional as F
+from torch.nn.attention import SDPBackend, sdpa_kernel
 
 from collections import namedtuple
 from functools import wraps
@@ -256,7 +257,12 @@ class Attend(nn.Module):
 
         # pytorch 2.0 flash attn: q, k, v, mask, dropout, causal, softmax_scale
         
-        with torch.backends.cuda.sdp_kernel(enable_math=True, enable_mem_efficient=True):
+        # Legacy code...
+        # with torch.backends.cuda.sdp_kernel(enable_math=True, enable_mem_efficient=True):
+
+        # New SDP kernel code...
+        with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+
             out = F.scaled_dot_product_attention(
                 q, k, v,
                 attn_mask = mask,
