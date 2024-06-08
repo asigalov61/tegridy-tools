@@ -6328,6 +6328,16 @@ def tones_to_pitches(tones, base_octave=5):
   return [(base_octave * 12) + t for t in tones]
 
 ###################################################################################
+
+def find_closest_value(lst, val):
+
+  closest_value = min(lst, key=lambda x: abs(val - x))
+  closest_value_indexes = [i for i in range(len(lst)) if lst[i] == closest_value]
+  
+  return [closest_value, abs(val - closest_value), closest_value_indexes]
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
