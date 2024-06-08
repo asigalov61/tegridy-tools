@@ -26,12 +26,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import TMIDIX
+import TMELODIES
+import HaystackSearch
 import midi_to_colab_audio
 
 import torch
 import cupy as cp
 
-from x_transformer_1_27_16 import *
+from x_transformer_1_23_2 import *
 
 import random
 
