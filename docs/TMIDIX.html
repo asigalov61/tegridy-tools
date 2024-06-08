@@ -1196,6 +1196,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_pitches">tones_chord_to_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.tones_to_pitches">tones_to_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.transpose_pitches">transpose_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.transpose_pitches_chord">transpose_pitches_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.transpose_tones">transpose_tones</a></li>
+    <li class="mono"><a href="#TMIDIX.transpose_tones_chord">transpose_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches">validate_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches_chord">validate_pitches_chord</a></li>
   </ul>
@@ -3028,7 +3032,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> 
                   <span class="n">note_height</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
                   <span class="n">show_grid_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                  <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span>
+                  <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                  <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span>
                   <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
@@ -3041,15 +3046,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="k">else</span><span class="p">:</span>
 
-    <span class="n">start_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
-    <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
+    <span class="n">start_times</span> <span class="o">=</span> <span class="p">[(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
+    <span class="n">durations</span> <span class="o">=</span> <span class="p">[(</span><span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="o">*</span> <span class="n">timings_multiplier</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
     <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
     <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
 
     <span class="n">colors</span> <span class="o">=</span> <span class="n">generate_colors</span><span class="p">(</span><span class="n">max_num_colors</span><span class="p">)</span>
     <span class="n">colors</span><span class="p">[</span><span class="n">drums_color_num</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">pbl</span> <span class="o">=</span> <span class="n">notes</span><span class="p">[</span><span class="n">preview_length_in_notes</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span>
+    <span class="n">pbl</span> <span class="o">=</span> <span class="p">(</span><span class="n">notes</span><span class="p">[</span><span class="n">preview_length_in_notes</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>
 
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
     <span class="c1">#fig, ax = plt.subplots()</span>
@@ -7602,6 +7607,26 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">closest_value_indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span> <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">closest_value</span><span class="p">]</span>
   
   <span class="k">return</span> <span class="p">[</span><span class="n">closest_value</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">closest_value</span><span class="p">),</span> <span class="n">closest_value_indexes</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">transpose_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">([((</span><span class="mi">60</span><span class="o">+</span><span class="n">t</span><span class="p">)</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))])</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">transpose_tones</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[((</span><span class="mi">60</span><span class="o">+</span><span class="n">t</span><span class="p">)</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">transpose_pitches_chord</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">transpose_pitches</span><span class="p">(</span><span class="n">pitches</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -13528,7 +13553,7 @@ see opus2midi() and score2opus().</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.plot_ms_SONG">
-    <p>def <span class="ident">plot_ms_SONG</span>(</p><p>ms_song, preview_length_in_notes=0, block_lines_times_list=None, plot_title=&#39;ms Song&#39;, max_num_colors=129, drums_color_num=128, plot_size=(11, 4), note_height=0.75, show_grid_lines=False, return_plt=False)</p>
+    <p>def <span class="ident">plot_ms_SONG</span>(</p><p>ms_song, preview_length_in_notes=0, block_lines_times_list=None, plot_title=&#39;ms Song&#39;, max_num_colors=129, drums_color_num=128, plot_size=(11, 4), note_height=0.75, show_grid_lines=False, return_plt=False, timings_multiplier=1)</p>
     </div>
     
 
@@ -13547,7 +13572,8 @@ see opus2midi() and score2opus().</p></div>
                   <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> 
                   <span class="n">note_height</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
                   <span class="n">show_grid_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                  <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span>
+                  <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                  <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span>
                   <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
@@ -13560,15 +13586,15 @@ see opus2midi() and score2opus().</p></div>
 
   <span class="k">else</span><span class="p">:</span>
 
-    <span class="n">start_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
-    <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
+    <span class="n">start_times</span> <span class="o">=</span> <span class="p">[(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
+    <span class="n">durations</span> <span class="o">=</span> <span class="p">[(</span><span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="o">*</span> <span class="n">timings_multiplier</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
     <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
     <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">]</span>
 
     <span class="n">colors</span> <span class="o">=</span> <span class="n">generate_colors</span><span class="p">(</span><span class="n">max_num_colors</span><span class="p">)</span>
     <span class="n">colors</span><span class="p">[</span><span class="n">drums_color_num</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">pbl</span> <span class="o">=</span> <span class="n">notes</span><span class="p">[</span><span class="n">preview_length_in_notes</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span>
+    <span class="n">pbl</span> <span class="o">=</span> <span class="p">(</span><span class="n">notes</span><span class="p">[</span><span class="n">preview_length_in_notes</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">timings_multiplier</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>
 
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
     <span class="c1">#fig, ax = plt.subplots()</span>
@@ -14272,6 +14298,90 @@ but it does make it easy to mix different scores together.</p></div>
   <div id="source-TMIDIX.tones_to_pitches" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_to_pitches</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">base_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
   <span class="k">return</span> <span class="p">[(</span><span class="n">base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.transpose_pitches">
+    <p>def <span class="ident">transpose_pitches</span>(</p><p>pitches, transpose_value=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.transpose_pitches', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.transpose_pitches" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">transpose_pitches</span><span class="p">(</span><span class="n">pitches</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.transpose_pitches_chord">
+    <p>def <span class="ident">transpose_pitches_chord</span>(</p><p>pitches_chord, transpose_value=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.transpose_pitches_chord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.transpose_pitches_chord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">transpose_pitches_chord</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.transpose_tones">
+    <p>def <span class="ident">transpose_tones</span>(</p><p>tones, transpose_value=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.transpose_tones', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.transpose_tones" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">transpose_tones</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[((</span><span class="mi">60</span><span class="o">+</span><span class="n">t</span><span class="p">)</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.transpose_tones_chord">
+    <p>def <span class="ident">transpose_tones_chord</span>(</p><p>tones_chord, transpose_value=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.transpose_tones_chord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.transpose_tones_chord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">transpose_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">([((</span><span class="mi">60</span><span class="o">+</span><span class="n">t</span><span class="p">)</span><span class="o">+</span><span class="n">transpose_value</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))])</span>
 </pre></div>
 
   </div>
