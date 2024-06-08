@@ -1070,15 +1070,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <ul>
     <li class="mono"><a href="#TMELODIES.adjust_melody_average_timings">adjust_melody_average_timings</a></li>
+    <li class="mono"><a href="#TMELODIES.flip_melody">flip_melody</a></li>
     <li class="mono"><a href="#TMELODIES.grouped_set">grouped_set</a></li>
     <li class="mono"><a href="#TMELODIES.harmonize_melody">harmonize_melody</a></li>
+    <li class="mono"><a href="#TMELODIES.melody_dtimes_counts">melody_dtimes_counts</a></li>
+    <li class="mono"><a href="#TMELODIES.melody_durations_counts">melody_durations_counts</a></li>
+    <li class="mono"><a href="#TMELODIES.melody_notes_count">melody_notes_count</a></li>
     <li class="mono"><a href="#TMELODIES.melody_octave">melody_octave</a></li>
     <li class="mono"><a href="#TMELODIES.melody_pitches">melody_pitches</a></li>
     <li class="mono"><a href="#TMELODIES.melody_pitches_counts">melody_pitches_counts</a></li>
     <li class="mono"><a href="#TMELODIES.melody_range">melody_range</a></li>
+    <li class="mono"><a href="#TMELODIES.melody_run_time">melody_run_time</a></li>
     <li class="mono"><a href="#TMELODIES.melody_to_enhanced_score_notes">melody_to_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMELODIES.melody_tones">melody_tones</a></li>
     <li class="mono"><a href="#TMELODIES.melody_tones_counts">melody_tones_counts</a></li>
+    <li class="mono"><a href="#TMELODIES.most_common_melody_dtime_and_duration">most_common_melody_dtime_and_duration</a></li>
     <li class="mono"><a href="#TMELODIES.most_common_melody_pitch_and_tone">most_common_melody_pitch_and_tone</a></li>
     <li class="mono"><a href="#TMELODIES.ordered_set">ordered_set</a></li>
     <li class="mono"><a href="#TMELODIES.transpose_melody">transpose_melody</a></li>
@@ -1859,7 +1865,7 @@ print('=' * 70)</p>
   <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">score</span><span class="p">:</span>
     <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">transpose_value</span>
 
-  <span class="k">return</span> <span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">score</span>
+  <span class="k">return</span> <span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">score</span><span class="p">]</span>
 
 <span class="c1">################################################################################</span>
 
@@ -1881,7 +1887,7 @@ print('=' * 70)</p>
   <span class="n">dtimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">score</span><span class="p">]</span>
   <span class="n">new_avg_dtime</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dtimes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dtimes</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="p">[</span><span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">score</span><span class="p">,</span> <span class="n">new_avg_dtime</span><span class="p">,</span> <span class="n">old_avg_dtime</span><span class="p">]</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">score</span><span class="p">],</span> <span class="n">new_avg_dtime</span><span class="p">,</span> <span class="n">old_avg_dtime</span><span class="p">]</span>
 
 <span class="c1">################################################################################</span>
 
@@ -1894,28 +1900,61 @@ print('=' * 70)</p>
 
 <span class="c1">################################################################################</span>
 
+<span class="k">def</span> <span class="nf">melody_dtimes_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">melody_durations_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">melody_notes_count</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">most_common_melody_dtime_and_duration</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">melody_dtimes_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">melody_durations_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">melody_run_time</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="n">dtimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+  <span class="n">last_dur</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="n">rel_run_time</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dtimes</span><span class="p">)</span><span class="o">+</span><span class="n">last_dur</span>
+  <span class="n">ms_run_time</span> <span class="o">=</span> <span class="n">rel_run_time</span> <span class="o">*</span> <span class="mi">16</span>
+  <span class="n">sec_run_time</span> <span class="o">=</span> <span class="n">ms_run_time</span> <span class="o">/</span> <span class="mi">1000</span>
+  <span class="n">min_run_time</span> <span class="o">=</span> <span class="n">sec_run_time</span> <span class="o">/</span> <span class="mi">60</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">rel_run_time</span><span class="p">,</span> <span class="n">ms_run_time</span><span class="p">,</span> <span class="n">sec_run_time</span><span class="p">,</span> <span class="n">min_run_time</span><span class="p">]</span>
+
+<span class="c1">################################################################################</span>
+
 <span class="k">def</span> <span class="nf">harmonize_melody</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
   
   <span class="n">mel_tones</span> <span class="o">=</span> <span class="n">melody_tones</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span>
 
   <span class="n">cur_chord</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">song</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">harmonized_chords</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mel_tones</span><span class="p">):</span>
     <span class="n">cur_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
-      <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+      <span class="n">harmonized_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="k">while</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
         <span class="n">cur_chord</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
-      <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+      <span class="n">harmonized_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">song</span>
+  <span class="k">return</span> <span class="n">harmonized_chords</span>
 
 <span class="c1">################################################################################</span>
 
@@ -1993,6 +2032,25 @@ print('=' * 70)</p>
   <span class="k">return</span> <span class="p">[</span><span class="n">name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">key1</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">key2</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">]</span>
 
 <span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">flip_melody</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+
+  <span class="n">mel</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span>
+
+  <span class="n">old_mel_range</span> <span class="o">=</span> <span class="n">melody_range</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">mel</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
+    <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">127</span> <span class="o">-</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+  <span class="n">new_mel_range</span> <span class="o">=</span> <span class="n">melody_range</span><span class="p">(</span><span class="n">mel</span><span class="p">)</span>
+
+  <span class="n">transpose_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">old_mel_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">new_mel_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+  <span class="n">new_melody</span> <span class="o">=</span> <span class="n">transpose_melody</span><span class="p">(</span><span class="n">mel</span><span class="p">,</span> <span class="n">transpose_value</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">melody</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">new_melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+
+<span class="c1">################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># This is the end of TMELODIES Python module</span>
 <span class="c1">#</span>
@@ -2053,7 +2111,42 @@ print('=' * 70)</p>
   <span class="n">dtimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">score</span><span class="p">]</span>
   <span class="n">new_avg_dtime</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dtimes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dtimes</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="p">[</span><span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">score</span><span class="p">,</span> <span class="n">new_avg_dtime</span><span class="p">,</span> <span class="n">old_avg_dtime</span><span class="p">]</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">score</span><span class="p">],</span> <span class="n">new_avg_dtime</span><span class="p">,</span> <span class="n">old_avg_dtime</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMELODIES.flip_melody">
+    <p>def <span class="ident">flip_melody</span>(</p><p>melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMELODIES.flip_melody', this);">Show source &equiv;</a></p>
+  <div id="source-TMELODIES.flip_melody" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">flip_melody</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+
+  <span class="n">mel</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span>
+
+  <span class="n">old_mel_range</span> <span class="o">=</span> <span class="n">melody_range</span><span class="p">(</span><span class="n">melody</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">mel</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
+    <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">127</span> <span class="o">-</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+  <span class="n">new_mel_range</span> <span class="o">=</span> <span class="n">melody_range</span><span class="p">(</span><span class="n">mel</span><span class="p">)</span>
+
+  <span class="n">transpose_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">old_mel_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">new_mel_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+  <span class="n">new_melody</span> <span class="o">=</span> <span class="n">transpose_melody</span><span class="p">(</span><span class="n">mel</span><span class="p">,</span> <span class="n">transpose_value</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">melody</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">new_melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
 </pre></div>
 
   </div>
@@ -2100,22 +2193,85 @@ print('=' * 70)</p>
 
   <span class="n">cur_chord</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">song</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">harmonized_chords</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mel_tones</span><span class="p">):</span>
     <span class="n">cur_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
-      <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+      <span class="n">harmonized_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="k">while</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
         <span class="n">cur_chord</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
-      <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+      <span class="n">harmonized_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">song</span>
+  <span class="k">return</span> <span class="n">harmonized_chords</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMELODIES.melody_dtimes_counts">
+    <p>def <span class="ident">melody_dtimes_counts</span>(</p><p>melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMELODIES.melody_dtimes_counts', this);">Show source &equiv;</a></p>
+  <div id="source-TMELODIES.melody_dtimes_counts" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">melody_dtimes_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMELODIES.melody_durations_counts">
+    <p>def <span class="ident">melody_durations_counts</span>(</p><p>melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMELODIES.melody_durations_counts', this);">Show source &equiv;</a></p>
+  <div id="source-TMELODIES.melody_durations_counts" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">melody_durations_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMELODIES.melody_notes_count">
+    <p>def <span class="ident">melody_notes_count</span>(</p><p>melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMELODIES.melody_notes_count', this);">Show source &equiv;</a></p>
+  <div id="source-TMELODIES.melody_notes_count" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">melody_notes_count</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
 </pre></div>
 
   </div>
@@ -2209,6 +2365,35 @@ print('=' * 70)</p>
   <span class="n">pitch_range</span> <span class="o">=</span> <span class="n">max_pitch</span> <span class="o">-</span> <span class="n">min_pitch</span>
 
   <span class="k">return</span> <span class="p">[</span><span class="n">max_pitch</span><span class="p">,</span> <span class="n">avg_pitch</span><span class="p">,</span> <span class="n">min_pitch</span><span class="p">,</span> <span class="n">pitch_range</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMELODIES.melody_run_time">
+    <p>def <span class="ident">melody_run_time</span>(</p><p>melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMELODIES.melody_run_time', this);">Show source &equiv;</a></p>
+  <div id="source-TMELODIES.melody_run_time" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">melody_run_time</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="n">dtimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+  <span class="n">last_dur</span> <span class="o">=</span> <span class="n">melody</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="n">rel_run_time</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dtimes</span><span class="p">)</span><span class="o">+</span><span class="n">last_dur</span>
+  <span class="n">ms_run_time</span> <span class="o">=</span> <span class="n">rel_run_time</span> <span class="o">*</span> <span class="mi">16</span>
+  <span class="n">sec_run_time</span> <span class="o">=</span> <span class="n">ms_run_time</span> <span class="o">/</span> <span class="mi">1000</span>
+  <span class="n">min_run_time</span> <span class="o">=</span> <span class="n">sec_run_time</span> <span class="o">/</span> <span class="mi">60</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">rel_run_time</span><span class="p">,</span> <span class="n">ms_run_time</span><span class="p">,</span> <span class="n">sec_run_time</span><span class="p">,</span> <span class="n">min_run_time</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -2332,6 +2517,27 @@ print('=' * 70)</p>
   
       
   <div class="item">
+    <div class="name def" id="TMELODIES.most_common_melody_dtime_and_duration">
+    <p>def <span class="ident">most_common_melody_dtime_and_duration</span>(</p><p>melody)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMELODIES.most_common_melody_dtime_and_duration', this);">Show source &equiv;</a></p>
+  <div id="source-TMELODIES.most_common_melody_dtime_and_duration" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">most_common_melody_dtime_and_duration</span><span class="p">(</span><span class="n">melody</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">melody_dtimes_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">melody_durations_counts</span><span class="p">(</span><span class="n">melody</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMELODIES.most_common_melody_pitch_and_tone">
     <p>def <span class="ident">most_common_melody_pitch_and_tone</span>(</p><p>melody)</p>
     </div>
@@ -2398,7 +2604,7 @@ print('=' * 70)</p>
   <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">score</span><span class="p">:</span>
     <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">transpose_value</span>
 
-  <span class="k">return</span> <span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">score</span>
+  <span class="k">return</span> <span class="n">mel</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">score</span><span class="p">]</span>
 </pre></div>
 
   </div>
