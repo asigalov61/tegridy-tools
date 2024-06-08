@@ -1927,7 +1927,7 @@ def Tegridy_Any_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
 
 ###################################################################################
 
-def Tegridy_Any_Pickle_File_Reader(input_file_name='TMIDI_Pickle_File', ext='.pickle'):
+def Tegridy_Any_Pickle_File_Reader(input_file_name='TMIDI_Pickle_File', ext='.pickle', verbose=True):
 
   '''Tegridy Pickle File Loader
      
@@ -1939,11 +1939,15 @@ def Tegridy_Any_Pickle_File_Reader(input_file_name='TMIDI_Pickle_File', ext='.pi
   Project Los Angeles
   Tegridy Code 2021'''
 
-  print('Tegridy Pickle File Loader')
-  print('Loading the pickle file. Please wait...')
+  if verbose:
+    print('Tegridy Pickle File Loader')
+    print('Loading the pickle file. Please wait...')
 
   with open(input_file_name + ext, 'rb') as pickle_file:
     content = pickle.load(pickle_file)
+
+  if verbose:
+    print('Done!')
 
   return content
 
@@ -5655,6 +5659,47 @@ def enhanced_chord_to_chord_token(enhanced_chord,
 
 def enhanced_chord_to_tones_chord(enhanced_chord):
   return sorted(set([t[4] % 12 for t in enhanced_chord if t[3] != 9]))
+
+###################################################################################
+
+import hashlib
+
+###################################################################################
+
+def md5_hash(file_path_or_data=None, original_md5_hash=None):
+
+  if type(file_path_or_data) == str:
+
+    with open(file_path_or_data, 'rb') as file_to_check:
+      data = file_to_check.read()
+      
+      if data:
+        md5 = hashlib.md5(data).hexdigest()
+
+  else:
+    if file_path_or_data:
+      md5 = hashlib.md5(file_path_or_data).hexdigest()
+
+  if md5:
+
+    if original_md5_hash:
+
+      if md5 == original_md5_hash:
+        check = True
+      else:
+        check = False
+        
+    else:
+      check = None
+
+    return [md5, check]
+
+  else:
+
+    md5 = None
+    check = None
+
+    return [md5, check]
 
 ###################################################################################
 
