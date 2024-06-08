@@ -8,7 +8,8 @@
 
 ***
 
-## [NEW] [X Transformer 1-27-16](https://asigalov61.github.io/tegridy-tools/x_transformer_1_27_16.html)
+## [NEW] [TMELODIES](https://asigalov61.github.io/tegridy-tools/TMELODIES.html)
+## [X Transformer 1-27-16](https://asigalov61.github.io/tegridy-tools/x_transformer_1_27_16.html)
 ## [nanoGPT](https://asigalov61.github.io/tegridy-tools/nanoGPT.html)
 ## [X Transformer 1-23-2](https://asigalov61.github.io/tegridy-tools/x_transformer_1_23_2.html)
 ## [X Transformer](https://asigalov61.github.io/tegridy-tools/x_transformer.html)
