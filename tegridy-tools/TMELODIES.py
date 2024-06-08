@@ -677,6 +677,16 @@ def melody_tones(melody):
 
 ################################################################################
 
+def melody_pitches_counts(melody):
+  return [list(c) for c in Counter(melody_pitches(melody)).most_common()]
+
+################################################################################
+
+def melody_tones_counts(melody):
+  return [list(c) for c in Counter(melody_tones(melody)).most_common()]
+
+################################################################################
+
 def transpose_melody(melody, transpose_value):
 
   mel = copy.deepcopy(melody)
