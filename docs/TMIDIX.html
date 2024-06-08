@@ -1149,6 +1149,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_tone">find_closest_tone</a></li>
+    <li class="mono"><a href="#TMIDIX.find_closest_value">find_closest_value</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
@@ -7594,6 +7595,16 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="k">return</span> <span class="p">[(</span><span class="n">base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_closest_value</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+
+  <span class="n">closest_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">x</span><span class="p">))</span>
+  <span class="n">closest_value_indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span> <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">closest_value</span><span class="p">]</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="n">closest_value</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">closest_value</span><span class="p">),</span> <span class="n">closest_value_indexes</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -12197,6 +12208,31 @@ The type of track (opus or score) is autodetected.</p></div>
   <div id="source-TMIDIX.find_closest_tone" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_closest_tone</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">tone</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">tone</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.find_closest_value">
+    <p>def <span class="ident">find_closest_value</span>(</p><p>lst, val)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_closest_value', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_closest_value" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_closest_value</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+
+  <span class="n">closest_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">x</span><span class="p">))</span>
+  <span class="n">closest_value_indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span> <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">closest_value</span><span class="p">]</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="n">closest_value</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">closest_value</span><span class="p">),</span> <span class="n">closest_value_indexes</span><span class="p">]</span>
 </pre></div>
 
   </div>
