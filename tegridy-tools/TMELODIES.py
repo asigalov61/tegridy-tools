@@ -41,35 +41,29 @@ r'''############################################################################
 #
 ################################################################################
 
-import TMIDIX
 import TMELODIES
+import TMIDIX
 
 melody = random.choice(TMELODIES.ALL_MELODIES)
 
-name = melody[0]
-part = melody[1]
-key1 = melody[2]
-key2 = melody[3]
-score = melody[4]
+mel_chords = TMELODIES.harmonize_melody(melody)
 
-output_score = []
+name, part, key, output_score = TMELODIES.melody_to_enhanced_score_notes(melody, 
+                                                                        harmonized_tones_chords=mel_chords
+                                                                        )
 
-time = 0
+print('=' * 70)
+print('Song:', name+' '+part+' in '+key) 
+print('=' * 70)
 
-for s in score:
-  
-  time += s[0]
-  dur = s[1]
-  ptc = s[2]
+midi_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
+                                                      output_signature = name+' '+part+' in '+key,
+                                                      output_file_name = name+' '+part+' in '+key,
+                                                      track_name='Project Los Angeles',
+                                                      timings_multiplier=16
+                                                      )
 
-  output_score.append(['note', time, dur, 0, ptc, 90, 0])
-
-TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
-                                        output_signature = name+' '+part+' in '+key1+' '+key2,
-                                        output_file_name = name+' '+part+' in '+key1+' '+key2,
-                                        track_name='Project Los Angeles',
-                                        timings_multiplier=16
-                                        )
+print('=' * 70)
 
 ################################################################################
 '''
@@ -635,8 +629,51 @@ ALL_MELODIES = [['Arabian Nights', 'Verse', 'A', 'Minor',
 
 ################################################################################
 
+ALL_CHORDS_FILTERED = [[0], [0, 3], [0, 3, 5], [0, 3, 5, 8], [0, 3, 5, 9], [0, 3, 5, 10], [0, 3, 7],
+                      [0, 3, 7, 10], [0, 3, 8], [0, 3, 9], [0, 3, 10], [0, 4], [0, 4, 6],
+                      [0, 4, 6, 9], [0, 4, 6, 10], [0, 4, 7], [0, 4, 7, 10], [0, 4, 8], [0, 4, 9],
+                      [0, 4, 10], [0, 5], [0, 5, 8], [0, 5, 9], [0, 5, 10], [0, 6], [0, 6, 9],
+                      [0, 6, 10], [0, 7], [0, 7, 10], [0, 8], [0, 9], [0, 10], [1], [1, 4],
+                      [1, 4, 6], [1, 4, 6, 9], [1, 4, 6, 10], [1, 4, 6, 11], [1, 4, 7],
+                      [1, 4, 7, 10], [1, 4, 7, 11], [1, 4, 8], [1, 4, 8, 11], [1, 4, 9], [1, 4, 10],
+                      [1, 4, 11], [1, 5], [1, 5, 8], [1, 5, 8, 11], [1, 5, 9], [1, 5, 10],
+                      [1, 5, 11], [1, 6], [1, 6, 9], [1, 6, 10], [1, 6, 11], [1, 7], [1, 7, 10],
+                      [1, 7, 11], [1, 8], [1, 8, 11], [1, 9], [1, 10], [1, 11], [2], [2, 5],
+                      [2, 5, 8], [2, 5, 8, 11], [2, 5, 9], [2, 5, 10], [2, 5, 11], [2, 6], [2, 6, 9],
+                      [2, 6, 10], [2, 6, 11], [2, 7], [2, 7, 10], [2, 7, 11], [2, 8], [2, 8, 11],
+                      [2, 9], [2, 10], [2, 11], [3], [3, 5], [3, 5, 8], [3, 5, 8, 11], [3, 5, 9],
+                      [3, 5, 10], [3, 5, 11], [3, 7], [3, 7, 10], [3, 7, 11], [3, 8], [3, 8, 11],
+                      [3, 9], [3, 10], [3, 11], [4], [4, 6], [4, 6, 9], [4, 6, 10], [4, 6, 11],
+                      [4, 7], [4, 7, 10], [4, 7, 11], [4, 8], [4, 8, 11], [4, 9], [4, 10], [4, 11],
+                      [5], [5, 8], [5, 8, 11], [5, 9], [5, 10], [5, 11], [6], [6, 9], [6, 10],
+                      [6, 11], [7], [7, 10], [7, 11], [8], [8, 11], [9], [10], [11]]
+
+################################################################################
+
 import copy
 from collections import Counter
+from itertools import groupby
+
+################################################################################
+
+def ordered_set(seq):
+  dic = {}
+  return [k for k, v in dic.fromkeys(seq).items()]
+
+################################################################################
+
+def grouped_set(seq):
+  return [k for k, v in groupby(seq)]
+
+################################################################################
+
+def melody_pitches(melody):
+  return [p[2] for p in melody[4]]
+
+################################################################################
+
+def melody_tones(melody):
+  return [t[2] % 12 for t in melody[4]]
 
 ################################################################################
 
@@ -675,14 +712,112 @@ def adjust_melody_average_timings(melody, average_time):
 
 ################################################################################
 
-from collections import Counter
-
 def most_common_melody_pitch_and_tone(melody):
 
-  mel_pitches = [p[2] for p in melody[4]]
+  mel_pitches = melody_pitches(melody)
   mel_tones = [t % 12 for t in mel_pitches]
 
   return [list(Counter(mel_pitches).most_common()[0]), list(Counter(mel_tones).most_common()[0])]
+
+################################################################################
+
+def harmonize_melody(melody):
+  
+  mel_tones = melody_tones(melody)
+
+  cur_chord = []
+
+  song = []
+
+  for i, m in enumerate(mel_tones):
+    cur_chord.append(m)
+    cc = sorted(set(cur_chord))
+
+    if cc in ALL_CHORDS_FILTERED:
+      song.append(cc)
+
+    else:
+      while sorted(set(cur_chord)) not in ALL_CHORDS_FILTERED:
+        cur_chord.pop(0)
+      cc = sorted(set(cur_chord))
+      song.append(cc)
+
+  return song
+
+################################################################################
+
+def melody_range(melody):
+
+  mel_pitches = melody_pitches(melody)
+
+  max_pitch = max(mel_pitches)
+  avg_pitch = sum(mel_pitches) / len(mel_pitches)
+  min_pitch = min(mel_pitches)
+
+  pitch_range = max_pitch - min_pitch
+
+  return [max_pitch, avg_pitch, min_pitch, pitch_range]
+
+################################################################################
+
+def melody_octave(melody):
+  return int(melody_range(melody)[1] // 12)
+
+################################################################################
+
+def melody_to_enhanced_score_notes(melody, 
+                                   melody_channel=3, 
+                                   melody_velocity=-1,
+                                   melody_patch=40,
+                                   harmonized_tones_chords=[],
+                                   harmonized_tones_chords_base_octave=-1,
+                                   harmonized_tones_chords_channel=0,
+                                   harmonized_tones_chords_velocity=-1,
+                                   harmonized_tones_chords_patch=0              
+                                   ):
+
+  name = melody[0]
+  part = melody[1]
+  key1 = melody[2]
+  key2 = melody[3]
+
+  if harmonized_tones_chords_base_octave > -1:
+    mel_base_octave = harmonized_tones_chords_base_octave
+  
+  else:
+    mel_base_octave = melody_octave(melody) - 1
+
+  escore_notes = []
+
+  time = 0
+
+  for i, note in enumerate(melody[4]):
+    
+    time += note[0]
+    dur = note[1]
+    ptc = note[2]
+
+    if melody_velocity == -1:
+      vel = int(110 + ((ptc % 12) * 1.5))
+    else:
+      vel = melody_velocity
+
+    escore_notes.append(['note', time, dur, melody_channel, ptc, vel, melody_patch])
+
+    if harmonized_tones_chords and i < len(harmonized_tones_chords):
+
+      for t in harmonized_tones_chords[i]:
+
+        ptc = (mel_base_octave * 12) + t
+
+        if harmonized_tones_chords_velocity == -1:
+          vel = int(80 + ((ptc % 12) * 1.5))
+        else:
+          vel = harmonized_tones_chords_velocity
+
+        escore_notes.append(['note', time, dur, harmonized_tones_chords_channel, ptc, vel, harmonized_tones_chords_patch])
+
+  return [name, part, key1 + ' ' + key2, escore_notes]
 
 ################################################################################
 #
