@@ -1761,7 +1761,8 @@ def plot_ms_SONG(ms_song,
                   plot_size=(11,4), 
                   note_height = 0.75,
                   show_grid_lines=False,
-                  return_plt = False
+                  return_plt = False,
+                  timings_multiplier=1
                   ):
 
   '''Tegridy ms SONG plotter/vizualizer'''
@@ -1774,15 +1775,15 @@ def plot_ms_SONG(ms_song,
 
   else:
 
-    start_times = [s[1] / 1000 for s in notes]
-    durations = [s[2] / 1000 for s in notes]
+    start_times = [(s[1] * timings_multiplier) / 1000 for s in notes]
+    durations = [(s[2]  * timings_multiplier) / 1000 for s in notes]
     pitches = [s[4] for s in notes]
     patches = [s[6] for s in notes]
 
     colors = generate_colors(max_num_colors)
     colors[drums_color_num] = (1, 1, 1)
 
-    pbl = notes[preview_length_in_notes][1] / 1000
+    pbl = (notes[preview_length_in_notes][1] * timings_multiplier) / 1000
 
     fig, ax = plt.subplots(figsize=plot_size)
     #fig, ax = plt.subplots()
@@ -6335,6 +6336,26 @@ def find_closest_value(lst, val):
   closest_value_indexes = [i for i in range(len(lst)) if lst[i] == closest_value]
   
   return [closest_value, abs(val - closest_value), closest_value_indexes]
+
+###################################################################################
+
+def transpose_tones_chord(tones_chord, transpose_value=0):
+  return sorted([((60+t)+transpose_value) % 12 for t in sorted(set(tones_chord))])
+
+###################################################################################
+
+def transpose_tones(tones, transpose_value=0):
+  return [((60+t)+transpose_value) % 12 for t in tones]
+
+###################################################################################
+
+def transpose_pitches_chord(pitches_chord, transpose_value=0):
+  return [max(1, min(127, p+transpose_value)) for p in sorted(set(pitches_chord), reverse=True)]
+
+###################################################################################
+
+def transpose_pitches(pitches, transpose_value=0):
+  return [max(1, min(127, p+transpose_value)) for p in pitches]
 
 ###################################################################################
 
