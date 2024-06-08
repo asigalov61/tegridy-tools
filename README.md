@@ -59,7 +59,7 @@
 ```
 import TMIDIX
 import midi_to_colab_audio
-from x_transformer_1_27_16 import *
+from x_transformer_1_23_2 import *
 import random
 ```
 
