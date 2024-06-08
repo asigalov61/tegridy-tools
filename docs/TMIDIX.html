@@ -1177,6 +1177,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.patch_list_from_enhanced_score_notes">patch_list_from_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.patch_to_instrument_family">patch_to_instrument_family</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_chord_to_int">pitches_chord_to_int</a></li>
+    <li class="mono"><a href="#TMIDIX.pitches_to_tones">pitches_to_tones</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_to_tones_chord">pitches_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.play_score">play_score</a></li>
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
@@ -1193,6 +1194,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_pitches">tones_chord_to_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.tones_to_pitches">tones_to_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches">validate_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches_chord">validate_pitches_chord</a></li>
   </ul>
@@ -7583,6 +7585,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">pitches_to_tones</span><span class="p">(</span><span class="n">pitches</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">tones_to_pitches</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">base_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[(</span><span class="n">base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -13406,6 +13417,27 @@ see opus2midi() and score2opus().</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.pitches_to_tones">
+    <p>def <span class="ident">pitches_to_tones</span>(</p><p>pitches)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.pitches_to_tones', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.pitches_to_tones" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pitches_to_tones</span><span class="p">(</span><span class="n">pitches</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.pitches_to_tones_chord">
     <p>def <span class="ident">pitches_to_tones_chord</span>(</p><p>pitches)</p>
     </div>
@@ -14183,6 +14215,27 @@ but it does make it easy to mix different scores together.</p></div>
   <div id="source-TMIDIX.tones_chord_to_pitches" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_chord_to_pitches</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">base_pitch</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
   <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="n">base_pitch</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones_chord</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.tones_to_pitches">
+    <p>def <span class="ident">tones_to_pitches</span>(</p><p>tones, base_octave=5)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.tones_to_pitches', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.tones_to_pitches" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_to_pitches</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">base_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[(</span><span class="n">base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
 </pre></div>
 
   </div>
