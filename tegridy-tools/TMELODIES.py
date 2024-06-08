@@ -697,7 +697,7 @@ def transpose_melody(melody, transpose_value):
   for note in score:
     note[2] += transpose_value
 
-  return mel[:4] + score
+  return mel[:4] + [score]
 
 ################################################################################
 
@@ -719,7 +719,7 @@ def adjust_melody_average_timings(melody, average_time):
   dtimes = [d[1] for d in score]
   new_avg_dtime = sum(dtimes) / len(dtimes)
 
-  return [mel[:4] + score, new_avg_dtime, old_avg_dtime]
+  return [mel[:4] + [score], new_avg_dtime, old_avg_dtime]
 
 ################################################################################
 
@@ -732,28 +732,61 @@ def most_common_melody_pitch_and_tone(melody):
 
 ################################################################################
 
+def melody_dtimes_counts(melody):
+  return [list(c) for c in Counter([n[0] for n in melody[4]]).most_common()]
+
+################################################################################
+
+def melody_durations_counts(melody):
+  return [list(c) for c in Counter([n[1] for n in melody[4]]).most_common()]
+
+################################################################################
+
+def melody_notes_count(melody):
+  return len(melody[4])
+
+################################################################################
+
+def most_common_melody_dtime_and_duration(melody):
+  return [melody_dtimes_counts(melody)[0], melody_durations_counts(melody)[0]]
+
+################################################################################
+
+def melody_run_time(melody):
+  dtimes = [n[0] for n in melody[4]]
+  last_dur = melody[4][-1][1]
+
+  rel_run_time = sum(dtimes)+last_dur
+  ms_run_time = rel_run_time * 16
+  sec_run_time = ms_run_time / 1000
+  min_run_time = sec_run_time / 60
+
+  return [rel_run_time, ms_run_time, sec_run_time, min_run_time]
+
+################################################################################
+
 def harmonize_melody(melody):
   
   mel_tones = melody_tones(melody)
 
   cur_chord = []
 
-  song = []
+  harmonized_chords = []
 
   for i, m in enumerate(mel_tones):
     cur_chord.append(m)
     cc = sorted(set(cur_chord))
 
     if cc in ALL_CHORDS_FILTERED:
-      song.append(cc)
+      harmonized_chords.append(cc)
 
     else:
       while sorted(set(cur_chord)) not in ALL_CHORDS_FILTERED:
         cur_chord.pop(0)
       cc = sorted(set(cur_chord))
-      song.append(cc)
+      harmonized_chords.append(cc)
 
-  return song
+  return harmonized_chords
 
 ################################################################################
 
@@ -829,6 +862,25 @@ def melody_to_enhanced_score_notes(melody,
         escore_notes.append(['note', time, dur, harmonized_tones_chords_channel, ptc, vel, harmonized_tones_chords_patch])
 
   return [name, part, key1 + ' ' + key2, escore_notes]
+
+################################################################################
+
+def flip_melody(melody):
+
+  mel = copy.deepcopy(melody)
+
+  old_mel_range = melody_range(melody)
+
+  for note in mel[4]:
+    note[2] = 127 - note[2]
+
+  new_mel_range = melody_range(mel)
+
+  transpose_value = int(old_mel_range[1] - new_mel_range[1])
+
+  new_melody = transpose_melody(mel, transpose_value)
+
+  return melody[:4] + [new_melody[4]]
 
 ################################################################################
 #
