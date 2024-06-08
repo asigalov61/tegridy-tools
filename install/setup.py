@@ -26,6 +26,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import TMIDIX
+import TMELODIES
+import HaystackSearch
 import midi_to_colab_audio
 
 import random
