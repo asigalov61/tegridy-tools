@@ -5602,6 +5602,62 @@ def basic_enhanced_delta_score_notes_detokenizer(tokenized_seq,
 
 ###################################################################################
 
+def enhanced_chord_to_chord_token(enhanced_chord, 
+                                  channels_index=3, 
+                                  pitches_index=4, 
+                                  use_filtered_chords=True
+                                  ):
+  
+  bad_chords_counter = 0
+  duplicate_pitches_counter = 0
+
+  if use_filtered_chords:
+    CHORDS = ALL_CHORDS_FILTERED
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
+  tones_chord = sorted(set([t[pitches_index] % 12 for t in enhanced_chord if t[channels_index] != 9]))
+
+  original_tones_chord = copy.deepcopy(tones_chord)
+
+  if tones_chord:
+
+      if tones_chord not in CHORDS:
+        
+        pitches_chord = sorted(set([p[pitches_index] for p in enhanced_chord if p[channels_index] != 9]), reverse=True)
+        
+        if len(tones_chord) == 2:
+          tones_counts = Counter([p % 12 for p in pitches_chord]).most_common()
+
+          if tones_counts[0][1] > 1:
+            tones_chord = [tones_counts[0][0]]
+          elif tones_counts[1][1] > 1:
+            tones_chord = [tones_counts[1][0]]
+          else:
+            tones_chord = [pitches_chord[0] % 12]
+
+        else:
+          tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
+
+          for co in tones_chord_combs:
+            if co in CHORDS:
+              tones_chord = co
+              break
+
+  if use_filtered_chords:
+    chord_token = ALL_CHORDS_FILTERED.index(tones_chord)
+  else:
+    chord_token = ALL_CHORDS_SORTED.index(tones_chord)
+
+  return [chord_token, tones_chord, original_tones_chord, sorted(set(original_tones_chord) ^ set(tones_chord))]
+
+###################################################################################
+
+def enhanced_chord_to_tones_chord(enhanced_chord):
+  return sorted(set([t[4] % 12 for t in enhanced_chord if t[3] != 9]))
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
