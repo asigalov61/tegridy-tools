@@ -6359,6 +6359,38 @@ def transpose_pitches(pitches, transpose_value=0):
 
 ###################################################################################
 
+def reverse_enhanced_score_notes(enhanced_score_notes):
+
+  score = recalculate_score_timings(enhanced_score_notes)
+
+  cscore = chordify_score([1000, score])
+
+  abs_dtimes = []
+
+  for i, t in enumerate(cscore[:-1]):
+    abs_dtimes.append(cscore[i+1][0][1])
+  abs_dtimes.append(cscore[-1][0][1]+cscore[-1][0][2])
+
+  new_dtimes = []
+  pt = abs_dtimes[-1]
+
+  for t in abs_dtimes[::-1]:
+    new_dtimes.append(abs(pt-t))
+    pt = t
+
+  new_mel = copy.deepcopy(cscore[::-1])
+
+  time = 0
+
+  for i, t in enumerate(new_mel):
+    time += new_dtimes[i]
+    for tt in t:
+      tt[1] = time
+
+  return recalculate_score_timings(flatten(new_mel))
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
