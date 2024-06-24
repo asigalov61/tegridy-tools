@@ -1,5 +1,3 @@
-# https://huggingface.co/spaces/asigalov61/Advanced-MIDI-Renderer
-
 import argparse
 import glob
 import os.path
@@ -86,20 +84,15 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     elif render_type == "Extract melody":
         output_score = TMIDIX.extract_melody(cscore, melody_range=[48, 84])
 
-    elif render_type == "Transform":
+    elif render_type == "Flip":
         output_score = TMIDIX.flip_enhanced_score_notes(escore)
-
+        
+    elif render_type == "Reverse":
+        output_score = TMIDIX.reverse_enhanced_score_notes(escore)
+        
     elif render_type == 'Repair':
-        output_score = []
-
-        for c in cscore:
-            c.sort(key=lambda x: x[4], reverse=True)
-
-            fixed_chord = TMIDIX.check_and_fix_chord(c)
-
-            output_score.extend(fixed_chord)
-
-        output_score.sort(key= lambda x: x[1])
+        fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
+        output_score = TMIDIX.flatten(fixed_cscore)
 
     print('Done processing!')
     print('=' * 70)
@@ -223,7 +216,7 @@ if __name__ == "__main__":
 
         gr.Markdown("## Select desired render type")
 
-        render_type = gr.Radio(["Render as-is", "Custom render", "Extract melody", "Transform", "Repair"], label="Render type", value="Render as-is")
+        render_type = gr.Radio(["Render as-is", "Custom render", "Extract melody", "Flip", "Reverse", "Repair"], label="Render type", value="Render as-is")
 
         gr.Markdown("## Select desired render options")
 
