@@ -1184,6 +1184,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
     <li class="mono"><a href="#TMIDIX.recalculate_score_timings">recalculate_score_timings</a></li>
     <li class="mono"><a href="#TMIDIX.replace_bad_tones_chord">replace_bad_tones_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.reverse_enhanced_score_notes">reverse_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.score2midi">score2midi</a></li>
     <li class="mono"><a href="#TMIDIX.score2opus">score2opus</a></li>
     <li class="mono"><a href="#TMIDIX.score2stats">score2stats</a></li>
@@ -7630,6 +7631,38 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">reverse_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">):</span>
+
+  <span class="n">score</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">)</span>
+
+  <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">score</span><span class="p">])</span>
+
+  <span class="n">abs_dtimes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cscore</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">abs_dtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+  <span class="n">abs_dtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">cscore</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+
+  <span class="n">new_dtimes</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">pt</span> <span class="o">=</span> <span class="n">abs_dtimes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">abs_dtimes</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+    <span class="n">new_dtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pt</span><span class="o">-</span><span class="n">t</span><span class="p">))</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">t</span>
+
+  <span class="n">new_mel</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cscore</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+  <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_mel</span><span class="p">):</span>
+    <span class="n">time</span> <span class="o">+=</span> <span class="n">new_dtimes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+      <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+
+  <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">new_mel</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -13708,6 +13741,54 @@ see opus2midi() and score2opus().</p></div>
      <span class="n">replaced_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="p">[</span><span class="n">replaced_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.reverse_enhanced_score_notes">
+    <p>def <span class="ident">reverse_enhanced_score_notes</span>(</p><p>enhanced_score_notes)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.reverse_enhanced_score_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.reverse_enhanced_score_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reverse_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">):</span>
+
+  <span class="n">score</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">)</span>
+
+  <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">score</span><span class="p">])</span>
+
+  <span class="n">abs_dtimes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cscore</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">abs_dtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+  <span class="n">abs_dtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">cscore</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+
+  <span class="n">new_dtimes</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">pt</span> <span class="o">=</span> <span class="n">abs_dtimes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">abs_dtimes</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+    <span class="n">new_dtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pt</span><span class="o">-</span><span class="n">t</span><span class="p">))</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">t</span>
+
+  <span class="n">new_mel</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cscore</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+  <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_mel</span><span class="p">):</span>
+    <span class="n">time</span> <span class="o">+=</span> <span class="n">new_dtimes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+      <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+
+  <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">new_mel</span><span class="p">))</span>
 </pre></div>
 
   </div>
