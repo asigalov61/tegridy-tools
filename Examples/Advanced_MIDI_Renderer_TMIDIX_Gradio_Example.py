@@ -1,5 +1,5 @@
-import argparse
-import glob
+# https://huggingface.co/spaces/asigalov61/Advanced-MIDI-Renderer
+
 import os.path
 import hashlib
 import time
@@ -8,9 +8,7 @@ from pytz import timezone
 
 import gradio as gr
 
-import pickle
 import tqdm
-import json
 
 import TMIDIX
 from midi_to_colab_audio import midi_to_colab_audio
@@ -192,12 +190,6 @@ if __name__ == "__main__":
     print('App start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     print('=' * 70)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--share", action="store_true", default=False, help="share gradio app")
-    parser.add_argument("--port", type=int, default=7860, help="gradio server port")
-    
-    opt = parser.parse_args()
-    
     soundfonts = ["SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2", "Nice-Strings-PlusOrchestra-v1.6.sf2", "KBH-Real-Choir-V2.5.sf2"]
 
     app = gr.Blocks()
@@ -240,4 +232,4 @@ if __name__ == "__main__":
         run_event = submit.click(render_midi, [input_midi, render_type, soundfont_bank, render_sample_rate, custom_render_patch],
                                                 [output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
         
-    app.queue(1).launch(server_port=opt.port, share=opt.share, inbrowser=True) 
+    app.queue(1).launch()
