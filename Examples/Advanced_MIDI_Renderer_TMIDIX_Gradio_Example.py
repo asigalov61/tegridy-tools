@@ -161,7 +161,7 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     output_midi = str(new_fn)
     output_audio = (srate, audio)
     
-    output_plot = TMIDIX.plot_ms_SONG(output_score, plot_title=output_midi, return_plt=True)
+    output_plot = TMIDIX.plot_ms_SONG(output_score, plot_title=output_midi, return_plt=True, timings_multiplier=16)
 
     print('Output MIDI file name:', output_midi)
     print('Output MIDI title:', output_midi_title)
