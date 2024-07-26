@@ -1139,6 +1139,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.check_and_fix_chords_in_chordified_score">check_and_fix_chords_in_chordified_score</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_tones_chord">check_and_fix_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
+    <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_notes">delta_score_notes</a></li>
@@ -1151,6 +1152,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_closest_tone">find_closest_tone</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_value">find_closest_value</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
+    <li class="mono"><a href="#TMIDIX.find_lrno_patterns">find_lrno_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
@@ -2756,6 +2758,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">difflib</span> <span class="kn">import</span> <span class="n">SequenceMatcher</span> <span class="k">as</span> <span class="n">SM</span>
 
 <span class="kn">import</span> <span class="nn">statistics</span>
+<span class="kn">import</span> <span class="nn">math</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
@@ -7663,6 +7666,60 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">count_patterns</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">sublist</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">==</span> <span class="n">sublist</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">idx</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">count</span>
+
+<span class="k">def</span> <span class="nf">find_lrno_patterns</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+
+  <span class="n">all_seqs</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+  <span class="n">max_pat_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+  <span class="n">num_iter</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">j</span><span class="o">-</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">max_pat_len</span><span class="p">:</span>
+        <span class="n">all_seqs</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">])]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">num_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="n">max_count</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">max_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">all_seqs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+    <span class="k">if</span> <span class="n">max_len</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+      <span class="n">max_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+      <span class="n">pval</span> <span class="o">=</span> <span class="n">val</span>
+
+  <span class="n">max_pats</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">all_seqs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="n">max_count</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="n">max_len</span><span class="p">:</span>
+      <span class="n">max_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+  <span class="n">found_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">pat</span> <span class="ow">in</span> <span class="n">max_pats</span><span class="p">:</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">count_patterns</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">pat</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">found_patterns</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="n">pat</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">found_patterns</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -11875,6 +11932,35 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.count_patterns">
+    <p>def <span class="ident">count_patterns</span>(</p><p>lst, sublist)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.count_patterns', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.count_patterns" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_patterns</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">sublist</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">==</span> <span class="n">sublist</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">idx</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.create_enhanced_monophonic_melody">
     <p>def <span class="ident">create_enhanced_monophonic_melody</span>(</p><p>monophonic_melody)</p>
     </div>
@@ -12334,6 +12420,65 @@ The type of track (opus or score) is autodetected.</p></div>
                 <span class="k">return</span> <span class="n">sublist</span>  <span class="c1"># Return the matching sublist</span>
     
     <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># No exact match found</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.find_lrno_patterns">
+    <p>def <span class="ident">find_lrno_patterns</span>(</p><p>seq)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_lrno_patterns', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_lrno_patterns" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_lrno_patterns</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+
+  <span class="n">all_seqs</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+  <span class="n">max_pat_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+  <span class="n">num_iter</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">j</span><span class="o">-</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">max_pat_len</span><span class="p">:</span>
+        <span class="n">all_seqs</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">])]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">num_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="n">max_count</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">max_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">all_seqs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+    <span class="k">if</span> <span class="n">max_len</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+      <span class="n">max_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+      <span class="n">pval</span> <span class="o">=</span> <span class="n">val</span>
+
+  <span class="n">max_pats</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">all_seqs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="n">max_count</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="n">max_len</span><span class="p">:</span>
+      <span class="n">max_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+  <span class="n">found_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">pat</span> <span class="ow">in</span> <span class="n">max_pats</span><span class="p">:</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">count_patterns</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">pat</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">found_patterns</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="n">pat</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">found_patterns</span>
 </pre></div>
 
   </div>
