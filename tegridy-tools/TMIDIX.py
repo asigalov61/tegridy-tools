@@ -6446,6 +6446,14 @@ def find_lrno_patterns(seq):
 
 ###################################################################################
 
+def delta_pitches(escore_notes, pitches_index=4):
+
+  pitches = [p[pitches_index] for p in escore_notes]
+  
+  return [a-b for a, b in zip(pitches[:-1], pitches[1:])]
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
