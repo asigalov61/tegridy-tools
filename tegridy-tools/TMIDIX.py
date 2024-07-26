@@ -1484,6 +1484,7 @@ from abc import ABC, abstractmethod
 from difflib import SequenceMatcher as SM
 
 import statistics
+import math
 
 import matplotlib.pyplot as plt
 
@@ -6388,6 +6389,60 @@ def reverse_enhanced_score_notes(enhanced_score_notes):
       tt[1] = time
 
   return recalculate_score_timings(flatten(new_mel))
+
+###################################################################################
+
+def count_patterns(lst, sublist):
+    count = 0
+    idx = 0
+    for i in range(len(lst) - len(sublist) + 1):
+        if lst[idx:idx + len(sublist)] == sublist:
+            count += 1
+            idx += len(sublist)
+        else:
+          idx += 1
+    return count
+
+def find_lrno_patterns(seq):
+
+  all_seqs = Counter()
+
+  max_pat_len = math.ceil(len(seq) / 2)
+
+  num_iter = 0
+
+  for i in range(len(seq)):
+    for j in range(i+1, len(seq)+1):
+      if j-i <= max_pat_len:
+        all_seqs[tuple(seq[i:j])] += 1
+        num_iter += 1
+
+  max_count = 0
+  max_len = 0
+
+  for val, count in all_seqs.items():
+
+    if max_len < len(val):
+      max_count = max(2, count)
+
+    if count > 1:
+      max_len = max(max_len, len(val))
+      pval = val
+
+  max_pats = []
+
+  for val, count in all_seqs.items():
+    if count == max_count and len(val) == max_len:
+      max_pats.append(val)
+
+  found_patterns = []
+
+  for pat in max_pats:
+    count = count_patterns(seq, list(pat))
+    if count > 1:
+      found_patterns.append([count, len(pat), pat])
+
+  return found_patterns
 
 ###################################################################################
 
