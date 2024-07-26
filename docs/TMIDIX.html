@@ -1142,6 +1142,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.delta_pitches">delta_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_notes">delta_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.destack_list">destack_list</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_chord_to_chord_token">enhanced_chord_to_chord_token</a></li>
@@ -7720,6 +7721,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">delta_pitches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pitches</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">pitches</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -12026,6 +12035,30 @@ Tegridy Code 2024</p></div>
           <span class="n">similarity_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">similarity_matrix</span><span class="p">,</span> <span class="n">sim_matrix</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.delta_pitches">
+    <p>def <span class="ident">delta_pitches</span>(</p><p>escore_notes, pitches_index=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.delta_pitches', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.delta_pitches" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">delta_pitches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pitches</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">pitches</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
 </pre></div>
 
   </div>
