@@ -6454,6 +6454,11 @@ def delta_pitches(escore_notes, pitches_index=4):
 
 ###################################################################################
 
+def split_list(lst, val):
+    return [lst[i:j] for i, j in zip([0] + [k + 1 for k, x in enumerate(lst) if x == val], [k for k, x in enumerate(lst) if x == val] + [len(lst)]) if j > i]
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
