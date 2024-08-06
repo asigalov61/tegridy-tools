@@ -1171,6 +1171,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.group_sublists_by_length">group_sublists_by_length</a></li>
     <li class="mono"><a href="#TMIDIX.grouped_set">grouped_set</a></li>
     <li class="mono"><a href="#TMIDIX.harmonize_enhanced_melody_score_notes">harmonize_enhanced_melody_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.horizontal_ordered_list_search">horizontal_ordered_list_search</a></li>
     <li class="mono"><a href="#TMIDIX.hsv_to_rgb">hsv_to_rgb</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_bits">int_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_pitches_chord">int_to_pitches_chord</a></li>
@@ -1179,6 +1180,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.midi2opus">midi2opus</a></li>
     <li class="mono"><a href="#TMIDIX.midi2score">midi2score</a></li>
     <li class="mono"><a href="#TMIDIX.midi2single_track_ms_score">midi2single_track_ms_score</a></li>
+    <li class="mono"><a href="#TMIDIX.normalize_chord_durations">normalize_chord_durations</a></li>
+    <li class="mono"><a href="#TMIDIX.normalize_chordified_score_durations">normalize_chordified_score_durations</a></li>
     <li class="mono"><a href="#TMIDIX.opus2midi">opus2midi</a></li>
     <li class="mono"><a href="#TMIDIX.opus2score">opus2score</a></li>
     <li class="mono"><a href="#TMIDIX.ordered_set">ordered_set</a></li>
@@ -7896,6 +7899,79 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">normalize_chord_durations</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> 
+                              <span class="n">dur_idx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                              <span class="n">norm_factor</span><span class="o">=</span><span class="mi">100</span>
+                              <span class="p">):</span>
+
+  <span class="n">nchord</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+  
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">nchord</span><span class="p">:</span>
+    <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">norm_factor</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">//</span> <span class="n">norm_factor</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm_factor</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">nchord</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">normalize_chordified_score_durations</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">,</span> 
+                                         <span class="n">dur_idx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                         <span class="n">norm_factor</span><span class="o">=</span><span class="mi">100</span>
+                                         <span class="p">):</span>
+
+  <span class="n">ncscore</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">)</span>
+  
+  <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ncscore</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cc</span><span class="p">:</span>
+      <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">norm_factor</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">//</span> <span class="n">norm_factor</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm_factor</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">ncscore</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">horizontal_ordered_list_search</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">,</span> 
+                                    <span class="n">query_list</span><span class="p">,</span> 
+                                    <span class="n">start_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="n">end_idx</span><span class="o">=-</span><span class="mi">1</span>
+                                    <span class="p">):</span>
+
+  <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span>
+
+  <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">start_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:]</span>
+
+  <span class="k">if</span> <span class="n">start_idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">query_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+        <span class="k">break</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">continue</span>
+
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">results</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">end_idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">start_idx</span><span class="o">+</span><span class="nb">max</span><span class="p">(</span><span class="n">end_idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_list</span><span class="p">))]</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">query_list</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">idx</span> <span class="o">=</span> <span class="n">lol</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">results</span>
+
+  <span class="k">return</span> <span class="n">results</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -13359,6 +13435,66 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.horizontal_ordered_list_search">
+    <p>def <span class="ident">horizontal_ordered_list_search</span>(</p><p>list_of_lists, query_list, start_idx=0, end_idx=-1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.horizontal_ordered_list_search', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.horizontal_ordered_list_search" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">horizontal_ordered_list_search</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">,</span> 
+                                    <span class="n">query_list</span><span class="p">,</span> 
+                                    <span class="n">start_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="n">end_idx</span><span class="o">=-</span><span class="mi">1</span>
+                                    <span class="p">):</span>
+
+  <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span>
+
+  <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">start_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:]</span>
+
+  <span class="k">if</span> <span class="n">start_idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">query_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+        <span class="k">break</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">continue</span>
+
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">results</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">end_idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="n">lol</span> <span class="o">=</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">start_idx</span><span class="o">+</span><span class="nb">max</span><span class="p">(</span><span class="n">end_idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_list</span><span class="p">))]</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">query_list</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">idx</span> <span class="o">=</span> <span class="n">lol</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">results</span>
+
+  <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.hsv_to_rgb">
     <p>def <span class="ident">hsv_to_rgb</span>(</p><p>h, s, v)</p>
     </div>
@@ -13704,6 +13840,67 @@ tick per millisecond</p></div>
     <span class="n">ms_score</span> <span class="o">=</span> <span class="n">opus2score</span><span class="p">(</span><span class="n">to_millisecs</span><span class="p">(</span><span class="n">opus</span><span class="p">,</span> <span class="n">pass_old_timings_events</span><span class="o">=</span><span class="n">pass_old_timings_events</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">ms_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.normalize_chord_durations">
+    <p>def <span class="ident">normalize_chord_durations</span>(</p><p>chord, dur_idx=2, norm_factor=100)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.normalize_chord_durations', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.normalize_chord_durations" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">normalize_chord_durations</span><span class="p">(</span><span class="n">chord</span><span class="p">,</span> 
+                              <span class="n">dur_idx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                              <span class="n">norm_factor</span><span class="o">=</span><span class="mi">100</span>
+                              <span class="p">):</span>
+
+  <span class="n">nchord</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+  
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">nchord</span><span class="p">:</span>
+    <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">norm_factor</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">//</span> <span class="n">norm_factor</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm_factor</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">nchord</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.normalize_chordified_score_durations">
+    <p>def <span class="ident">normalize_chordified_score_durations</span>(</p><p>chordified_score, dur_idx=2, norm_factor=100)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.normalize_chordified_score_durations', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.normalize_chordified_score_durations" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">normalize_chordified_score_durations</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">,</span> 
+                                         <span class="n">dur_idx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                         <span class="n">norm_factor</span><span class="o">=</span><span class="mi">100</span>
+                                         <span class="p">):</span>
+
+  <span class="n">ncscore</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">)</span>
+  
+  <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ncscore</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cc</span><span class="p">:</span>
+      <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">norm_factor</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="n">dur_idx</span><span class="p">]</span> <span class="o">//</span> <span class="n">norm_factor</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm_factor</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">ncscore</span>
 </pre></div>
 
   </div>
