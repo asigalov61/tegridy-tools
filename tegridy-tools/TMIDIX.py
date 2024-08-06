@@ -6459,6 +6459,162 @@ def split_list(lst, val):
 
 ###################################################################################
 
+def even_timings(escore_notes, 
+                 times_idx=1, 
+                 durs_idx=2
+                 ):
+
+  esn = copy.deepcopy(escore_notes)
+
+  for e in esn:
+
+    if e[times_idx] != 0:
+      if e[times_idx] % 2 != 0:
+        e[times_idx] += 1
+
+    if e[durs_idx] % 2 != 0:
+      e[durs_idx] += 1
+
+  return esn
+
+###################################################################################
+
+def delta_score_to_abs_score(delta_score_notes, 
+                            times_idx=1
+                            ):
+
+  abs_score = copy.deepcopy(delta_score_notes)
+
+  abs_time = 0
+
+  for i, e in enumerate(delta_score_notes):
+
+    dtime = e[times_idx]
+    
+    abs_time += dtime
+
+    abs_score[i][times_idx] = abs_time
+    
+  return abs_score
+
+###################################################################################
+
+
+def adjust_numbers_to_sum(numbers, target_sum):
+
+  current_sum = sum(numbers)
+  difference = target_sum - current_sum
+
+  non_zero_elements = [(i, num) for i, num in enumerate(numbers) if num != 0]
+
+  total_non_zero = sum(num for _, num in non_zero_elements)
+
+  increments = []
+  for i, num in non_zero_elements:
+      proportion = num / total_non_zero
+      increment = proportion * difference
+      increments.append(increment)
+
+  for idx, (i, num) in enumerate(non_zero_elements):
+      numbers[i] += int(round(increments[idx]))
+
+  current_sum = sum(numbers)
+  difference = target_sum - current_sum
+  non_zero_indices = [i for i, num in enumerate(numbers) if num != 0]
+
+  for i in range(abs(difference)):
+      numbers[non_zero_indices[i % len(non_zero_indices)]] += 1 if difference > 0 else -1
+
+  return numbers
+
+###################################################################################
+
+def find_next_bar(escore_notes, bar_time, start_note_idx, cur_bar):
+  for e in escore_notes[start_note_idx:]:
+    if e[1] // bar_time > cur_bar:
+      return e, escore_notes.index(e)
+
+###################################################################################
+
+def align_escore_notes_to_bars(escore_notes,
+                               bar_time=4000,
+                               trim_durations=False,
+                               split_durations=False
+                               ):
+
+  #=============================================================================
+
+  aligned_escore_notes = copy.deepcopy(escore_notes)
+
+  abs_time = 0
+  nidx = 0
+  delta = 0
+  bcount = 0
+  next_bar = [0]
+
+  #=============================================================================
+
+  while next_bar:
+
+    next_bar = find_next_bar(escore_notes, bar_time, nidx, bcount)
+
+    if next_bar:
+
+      gescore_notes = escore_notes[nidx:next_bar[1]]
+    else:
+      gescore_notes = escore_notes[nidx:]
+
+    original_timings = [delta] + [(b[1]-a[1]) for a, b in zip(gescore_notes[:-1], gescore_notes[1:])]
+    adj_timings = adjust_numbers_to_sum(original_timings, bar_time)
+
+    for t in adj_timings:
+
+      abs_time += t
+
+      aligned_escore_notes[nidx][1] = abs_time
+      aligned_escore_notes[nidx][2] -= int(bar_time // 200)
+
+      nidx += 1
+
+    if next_bar:
+      delta = escore_notes[next_bar[1]][1]-escore_notes[next_bar[1]-1][1]
+    bcount += 1
+
+  #=============================================================================
+
+  aligned_adjusted_escore_notes = []
+  bcount = 0
+
+  for a in aligned_escore_notes:
+    bcount = a[1] // bar_time
+    nbtime = bar_time * (bcount+1)
+
+    if a[1]+a[2] > nbtime and a[3] != 9:
+      if trim_durations or split_durations:
+        ddiff = ((a[1]+a[2])-nbtime)
+        aa = copy.deepcopy(a)
+        aa[2] = a[2] - ddiff
+        aligned_adjusted_escore_notes.append(aa)
+
+        if split_durations:
+          aaa = copy.deepcopy(a)
+          aaa[1] = a[1]+aa[2]
+          aaa[2] = ddiff
+
+          aligned_adjusted_escore_notes.append(aaa)
+
+      else:
+        aligned_adjusted_escore_notes.append(a)
+
+    else:
+      aligned_adjusted_escore_notes.append(a)
+
+  #=============================================================================
+
+  return aligned_adjusted_escore_notes
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
