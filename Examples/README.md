@@ -102,6 +102,54 @@ display(Audio(midi_audio, rate=16000, normalize=False))
 TMIDIX.plot_ms_SONG(output_score, plot_title=output_file_name+'.mid')
 ```
 
+### MIDI alignment
+
+```
+import TMIDIX
+
+#===============================================================================
+# Input MIDI file (as filepath or bytes)
+
+input_midi = './tegridy-tools/tegridy-tools/seed2.mid'
+
+#===============================================================================
+# Raw single-track ms score
+
+raw_score = TMIDIX.midi2single_track_ms_score(input_midi)
+
+#===============================================================================
+# Enhanced score notes
+
+escore_notes = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
+
+#===============================================================================
+# Augmented enhanced score notes
+
+escore_notes = TMIDIX.augment_enhanced_score_notes(escore_notes, timings_divider=1)
+
+#===============================================================================
+# Zero score start time
+
+escore_notes = TMIDIX.recalculate_score_timings(escore_notes)
+
+#===============================================================================
+# Align score to bars
+
+aligned_score = TMIDIX.align_escore_notes_to_bars(escore_notes)
+
+#===============================================================================
+# Export aligned score back to MIDI
+
+output_score, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(aligned_score)
+
+detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
+                                                          output_signature = 'TMIDIX MIDI Composition',
+                                                          output_file_name = 'Aligned-MIDI-Score',
+                                                          track_name='Project Los Angeles',
+                                                          list_of_MIDI_patches=patches
+                                                          )
+```
+
 ### Advanced MIDI processing
 
 ```
