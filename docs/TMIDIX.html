@@ -1121,11 +1121,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter">Tegridy_ms_SONG_to_MIDI_Converter</a></li>
     <li class="mono"><a href="#TMIDIX.add_arrays">add_arrays</a></li>
     <li class="mono"><a href="#TMIDIX.add_melody_to_enhanced_score_notes">add_melody_to_enhanced_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.adjust_numbers_to_sum">adjust_numbers_to_sum</a></li>
     <li class="mono"><a href="#TMIDIX.adjust_score_velocities">adjust_score_velocities</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_check_and_fix_chords_in_chordified_score">advanced_check_and_fix_chords_in_chordified_score</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_check_and_fix_tones_chord">advanced_check_and_fix_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_score_processor">advanced_score_processor</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_validate_chord_pitches">advanced_validate_chord_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.align_escore_notes_to_bars">align_escore_notes_to_bars</a></li>
     <li class="mono"><a href="#TMIDIX.analyze_score_pitches">analyze_score_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.ascii_text_words_counter">ascii_text_words_counter</a></li>
     <li class="mono"><a href="#TMIDIX.ascii_texts_search">ascii_texts_search</a></li>
@@ -1144,16 +1146,19 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.delta_pitches">delta_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_notes">delta_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.delta_score_to_abs_score">delta_score_to_abs_score</a></li>
     <li class="mono"><a href="#TMIDIX.destack_list">destack_list</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_chord_to_chord_token">enhanced_chord_to_chord_token</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_chord_to_tones_chord">enhanced_chord_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_delta_score_notes">enhanced_delta_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.even_timings">even_timings</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_tone">find_closest_tone</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_value">find_closest_value</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_patterns">find_lrno_patterns</a></li>
+    <li class="mono"><a href="#TMIDIX.find_next_bar">find_next_bar</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
@@ -7735,6 +7740,162 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">even_timings</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                 <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                 <span class="n">durs_idx</span><span class="o">=</span><span class="mi">2</span>
+                 <span class="p">):</span>
+
+  <span class="n">esn</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esn</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">return</span> <span class="n">esn</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">delta_score_to_abs_score</span><span class="p">(</span><span class="n">delta_score_notes</span><span class="p">,</span> 
+                            <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span>
+                            <span class="p">):</span>
+
+  <span class="n">abs_score</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">delta_score_notes</span><span class="p">)</span>
+
+  <span class="n">abs_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">delta_score_notes</span><span class="p">):</span>
+
+    <span class="n">dtime</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span>
+    
+    <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
+
+    <span class="n">abs_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_time</span>
+    
+  <span class="k">return</span> <span class="n">abs_score</span>
+
+<span class="c1">###################################################################################</span>
+
+
+<span class="k">def</span> <span class="nf">adjust_numbers_to_sum</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">target_sum</span><span class="p">):</span>
+
+  <span class="n">current_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+  <span class="n">difference</span> <span class="o">=</span> <span class="n">target_sum</span> <span class="o">-</span> <span class="n">current_sum</span>
+
+  <span class="n">non_zero_elements</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="k">if</span> <span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">total_non_zero</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">num</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">non_zero_elements</span><span class="p">)</span>
+
+  <span class="n">increments</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">non_zero_elements</span><span class="p">:</span>
+      <span class="n">proportion</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="n">total_non_zero</span>
+      <span class="n">increment</span> <span class="o">=</span> <span class="n">proportion</span> <span class="o">*</span> <span class="n">difference</span>
+      <span class="n">increments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">increment</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">non_zero_elements</span><span class="p">):</span>
+      <span class="n">numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">increments</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+
+  <span class="n">current_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+  <span class="n">difference</span> <span class="o">=</span> <span class="n">target_sum</span> <span class="o">-</span> <span class="n">current_sum</span>
+  <span class="n">non_zero_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="k">if</span> <span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">difference</span><span class="p">)):</span>
+      <span class="n">numbers</span><span class="p">[</span><span class="n">non_zero_indices</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_zero_indices</span><span class="p">)]]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">difference</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+
+  <span class="k">return</span> <span class="n">numbers</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_next_bar</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">bar_time</span><span class="p">,</span> <span class="n">start_note_idx</span><span class="p">,</span> <span class="n">cur_bar</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">start_note_idx</span><span class="p">:]:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">bar_time</span> <span class="o">&gt;</span> <span class="n">cur_bar</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="n">escore_notes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">align_escore_notes_to_bars</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                               <span class="n">bar_time</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                               <span class="n">trim_durations</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">split_durations</span><span class="o">=</span><span class="kc">False</span>
+                               <span class="p">):</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="n">aligned_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="n">abs_time</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">nidx</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">bcount</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">next_bar</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="k">while</span> <span class="n">next_bar</span><span class="p">:</span>
+
+    <span class="n">next_bar</span> <span class="o">=</span> <span class="n">find_next_bar</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">bar_time</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">bcount</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">next_bar</span><span class="p">:</span>
+
+      <span class="n">gescore_notes</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">:</span><span class="n">next_bar</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">gescore_notes</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">:]</span>
+
+    <span class="n">original_timings</span> <span class="o">=</span> <span class="p">[</span><span class="n">delta</span><span class="p">]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gescore_notes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">gescore_notes</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+    <span class="n">adj_timings</span> <span class="o">=</span> <span class="n">adjust_numbers_to_sum</span><span class="p">(</span><span class="n">original_timings</span><span class="p">,</span> <span class="n">bar_time</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">adj_timings</span><span class="p">:</span>
+
+      <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">t</span>
+
+      <span class="n">aligned_escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_time</span>
+      <span class="n">aligned_escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bar_time</span> <span class="o">//</span> <span class="mi">200</span><span class="p">)</span>
+
+      <span class="n">nidx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">next_bar</span><span class="p">:</span>
+      <span class="n">delta</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">next_bar</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">escore_notes</span><span class="p">[</span><span class="n">next_bar</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">bcount</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="n">aligned_adjusted_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">bcount</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">aligned_escore_notes</span><span class="p">:</span>
+    <span class="n">bcount</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">bar_time</span>
+    <span class="n">nbtime</span> <span class="o">=</span> <span class="n">bar_time</span> <span class="o">*</span> <span class="p">(</span><span class="n">bcount</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">nbtime</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">trim_durations</span> <span class="ow">or</span> <span class="n">split_durations</span><span class="p">:</span>
+        <span class="n">ddiff</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">-</span><span class="n">nbtime</span><span class="p">)</span>
+        <span class="n">aa</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">aa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ddiff</span>
+        <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">split_durations</span><span class="p">:</span>
+          <span class="n">aaa</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+          <span class="n">aaa</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">aa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+          <span class="n">aaa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddiff</span>
+
+          <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aaa</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="k">return</span> <span class="n">aligned_adjusted_escore_notes</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -10664,6 +10825,51 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.adjust_numbers_to_sum">
+    <p>def <span class="ident">adjust_numbers_to_sum</span>(</p><p>numbers, target_sum)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.adjust_numbers_to_sum', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.adjust_numbers_to_sum" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">adjust_numbers_to_sum</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">target_sum</span><span class="p">):</span>
+
+  <span class="n">current_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+  <span class="n">difference</span> <span class="o">=</span> <span class="n">target_sum</span> <span class="o">-</span> <span class="n">current_sum</span>
+
+  <span class="n">non_zero_elements</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="k">if</span> <span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">total_non_zero</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">num</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">non_zero_elements</span><span class="p">)</span>
+
+  <span class="n">increments</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">non_zero_elements</span><span class="p">:</span>
+      <span class="n">proportion</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="n">total_non_zero</span>
+      <span class="n">increment</span> <span class="o">=</span> <span class="n">proportion</span> <span class="o">*</span> <span class="n">difference</span>
+      <span class="n">increments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">increment</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">non_zero_elements</span><span class="p">):</span>
+      <span class="n">numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">increments</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+
+  <span class="n">current_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+  <span class="n">difference</span> <span class="o">=</span> <span class="n">target_sum</span> <span class="o">-</span> <span class="n">current_sum</span>
+  <span class="n">non_zero_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="k">if</span> <span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">difference</span><span class="p">)):</span>
+      <span class="n">numbers</span><span class="p">[</span><span class="n">non_zero_indices</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_zero_indices</span><span class="p">)]]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">difference</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+
+  <span class="k">return</span> <span class="n">numbers</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.adjust_score_velocities">
     <p>def <span class="ident">adjust_score_velocities</span>(</p><p>score, max_velocity)</p>
     </div>
@@ -11200,6 +11406,101 @@ Tegridy Code 2024</p></div>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">chord</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
       <span class="k">return</span> <span class="n">chord</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.align_escore_notes_to_bars">
+    <p>def <span class="ident">align_escore_notes_to_bars</span>(</p><p>escore_notes, bar_time=4000, trim_durations=False, split_durations=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.align_escore_notes_to_bars', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.align_escore_notes_to_bars" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">align_escore_notes_to_bars</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                               <span class="n">bar_time</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                               <span class="n">trim_durations</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">split_durations</span><span class="o">=</span><span class="kc">False</span>
+                               <span class="p">):</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="n">aligned_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="n">abs_time</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">nidx</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">bcount</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">next_bar</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="k">while</span> <span class="n">next_bar</span><span class="p">:</span>
+
+    <span class="n">next_bar</span> <span class="o">=</span> <span class="n">find_next_bar</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">bar_time</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">bcount</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">next_bar</span><span class="p">:</span>
+
+      <span class="n">gescore_notes</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">:</span><span class="n">next_bar</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">gescore_notes</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">:]</span>
+
+    <span class="n">original_timings</span> <span class="o">=</span> <span class="p">[</span><span class="n">delta</span><span class="p">]</span> <span class="o">+</span> <span class="p">[(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gescore_notes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">gescore_notes</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+    <span class="n">adj_timings</span> <span class="o">=</span> <span class="n">adjust_numbers_to_sum</span><span class="p">(</span><span class="n">original_timings</span><span class="p">,</span> <span class="n">bar_time</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">adj_timings</span><span class="p">:</span>
+
+      <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">t</span>
+
+      <span class="n">aligned_escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_time</span>
+      <span class="n">aligned_escore_notes</span><span class="p">[</span><span class="n">nidx</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bar_time</span> <span class="o">//</span> <span class="mi">200</span><span class="p">)</span>
+
+      <span class="n">nidx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">next_bar</span><span class="p">:</span>
+      <span class="n">delta</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">next_bar</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">escore_notes</span><span class="p">[</span><span class="n">next_bar</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">bcount</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="n">aligned_adjusted_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">bcount</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">aligned_escore_notes</span><span class="p">:</span>
+    <span class="n">bcount</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">bar_time</span>
+    <span class="n">nbtime</span> <span class="o">=</span> <span class="n">bar_time</span> <span class="o">*</span> <span class="p">(</span><span class="n">bcount</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">nbtime</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">trim_durations</span> <span class="ow">or</span> <span class="n">split_durations</span><span class="p">:</span>
+        <span class="n">ddiff</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">-</span><span class="n">nbtime</span><span class="p">)</span>
+        <span class="n">aa</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">aa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ddiff</span>
+        <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">split_durations</span><span class="p">:</span>
+          <span class="n">aaa</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+          <span class="n">aaa</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">aa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+          <span class="n">aaa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddiff</span>
+
+          <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aaa</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">aligned_adjusted_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+  <span class="c1">#=============================================================================</span>
+
+  <span class="k">return</span> <span class="n">aligned_adjusted_escore_notes</span>
 </pre></div>
 
   </div>
@@ -12131,6 +12432,42 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.delta_score_to_abs_score">
+    <p>def <span class="ident">delta_score_to_abs_score</span>(</p><p>delta_score_notes, times_idx=1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.delta_score_to_abs_score', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.delta_score_to_abs_score" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">delta_score_to_abs_score</span><span class="p">(</span><span class="n">delta_score_notes</span><span class="p">,</span> 
+                            <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span>
+                            <span class="p">):</span>
+
+  <span class="n">abs_score</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">delta_score_notes</span><span class="p">)</span>
+
+  <span class="n">abs_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">delta_score_notes</span><span class="p">):</span>
+
+    <span class="n">dtime</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span>
+    
+    <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
+
+    <span class="n">abs_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_time</span>
+    
+  <span class="k">return</span> <span class="n">abs_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.destack_list">
     <p>def <span class="ident">destack_list</span>(</p><p>num, base=12)</p>
     </div>
@@ -12277,6 +12614,42 @@ Tegridy Code 2024</p></div>
     <span class="n">pe</span> <span class="o">=</span> <span class="n">e</span>
 
   <span class="k">return</span> <span class="n">delta_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.even_timings">
+    <p>def <span class="ident">even_timings</span>(</p><p>escore_notes, times_idx=1, durs_idx=2)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.even_timings', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.even_timings" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">even_timings</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                 <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                 <span class="n">durs_idx</span><span class="o">=</span><span class="mi">2</span>
+                 <span class="p">):</span>
+
+  <span class="n">esn</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esn</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">return</span> <span class="n">esn</span>
 </pre></div>
 
   </div>
@@ -12518,6 +12891,29 @@ The type of track (opus or score) is autodetected.</p></div>
       <span class="n">found_patterns</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="n">pat</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="n">found_patterns</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.find_next_bar">
+    <p>def <span class="ident">find_next_bar</span>(</p><p>escore_notes, bar_time, start_note_idx, cur_bar)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_next_bar', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_next_bar" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_next_bar</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">bar_time</span><span class="p">,</span> <span class="n">start_note_idx</span><span class="p">,</span> <span class="n">cur_bar</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">[</span><span class="n">start_note_idx</span><span class="p">:]:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">bar_time</span> <span class="o">&gt;</span> <span class="n">cur_bar</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="n">escore_notes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </pre></div>
 
   </div>
