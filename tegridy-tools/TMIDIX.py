@@ -6615,6 +6615,79 @@ def align_escore_notes_to_bars(escore_notes,
 
 ###################################################################################
 
+def normalize_chord_durations(chord, 
+                              dur_idx=2, 
+                              norm_factor=100
+                              ):
+
+  nchord = copy.deepcopy(chord)
+  
+  for c in nchord:
+    c[dur_idx] = int(round(max(1 / norm_factor, c[dur_idx] // norm_factor) * norm_factor))
+
+  return nchord
+
+###################################################################################
+
+def normalize_chordified_score_durations(chordified_score, 
+                                         dur_idx=2, 
+                                         norm_factor=100
+                                         ):
+
+  ncscore = copy.deepcopy(chordified_score)
+  
+  for cc in ncscore:
+    for c in cc:
+      c[dur_idx] = int(round(max(1 / norm_factor, c[dur_idx] // norm_factor) * norm_factor))
+
+  return ncscore
+
+###################################################################################
+
+def horizontal_ordered_list_search(list_of_lists, 
+                                    query_list, 
+                                    start_idx=0,
+                                    end_idx=-1
+                                    ):
+
+  lol = list_of_lists
+
+  results = []
+
+  if start_idx > 0:
+    lol = list_of_lists[start_idx:]
+
+  if start_idx == -1:
+    idx = -1
+    for i, l in enumerate(list_of_lists):
+      try:
+        idx = l.index(query_list[0])
+        lol = list_of_lists[i:]
+        break
+      except:
+        continue
+
+    if idx == -1:
+      results.append(-1)
+      return results
+    else:
+      results.append(i)
+
+  if end_idx != -1:
+    lol = list_of_lists[start_idx:start_idx+max(end_idx, len(query_list))]
+
+  for i, q in enumerate(query_list):
+    try:
+      idx = lol[i].index(q)
+      results.append(idx)
+    except:
+      results.append(-1)
+      return results
+
+  return results
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
