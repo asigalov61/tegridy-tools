@@ -6688,6 +6688,60 @@ def horizontal_ordered_list_search(list_of_lists,
 
 ###################################################################################
 
+def escore_notes_to_escore_matrix(escore_notes):
+
+    last_time = escore_notes[-1][1]
+    last_notes = [e for e in escore_notes if e[1] == last_time]
+    max_last_dur = max([e[2] for e in last_notes])
+
+    time_range = last_time+max_last_dur
+
+    escore_matrix = [[[-1, -1, -1]] * 128 for _ in range(time_range)]
+
+    for note in escore_notes:
+
+        etype, time, duration, channel, pitch, velocity, patch = note
+
+        for t in range(time, min(time + duration, time_range)):
+         
+          escore_matrix[t][pitch] = [channel, velocity, patch]
+
+    return escore_matrix
+
+###################################################################################
+
+def escore_matrix_to_merged_escore_notes(escore_matrix):
+
+  result = []
+
+  for j in range(len(escore_matrix[0])):
+
+      count = 1
+
+      for i in range(1, len(escore_matrix)):
+          if escore_matrix[i][j] != [-1, -1, -1] and escore_matrix[i][j][2] == escore_matrix[i-1][j][2]:
+              count += 1
+
+          else:
+              if count > 1:
+                result.append([i-count, count, j, escore_matrix[i-1][j]])
+
+              count = 1
+
+      if count > 1:
+          result.append([len(escore_matrix)-count, count, j, escore_matrix[-1][j]])
+
+  result.sort(key=lambda x: (x[0], -x[2]))
+
+  merged_escore_notes = []
+
+  for r in result:
+    merged_escore_notes.append(['note', r[0], r[1], r[3][0], r[2], r[3][1], r[3][2]])
+
+  return merged_escore_notes
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
