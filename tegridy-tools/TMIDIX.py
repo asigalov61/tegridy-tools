@@ -6690,38 +6690,56 @@ def horizontal_ordered_list_search(list_of_lists,
 
 def escore_notes_to_escore_matrix(escore_notes):
 
-    last_time = escore_notes[-1][1]
-    last_notes = [e for e in escore_notes if e[1] == last_time]
-    max_last_dur = max([e[2] for e in last_notes])
+  last_time = escore_notes[-1][1]
+  last_notes = [e for e in escore_notes if e[1] == last_time]
+  max_last_dur = max([e[2] for e in last_notes])
 
-    time_range = last_time+max_last_dur
+  time_range = last_time+max_last_dur
 
-    escore_matrix = [[[-1, -1, -1]] * 128 for _ in range(time_range)]
+  channels_list = sorted(set([e[3] for e in escore_notes]))
+
+  escore_matrixes = []
+
+  for cha in channels_list:
+
+    escore_matrix = [[[-1, -1]] * 128 for _ in range(time_range)]
 
     for note in escore_notes:
 
         etype, time, duration, channel, pitch, velocity, patch = note
 
-        for t in range(time, min(time + duration, time_range)):
-         
-          escore_matrix[t][pitch] = [channel, velocity, patch]
+        if channel == cha:
 
-    return escore_matrix
+          for t in range(time, min(time + duration, time_range)):
+
+            escore_matrix[t][pitch] = [velocity, patch]
+
+    escore_matrixes.append(escore_matrix)
+
+  return [channels_list, escore_matrixes]
 
 ###################################################################################
 
-def escore_matrix_to_merged_escore_notes(escore_matrix,
+def escore_matrix_to_merged_escore_notes(full_escore_matrix,
                                         max_note_duration=4000
                                         ):
 
   result = []
+  merged_escore_notes = []
 
-  for j in range(len(escore_matrix[0])):
+  mat_channels_list = full_escore_matrix[0]
+  
+  for m, cha in enumerate(mat_channels_list):
 
-      count = 1
+    escore_matrix = full_escore_matrix[1][m]
 
-      for i in range(1, len(escore_matrix)):
-          if escore_matrix[i][j] != [-1, -1, -1] and escore_matrix[i][j][2] == escore_matrix[i-1][j][2] and count < max_note_duration:
+    for j in range(len(escore_matrix[0])):
+
+        count = 1
+
+        for i in range(1, len(escore_matrix)):
+
+          if escore_matrix[i][j] != [-1, -1] and escore_matrix[i][j][1] == escore_matrix[i-1][j][1] and count < max_note_duration:
               count += 1
 
           else:
@@ -6730,17 +6748,15 @@ def escore_matrix_to_merged_escore_notes(escore_matrix,
 
               count = 1
 
-      if count > 1:
-          result.append([len(escore_matrix)-count, count, j, escore_matrix[-1][j]])
+        if count > 1:
+            result.append([len(escore_matrix)-count, count, j, escore_matrix[-1][j]])
 
-  result.sort(key=lambda x: (x[0], -x[2]))
+    result.sort(key=lambda x: (x[0], -x[2]))
 
-  merged_escore_notes = []
+    for r in result:
+      merged_escore_notes.append(['note', r[0], r[1], cha, r[2], r[3][0], r[3][1]])
 
-  for r in result:
-    merged_escore_notes.append(['note', r[0], r[1], r[3][0], r[2], r[3][1], r[3][2]])
-
-  return merged_escore_notes
+  return sorted(merged_escore_notes, key=lambda x: (x[1], -x[4], x[6]))
 
 ###################################################################################
 
