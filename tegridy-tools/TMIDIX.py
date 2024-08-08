@@ -6724,7 +6724,6 @@ def escore_matrix_to_merged_escore_notes(full_escore_matrix,
                                         max_note_duration=4000
                                         ):
 
-  result = []
   merged_escore_notes = []
 
   mat_channels_list = full_escore_matrix[0]
@@ -6732,6 +6731,8 @@ def escore_matrix_to_merged_escore_notes(full_escore_matrix,
   for m, cha in enumerate(mat_channels_list):
 
     escore_matrix = full_escore_matrix[1][m]
+
+    result = []
 
     for j in range(len(escore_matrix[0])):
 
