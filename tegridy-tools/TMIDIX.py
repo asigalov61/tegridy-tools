@@ -6710,7 +6710,9 @@ def escore_notes_to_escore_matrix(escore_notes):
 
 ###################################################################################
 
-def escore_matrix_to_merged_escore_notes(escore_matrix):
+def escore_matrix_to_merged_escore_notes(escore_matrix,
+                                        max_note_duration=4000
+                                        ):
 
   result = []
 
@@ -6719,11 +6721,11 @@ def escore_matrix_to_merged_escore_notes(escore_matrix):
       count = 1
 
       for i in range(1, len(escore_matrix)):
-          if escore_matrix[i][j] != [-1, -1, -1] and escore_matrix[i][j][2] == escore_matrix[i-1][j][2]:
+          if escore_matrix[i][j] != [-1, -1, -1] and escore_matrix[i][j][2] == escore_matrix[i-1][j][2] and count < max_note_duration:
               count += 1
 
           else:
-              if count > 1:
+              if count > 1:  
                 result.append([i-count, count, j, escore_matrix[i-1][j]])
 
               count = 1
