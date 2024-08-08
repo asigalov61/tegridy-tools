@@ -7976,38 +7976,56 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">escore_notes_to_escore_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">):</span>
 
-    <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">last_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_time</span><span class="p">]</span>
-    <span class="n">max_last_dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">last_notes</span><span class="p">])</span>
+  <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">last_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_time</span><span class="p">]</span>
+  <span class="n">max_last_dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">last_notes</span><span class="p">])</span>
 
-    <span class="n">time_range</span> <span class="o">=</span> <span class="n">last_time</span><span class="o">+</span><span class="n">max_last_dur</span>
+  <span class="n">time_range</span> <span class="o">=</span> <span class="n">last_time</span><span class="o">+</span><span class="n">max_last_dur</span>
 
-    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_range</span><span class="p">)]</span>
+  <span class="n">channels_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
+
+  <span class="n">escore_matrixes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">cha</span> <span class="ow">in</span> <span class="n">channels_list</span><span class="p">:</span>
+
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_range</span><span class="p">)]</span>
 
     <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
 
         <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span> <span class="o">=</span> <span class="n">note</span>
 
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
-         
-          <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">channel</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="n">cha</span><span class="p">:</span>
 
-    <span class="k">return</span> <span class="n">escore_matrix</span>
+          <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
+
+            <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">]</span>
+
+    <span class="n">escore_matrixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">channels_list</span><span class="p">,</span> <span class="n">escore_matrixes</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span> <span class="nf">escore_matrix_to_merged_escore_notes</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">escore_matrix_to_merged_escore_notes</span><span class="p">(</span><span class="n">full_escore_matrix</span><span class="p">,</span>
                                         <span class="n">max_note_duration</span><span class="o">=</span><span class="mi">4000</span>
                                         <span class="p">):</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">merged_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+  <span class="n">mat_channels_list</span> <span class="o">=</span> <span class="n">full_escore_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  
+  <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">cha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mat_channels_list</span><span class="p">):</span>
 
-      <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">full_escore_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">m</span><span class="p">]</span>
 
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)):</span>
-          <span class="k">if</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">max_note_duration</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)):</span>
+
+          <span class="k">if</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">max_note_duration</span><span class="p">:</span>
               <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
           <span class="k">else</span><span class="p">:</span>
@@ -8016,17 +8034,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
               <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
 
-      <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
 
-  <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
 
-  <span class="n">merged_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+      <span class="n">merged_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cha</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
 
-  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-    <span class="n">merged_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]])</span>
-
-  <span class="k">return</span> <span class="n">merged_escore_notes</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">merged_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -12758,7 +12774,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.escore_matrix_to_merged_escore_notes">
-    <p>def <span class="ident">escore_matrix_to_merged_escore_notes</span>(</p><p>escore_matrix, max_note_duration=4000)</p>
+    <p>def <span class="ident">escore_matrix_to_merged_escore_notes</span>(</p><p>full_escore_matrix, max_note_duration=4000)</p>
     </div>
     
 
@@ -12767,18 +12783,26 @@ Tegridy Code 2024</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_matrix_to_merged_escore_notes', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.escore_matrix_to_merged_escore_notes" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_matrix_to_merged_escore_notes</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_matrix_to_merged_escore_notes</span><span class="p">(</span><span class="n">full_escore_matrix</span><span class="p">,</span>
                                         <span class="n">max_note_duration</span><span class="o">=</span><span class="mi">4000</span>
                                         <span class="p">):</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">merged_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+  <span class="n">mat_channels_list</span> <span class="o">=</span> <span class="n">full_escore_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  
+  <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">cha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mat_channels_list</span><span class="p">):</span>
 
-      <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">full_escore_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">m</span><span class="p">]</span>
 
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)):</span>
-          <span class="k">if</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">max_note_duration</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)):</span>
+
+          <span class="k">if</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">max_note_duration</span><span class="p">:</span>
               <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
           <span class="k">else</span><span class="p">:</span>
@@ -12787,17 +12811,15 @@ Tegridy Code 2024</p></div>
 
               <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
 
-      <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
 
-  <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
 
-  <span class="n">merged_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+      <span class="n">merged_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cha</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
 
-  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-    <span class="n">merged_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]])</span>
-
-  <span class="k">return</span> <span class="n">merged_escore_notes</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">merged_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
 </pre></div>
 
   </div>
@@ -12819,23 +12841,33 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.escore_notes_to_escore_matrix" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_escore_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">):</span>
 
-    <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">last_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_time</span><span class="p">]</span>
-    <span class="n">max_last_dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">last_notes</span><span class="p">])</span>
+  <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">last_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_time</span><span class="p">]</span>
+  <span class="n">max_last_dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">last_notes</span><span class="p">])</span>
 
-    <span class="n">time_range</span> <span class="o">=</span> <span class="n">last_time</span><span class="o">+</span><span class="n">max_last_dur</span>
+  <span class="n">time_range</span> <span class="o">=</span> <span class="n">last_time</span><span class="o">+</span><span class="n">max_last_dur</span>
 
-    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_range</span><span class="p">)]</span>
+  <span class="n">channels_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
+
+  <span class="n">escore_matrixes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">cha</span> <span class="ow">in</span> <span class="n">channels_list</span><span class="p">:</span>
+
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_range</span><span class="p">)]</span>
 
     <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
 
         <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span> <span class="o">=</span> <span class="n">note</span>
 
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
-         
-          <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">channel</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="n">cha</span><span class="p">:</span>
 
-    <span class="k">return</span> <span class="n">escore_matrix</span>
+          <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
+
+            <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">]</span>
+
+    <span class="n">escore_matrixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">channels_list</span><span class="p">,</span> <span class="n">escore_matrixes</span><span class="p">]</span>
 </pre></div>
 
   </div>
