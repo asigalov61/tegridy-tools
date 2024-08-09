@@ -1121,6 +1121,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter">Tegridy_ms_SONG_to_MIDI_Converter</a></li>
     <li class="mono"><a href="#TMIDIX.add_arrays">add_arrays</a></li>
     <li class="mono"><a href="#TMIDIX.add_melody_to_enhanced_score_notes">add_melody_to_enhanced_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.adjust_escore_notes_timings">adjust_escore_notes_timings</a></li>
     <li class="mono"><a href="#TMIDIX.adjust_numbers_to_sum">adjust_numbers_to_sum</a></li>
     <li class="mono"><a href="#TMIDIX.adjust_score_velocities">adjust_score_velocities</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_check_and_fix_chords_in_chordified_score">advanced_check_and_fix_chords_in_chordified_score</a></li>
@@ -1154,6 +1155,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.enhanced_delta_score_notes">enhanced_delta_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.escore_matrix_to_merged_escore_notes">escore_matrix_to_merged_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.escore_matrix_to_original_escore_notes">escore_matrix_to_original_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_averages">escore_notes_averages</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_delta_times">escore_notes_delta_times</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_durations">escore_notes_durations</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_binary_matrix">escore_notes_to_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_escore_matrix">escore_notes_to_escore_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.even_timings">even_timings</a></li>
@@ -1180,6 +1184,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.hsv_to_rgb">hsv_to_rgb</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_bits">int_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_pitches_chord">int_to_pitches_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
     <li class="mono"><a href="#TMIDIX.md5_hash">md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.midi2ms_score">midi2ms_score</a></li>
     <li class="mono"><a href="#TMIDIX.midi2opus">midi2opus</a></li>
@@ -1189,6 +1194,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.normalize_chordified_score_durations">normalize_chordified_score_durations</a></li>
     <li class="mono"><a href="#TMIDIX.opus2midi">opus2midi</a></li>
     <li class="mono"><a href="#TMIDIX.opus2score">opus2score</a></li>
+    <li class="mono"><a href="#TMIDIX.ordered_lists_match_ratio">ordered_lists_match_ratio</a></li>
     <li class="mono"><a href="#TMIDIX.ordered_set">ordered_set</a></li>
     <li class="mono"><a href="#TMIDIX.patch_enhanced_score_notes">patch_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.patch_list_from_enhanced_score_notes">patch_list_from_enhanced_score_notes</a></li>
@@ -8184,6 +8190,96 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">escore_notes_averages</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                          <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                          <span class="n">durs_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                          <span class="n">ptcs_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
+                          <span class="n">vels_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                          <span class="n">score_is_delta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">return_ptcs_and_vels</span><span class="o">=</span><span class="kc">False</span>
+                          <span class="p">):</span>
+  
+  <span class="k">if</span> <span class="n">score_is_delta</span><span class="p">:</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">return_ptcs_and_vels</span><span class="p">:</span>
+    <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">ptcs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+    <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ptcs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptcs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vels</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">vels</span><span class="p">)]</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">)]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">adjust_escore_notes_timings</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                <span class="n">adj_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                                <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                                <span class="n">durs_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                <span class="n">score_is_delta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                <span class="n">return_delta_scpre</span><span class="o">=</span><span class="kc">False</span>
+                                <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">score_is_delta</span><span class="p">:</span>
+    <span class="n">adj_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">adj_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">adj_escore_notes</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">adj_k</span><span class="p">))</span>
+
+    <span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">adj_k</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="n">return_delta_scpre</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">adj_escore_notes</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">adj_escore_notes</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_delta_times</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                             <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span>
+                             <span class="p">):</span>
+
+  <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_durations</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                            <span class="n">durs_index</span><span class="o">=</span><span class="mi">1</span>
+                            <span class="p">):</span>
+
+  <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">ordered_lists_match_ratio</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+
+  <span class="n">zlist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span> <span class="o">==</span> <span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">zlist</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">zlist</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">lists_intersections</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -11113,6 +11209,50 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.adjust_escore_notes_timings">
+    <p>def <span class="ident">adjust_escore_notes_timings</span>(</p><p>escore_notes, adj_k=1, times_index=1, durs_index=2, score_is_delta=False, return_delta_scpre=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.adjust_escore_notes_timings', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.adjust_escore_notes_timings" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">adjust_escore_notes_timings</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                <span class="n">adj_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                                <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                                <span class="n">durs_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                <span class="n">score_is_delta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                <span class="n">return_delta_scpre</span><span class="o">=</span><span class="kc">False</span>
+                                <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">score_is_delta</span><span class="p">:</span>
+    <span class="n">adj_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">adj_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">adj_escore_notes</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">adj_k</span><span class="p">))</span>
+
+    <span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">adj_k</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="n">return_delta_scpre</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">adj_escore_notes</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">adj_escore_notes</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.adjust_numbers_to_sum">
     <p>def <span class="ident">adjust_numbers_to_sum</span>(</p><p>numbers, target_sum)</p>
     </div>
@@ -13076,6 +13216,103 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_averages">
+    <p>def <span class="ident">escore_notes_averages</span>(</p><p>escore_notes, times_index=1, durs_index=2, ptcs_index=4, vels_index=5, score_is_delta=False, return_ptcs_and_vels=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_averages', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_averages" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_averages</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                          <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                          <span class="n">durs_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                          <span class="n">ptcs_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
+                          <span class="n">vels_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                          <span class="n">score_is_delta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">return_ptcs_and_vels</span><span class="o">=</span><span class="kc">False</span>
+                          <span class="p">):</span>
+  
+  <span class="k">if</span> <span class="n">score_is_delta</span><span class="p">:</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">return_ptcs_and_vels</span><span class="p">:</span>
+    <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">ptcs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+    <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ptcs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptcs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vels</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">vels</span><span class="p">)]</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_delta_times">
+    <p>def <span class="ident">escore_notes_delta_times</span>(</p><p>escore_notes, times_index=1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_delta_times', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_delta_times" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_delta_times</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                             <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span>
+                             <span class="p">):</span>
+
+  <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_durations">
+    <p>def <span class="ident">escore_notes_durations</span>(</p><p>escore_notes, durs_index=1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_durations', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_durations" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_durations</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                            <span class="n">durs_index</span><span class="o">=</span><span class="mi">1</span>
+                            <span class="p">):</span>
+
+  <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_to_binary_matrix">
     <p>def <span class="ident">escore_notes_to_binary_matrix</span>(</p><p>escore_notes, channel=0, patch=0)</p>
     </div>
@@ -14081,6 +14318,27 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.lists_intersections">
+    <p>def <span class="ident">lists_intersections</span>(</p><p>src_list, trg_list)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.lists_intersections', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.lists_intersections" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_intersections</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.md5_hash">
     <p>def <span class="ident">md5_hash</span>(</p><p>file_path_or_data=None, original_md5_hash=None)</p>
     </div>
@@ -14545,6 +14803,30 @@ see opus2midi() and score2opus().</p></div>
         <span class="n">score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_track</span><span class="p">)</span>
     <span class="n">_clean_up_warnings</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.ordered_lists_match_ratio">
+    <p>def <span class="ident">ordered_lists_match_ratio</span>(</p><p>src_list, trg_list)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.ordered_lists_match_ratio', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.ordered_lists_match_ratio" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ordered_lists_match_ratio</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+
+  <span class="n">zlist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span> <span class="o">==</span> <span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">zlist</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">zlist</span><span class="p">))</span>
 </pre></div>
 
   </div>
