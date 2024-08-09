@@ -6895,6 +6895,96 @@ def binary_matrix_to_original_escore_notes(binary_matrix,
 
 ###################################################################################
 
+def escore_notes_averages(escore_notes, 
+                          times_index=1, 
+                          durs_index=2, 
+                          ptcs_index=4, 
+                          vels_index=5,
+                          score_is_delta=False,
+                          return_ptcs_and_vels=False
+                          ):
+  
+  if score_is_delta:
+    times = [e[times_index] for e in escore_notes if e[times_index] != 0]
+    
+  else:
+    descore_notes = delta_score_notes(escore_notes)
+    times = [e[times_index] for e in descore_notes if e[times_index] != 0]
+
+  durs = [e[durs_index] for e in escore_notes]
+
+  if return_ptcs_and_vels:
+    ptcs = [e[ptcs_index] for e in escore_notes]
+    vels = [e[vels_index] for e in escore_notes]
+
+    return [sum(times) / len(times), sum(durs) / len(durs), sum(ptcs) / len(ptcs), sum(vels) / len(vels)]
+  
+  else:
+    return [sum(times) / len(times), sum(durs) / len(durs)]
+
+###################################################################################
+
+def adjust_escore_notes_timings(escore_notes, 
+                                adj_k=1, 
+                                times_index=1, 
+                                durs_index=2, 
+                                score_is_delta=False, 
+                                return_delta_scpre=False
+                                ):
+
+  if score_is_delta:
+    adj_escore_notes = copy.deepcopy(escore_notes)
+  else:
+    adj_escore_notes = delta_score_notes(escore_notes)
+
+  for e in adj_escore_notes:
+
+    if e[times_index] != 0:
+      e[times_index] = max(1, round(e[times_index] * adj_k))
+
+    e[durs_index] = max(1, round(e[durs_index] * adj_k))
+
+  if return_delta_scpre:
+    return adj_escore_notes
+
+  else:
+    return delta_score_to_abs_score(adj_escore_notes)
+
+###################################################################################
+
+def escore_notes_delta_times(escore_notes,
+                             times_index=1
+                             ):
+
+  descore_notes = delta_score_notes(escore_notes)
+
+  return [e[times_index] for e in descore_notes]
+
+###################################################################################
+
+def escore_notes_durations(escore_notes,
+                            durs_index=1
+                            ):
+
+  descore_notes = delta_score_notes(escore_notes)
+
+  return [e[durs_index] for e in descore_notes]
+
+###################################################################################
+
+def ordered_lists_match_ratio(src_list, trg_list):
+
+  zlist = list(zip(src_list, trg_list))
+
+  return sum([a == b for a, b in zlist]) / len(list(zlist))
+
+###################################################################################
+
+def lists_intersections(src_list, trg_list):
+  return list(set(src_list) & set(trg_list))
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
