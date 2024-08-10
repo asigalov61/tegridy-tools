@@ -7000,6 +7000,40 @@ def lists_intersections(src_list, trg_list):
 
 ###################################################################################
 
+def transpose_escore_notes(escore_notes, 
+                            transpose_value=0, 
+                            channel_index=3, 
+                            pitches_index=4
+                            ):
+
+  tr_escore_notes = copy.deepcopy(escore_notes)
+
+  for e in tr_escore_notes:
+    if e[channel_index] != 9:
+      e[pitches_index] = max(1, min(127, e[pitches_index] + transpose_value))
+
+  return tr_escore_notes
+
+###################################################################################
+
+def transpose_escore_notes_to_pitch(escore_notes, 
+                                    target_pitch_value=60, 
+                                    channel_index=3, 
+                                    pitches_index=4
+                                    ):
+
+  tr_escore_notes = copy.deepcopy(escore_notes)
+
+  transpose_delta = int(round(target_pitch_value)) - int(round(escore_notes_averages(escore_notes, return_ptcs_and_vels=True)[2]))
+
+  for e in tr_escore_notes:
+    if e[channel_index] != 9:
+      e[pitches_index] = max(1, min(127, e[pitches_index] + transpose_delta))
+
+  return tr_escore_notes
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
