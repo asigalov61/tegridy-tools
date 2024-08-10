@@ -1220,6 +1220,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_pitches">tones_chord_to_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.tones_to_pitches">tones_to_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.transpose_escore_notes">transpose_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.transpose_escore_notes_to_pitch">transpose_escore_notes_to_pitch</a></li>
     <li class="mono"><a href="#TMIDIX.transpose_pitches">transpose_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.transpose_pitches_chord">transpose_pitches_chord</a></li>
     <li class="mono"><a href="#TMIDIX.transpose_tones">transpose_tones</a></li>
@@ -8292,6 +8294,40 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">lists_intersections</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">transpose_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                            <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                            <span class="n">channel_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                            <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                            <span class="p">):</span>
+
+  <span class="n">tr_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tr_escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">transpose_value</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">tr_escore_notes</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">transpose_escore_notes_to_pitch</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                    <span class="n">target_pitch_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> 
+                                    <span class="n">channel_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                                    <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                                    <span class="p">):</span>
+
+  <span class="n">tr_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="n">transpose_delta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">target_pitch_value</span><span class="p">))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">escore_notes_averages</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">return_ptcs_and_vels</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">2</span><span class="p">]))</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tr_escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">transpose_delta</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">tr_escore_notes</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -15988,6 +16024,72 @@ but it does make it easy to mix different scores together.</p></div>
   <div id="source-TMIDIX.tones_to_pitches" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_to_pitches</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">base_octave</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
   <span class="k">return</span> <span class="p">[(</span><span class="n">base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.transpose_escore_notes">
+    <p>def <span class="ident">transpose_escore_notes</span>(</p><p>escore_notes, transpose_value=0, channel_index=3, pitches_index=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.transpose_escore_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.transpose_escore_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">transpose_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                            <span class="n">transpose_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                            <span class="n">channel_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                            <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                            <span class="p">):</span>
+
+  <span class="n">tr_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tr_escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">transpose_value</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">tr_escore_notes</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.transpose_escore_notes_to_pitch">
+    <p>def <span class="ident">transpose_escore_notes_to_pitch</span>(</p><p>escore_notes, target_pitch_value=60, channel_index=3, pitches_index=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.transpose_escore_notes_to_pitch', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.transpose_escore_notes_to_pitch" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">transpose_escore_notes_to_pitch</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                    <span class="n">target_pitch_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> 
+                                    <span class="n">channel_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+                                    <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                                    <span class="p">):</span>
+
+  <span class="n">tr_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="n">transpose_delta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">target_pitch_value</span><span class="p">))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">escore_notes_averages</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">return_ptcs_and_vels</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">2</span><span class="p">]))</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tr_escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">transpose_delta</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">tr_escore_notes</span>
 </pre></div>
 
   </div>
