@@ -124,7 +124,10 @@ def Mix_Melody(input_midi,
                input_adjust_accompaniment_notes_durations,
                input_output_as_solo_piano,
                input_remove_drums,
-               input_output_tempo
+               input_output_tempo,
+               input_transform,
+               input_transpose_to_C4,
+               input_transpose_value
              ):
     
     print('=' * 70)
@@ -137,6 +140,8 @@ def Mix_Melody(input_midi,
     fn1 = fn.split('.')[0]
 
     print('-' * 70)
+    print('Requested settings:')
+    print('-' * 70)
     print('Input file name:', fn)
     print('Find best matches', input_find_best_match)
     print('Adjust melody notes durations:', input_adjust_melody_notes_durations)
@@ -144,6 +149,9 @@ def Mix_Melody(input_midi,
     print('Output as Solo Piano:', input_output_as_solo_piano)
     print('Remove drums:', input_remove_drums)
     print('Output tempo:', input_output_tempo)
+    print('Transform:', input_transform)
+    print('Transpose to C4:', input_transpose_to_C4)
+    print('Transpose value:', input_transpose_value)
     print('-' * 70)
 
     #===============================================================================
@@ -164,6 +172,12 @@ def Mix_Melody(input_midi,
         src_cscore = TMIDIX.chordify_score([1000, src_escore])
         
         src_melody = [c[0] for c in src_cscore][:256]
+
+        if input_transform == 'Flip Melody':
+            src_melody = TMIDIX.flip_enhanced_score_notes(src_melody)
+            
+        elif input_transform == 'Reverse Melody':
+            src_melody = TMIDIX.reverse_enhanced_score_notes(src_melody)
 
         mel_avg_time = TMIDIX.escore_notes_averages(src_melody)[0]
         
@@ -288,18 +302,30 @@ def Mix_Melody(input_midi,
         if input_remove_drums:
             mixed_song = [e for e in mixed_song if e[3] != 9]
 
-        if input_output_tempo == 'Source Melody':
+        if input_output_tempo == 'Mix':
     
             time_k = mel_avg_time / mix_avg_time
     
             mixed_song = TMIDIX.adjust_escore_notes_timings(mixed_song, time_k)
 
-        elif input_output_tempo == 'Mix Melody':
+        elif input_output_tempo == 'Source Melody':
             
             time_k = mel_avg_time / mix_mel_avg_time
     
             mixed_song = TMIDIX.adjust_escore_notes_timings(mixed_song, time_k)
-           
+
+        if input_transform == 'Flip Mix':
+            mixed_song = TMIDIX.flip_enhanced_score_notes(mixed_song)
+            
+        elif input_transform == 'Reverse Mix':
+            mixed_song = TMIDIX.reverse_enhanced_score_notes(mixed_song)        
+
+        if input_transpose_value != 0:
+            mixed_song = TMIDIX.transpose_escore_notes(mixed_song, input_transpose_value)
+
+        if input_transpose_to_C4:
+            mixed_song = TMIDIX.transpose_escore_notes_to_pitch(mixed_song)
+            
         #===============================================================================
         print('Rendering results...')
         
@@ -386,13 +412,19 @@ if __name__ == "__main__":
         gr.Markdown("## Upload your MIDI or select a sample example MIDI below")
         
         input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
+
+        gr.Markdown("## Select mixing options")
+        
         input_find_best_match = gr.Checkbox(label="Find best match", value=True)
         input_adjust_melody_notes_durations = gr.Checkbox(label="Adjust melody notes durations", value=False)
         input_adjust_accompaniment_notes_durations = gr.Checkbox(label="Adjust accompaniment notes durations", value=False)
         input_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
         input_remove_drums = gr.Checkbox(label="Remove drums from output", value=False)
-        input_output_tempo = gr.Radio(["Mix", "Source Melody", "Mix Melody"], value="Mix", label="Output tempo")
-        
+        input_output_tempo = gr.Radio(["Mix Melody", "Source Melody", "Mix"], value="Mix Melody", label="Output tempo")
+        input_transform = gr.Radio(["As-is", "Flip Melody", "Reverse Melody", "Flip Mix", "Reverse Mix"], value="As-is", label="Transform")
+        input_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
+        input_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
+         
         run_btn = gr.Button("mix melody", variant="primary")
 
         gr.Markdown("## Output results")
@@ -410,13 +442,16 @@ if __name__ == "__main__":
                                                input_adjust_accompaniment_notes_durations,
                                                input_output_as_solo_piano,
                                                input_remove_drums,
-                                               input_output_tempo
+                                               input_output_tempo,
+                                               input_transform,
+                                               input_transpose_to_C4,
+                                               input_transpose_value
                                               ],
                                             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
 
         gr.Examples(
-            [["Abracadabra-Sample-Melody.mid", True, True, True, False, False, "Mix"], 
-             ["Sparks-Fly-Sample-Melody.mid", True, True, True, False, False, "Mix"],
+            [["Abracadabra-Sample-Melody.mid", True, True, True, False, False, "Mix Melody", "As-is", False, 0], 
+             ["Sparks-Fly-Sample-Melody.mid", True, True, True, False, False, "Mix Melody", "As-is", False, 0],
             ],
             [input_midi, 
              input_find_best_match, 
@@ -424,7 +459,10 @@ if __name__ == "__main__":
              input_adjust_accompaniment_notes_durations,
              input_output_as_solo_piano,
              input_remove_drums,
-             input_output_tempo
+             input_output_tempo,
+             input_transform,
+             input_transpose_to_C4,
+             input_transpose_value
             ],
             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot],
             Mix_Melody,
