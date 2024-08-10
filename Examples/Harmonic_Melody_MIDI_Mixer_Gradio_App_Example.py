@@ -122,9 +122,9 @@ def Mix_Melody(input_midi,
                input_find_best_match, 
                input_adjust_melody_notes_durations, 
                input_adjust_accompaniment_notes_durations,
-               input_match_source_MIDI_average_time,
                input_output_as_solo_piano,
-               input_remove_drums
+               input_remove_drums,
+               input_output_tempo
              ):
     
     print('=' * 70)
@@ -143,6 +143,7 @@ def Mix_Melody(input_midi,
     print('Adjust accompaniment notes durations:', input_adjust_accompaniment_notes_durations)
     print('Output as Solo Piano:', input_output_as_solo_piano)
     print('Remove drums:', input_remove_drums)
+    print('Output tempo:', input_output_tempo)
     print('-' * 70)
 
     #===============================================================================
@@ -160,11 +161,11 @@ def Mix_Melody(input_midi,
         
         src_escore = TMIDIX.recalculate_score_timings(TMIDIX.augment_enhanced_score_notes([e for e in raw_escore if e[6] < 80]))
 
-        src_avg_time = TMIDIX.escore_notes_averages(src_escore)[0]
-        
         src_cscore = TMIDIX.chordify_score([1000, src_escore])
         
         src_melody = [c[0] for c in src_cscore][:256]
+
+        mel_avg_time = TMIDIX.escore_notes_averages(src_melody)[0]
         
         src_melody_pitches = [p[4] for p in src_melody]
         
@@ -201,6 +202,10 @@ def Mix_Melody(input_midi,
         trg_patch = new_song[1]
         
         trg_song = copy.deepcopy(new_song[3])
+        
+        mix_avg_time = TMIDIX.escore_notes_averages(trg_song)[0]
+        mix_mel_avg_time = TMIDIX.escore_notes_averages([e for e in trg_song if e[6] == trg_patch])[0]
+        
         TMIDIX.adjust_score_velocities(trg_song, 95)
         
         cscore = TMIDIX.chordify_score([1000, trg_song])
@@ -283,14 +288,18 @@ def Mix_Melody(input_midi,
         if input_remove_drums:
             mixed_song = [e for e in mixed_song if e[3] != 9]
 
-        if input_match_source_MIDI_average_time:
+        if input_output_tempo == 'Source Melody':
     
-            trg_avg_time = TMIDIX.escore_notes_averages(mixed_song)[0]
-    
-            time_k = src_avg_time / trg_avg_time
+            time_k = mel_avg_time / mix_avg_time
     
             mixed_song = TMIDIX.adjust_escore_notes_timings(mixed_song, time_k)
 
+        elif input_output_tempo == 'Mix Melody':
+            
+            time_k = mel_avg_time / mix_mel_avg_time
+    
+            mixed_song = TMIDIX.adjust_escore_notes_timings(mixed_song, time_k)
+           
         #===============================================================================
         print('Rendering results...')
         
@@ -380,9 +389,9 @@ if __name__ == "__main__":
         input_find_best_match = gr.Checkbox(label="Find best match", value=True)
         input_adjust_melody_notes_durations = gr.Checkbox(label="Adjust melody notes durations", value=False)
         input_adjust_accompaniment_notes_durations = gr.Checkbox(label="Adjust accompaniment notes durations", value=False)
-        input_match_source_MIDI_average_time = gr.Checkbox(label="Match source MIDI average time", value=False)
         input_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
         input_remove_drums = gr.Checkbox(label="Remove drums from output", value=False)
+        input_output_tempo = gr.Radio(["Mix", "Source Melody", "Mix Melody"], value="Mix", label="Output tempo")
         
         run_btn = gr.Button("mix melody", variant="primary")
 
@@ -399,23 +408,23 @@ if __name__ == "__main__":
                                                input_find_best_match, 
                                                input_adjust_melody_notes_durations, 
                                                input_adjust_accompaniment_notes_durations,
-                                               input_match_source_MIDI_average_time,
                                                input_output_as_solo_piano,
-                                               input_remove_drums
+                                               input_remove_drums,
+                                               input_output_tempo
                                               ],
                                             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
 
         gr.Examples(
-            [["Abracadabra-Sample-Melody.mid", True, True, True, False, False, False], 
-             ["Sparks-Fly-Sample-Melody.mid", True, True, True, False, False, False],
+            [["Abracadabra-Sample-Melody.mid", True, True, True, False, False, "Mix"], 
+             ["Sparks-Fly-Sample-Melody.mid", True, True, True, False, False, "Mix"],
             ],
             [input_midi, 
              input_find_best_match, 
              input_adjust_melody_notes_durations, 
              input_adjust_accompaniment_notes_durations,
-             input_match_source_MIDI_average_time,
              input_output_as_solo_piano,
-             input_remove_drums
+             input_remove_drums,
+             input_output_tempo
             ],
             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot],
             Mix_Melody,
