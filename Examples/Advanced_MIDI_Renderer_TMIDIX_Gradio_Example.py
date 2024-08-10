@@ -8,8 +8,6 @@ from pytz import timezone
 
 import gradio as gr
 
-import tqdm
-
 import TMIDIX
 from midi_to_colab_audio import midi_to_colab_audio
 
@@ -22,11 +20,14 @@ import matplotlib.pyplot as plt
 
 #==========================================================================================================
 
-in_space = os.getenv("SYSTEM") == "spaces"
-
-#==========================================================================================================
-
-def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, custom_render_patch):
+def render_midi(input_midi, 
+                render_type, 
+                soundfont_bank, 
+                render_sample_rate, 
+                custom_render_patch,
+                render_transpose_value,
+                render_transpose_to_C4
+               ):
     
     print('*' * 70)
     print('Req start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
@@ -48,6 +49,8 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     print('Soudnfont bank', soundfont_bank)
     print('Audio render sample rate', render_sample_rate)
     print('Custom MIDI render patch', custom_render_patch)
+    print('Transpose value:', render_transpose_value)
+    print('Transpose to C4', render_transpose_to_C4)
     
     print('=' * 70)
     print('Processing MIDI...Please wait...')
@@ -114,6 +117,12 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
 
     if render_type != "Render as-is":
 
+        if render_transpose_value != 0:
+            output_score = TMIDIX.transpose_escore_notes(output_score, render_transpose_value)
+
+        if render_transpose_to_C4:
+            output_score = TMIDIX.transpose_escore_notes_to_pitch(output_score)
+            
         SONG, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
                     
         detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(SONG,
@@ -129,8 +138,8 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
             f.write(fdata)
             f.close()
             
-    if soundfont_bank in ["General MIDI", "Nice strings plus orchestra", "Real choir"]:
-        sf2bank = ["General MIDI", "Nice strings plus orchestra", "Real choir"].index(soundfont_bank)
+    if soundfont_bank in ["General MIDI", "Nice strings plus orchestra", "Real choir", "Orpheus", "Super Game Boy", "Proto Square"]:
+        sf2bank = ["General MIDI", "Nice strings plus orchestra", "Real choir", "Orpheus", "Super Game Boy", "Proto Square"].index(soundfont_bank)
     
     else:
         sf2bank = 0
@@ -169,16 +178,16 @@ def render_midi(input_midi, render_type, soundfont_bank, render_sample_rate, cus
     print('Output MIDI summary:', output_midi_summary[:5])
     print('=' * 70) 
     
-
     #========================================================
 
     print('Req end time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     print('-' * 70)
     print('Req execution time:', (time.time() - start_time), 'sec')
     print('*' * 70)
+    
     #========================================================
     
-    yield output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot
+    return output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot
     
 #==========================================================================================================
 
@@ -190,10 +199,18 @@ if __name__ == "__main__":
     print('App start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     print('=' * 70)
 
-    soundfonts = ["SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2", "Nice-Strings-PlusOrchestra-v1.6.sf2", "KBH-Real-Choir-V2.5.sf2"]
+    soundfonts = ["SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2", 
+                  "Nice-Strings-PlusOrchestra-v1.6.sf2", 
+                  "KBH-Real-Choir-V2.5.sf2", 
+                  "Orpheus_18.06.2020.sf2", 
+                  "SuperGameBoy.sf2", 
+                  "ProtoSquare.sf2"
+                 ]
 
     app = gr.Blocks()
+    
     with app:
+        
         gr.Markdown("<h1 style='text-align: center; margin-bottom: 1rem'>Advanced MIDI Renderer</h1>")
         gr.Markdown("<h1 style='text-align: center; margin-bottom: 1rem'>Transform and render any MIDI</h1>")
         
@@ -212,11 +229,14 @@ if __name__ == "__main__":
 
         gr.Markdown("## Select desired render options")
 
-        soundfont_bank = gr.Radio(["General MIDI", "Nice strings plus orchestra", "Real choir"], label="SoundFont bank", value="General MIDI")
+        soundfont_bank = gr.Radio(["General MIDI", "Nice strings plus orchestra", "Real choir", "Orpheus", "Super Game Boy", "Proto Square"], label="SoundFont bank", value="General MIDI")
 
         render_sample_rate = gr.Radio(["16000", "32000", "44100"], label="MIDI audio render sample rate", value="16000")
 
-        custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom MIDI render patch")
+        custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
+        
+        render_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
+        render_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
 
         submit = gr.Button()
 
@@ -229,7 +249,14 @@ if __name__ == "__main__":
         output_plot = gr.Plot(label="Output MIDI score plot")
         output_midi = gr.File(label="Output MIDI file", file_types=[".mid"])
         
-        run_event = submit.click(render_midi, [input_midi, render_type, soundfont_bank, render_sample_rate, custom_render_patch],
+        run_event = submit.click(render_midi, [input_midi, 
+                                               render_type, 
+                                               soundfont_bank, 
+                                               render_sample_rate, 
+                                               custom_render_patch,
+                                               render_transpose_value,
+                                               render_transpose_to_C4
+                                              ],
                                                 [output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
         
-    app.queue(1).launch()
+    app.queue().launch()
