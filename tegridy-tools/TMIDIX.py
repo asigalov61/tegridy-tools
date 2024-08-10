@@ -6897,25 +6897,40 @@ def binary_matrix_to_original_escore_notes(binary_matrix,
 
 def escore_notes_averages(escore_notes, 
                           times_index=1, 
-                          durs_index=2, 
+                          durs_index=2,
+                          chans_index=3, 
                           ptcs_index=4, 
                           vels_index=5,
+                          average_drums=False,
                           score_is_delta=False,
                           return_ptcs_and_vels=False
                           ):
   
   if score_is_delta:
-    times = [e[times_index] for e in escore_notes if e[times_index] != 0]
-    
+    if average_drums:
+      times = [e[times_index] for e in escore_notes if e[times_index] != 0]
+    else:
+      times = [e[times_index] for e in escore_notes if e[times_index] != 0 and e[chans_index] != 9]
+
   else:
     descore_notes = delta_score_notes(escore_notes)
-    times = [e[times_index] for e in descore_notes if e[times_index] != 0]
-
-  durs = [e[durs_index] for e in escore_notes]
+    if average_drums:
+      times = [e[times_index] for e in descore_notes if e[times_index] != 0]
+    else:
+      times = [e[times_index] for e in descore_notes if e[times_index] != 0 and e[chans_index] != 9]
+      
+  if average_drums:
+    durs = [e[durs_index] for e in escore_notes]
+  else:
+    durs = [e[durs_index] for e in escore_notes if e[chans_index] != 9]
 
   if return_ptcs_and_vels:
-    ptcs = [e[ptcs_index] for e in escore_notes]
-    vels = [e[vels_index] for e in escore_notes]
+    if average_drums:
+      ptcs = [e[ptcs_index] for e in escore_notes]
+      vels = [e[vels_index] for e in escore_notes]
+    else:
+      ptcs = [e[ptcs_index] for e in escore_notes if e[chans_index] != 9]
+      vels = [e[vels_index] for e in escore_notes if e[chans_index] != 9]      
 
     return [sum(times) / len(times), sum(durs) / len(durs), sum(ptcs) / len(ptcs), sum(vels) / len(vels)]
   
