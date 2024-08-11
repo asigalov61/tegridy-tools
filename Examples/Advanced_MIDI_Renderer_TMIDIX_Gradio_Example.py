@@ -26,7 +26,8 @@ def render_midi(input_midi,
                 render_sample_rate, 
                 custom_render_patch,
                 render_transpose_value,
-                render_transpose_to_C4
+                render_transpose_to_C4,
+                render_align
                ):
     
     print('*' * 70)
@@ -51,7 +52,7 @@ def render_midi(input_midi,
     print('Custom MIDI render patch', custom_render_patch)
     print('Transpose value:', render_transpose_value)
     print('Transpose to C4', render_transpose_to_C4)
-    
+    print('Align to bars:', render_align)
     print('=' * 70)
     print('Processing MIDI...Please wait...')
     
@@ -62,7 +63,7 @@ def render_midi(input_midi,
     
     escore = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
     
-    escore= TMIDIX.augment_enhanced_score_notes(escore)
+    escore= TMIDIX.augment_enhanced_score_notes(escore, timings_divider=1)
 
     first_note_index = [e[0] for e in raw_score[1]].index('note')
     
@@ -122,6 +123,18 @@ def render_midi(input_midi,
 
         if render_transpose_to_C4:
             output_score = TMIDIX.transpose_escore_notes_to_pitch(output_score)
+
+        if render_align == "Start Times":
+            output_score = TMIDIX.recalculate_score_timings(output_score)
+            output_score = TMIDIX.align_escore_notes_to_bars(output_score)
+    
+        elif render_align == "Start Times and Durations":
+            output_score = TMIDIX.recalculate_score_timings(output_score)
+            output_score = TMIDIX.align_escore_notes_to_bars(output_score, trim_durations=True)
+    
+        elif render_align == "Start Times and Split Durations":
+            output_score = TMIDIX.recalculate_score_timings(output_score)
+            output_score = TMIDIX.align_escore_notes_to_bars(output_score, split_durations=True)
             
         SONG, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
                     
@@ -129,8 +142,7 @@ def render_midi(input_midi,
                                                                   output_signature = 'Advanced MIDI Renderer',
                                                                   output_file_name = fn1,
                                                                   track_name='Project Los Angeles',
-                                                                  list_of_MIDI_patches=patches,
-                                                                  timings_multiplier=16
+                                                                  list_of_MIDI_patches=patches
                                                                   )
 
     else:
@@ -170,7 +182,7 @@ def render_midi(input_midi,
     output_midi = str(new_fn)
     output_audio = (srate, audio)
     
-    output_plot = TMIDIX.plot_ms_SONG(output_score, plot_title=output_midi, return_plt=True, timings_multiplier=16)
+    output_plot = TMIDIX.plot_ms_SONG(output_score, plot_title=output_midi, return_plt=True)
 
     print('Output MIDI file name:', output_midi)
     print('Output MIDI title:', output_midi_title)
@@ -237,6 +249,7 @@ if __name__ == "__main__":
         
         render_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
         render_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
+        render_align = gr.Radio(["Do not align", "Start Times", "Start Times and Durations", "Start Times and Split Durations"], label="Align output to bars", value="Do not align")
 
         submit = gr.Button()
 
@@ -255,7 +268,8 @@ if __name__ == "__main__":
                                                render_sample_rate, 
                                                custom_render_patch,
                                                render_transpose_value,
-                                               render_transpose_to_C4
+                                               render_transpose_to_C4,
+                                               render_align
                                               ],
                                                 [output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
         
