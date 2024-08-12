@@ -94,22 +94,32 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch, next_note_dtime):
 
         tclen = len(tones_chord)
 
-        tchord = tones_chord
+        if len(tones_chord) == 1:
+            tones_chord = sorted(tones_chord + [tones_chord[0] + 7])
 
         if len(cg) > tclen:
           tchord = tones_chord + [random.choice(tones_chord) for _ in range(len(cg)-tclen)]
+        
+        else:
+          tchord = tones_chord
+
+        seen = []
 
         for i, cc in enumerate(cg):
+
+            if [cc[4], cc[6]] not in seen:
             
-          c = copy.deepcopy(cc)
-            
-          if cc[2] > next_note_dtime:
-              c[2] = next_note_dtime
-              
-          c[4] = ((c[4] // 12) * 12) + tchord[i]
-          c[5] += c[4] % 12
-            
-          cho.append(c)
+                c = copy.deepcopy(cc)
+                
+                if cc[2] > next_note_dtime:
+                    c[2] = next_note_dtime
+                  
+                c[4] = ((c[4] // 12) * 12) + tchord[i]
+                c[5] += c[4] % 12
+                
+                cho.append(c)
+
+                seen.append([cc[4], cc[6]])
 
     else:
       cho.extend(list(g))
@@ -421,9 +431,9 @@ if __name__ == "__main__":
         input_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
         input_remove_drums = gr.Checkbox(label="Remove drums from output", value=False)
         input_output_tempo = gr.Radio(["Mix Melody", "Source Melody", "Mix"], value="Mix Melody", label="Output tempo")
-        input_transform = gr.Radio(["As-is", "Flip Melody", "Reverse Melody", "Flip Mix", "Reverse Mix"], value="As-is", label="Transform")
-        input_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
+        input_transform = gr.Radio(["As-is", "Flip Melody", "Reverse Melody", "Flip Mix", "Reverse Mix"], value="As-is", label="Transform")        
         input_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
+        input_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
          
         run_btn = gr.Button("mix melody", variant="primary")
 
