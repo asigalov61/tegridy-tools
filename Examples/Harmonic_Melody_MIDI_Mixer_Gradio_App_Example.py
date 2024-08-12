@@ -95,7 +95,7 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch, next_note_dtime):
         tclen = len(tones_chord)
 
         if len(tones_chord) == 1:
-            tones_chord = sorted(tones_chord + [tones_chord[0] + 7])
+            tones_chord = sorted(tones_chord + TMIDIX.transpose_tones_chord([tones_chord[0]], 7))
 
         if len(cg) > tclen:
           tchord = tones_chord + [random.choice(tones_chord) for _ in range(len(cg)-tclen)]
