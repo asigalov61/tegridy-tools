@@ -94,9 +94,6 @@ def mix_chord(chord, tones_chord, mel_patch, mel_pitch, next_note_dtime):
 
         tclen = len(tones_chord)
 
-        if len(tones_chord) == 1:
-            tones_chord = sorted(tones_chord + TMIDIX.transpose_tones_chord([tones_chord[0]], 7))
-
         if len(cg) > tclen:
           tchord = tones_chord + [random.choice(tones_chord) for _ in range(len(cg)-tclen)]
         
@@ -425,7 +422,7 @@ if __name__ == "__main__":
 
         gr.Markdown("## Select mixing options")
         
-        input_find_best_match = gr.Checkbox(label="Find best match", value=True)
+        input_find_best_match = gr.Checkbox(label="Find best match", value=False)
         input_adjust_melody_notes_durations = gr.Checkbox(label="Adjust melody notes durations", value=False)
         input_adjust_accompaniment_notes_durations = gr.Checkbox(label="Adjust accompaniment notes durations", value=False)
         input_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
