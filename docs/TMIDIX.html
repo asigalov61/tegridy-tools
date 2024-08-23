@@ -1072,6 +1072,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.ALL_PITCHES_CHORDS_SORTED">ALL_PITCHES_CHORDS_SORTED</a></li>
     <li class="mono"><a href="#TMIDIX.All_events">All_events</a></li>
     <li class="mono"><a href="#TMIDIX.BLACK_NOTES">BLACK_NOTES</a></li>
+    <li class="mono"><a href="#TMIDIX.CHORDS_TYPES">CHORDS_TYPES</a></li>
     <li class="mono"><a href="#TMIDIX.Event2channelindex">Event2channelindex</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_Instruments_Families">MIDI_Instruments_Families</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_events">MIDI_events</a></li>
@@ -1122,6 +1123,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.add_arrays">add_arrays</a></li>
     <li class="mono"><a href="#TMIDIX.add_melody_to_enhanced_score_notes">add_melody_to_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.adjust_escore_notes_timings">adjust_escore_notes_timings</a></li>
+    <li class="mono"><a href="#TMIDIX.adjust_escore_notes_to_average">adjust_escore_notes_to_average</a></li>
+    <li class="mono"><a href="#TMIDIX.adjust_list_of_values_to_target_average">adjust_list_of_values_to_target_average</a></li>
     <li class="mono"><a href="#TMIDIX.adjust_numbers_to_sum">adjust_numbers_to_sum</a></li>
     <li class="mono"><a href="#TMIDIX.adjust_score_velocities">adjust_score_velocities</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_check_and_fix_chords_in_chordified_score">advanced_check_and_fix_chords_in_chordified_score</a></li>
@@ -1163,10 +1166,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.even_timings">even_timings</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
+    <li class="mono"><a href="#TMIDIX.find_best_tones_chord">find_best_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_tone">find_closest_tone</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_value">find_closest_value</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_patterns">find_lrno_patterns</a></li>
+    <li class="mono"><a href="#TMIDIX.find_matching_tones_chords">find_matching_tones_chords</a></li>
     <li class="mono"><a href="#TMIDIX.find_next_bar">find_next_bar</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
@@ -1180,11 +1185,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.group_sublists_by_length">group_sublists_by_length</a></li>
     <li class="mono"><a href="#TMIDIX.grouped_set">grouped_set</a></li>
     <li class="mono"><a href="#TMIDIX.harmonize_enhanced_melody_score_notes">harmonize_enhanced_melody_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG">harmonize_enhanced_melody_score_notes_to_ms_SONG</a></li>
     <li class="mono"><a href="#TMIDIX.horizontal_ordered_list_search">horizontal_ordered_list_search</a></li>
     <li class="mono"><a href="#TMIDIX.hsv_to_rgb">hsv_to_rgb</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_bits">int_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_pitches_chord">int_to_pitches_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.lists_differences">lists_differences</a></li>
     <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
+    <li class="mono"><a href="#TMIDIX.lists_sym_differences">lists_sym_differences</a></li>
     <li class="mono"><a href="#TMIDIX.md5_hash">md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.midi2ms_score">midi2ms_score</a></li>
     <li class="mono"><a href="#TMIDIX.midi2opus">midi2opus</a></li>
@@ -1217,8 +1225,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.split_melody">split_melody</a></li>
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
+    <li class="mono"><a href="#TMIDIX.tone_type">tone_type</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_pitches">tones_chord_to_pitches</a></li>
+    <li class="mono"><a href="#TMIDIX.tones_chord_type">tones_chord_type</a></li>
     <li class="mono"><a href="#TMIDIX.tones_to_pitches">tones_to_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.transpose_escore_notes">transpose_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.transpose_escore_notes_to_pitch">transpose_escore_notes_to_pitch</a></li>
@@ -8331,6 +8341,304 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="n">CHORDS_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;WHITE&#39;</span><span class="p">,</span> <span class="s1">&#39;BLACK&#39;</span><span class="p">,</span> <span class="s1">&#39;UNKNOWN&#39;</span><span class="p">,</span> <span class="s1">&#39;MIXED WHITE&#39;</span><span class="p">,</span> <span class="s1">&#39;MIXED BLACK&#39;</span><span class="p">,</span> <span class="s1">&#39;MIXED GRAY&#39;</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">tones_chord_type</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
+                     <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                     <span class="p">):</span>
+
+  <span class="n">WN</span> <span class="o">=</span> <span class="n">WHITE_NOTES</span>
+  <span class="n">BN</span> <span class="o">=</span> <span class="n">BLACK_NOTES</span>
+  <span class="n">MX</span> <span class="o">=</span> <span class="n">WHITE_NOTES</span> <span class="o">+</span> <span class="n">BLACK_NOTES</span>
+
+  <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+  <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+
+  <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+      <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;WHITE&#39;</span>
+
+    <span class="k">elif</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+      <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;BLACK&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">MX</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))):</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;MIXED GRAY&#39;</span>
+
+      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))):</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;MIXED WHITE&#39;</span>
+
+      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))):</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;MIXED BLACK&#39;</span>
+
+  <span class="k">if</span> <span class="n">return_chord_type_index</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">CHORDS_TYPES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ctype</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">ctype</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">tone_type</span><span class="p">(</span><span class="n">tone</span><span class="p">,</span> 
+              <span class="n">return_tone_type_index</span><span class="o">=</span><span class="kc">True</span>
+              <span class="p">):</span>
+
+  <span class="n">tone</span> <span class="o">=</span> <span class="n">tone</span> <span class="o">%</span> <span class="mi">12</span>
+
+  <span class="k">if</span> <span class="n">tone</span> <span class="ow">in</span> <span class="n">BLACK_NOTES</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">return_tone_type_index</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">CHORDS_TYPES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;BLACK&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;BLACK&quot;</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">return_tone_type_index</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">CHORDS_TYPES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;WHITE&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;WHITE&quot;</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">lists_sym_differences</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">lists_differences</span><span class="p">(</span><span class="n">long_list</span><span class="p">,</span> <span class="n">short_list</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">long_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">short_list</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_best_tones_chord</span><span class="p">(</span><span class="n">src_tones_chords</span><span class="p">,</span>
+                          <span class="n">trg_tones_chords</span><span class="p">,</span>
+                          <span class="n">find_longest</span><span class="o">=</span><span class="kc">True</span>
+                          <span class="p">):</span>
+
+  <span class="n">not_seen_trg_chords</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">max_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">trg_tones_chords</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span> <span class="ow">in</span> <span class="n">src_tones_chords</span><span class="p">:</span>
+      <span class="n">not_seen_trg_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tc</span><span class="p">))</span>
+      <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tc</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">not_seen_trg_chords</span><span class="p">:</span>
+    <span class="n">max_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">trg_tones_chords</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+    <span class="n">not_seen_trg_chords</span> <span class="o">=</span> <span class="n">trg_tones_chords</span>
+
+  <span class="k">if</span> <span class="n">find_longest</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">not_seen_trg_chords</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">max_len</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">not_seen_trg_chords</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_matching_tones_chords</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span>
+                               <span class="n">matching_chord_length</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">match_chord_type</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                               <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+  <span class="n">tclen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+  <span class="n">tctype</span> <span class="o">=</span> <span class="n">tones_chord_type</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">use_filtered_chords</span><span class="o">=</span><span class="n">use_filtered_chords</span><span class="p">)</span>
+
+  <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">matching_chord_length</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tclen</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lists_intersections</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">match_chord_type</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tones_chord_type</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">use_filtered_chords</span><span class="o">=</span><span class="n">use_filtered_chords</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span><span class="p">:</span>
+              <span class="n">tcdiffs</span> <span class="o">=</span> <span class="n">lists_differences</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">)</span>
+              <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">tone_type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span> <span class="o">%</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tcdiffs</span><span class="p">):</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">tclen</span><span class="p">,</span> <span class="n">matching_chord_length</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lists_intersections</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">match_chord_type</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tones_chord_type</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">use_filtered_chords</span><span class="o">=</span><span class="n">use_filtered_chords</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span><span class="p">:</span>
+              <span class="n">tcdiffs</span> <span class="o">=</span> <span class="n">lists_differences</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">)</span>
+              <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">tone_type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span> <span class="o">%</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tcdiffs</span><span class="p">):</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">adjust_list_of_values_to_target_average</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> 
+                                            <span class="n">trg_avg</span><span class="p">,</span> 
+                                            <span class="n">min_value</span><span class="p">,</span> 
+                                            <span class="n">max_value</span>
+                                            <span class="p">):</span>
+
+    <span class="n">filtered_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">list_of_values</span> <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">list_of_values</span>
+
+    <span class="n">current_avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">/</span> <span class="n">current_avg</span>
+
+    <span class="n">adjusted_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="o">*</span> <span class="n">scale_factor</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">]</span>
+
+    <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">adjusted_values</span><span class="p">)</span>
+    <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="o">+</span> <span class="n">adjustment_per_value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">adjusted_values</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="n">trg_avg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+        <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span>
+        <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span>
+        <span class="n">final_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="o">+</span> <span class="n">adjustment_per_value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">adjusted_values</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adjusted_values</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">adjusted_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">:</span>
+            <span class="n">adjusted_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">adjusted_values</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">adjust_escore_notes_to_average</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                   <span class="n">trg_avg</span><span class="p">,</span>
+                                   <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">max_value</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                                   <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">durs_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                   <span class="n">score_is_delta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">return_delta_scpre</span><span class="o">=</span><span class="kc">False</span>
+                                   <span class="p">):</span>
+    <span class="k">if</span> <span class="n">score_is_delta</span><span class="p">:</span>
+      <span class="n">delta_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">delta_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">delta_escore_notes</span><span class="p">]</span>
+
+    <span class="n">filtered_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">times</span> <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">escore_notes</span>
+
+    <span class="n">current_avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">])</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">/</span> <span class="n">current_avg</span>
+
+    <span class="n">adjusted_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">]</span>
+
+    <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">])</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">adjusted_values</span><span class="p">])</span>
+    <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">adjusted_values</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="n">trg_avg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+        <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">])</span>
+        <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span>
+        <span class="n">final_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">adjusted_delta_score</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">delta_escore_notes</span><span class="p">)</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adjusted_delta_score</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">adjusted_delta_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">:</span>
+            <span class="n">adjusted_delta_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">times_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_values</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">adjusted_delta_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">durs_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_values</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">adjusted_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">adjusted_delta_score</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_delta_scpre</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">adjusted_delta_score</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">adjusted_escore_notes</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">harmonize_enhanced_melody_score_notes_to_ms_SONG</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                                      <span class="n">melody_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">melody_channel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                      <span class="n">melody_patch</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                                                      <span class="n">melody_base_octave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                      <span class="n">harmonized_tones_chords_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">harmonized_tones_chords_channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                      <span class="n">harmonized_tones_chords_patch</span><span class="o">=</span><span class="mi">0</span>
+                                                    <span class="p">):</span>
+
+  <span class="n">harmonized_tones_chords</span> <span class="o">=</span> <span class="n">harmonize_enhanced_melody_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="n">harm_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">):</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">ptc</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">melody_velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">110</span> <span class="o">+</span> <span class="p">((</span><span class="n">ptc</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="n">melody_velocity</span>
+
+    <span class="n">harm_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">melody_channel</span><span class="p">,</span> <span class="n">ptc</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">melody_patch</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">harmonized_tones_chords</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+
+      <span class="n">ptc</span> <span class="o">=</span> <span class="p">(</span><span class="n">melody_base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span>
+
+      <span class="k">if</span> <span class="n">harmonized_tones_chords_velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">80</span> <span class="o">+</span> <span class="p">((</span><span class="n">ptc</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="n">harmonized_tones_chords_velocity</span>
+
+      <span class="n">harm_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">harmonized_tones_chords_channel</span><span class="p">,</span> <span class="n">ptc</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">harmonized_tones_chords_patch</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">harm_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -8432,6 +8740,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.BLACK_NOTES" class="name">var <span class="ident">BLACK_NOTES</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.CHORDS_TYPES" class="name">var <span class="ident">CHORDS_TYPES</span></p>
       
   
   <div class="source_cont">
@@ -11304,6 +11620,138 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.adjust_escore_notes_to_average">
+    <p>def <span class="ident">adjust_escore_notes_to_average</span>(</p><p>escore_notes, trg_avg, min_value=1, max_value=4000, times_index=1, durs_index=2, score_is_delta=False, return_delta_scpre=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.adjust_escore_notes_to_average', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.adjust_escore_notes_to_average" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">adjust_escore_notes_to_average</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                   <span class="n">trg_avg</span><span class="p">,</span>
+                                   <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">max_value</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                                   <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">durs_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                   <span class="n">score_is_delta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">return_delta_scpre</span><span class="o">=</span><span class="kc">False</span>
+                                   <span class="p">):</span>
+    <span class="k">if</span> <span class="n">score_is_delta</span><span class="p">:</span>
+      <span class="n">delta_escore_notes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">delta_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[[</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">delta_escore_notes</span><span class="p">]</span>
+
+    <span class="n">filtered_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">times</span> <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">escore_notes</span>
+
+    <span class="n">current_avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">])</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">/</span> <span class="n">current_avg</span>
+
+    <span class="n">adjusted_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">]</span>
+
+    <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">])</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">adjusted_values</span><span class="p">])</span>
+    <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">adjusted_values</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="n">trg_avg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+        <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">])</span>
+        <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span>
+        <span class="n">final_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjustment_per_value</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">adjusted_delta_score</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">delta_escore_notes</span><span class="p">)</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adjusted_delta_score</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">adjusted_delta_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">:</span>
+            <span class="n">adjusted_delta_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">times_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_values</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">adjusted_delta_score</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">durs_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_values</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">adjusted_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">adjusted_delta_score</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_delta_scpre</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">adjusted_delta_score</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">adjusted_escore_notes</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.adjust_list_of_values_to_target_average">
+    <p>def <span class="ident">adjust_list_of_values_to_target_average</span>(</p><p>list_of_values, trg_avg, min_value, max_value)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.adjust_list_of_values_to_target_average', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.adjust_list_of_values_to_target_average" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">adjust_list_of_values_to_target_average</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> 
+                                            <span class="n">trg_avg</span><span class="p">,</span> 
+                                            <span class="n">min_value</span><span class="p">,</span> 
+                                            <span class="n">max_value</span>
+                                            <span class="p">):</span>
+
+    <span class="n">filtered_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">list_of_values</span> <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">list_of_values</span>
+
+    <span class="n">current_avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">/</span> <span class="n">current_avg</span>
+
+    <span class="n">adjusted_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="o">*</span> <span class="n">scale_factor</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filtered_values</span><span class="p">]</span>
+
+    <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">adjusted_values</span><span class="p">)</span>
+    <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_values</span><span class="p">)</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="o">+</span> <span class="n">adjustment_per_value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">adjusted_values</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="n">trg_avg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+        <span class="n">total_difference</span> <span class="o">=</span> <span class="n">trg_avg</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span>
+        <span class="n">adjustment_per_value</span> <span class="o">=</span> <span class="n">total_difference</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_values</span><span class="p">)</span>
+        <span class="n">final_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="o">+</span> <span class="n">adjustment_per_value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">final_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">final_values</span><span class="p">]</span>
+
+    <span class="n">adjusted_values</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adjusted_values</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">min_value</span> <span class="o">&lt;=</span> <span class="n">adjusted_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_value</span><span class="p">:</span>
+            <span class="n">adjusted_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">adjusted_values</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.adjust_numbers_to_sum">
     <p>def <span class="ident">adjust_numbers_to_sum</span>(</p><p>numbers, target_sum)</p>
     </div>
@@ -13630,6 +14078,48 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.find_best_tones_chord">
+    <p>def <span class="ident">find_best_tones_chord</span>(</p><p>src_tones_chords, trg_tones_chords, find_longest=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_best_tones_chord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_best_tones_chord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_best_tones_chord</span><span class="p">(</span><span class="n">src_tones_chords</span><span class="p">,</span>
+                          <span class="n">trg_tones_chords</span><span class="p">,</span>
+                          <span class="n">find_longest</span><span class="o">=</span><span class="kc">True</span>
+                          <span class="p">):</span>
+
+  <span class="n">not_seen_trg_chords</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">max_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">trg_tones_chords</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span> <span class="ow">in</span> <span class="n">src_tones_chords</span><span class="p">:</span>
+      <span class="n">not_seen_trg_chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tc</span><span class="p">))</span>
+      <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tc</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">not_seen_trg_chords</span><span class="p">:</span>
+    <span class="n">max_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">trg_tones_chords</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+    <span class="n">not_seen_trg_chords</span> <span class="o">=</span> <span class="n">trg_tones_chords</span>
+
+  <span class="k">if</span> <span class="n">find_longest</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">not_seen_trg_chords</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">max_len</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">not_seen_trg_chords</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.find_closest_tone">
     <p>def <span class="ident">find_closest_tone</span>(</p><p>tones, tone)</p>
     </div>
@@ -13769,6 +14259,70 @@ The type of track (opus or score) is autodetected.</p></div>
       <span class="n">found_patterns</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="n">pat</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="n">found_patterns</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.find_matching_tones_chords">
+    <p>def <span class="ident">find_matching_tones_chords</span>(</p><p>tones_chord, matching_chord_length=-1, match_chord_type=True, use_filtered_chords=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_matching_tones_chords', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_matching_tones_chords" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_matching_tones_chords</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span>
+                               <span class="n">matching_chord_length</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">match_chord_type</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                               <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+  <span class="n">tclen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+  <span class="n">tctype</span> <span class="o">=</span> <span class="n">tones_chord_type</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">use_filtered_chords</span><span class="o">=</span><span class="n">use_filtered_chords</span><span class="p">)</span>
+
+  <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">matching_chord_length</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tclen</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lists_intersections</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">match_chord_type</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tones_chord_type</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">use_filtered_chords</span><span class="o">=</span><span class="n">use_filtered_chords</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span><span class="p">:</span>
+              <span class="n">tcdiffs</span> <span class="o">=</span> <span class="n">lists_differences</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">)</span>
+              <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">tone_type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span> <span class="o">%</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tcdiffs</span><span class="p">):</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">tclen</span><span class="p">,</span> <span class="n">matching_chord_length</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lists_intersections</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">match_chord_type</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tones_chord_type</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">use_filtered_chords</span><span class="o">=</span><span class="n">use_filtered_chords</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span><span class="p">:</span>
+              <span class="n">tcdiffs</span> <span class="o">=</span> <span class="n">lists_differences</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">tones_chord</span><span class="p">)</span>
+              <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">tone_type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">tctype</span> <span class="o">%</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">tcdiffs</span><span class="p">):</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -14237,6 +14791,66 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG">
+    <p>def <span class="ident">harmonize_enhanced_melody_score_notes_to_ms_SONG</span>(</p><p>escore_notes, melody_velocity=-1, melody_channel=3, melody_patch=40, melody_base_octave=4, harmonized_tones_chords_velocity=-1, harmonized_tones_chords_channel=0, harmonized_tones_chords_patch=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">harmonize_enhanced_melody_score_notes_to_ms_SONG</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                                      <span class="n">melody_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">melody_channel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                      <span class="n">melody_patch</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                                                      <span class="n">melody_base_octave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                      <span class="n">harmonized_tones_chords_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">harmonized_tones_chords_channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                      <span class="n">harmonized_tones_chords_patch</span><span class="o">=</span><span class="mi">0</span>
+                                                    <span class="p">):</span>
+
+  <span class="n">harmonized_tones_chords</span> <span class="o">=</span> <span class="n">harmonize_enhanced_melody_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+
+  <span class="n">harm_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">):</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dur</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">ptc</span> <span class="o">=</span> <span class="n">note</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">melody_velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">110</span> <span class="o">+</span> <span class="p">((</span><span class="n">ptc</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="n">melody_velocity</span>
+
+    <span class="n">harm_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">melody_channel</span><span class="p">,</span> <span class="n">ptc</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">melody_patch</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">harmonized_tones_chords</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+
+      <span class="n">ptc</span> <span class="o">=</span> <span class="p">(</span><span class="n">melody_base_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">t</span>
+
+      <span class="k">if</span> <span class="n">harmonized_tones_chords_velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">80</span> <span class="o">+</span> <span class="p">((</span><span class="n">ptc</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="n">harmonized_tones_chords_velocity</span>
+
+      <span class="n">harm_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">harmonized_tones_chords_channel</span><span class="p">,</span> <span class="n">ptc</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">harmonized_tones_chords_patch</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">harm_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.horizontal_ordered_list_search">
     <p>def <span class="ident">horizontal_ordered_list_search</span>(</p><p>list_of_lists, query_list, start_idx=0, end_idx=-1)</p>
     </div>
@@ -14384,6 +14998,27 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.lists_differences">
+    <p>def <span class="ident">lists_differences</span>(</p><p>long_list, short_list)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.lists_differences', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.lists_differences" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_differences</span><span class="p">(</span><span class="n">long_list</span><span class="p">,</span> <span class="n">short_list</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">long_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">short_list</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.lists_intersections">
     <p>def <span class="ident">lists_intersections</span>(</p><p>src_list, trg_list)</p>
     </div>
@@ -14396,6 +15031,27 @@ The type of track (opus or score) is autodetected.</p></div>
   <div id="source-TMIDIX.lists_intersections" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_intersections</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.lists_sym_differences">
+    <p>def <span class="ident">lists_sym_differences</span>(</p><p>src_list, trg_list)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.lists_sym_differences', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.lists_sym_differences" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_sym_differences</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -15966,6 +16622,42 @@ but it does make it easy to mix different scores together.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.tone_type">
+    <p>def <span class="ident">tone_type</span>(</p><p>tone, return_tone_type_index=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.tone_type', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.tone_type" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tone_type</span><span class="p">(</span><span class="n">tone</span><span class="p">,</span> 
+              <span class="n">return_tone_type_index</span><span class="o">=</span><span class="kc">True</span>
+              <span class="p">):</span>
+
+  <span class="n">tone</span> <span class="o">=</span> <span class="n">tone</span> <span class="o">%</span> <span class="mi">12</span>
+
+  <span class="k">if</span> <span class="n">tone</span> <span class="ow">in</span> <span class="n">BLACK_NOTES</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">return_tone_type_index</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">CHORDS_TYPES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;BLACK&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;BLACK&quot;</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">return_tone_type_index</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">CHORDS_TYPES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;WHITE&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;WHITE&quot;</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.tones_chord_to_bits">
     <p>def <span class="ident">tones_chord_to_bits</span>(</p><p>chord)</p>
     </div>
@@ -16003,6 +16695,68 @@ but it does make it easy to mix different scores together.</p></div>
   <div id="source-TMIDIX.tones_chord_to_pitches" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_chord_to_pitches</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">base_pitch</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
   <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="n">base_pitch</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tones_chord</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.tones_chord_type">
+    <p>def <span class="ident">tones_chord_type</span>(</p><p>tones_chord, return_chord_type_index=True, use_filtered_chords=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.tones_chord_type', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.tones_chord_type" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_chord_type</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
+                     <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                     <span class="p">):</span>
+
+  <span class="n">WN</span> <span class="o">=</span> <span class="n">WHITE_NOTES</span>
+  <span class="n">BN</span> <span class="o">=</span> <span class="n">BLACK_NOTES</span>
+  <span class="n">MX</span> <span class="o">=</span> <span class="n">WHITE_NOTES</span> <span class="o">+</span> <span class="n">BLACK_NOTES</span>
+
+  <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+  <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+
+  <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+      <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;WHITE&#39;</span>
+
+    <span class="k">elif</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+      <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;BLACK&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">MX</span><span class="p">))</span> <span class="o">==</span> <span class="n">tones_chord</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))):</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;MIXED GRAY&#39;</span>
+
+      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))):</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;MIXED WHITE&#39;</span>
+
+      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">WN</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">BN</span><span class="p">))):</span>
+        <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;MIXED BLACK&#39;</span>
+
+  <span class="k">if</span> <span class="n">return_chord_type_index</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">CHORDS_TYPES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ctype</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">ctype</span>
 </pre></div>
 
   </div>
