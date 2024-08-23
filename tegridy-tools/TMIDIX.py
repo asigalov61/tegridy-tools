@@ -7332,6 +7332,52 @@ def harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes,
 
 ###################################################################################
 
+def check_and_fix_pitches_chord(pitches_chord,
+                                use_filtered_chords=True
+                                ):
+  
+  pitches_chord = sorted(pitches_chord, reverse=True)
+
+  if use_filtered_chords:
+    CHORDS = ALL_CHORDS_FILTERED
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
+  tones_chord = sorted(set([p % 12 for p in pitches_chord]))
+
+  if tones_chord not in CHORDS:
+
+    if len(tones_chord) == 2:
+
+      tones_counts = Counter([p % 12 for p in pitches_chord]).most_common()
+
+      if tones_counts[0][1] > 1:
+        tones_chord = [tones_counts[0][0]]
+      elif tones_counts[1][1] > 1:
+        tones_chord = [tones_counts[1][0]]
+      else:
+        tones_chord = [pitches_chord[0] % 12]
+
+    if len(tones_chord) > 2:
+
+      tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
+
+      for co in tones_chord_combs:
+        if co in CHORDS:
+          tones_chord = co
+          break
+
+  new_pitches_chord = []
+
+  for p in pitches_chord:
+
+    if p % 12 in tones_chord:
+      new_pitches_chord.append(p)
+
+  return sorted(new_pitches_chord, reverse=True)
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
