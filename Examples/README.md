@@ -102,6 +102,69 @@ display(Audio(midi_audio, rate=16000, normalize=False))
 TMIDIX.plot_ms_SONG(output_score, plot_title=output_file_name+'.mid')
 ```
 
+### MIDI Melody Harmonization
+
+```
+import TMIDIX
+
+#===============================================================================
+# Input MIDI file (as filepath or bytes)
+
+input_MIDI_file_name = './tegridy-tools/tegridy-tools/seed-melody.mid'
+output_MIDI_file_name = './harmonized_melody'
+
+#===============================================================================
+# Raw single-track ms score
+
+raw_score = TMIDIX.midi2single_track_ms_score(input_MIDI_file_name)
+
+#===============================================================================
+# Enhanced score notes
+
+escore_notes = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
+
+#===============================================================================
+# Augmented enhanced score notes
+
+escore_notes = TMIDIX.augment_enhanced_score_notes(escore_notes)
+
+#===============================================================================
+# Chordified augmented enhanced score
+
+cscore = TMIDIX.chordify_score([1000, escore_notes])
+
+#===============================================================================
+# Monophonic melody score with adjusted durations
+
+melody = TMIDIX.fix_monophonic_score_durations([c[0] for c in cscore])
+
+#===============================================================================
+# Harmonized melody chords (for further processing)
+
+harmonized_melody_chords = TMIDIX.harmonize_enhanced_melody_score_notes(melody)
+
+#===============================================================================
+# Harmonized melody ms SONG (for output to MIDI or for further processing)
+
+harmonized_melody_ms_SONG = TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes)
+
+#===============================================================================
+# Creating output score patches list from the resulting harmonized melody ms SONG
+
+output_score, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(harmonized_melody_ms_SONG)
+
+#===============================================================================
+# Converting to MIDI
+
+detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
+                                                          output_signature = 'TMIDIX MIDI Composition',
+                                                          output_file_name = output_MIDI_file_name,
+                                                          track_name='Project Los Angeles',
+                                                          list_of_MIDI_patches=patches,
+                                                          timings_multiplier=16 # Restoring augmented timings
+                                                          )
+```
+
 ### MIDI alignment
 
 ```
