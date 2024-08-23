@@ -7034,6 +7034,304 @@ def transpose_escore_notes_to_pitch(escore_notes,
 
 ###################################################################################
 
+CHORDS_TYPES = ['WHITE', 'BLACK', 'UNKNOWN', 'MIXED WHITE', 'MIXED BLACK', 'MIXED GRAY']
+
+###################################################################################
+
+def tones_chord_type(tones_chord, 
+                     return_chord_type_index=True,
+                     use_filtered_chords=True
+                     ):
+
+  WN = WHITE_NOTES
+  BN = BLACK_NOTES
+  MX = WHITE_NOTES + BLACK_NOTES
+
+  if use_filtered_chords:
+    CHORDS = ALL_CHORDS_FILTERED
+  
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
+  tones_chord = sorted(tones_chord)
+
+  ctype = 'UNKNOWN'
+
+  if tones_chord in CHORDS:
+
+    if sorted(set(tones_chord) & set(WN)) == tones_chord:
+      ctype = 'WHITE'
+
+    elif sorted(set(tones_chord) & set(BN)) == tones_chord:
+      ctype = 'BLACK'
+
+    if len(tones_chord) > 1 and sorted(set(tones_chord) & set(MX)) == tones_chord:
+
+      if len(sorted(set(tones_chord) & set(WN))) == len(sorted(set(tones_chord) & set(BN))):
+        ctype = 'MIXED GRAY'
+
+      elif len(sorted(set(tones_chord) & set(WN))) > len(sorted(set(tones_chord) & set(BN))):
+        ctype = 'MIXED WHITE'
+
+      elif len(sorted(set(tones_chord) & set(WN))) < len(sorted(set(tones_chord) & set(BN))):
+        ctype = 'MIXED BLACK'
+
+  if return_chord_type_index:
+    return CHORDS_TYPES.index(ctype)
+
+  else:
+    return ctype
+
+###################################################################################
+
+def tone_type(tone, 
+              return_tone_type_index=True
+              ):
+
+  tone = tone % 12
+
+  if tone in BLACK_NOTES:
+    if return_tone_type_index:
+      return CHORDS_TYPES.index('BLACK')
+    else:
+      return "BLACK"
+
+  else:
+    if return_tone_type_index:
+      return CHORDS_TYPES.index('WHITE')
+    else:
+      return "WHITE"
+
+###################################################################################
+
+def lists_sym_differences(src_list, trg_list):
+  return list(set(src_list) ^ set(trg_list))
+
+###################################################################################
+
+def lists_differences(long_list, short_list):
+  return list(set(long_list) - set(short_list))
+
+###################################################################################
+
+def find_best_tones_chord(src_tones_chords,
+                          trg_tones_chords,
+                          find_longest=True
+                          ):
+
+  not_seen_trg_chords = []
+
+  max_len = 0
+
+  for tc in trg_tones_chords:
+    if sorted(tc) in src_tones_chords:
+      not_seen_trg_chords.append(sorted(tc))
+      max_len = max(max_len, len(tc))
+
+  if not not_seen_trg_chords:
+    max_len = len(max(trg_tones_chords, key=len))
+    not_seen_trg_chords = trg_tones_chords
+
+  if find_longest:
+    return random.choice([c for c in not_seen_trg_chords if len(c) == max_len])
+
+  else:
+    return random.choice(not_seen_trg_chords)
+
+###################################################################################
+
+def find_matching_tones_chords(tones_chord,
+                               matching_chord_length=-1,
+                               match_chord_type=True,
+                               use_filtered_chords=True
+                               ):
+
+  if use_filtered_chords:
+    CHORDS = ALL_CHORDS_FILTERED
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
+  tones_chord = sorted(tones_chord)
+
+  tclen = len(tones_chord)
+
+  tctype = tones_chord_type(tones_chord, use_filtered_chords=use_filtered_chords)
+
+  matches = []
+
+  for tc in CHORDS:
+
+    if matching_chord_length == -1:
+      if len(tc) > tclen:
+        if sorted(lists_intersections(tc, tones_chord)) == tones_chord:
+          if match_chord_type:
+            if tones_chord_type(tc, use_filtered_chords=use_filtered_chords) == tctype:
+              tcdiffs = lists_differences(tc, tones_chord)
+              if all(tone_type(d) == tctype % 3 for d in tcdiffs):
+                matches.append(tc)
+          else:
+            matches.append(tc)
+
+    else:
+
+      if len(tc) == max(tclen, matching_chord_length):
+        if sorted(lists_intersections(tc, tones_chord)) == tones_chord:
+          if match_chord_type:
+            if tones_chord_type(tc, use_filtered_chords=use_filtered_chords) == tctype:
+              tcdiffs = lists_differences(tc, tones_chord)
+              if all(tone_type(d) == tctype % 3 for d in tcdiffs):
+                matches.append(tc)
+          else:
+            matches.append(tc)
+
+  return sorted(matches, key=len)
+
+###################################################################################
+
+def adjust_list_of_values_to_target_average(list_of_values, 
+                                            trg_avg, 
+                                            min_value, 
+                                            max_value
+                                            ):
+
+    filtered_values = [value for value in list_of_values if min_value <= value <= max_value]
+
+    if not filtered_values:
+        return list_of_values
+
+    current_avg = sum(filtered_values) / len(filtered_values)
+    scale_factor = trg_avg / current_avg
+
+    adjusted_values = [value * scale_factor for value in filtered_values]
+
+    total_difference = trg_avg * len(filtered_values) - sum(adjusted_values)
+    adjustment_per_value = total_difference / len(filtered_values)
+
+    final_values = [value + adjustment_per_value for value in adjusted_values]
+
+    while abs(sum(final_values) / len(final_values) - trg_avg) > 1e-6:
+        total_difference = trg_avg * len(final_values) - sum(final_values)
+        adjustment_per_value = total_difference / len(final_values)
+        final_values = [value + adjustment_per_value for value in final_values]
+
+    final_values = [round(value) for value in final_values]
+
+    adjusted_values = copy.deepcopy(list_of_values)
+
+    j = 0
+
+    for i in range(len(adjusted_values)):
+        if min_value <= adjusted_values[i] <= max_value:
+            adjusted_values[i] = final_values[j]
+            j += 1
+
+    return adjusted_values
+
+###################################################################################
+
+def adjust_escore_notes_to_average(escore_notes,
+                                   trg_avg,
+                                   min_value=1,
+                                   max_value=4000,
+                                   times_index=1,
+                                   durs_index=2,
+                                   score_is_delta=False,
+                                   return_delta_scpre=False
+                                   ):
+    if score_is_delta:
+      delta_escore_notes = copy.deepcopy(escore_notes)
+
+    else:
+      delta_escore_notes = delta_score_notes(escore_notes)
+
+    times = [[e[times_index], e[durs_index]] for e in delta_escore_notes]
+
+    filtered_values = [value for value in times if min_value <= value[0] <= max_value]
+
+    if not filtered_values:
+        return escore_notes
+
+    current_avg = sum([v[0] for v in filtered_values]) / len([v[0] for v in filtered_values])
+    scale_factor = trg_avg / current_avg
+
+    adjusted_values = [[value[0] * scale_factor, value[1] * scale_factor] for value in filtered_values]
+
+    total_difference = trg_avg * len([v[0] for v in filtered_values]) - sum([v[0] for v in adjusted_values])
+    adjustment_per_value = total_difference / len(filtered_values)
+
+    final_values = [[value[0] + adjustment_per_value, value[1] + adjustment_per_value] for value in adjusted_values]
+
+    while abs(sum([v[0] for v in final_values]) / len(final_values) - trg_avg) > 1e-6:
+        total_difference = trg_avg * len(final_values) - sum([v[0] for v in final_values])
+        adjustment_per_value = total_difference / len(final_values)
+        final_values = [[value[0] + adjustment_per_value, value[1] + adjustment_per_value] for value in final_values]
+
+    final_values = [[round(value[0]), round(value[1])] for value in final_values]
+
+    adjusted_delta_score = copy.deepcopy(delta_escore_notes)
+
+    j = 0
+
+    for i in range(len(adjusted_delta_score)):
+        if min_value <= adjusted_delta_score[i][1] <= max_value:
+            adjusted_delta_score[i][times_index] = final_values[j][0]
+            adjusted_delta_score[i][durs_index] = final_values[j][1]
+            j += 1
+
+    adjusted_escore_notes = delta_score_to_abs_score(adjusted_delta_score)
+
+    if return_delta_scpre:
+      return adjusted_delta_score
+
+    else:
+      return adjusted_escore_notes
+
+###################################################################################
+
+def harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes,
+                                                      melody_velocity=-1,
+                                                      melody_channel=3,
+                                                      melody_patch=40,
+                                                      melody_base_octave=4,
+                                                      harmonized_tones_chords_velocity=-1,
+                                                      harmonized_tones_chords_channel=0,
+                                                      harmonized_tones_chords_patch=0
+                                                    ):
+
+  harmonized_tones_chords = harmonize_enhanced_melody_score_notes(escore_notes)
+
+  harm_escore_notes = []
+
+  time = 0
+
+  for i, note in enumerate(escore_notes):
+
+    time = note[1]
+    dur = note[2]
+    ptc = note[4]
+
+    if melody_velocity == -1:
+      vel = int(110 + ((ptc % 12) * 1.5))
+    else:
+      vel = melody_velocity
+
+    harm_escore_notes.append(['note', time, dur, melody_channel, ptc, vel, melody_patch])
+
+    for t in harmonized_tones_chords[i]:
+
+      ptc = (melody_base_octave * 12) + t
+
+      if harmonized_tones_chords_velocity == -1:
+        vel = int(80 + ((ptc % 12) * 1.5))
+      else:
+        vel = harmonized_tones_chords_velocity
+
+      harm_escore_notes.append(['note', time, dur, harmonized_tones_chords_channel, ptc, vel, harmonized_tones_chords_patch])
+
+  return sorted(harm_escore_notes, key=lambda x: (x[1], -x[4], x[6]))
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
