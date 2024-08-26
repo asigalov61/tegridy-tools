@@ -1933,7 +1933,7 @@ def Tegridy_Any_Pickle_File_Reader(input_file_name='TMIDI_Pickle_File', ext='.pi
 
   '''Tegridy Pickle File Loader
      
-  Input: Full path and file name without extention
+  Input: Full path and file name with or without extention
          File extension if different from default .pickle
        
   Output: Standard Python 3 unpickled data object
@@ -1945,7 +1945,13 @@ def Tegridy_Any_Pickle_File_Reader(input_file_name='TMIDI_Pickle_File', ext='.pi
     print('Tegridy Pickle File Loader')
     print('Loading the pickle file. Please wait...')
 
-  with open(input_file_name + ext, 'rb') as pickle_file:
+  if os.path.basename(input_file_name).endswith(ext):
+    fname = input_file_name
+  
+  else:
+    fname = input_file_name + ext
+
+  with open(fname, 'rb') as pickle_file:
     content = pickle.load(pickle_file)
 
   if verbose:
@@ -3520,12 +3526,19 @@ def Tegridy_Split_List(list_to_split, split_value=0):
 
 # Binary chords functions
 
-def tones_chord_to_bits(chord):
+def tones_chord_to_bits(chord, reverse=True):
+
     bits = [0] * 12
+
     for num in chord:
         bits[num] = 1
     
-    return bits
+    if reverse:
+      bits.reverse()
+      return bits
+    
+    else:
+      return bits
 
 def bits_to_tones_chord(bits):
     return [i for i, bit in enumerate(bits) if bit == 1]
@@ -5350,7 +5363,10 @@ def find_paths(list_of_lists, path=[]):
 
 ###################################################################################
 
-def recalculate_score_timings(score, start_time=0):
+def recalculate_score_timings(score, 
+                              start_time=0, 
+                              timings_index=1
+                              ):
 
   rscore = copy.deepcopy(score)
 
@@ -5360,10 +5376,10 @@ def recalculate_score_timings(score, start_time=0):
 
   for e in rscore:
 
-    dtime = e[1] - pe[1]
+    dtime = e[timings_index] - pe[timings_index]
     pe = copy.deepcopy(e)
     abs_time += dtime
-    e[1] = abs_time
+    e[timings_index] = abs_time
     
   return rscore
 
@@ -7387,7 +7403,7 @@ ALL_CHORDS_TRANS = [[0], [0, 4], [0, 4, 7], [0, 4, 8], [0, 5], [0, 6], [0, 7], [
 
 ###################################################################################
 
-def minkowski_distance(x, y, p=3):
+def minkowski_distance(x, y, p=3, pad_value=float('inf')):
 
     if len(x) != len(y):
       return -1
@@ -7395,33 +7411,197 @@ def minkowski_distance(x, y, p=3):
     distance = 0
     
     for i in range(len(x)):
+
+        if x[i] == pad_value or y[i] == pad_value:
+          continue
+
         distance += abs(x[i] - y[i]) ** p
 
     return distance ** (1 / p)
 
 ###################################################################################
 
-def dot_product(x, y):
-    return sum(xi * yi for xi, yi in zip(x, y))
+def dot_product(x, y, pad_value=None):
+    return sum(xi * yi for xi, yi in zip(x, y) if xi != pad_value and yi != pad_value)
 
-def norm(vector):
-    return sum(xi ** 2 for xi in vector) ** 0.5
+def norm(vector, pad_value=None):
+    return sum(xi ** 2 for xi in vector if xi != pad_value) ** 0.5
 
-def cosine_similarity(x, y):
-
+def cosine_similarity(x, y, pad_value=None):
     if len(x) != len(y):
-      return -1
+        return -1
     
-    dot_prod = dot_product(x, y)
-    
-    norm_x = norm(x)
-    norm_y = norm(y)
+    dot_prod = dot_product(x, y, pad_value)
+    norm_x = norm(x, pad_value)
+    norm_y = norm(y, pad_value)
     
     if norm_x == 0 or norm_y == 0:
         return 0.0
     
-    else:
-        return dot_prod / (norm_x * norm_y)
+    return dot_prod / (norm_x * norm_y)
+
+###################################################################################
+
+def hamming_distance(arr1, arr2, pad_value):
+    return sum(el1 != el2 for el1, el2 in zip(arr1, arr2) if el1 != pad_value and el2 != pad_value)
+
+###################################################################################
+
+def jaccard_similarity(arr1, arr2, pad_value):
+    intersection = sum(el1 and el2 for el1, el2 in zip(arr1, arr2) if el1 != pad_value and el2 != pad_value)
+    union = sum((el1 or el2) for el1, el2 in zip(arr1, arr2) if el1 != pad_value or el2 != pad_value)
+    return intersection / union if union != 0 else 0
+
+###################################################################################
+
+def pearson_correlation(arr1, arr2, pad_value):
+    filtered_pairs = [(el1, el2) for el1, el2 in zip(arr1, arr2) if el1 != pad_value and el2 != pad_value]
+    if not filtered_pairs:
+        return 0
+    n = len(filtered_pairs)
+    sum1 = sum(el1 for el1, el2 in filtered_pairs)
+    sum2 = sum(el2 for el1, el2 in filtered_pairs)
+    sum1_sq = sum(el1 ** 2 for el1, el2 in filtered_pairs)
+    sum2_sq = sum(el2 ** 2 for el1, el2 in filtered_pairs)
+    p_sum = sum(el1 * el2 for el1, el2 in filtered_pairs)
+    num = p_sum - (sum1 * sum2 / n)
+    den = ((sum1_sq - sum1 ** 2 / n) * (sum2_sq - sum2 ** 2 / n)) ** 0.5
+    if den == 0:
+        return 0
+    return num / den
+
+###################################################################################
+
+def calculate_combined_distances(array_of_arrays,
+                                  combine_hamming_distance=True,
+                                  combine_jaccard_similarity=True, 
+                                  combine_pearson_correlation=True,
+                                  pad_value=None
+                                  ):
+
+  binary_arrays = array_of_arrays
+  binary_array_len = len(binary_arrays)
+
+  hamming_distances = [[0] * binary_array_len for _ in range(binary_array_len)]
+  jaccard_similarities = [[0] * binary_array_len for _ in range(binary_array_len)]
+  pearson_correlations = [[0] * binary_array_len for _ in range(binary_array_len)]
+
+  for i in range(binary_array_len):
+      for j in range(i + 1, binary_array_len):
+          hamming_distances[i][j] = hamming_distance(binary_arrays[i], binary_arrays[j], pad_value)
+          hamming_distances[j][i] = hamming_distances[i][j]
+          
+          jaccard_similarities[i][j] = jaccard_similarity(binary_arrays[i], binary_arrays[j], pad_value)
+          jaccard_similarities[j][i] = jaccard_similarities[i][j]
+          
+          pearson_correlations[i][j] = pearson_correlation(binary_arrays[i], binary_arrays[j], pad_value)
+          pearson_correlations[j][i] = pearson_correlations[i][j]
+
+  max_hamming = max(max(row) for row in hamming_distances)
+  min_hamming = min(min(row) for row in hamming_distances)
+  normalized_hamming = [[(val - min_hamming) / (max_hamming - min_hamming) for val in row] for row in hamming_distances]
+
+  max_jaccard = max(max(row) for row in jaccard_similarities)
+  min_jaccard = min(min(row) for row in jaccard_similarities)
+  normalized_jaccard = [[(val - min_jaccard) / (max_jaccard - min_jaccard) for val in row] for row in jaccard_similarities]
+
+  max_pearson = max(max(row) for row in pearson_correlations)
+  min_pearson = min(min(row) for row in pearson_correlations)
+  normalized_pearson = [[(val - min_pearson) / (max_pearson - min_pearson) for val in row] for row in pearson_correlations]
+
+  selected_metrics = 0
+
+  if combine_hamming_distance:
+    selected_metrics += normalized_hamming[i][j]
+  
+  if combine_jaccard_similarity:
+    selected_metrics += (1 - normalized_jaccard[i][j])
+
+  if combine_pearson_correlation:
+    selected_metrics += (1 - normalized_pearson[i][j])
+
+  combined_metric = [[selected_metrics for i in range(binary_array_len)] for j in range(binary_array_len)]
+
+  return combined_metric
+
+###################################################################################
+
+def tones_chords_to_bits(tones_chords):
+
+  bits_tones_chords = []
+
+  for c in tones_chords:
+
+    c.sort()
+
+    bits = tones_chord_to_bits(c)
+
+    bits_tones_chords.append(bits)
+
+  return bits_tones_chords
+
+###################################################################################
+
+def tones_chords_to_ints(tones_chords):
+
+  ints_tones_chords = []
+
+  for c in tones_chords:
+
+    c.sort()
+
+    bits = tones_chord_to_bits(c)
+
+    number = bits_to_int(bits)
+
+    ints_tones_chords.append(number)
+
+  return ints_tones_chords
+
+###################################################################################
+
+def tones_chords_to_types(tones_chords, 
+                          return_chord_type_index=False
+                          ):
+
+  types_tones_chords = []
+
+  for c in tones_chords:
+
+    c.sort()
+
+    ctype = tones_chord_type(c, return_chord_type_index=return_chord_type_index)
+
+    types_tones_chords.append(ctype)
+
+  return types_tones_chords
+
+###################################################################################
+
+def morph_tones_chord(tones_chord, 
+                      trg_tone, 
+                      use_filtered_chords=True
+                      ):
+
+  src_tones_chord = sorted(sorted(set(tones_chord)) + [trg_tone])
+
+  combs = [list(comb) for i in range(len(src_tones_chord), 0, -1) for comb in combinations(src_tones_chord, i) if trg_tone in list(comb)]
+
+  matches = []
+
+  if use_filtered_chords:
+    CHORDS = ALL_CHORDS_FILTERED
+  
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
+  for c in combs:
+    if sorted(set(c)) in CHORDS:
+      matches.append(sorted(set(c)))
+
+  max_len = len(max(matches, key=len))
+
+  return random.choice([m for m in matches if len(m) == max_len])
 
 ###################################################################################
 
