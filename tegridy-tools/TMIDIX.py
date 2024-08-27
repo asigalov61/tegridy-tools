@@ -1764,7 +1764,9 @@ def plot_ms_SONG(ms_song,
                   show_grid_lines=False,
                   return_plt = False,
                   timings_multiplier=1,
-                  save_plt=''
+                  save_plt='',
+                  save_only_plt_image=True,
+                  save_transparent=False
                   ):
 
   '''Tegridy ms SONG plotter/vizualizer'''
@@ -1819,12 +1821,21 @@ def plot_ms_SONG(ms_song,
     plt.title(plot_title)
 
     if save_plt != '':
-      plt.savefig(save_plt)
+      if save_only_plt_image:
+        plt.axis('off')
+        plt.title('')
+        plt.savefig(save_plt, transparent=save_transparent, bbox_inches='tight', pad_inches=0, facecolor='black')
+        plt.close()
+      
+      else:
+        plt.savefig(save_plt)
+        plt.close()
 
     if return_plt:
       return fig
 
     plt.show()
+    plt.close()
 
 ###################################################################################
 
@@ -7682,7 +7693,7 @@ def solo_piano_escore_notes(escore_notes,
 
     sp_escore_notes.append(chord)
 
-  return sp_escore_notes
+  return flatten(sp_escore_notes)
 
 ###################################################################################
 
@@ -7731,6 +7742,123 @@ def fixed_escore_notes_timings(escore_notes,
         e[2] = mode_dur
 
   return delta_score_to_abs_score(fixed_timings_escore_notes)
+
+###################################################################################
+
+def cubic_kernel(x):
+    abs_x = abs(x)
+    if abs_x <= 1:
+        return (1.5 * abs_x**3 - 2.5 * abs_x**2 + 1)
+    elif abs_x <= 2:
+        return (-0.5 * abs_x**3 + 2.5 * abs_x**2 - 4 * abs_x + 2)
+    else:
+        return 0
+
+###################################################################################
+
+def resize_matrix(matrix, new_height, new_width):
+    old_height = len(matrix)
+    old_width = len(matrix[0])
+    resized_matrix = [[0] * new_width for _ in range(new_height)]
+    
+    for i in range(new_height):
+        for j in range(new_width):
+
+            old_i = i * old_height / new_height
+            old_j = j * old_width / new_width
+            
+            value = 0
+            for m in range(-1, 3):
+                for n in range(-1, 3):
+                    i_m = min(max(int(old_i) + m, 0), old_height - 1)
+                    j_n = min(max(int(old_j) + n, 0), old_width - 1)
+                    weight = cubic_kernel(old_i - i_m) * cubic_kernel(old_j - j_n)
+                    value += matrix[i_m][j_n] * weight
+            
+            resized_matrix[i][j] = int(value > 0.5)
+    
+    return resized_matrix
+
+###################################################################################
+
+def square_binary_matrix(binary_matrix, 
+                         matrix_size=128,
+                         return_plot_points=False
+                         ):
+  
+  resized_matrix = resize_matrix(binary_matrix, matrix_size, matrix_size)
+
+  points = [(i, j) for i in range(128) for j in range(128) if resized_matrix[i][j] == 1]
+
+  if return_plot_points:
+    return [resized_matrix, points]
+
+  else:
+    return resized_matrix
+
+###################################################################################
+
+def mean(matrix):
+    return sum(sum(row) for row in matrix) / (len(matrix) * len(matrix[0]))
+
+###################################################################################
+
+def variance(matrix, mean_value):
+    return sum(sum((element - mean_value) ** 2 for element in row) for row in matrix) / (len(matrix) * len(matrix[0]))
+    
+###################################################################################
+
+def covariance(matrix1, matrix2, mean1, mean2):
+    return sum(sum((matrix1[i][j] - mean1) * (matrix2[i][j] - mean2) for j in range(len(matrix1[0]))) for i in range(len(matrix1))) / (len(matrix1) * len(matrix1[0]))
+
+###################################################################################
+
+def ssim_index(matrix1, matrix2, bit_depth=1):
+
+    if len(matrix1) != len(matrix2) and len(matrix1[0]) != len(matrix2[0]):
+      return -1
+
+    K1, K2 = 0.01, 0.03
+    L = bit_depth
+    C1 = (K1 * L) ** 2
+    C2 = (K2 * L) ** 2
+    
+    mu1 = mean(matrix1)
+    mu2 = mean(matrix2)
+    
+    sigma1_sq = variance(matrix1, mu1)
+    sigma2_sq = variance(matrix2, mu2)
+    
+    sigma12 = covariance(matrix1, matrix2, mu1, mu2)
+    
+    ssim = ((2 * mu1 * mu2 + C1) * (2 * sigma12 + C2)) / ((mu1 ** 2 + mu2 ** 2 + C1) * (sigma1_sq + sigma2_sq + C2))
+    
+    return ssim
+
+###################################################################################
+
+def find_most_similar_matrix(array_of_matrices, 
+                             trg_matrix,
+                             matrices_bit_depth=1,
+                             return_most_similar_index=False
+                             ):
+   
+    max_ssim = -float('inf')
+    most_similar_index = -1
+
+    for i, matrix in enumerate(array_of_matrices):
+
+        ssim = ssim_index(matrix, trg_matrix, bit_depth=matrices_bit_depth)
+        
+        if ssim > max_ssim:
+            max_ssim = ssim
+            most_similar_index = i
+    
+    if return_most_similar_index:
+      return most_similar_index
+    
+    else:
+      return array_of_matrices[most_similar_index]
 
 ###################################################################################
 
