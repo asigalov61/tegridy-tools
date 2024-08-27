@@ -7783,12 +7783,47 @@ def resize_matrix(matrix, new_height, new_width):
 
 def square_binary_matrix(binary_matrix, 
                          matrix_size=128,
+                         use_fast_squaring=False,
                          return_plot_points=False
                          ):
-  
-  resized_matrix = resize_matrix(binary_matrix, matrix_size, matrix_size)
 
-  points = [(i, j) for i in range(128) for j in range(128) if resized_matrix[i][j] == 1]
+  if use_fast_squaring:
+
+    step = round(len(binary_matrix) / matrix_size)
+
+    samples = []
+
+    for i in range(0, len(binary_matrix), step):
+      samples.append(tuple([tuple(d) for d in binary_matrix[i:i+matrix_size]]))
+
+    resized_matrix = []
+
+    zmatrix = [[0] * matrix_size]
+
+    for s in samples:
+
+      samples_counts = Counter(s).most_common()
+
+      best_sample = tuple([0] * matrix_size)
+      pm = tuple(zmatrix[0])
+
+      for sc in samples_counts:
+        if sc[0] != tuple(zmatrix[0]) and sc[0] != pm:
+          best_sample = sc[0]
+          pm = sc[0]
+          break
+        
+        pm = sc[0]
+
+      resized_matrix.append(list(best_sample))
+
+    resized_matrix = resized_matrix[:matrix_size]
+    resized_matrix += zmatrix * (matrix_size - len(resized_matrix))
+    
+  else:
+    resized_matrix = resize_matrix(binary_matrix, matrix_size, matrix_size)
+
+  points = [(i, j) for i in range(matrix_size) for j in range(matrix_size) if resized_matrix[i][j] == 1]
 
   if return_plot_points:
     return [resized_matrix, points]
