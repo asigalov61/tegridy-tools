@@ -1149,6 +1149,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.check_and_fix_pitches_chord">check_and_fix_pitches_chord</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_tones_chord">check_and_fix_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
+    <li class="mono"><a href="#TMIDIX.compress_binary_matrix">compress_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
@@ -1181,6 +1182,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
+    <li class="mono"><a href="#TMIDIX.fixed_escore_notes_timings">fixed_escore_notes_timings</a></li>
     <li class="mono"><a href="#TMIDIX.flatten">flatten</a></li>
     <li class="mono"><a href="#TMIDIX.flip_enhanced_score_notes">flip_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.frame_monophonic_melody">frame_monophonic_melody</a></li>
@@ -1231,10 +1233,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.score2stats">score2stats</a></li>
     <li class="mono"><a href="#TMIDIX.score_chord_to_tones_chord">score_chord_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.shift_bits">shift_bits</a></li>
+    <li class="mono"><a href="#TMIDIX.solo_piano_escore_notes">solo_piano_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.sort_list_by_other">sort_list_by_other</a></li>
     <li class="mono"><a href="#TMIDIX.split_list">split_list</a></li>
     <li class="mono"><a href="#TMIDIX.split_melody">split_melody</a></li>
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
+    <li class="mono"><a href="#TMIDIX.strip_drums_from_escore_notes">strip_drums_from_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
     <li class="mono"><a href="#TMIDIX.tone_type">tone_type</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
@@ -3084,7 +3088,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">note_height</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
                   <span class="n">show_grid_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                   <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                  <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span>
+                  <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">save_plt</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                   <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
@@ -3137,6 +3142,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;MIDI Pitch&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">save_plt</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+      <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">return_plt</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">fig</span>
@@ -8198,7 +8206,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">binary_matrix_to_original_escore_notes</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
                                            <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
                                            <span class="n">patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
-                                           <span class="n">velocity</span><span class="o">=</span><span class="mi">90</span>
+                                           <span class="n">velocity</span><span class="o">=-</span><span class="mi">1</span>
                                            <span class="p">):</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8225,8 +8233,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">original_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
 
+  <span class="n">vel</span> <span class="o">=</span> <span class="n">velocity</span>
+
   <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-    <span class="n">original_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">original_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">vel</span><span class="p">,</span> <span class="n">patch</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">original_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
 
@@ -8923,6 +8937,125 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">max_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
 
   <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="n">max_len</span><span class="p">])</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">compress_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
+                           <span class="n">only_compress_zeros</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">return_compression_ratio</span><span class="o">=</span><span class="kc">False</span>
+                           <span class="p">):</span>
+
+  <span class="n">compressed_bmatrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">zm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="n">pm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+  <span class="n">mcount</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">:</span>
+    
+    <span class="k">if</span> <span class="n">only_compress_zeros</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">zm</span><span class="p">:</span>
+        <span class="n">compressed_bmatrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">mcount</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">pm</span><span class="p">:</span>
+        <span class="n">compressed_bmatrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">mcount</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">m</span>
+
+  <span class="k">if</span> <span class="n">return_compression_ratio</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">compressed_bmatrix</span><span class="p">,</span> <span class="n">mcount</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">)]</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">compressed_bmatrix</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">solo_piano_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                            <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                            <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                            <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                            <span class="n">keep_drums</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="p">):</span>
+
+  <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+  <span class="n">sp_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">chord</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+
+          <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+          
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">keep_drums</span><span class="p">:</span>
+              <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+              <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+
+    <span class="n">sp_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">sp_escore_notes</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">strip_drums_from_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                  <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span>
+                                  <span class="p">):</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">fixed_escore_notes_timings</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                               <span class="n">fixed_durations</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">fixed_timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">custom_fixed_time</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">custom_fixed_dur</span><span class="o">=-</span><span class="mi">1</span>
+                               <span class="p">):</span>
+
+  <span class="n">fixed_timings_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">even_timings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="n">mode_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">fixed_timings_escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">fixed_timings_multiplier</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">mode_time</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">mode_time</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="n">mode_dur</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">fixed_timings_escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">fixed_timings_multiplier</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">mode_dur</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">mode_dur</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">fixed_timings_escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      
+      <span class="k">if</span> <span class="n">custom_fixed_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_fixed_time</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode_time</span>
+
+    <span class="k">if</span> <span class="n">fixed_durations</span><span class="p">:</span>
+      
+      <span class="k">if</span> <span class="n">custom_fixed_dur</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_fixed_dur</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode_dur</span>
+
+  <span class="k">return</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">fixed_timings_escore_notes</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -13129,7 +13262,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.binary_matrix_to_original_escore_notes">
-    <p>def <span class="ident">binary_matrix_to_original_escore_notes</span>(</p><p>binary_matrix, channel=0, patch=0, velocity=90)</p>
+    <p>def <span class="ident">binary_matrix_to_original_escore_notes</span>(</p><p>binary_matrix, channel=0, patch=0, velocity=-1)</p>
     </div>
     
 
@@ -13141,7 +13274,7 @@ Tegridy Code 2024</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">binary_matrix_to_original_escore_notes</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
                                            <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
                                            <span class="n">patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
-                                           <span class="n">velocity</span><span class="o">=</span><span class="mi">90</span>
+                                           <span class="n">velocity</span><span class="o">=-</span><span class="mi">1</span>
                                            <span class="p">):</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
@@ -13168,8 +13301,14 @@ Tegridy Code 2024</p></div>
 
   <span class="n">original_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
 
+  <span class="n">vel</span> <span class="o">=</span> <span class="n">velocity</span>
+
   <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-    <span class="n">original_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">original_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">vel</span><span class="p">,</span> <span class="n">patch</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">original_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
 </pre></div>
@@ -13652,6 +13791,56 @@ Tegridy Code 2024</p></div>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.compress_binary_matrix">
+    <p>def <span class="ident">compress_binary_matrix</span>(</p><p>binary_matrix, only_compress_zeros=False, return_compression_ratio=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.compress_binary_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.compress_binary_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compress_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
+                           <span class="n">only_compress_zeros</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">return_compression_ratio</span><span class="o">=</span><span class="kc">False</span>
+                           <span class="p">):</span>
+
+  <span class="n">compressed_bmatrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">zm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="n">pm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+  <span class="n">mcount</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">:</span>
+    
+    <span class="k">if</span> <span class="n">only_compress_zeros</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">zm</span><span class="p">:</span>
+        <span class="n">compressed_bmatrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">mcount</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">pm</span><span class="p">:</span>
+        <span class="n">compressed_bmatrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">mcount</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">m</span>
+
+  <span class="k">if</span> <span class="n">return_compression_ratio</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">compressed_bmatrix</span><span class="p">,</span> <span class="n">mcount</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">)]</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">compressed_bmatrix</span>
 </pre></div>
 
   </div>
@@ -14972,6 +15161,62 @@ The type of track (opus or score) is autodetected.</p></div>
       <span class="n">fixed_score</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> 
 
     <span class="k">return</span> <span class="n">fixed_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.fixed_escore_notes_timings">
+    <p>def <span class="ident">fixed_escore_notes_timings</span>(</p><p>escore_notes, fixed_durations=False, fixed_timings_multiplier=1, custom_fixed_time=-1, custom_fixed_dur=-1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.fixed_escore_notes_timings', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.fixed_escore_notes_timings" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fixed_escore_notes_timings</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                               <span class="n">fixed_durations</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">fixed_timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">custom_fixed_time</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">custom_fixed_dur</span><span class="o">=-</span><span class="mi">1</span>
+                               <span class="p">):</span>
+
+  <span class="n">fixed_timings_escore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">even_timings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="n">mode_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">fixed_timings_escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">fixed_timings_multiplier</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">mode_time</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">mode_time</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="n">mode_dur</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">fixed_timings_escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">fixed_timings_multiplier</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">mode_dur</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">mode_dur</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">fixed_timings_escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+      
+      <span class="k">if</span> <span class="n">custom_fixed_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_fixed_time</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode_time</span>
+
+    <span class="k">if</span> <span class="n">fixed_durations</span><span class="p">:</span>
+      
+      <span class="k">if</span> <span class="n">custom_fixed_dur</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_fixed_dur</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode_dur</span>
+
+  <span class="k">return</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">fixed_timings_escore_notes</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -16527,7 +16772,7 @@ see opus2midi() and score2opus().</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.plot_ms_SONG">
-    <p>def <span class="ident">plot_ms_SONG</span>(</p><p>ms_song, preview_length_in_notes=0, block_lines_times_list=None, plot_title=&#39;ms Song&#39;, max_num_colors=129, drums_color_num=128, plot_size=(11, 4), note_height=0.75, show_grid_lines=False, return_plt=False, timings_multiplier=1)</p>
+    <p>def <span class="ident">plot_ms_SONG</span>(</p><p>ms_song, preview_length_in_notes=0, block_lines_times_list=None, plot_title=&#39;ms Song&#39;, max_num_colors=129, drums_color_num=128, plot_size=(11, 4), note_height=0.75, show_grid_lines=False, return_plt=False, timings_multiplier=1, save_plt=&#39;&#39;)</p>
     </div>
     
 
@@ -16547,7 +16792,8 @@ see opus2midi() and score2opus().</p></div>
                   <span class="n">note_height</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
                   <span class="n">show_grid_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                   <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                  <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span>
+                  <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">save_plt</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                   <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
@@ -16600,6 +16846,9 @@ see opus2midi() and score2opus().</p></div>
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;MIDI Pitch&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">save_plt</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+      <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">return_plt</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">fig</span>
@@ -17068,6 +17317,59 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.solo_piano_escore_notes">
+    <p>def <span class="ident">solo_piano_escore_notes</span>(</p><p>escore_notes, channels_index=3, pitches_index=4, patches_index=6, keep_drums=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.solo_piano_escore_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.solo_piano_escore_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">solo_piano_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                            <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                            <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                            <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                            <span class="n">keep_drums</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="p">):</span>
+
+  <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+  <span class="n">sp_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">chord</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+
+          <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+          
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">keep_drums</span><span class="p">:</span>
+              <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+              <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+
+    <span class="n">sp_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">sp_escore_notes</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.sort_list_by_other">
     <p>def <span class="ident">sort_list_by_other</span>(</p><p>list1, list2)</p>
     </div>
@@ -17176,6 +17478,30 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <div id="source-TMIDIX.stack_list" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">stack_list</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">base</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.strip_drums_from_escore_notes">
+    <p>def <span class="ident">strip_drums_from_escore_notes</span>(</p><p>escore_notes, channels_index=3)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.strip_drums_from_escore_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.strip_drums_from_escore_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">strip_drums_from_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                  <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span>
+                                  <span class="p">):</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
 </pre></div>
 
   </div>
