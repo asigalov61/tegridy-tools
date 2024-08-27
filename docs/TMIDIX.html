@@ -1152,8 +1152,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.compress_binary_matrix">compress_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
+    <li class="mono"><a href="#TMIDIX.covariance">covariance</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.cubic_kernel">cubic_kernel</a></li>
     <li class="mono"><a href="#TMIDIX.delta_pitches">delta_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_notes">delta_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_to_abs_score">delta_score_to_abs_score</a></li>
@@ -1178,6 +1180,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_patterns">find_lrno_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.find_matching_tones_chords">find_matching_tones_chords</a></li>
+    <li class="mono"><a href="#TMIDIX.find_most_similar_matrix">find_most_similar_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.find_next_bar">find_next_bar</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
@@ -1203,6 +1206,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
     <li class="mono"><a href="#TMIDIX.lists_sym_differences">lists_sym_differences</a></li>
     <li class="mono"><a href="#TMIDIX.md5_hash">md5_hash</a></li>
+    <li class="mono"><a href="#TMIDIX.mean">mean</a></li>
     <li class="mono"><a href="#TMIDIX.midi2ms_score">midi2ms_score</a></li>
     <li class="mono"><a href="#TMIDIX.midi2opus">midi2opus</a></li>
     <li class="mono"><a href="#TMIDIX.midi2score">midi2score</a></li>
@@ -1227,6 +1231,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
     <li class="mono"><a href="#TMIDIX.recalculate_score_timings">recalculate_score_timings</a></li>
     <li class="mono"><a href="#TMIDIX.replace_bad_tones_chord">replace_bad_tones_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.resize_matrix">resize_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.reverse_enhanced_score_notes">reverse_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.score2midi">score2midi</a></li>
     <li class="mono"><a href="#TMIDIX.score2opus">score2opus</a></li>
@@ -1237,6 +1242,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.sort_list_by_other">sort_list_by_other</a></li>
     <li class="mono"><a href="#TMIDIX.split_list">split_list</a></li>
     <li class="mono"><a href="#TMIDIX.split_melody">split_melody</a></li>
+    <li class="mono"><a href="#TMIDIX.square_binary_matrix">square_binary_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.ssim_index">ssim_index</a></li>
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.strip_drums_from_escore_notes">strip_drums_from_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
@@ -1256,6 +1263,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.transpose_tones_chord">transpose_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches">validate_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches_chord">validate_pitches_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.variance">variance</a></li>
   </ul>
 
     </li>
@@ -3089,7 +3097,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">show_grid_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                   <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                   <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                  <span class="n">save_plt</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                  <span class="n">save_plt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                  <span class="n">save_only_plt_image</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
@@ -3144,12 +3154,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save_plt</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-      <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">save_only_plt_image</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">save_transparent</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">return_plt</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">fig</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -9007,7 +9026,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">sp_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">sp_escore_notes</span>
+  <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">sp_escore_notes</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -9056,6 +9075,123 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode_dur</span>
 
   <span class="k">return</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">fixed_timings_escore_notes</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">cubic_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">abs_x</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">abs_x</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">abs_x</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">abs_x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">resize_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">new_height</span><span class="p">,</span> <span class="n">new_width</span><span class="p">):</span>
+    <span class="n">old_height</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">old_width</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">new_width</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">new_height</span><span class="p">)]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">new_height</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">new_width</span><span class="p">):</span>
+
+            <span class="n">old_i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">old_height</span> <span class="o">/</span> <span class="n">new_height</span>
+            <span class="n">old_j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> <span class="n">old_width</span> <span class="o">/</span> <span class="n">new_width</span>
+            
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                    <span class="n">i_m</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">old_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">m</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">old_height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">j_n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">old_j</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">old_width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">weight</span> <span class="o">=</span> <span class="n">cubic_kernel</span><span class="p">(</span><span class="n">old_i</span> <span class="o">-</span> <span class="n">i_m</span><span class="p">)</span> <span class="o">*</span> <span class="n">cubic_kernel</span><span class="p">(</span><span class="n">old_j</span> <span class="o">-</span> <span class="n">j_n</span><span class="p">)</span>
+                    <span class="n">value</span> <span class="o">+=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i_m</span><span class="p">][</span><span class="n">j_n</span><span class="p">]</span> <span class="o">*</span> <span class="n">weight</span>
+            
+            <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">resized_matrix</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">square_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
+                         <span class="n">matrix_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                         <span class="n">return_plot_points</span><span class="o">=</span><span class="kc">False</span>
+                         <span class="p">):</span>
+  
+  <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resize_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">)</span>
+
+  <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">if</span> <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">return_plot_points</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">resized_matrix</span><span class="p">,</span> <span class="n">points</span><span class="p">]</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">resized_matrix</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">mean_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">element</span> <span class="o">-</span> <span class="n">mean_value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">covariance</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">matrix2</span><span class="p">,</span> <span class="n">mean1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">matrix1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">matrix2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean2</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">ssim_index</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">matrix2</span><span class="p">,</span> <span class="n">bit_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix2</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix2</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">K1</span><span class="p">,</span> <span class="n">K2</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">bit_depth</span>
+    <span class="n">C1</span> <span class="o">=</span> <span class="p">(</span><span class="n">K1</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">C2</span> <span class="o">=</span> <span class="p">(</span><span class="n">K2</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    
+    <span class="n">mu1</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)</span>
+    <span class="n">mu2</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">matrix2</span><span class="p">)</span>
+    
+    <span class="n">sigma1_sq</span> <span class="o">=</span> <span class="n">variance</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span>
+    <span class="n">sigma2_sq</span> <span class="o">=</span> <span class="n">variance</span><span class="p">(</span><span class="n">matrix2</span><span class="p">,</span> <span class="n">mu2</span><span class="p">)</span>
+    
+    <span class="n">sigma12</span> <span class="o">=</span> <span class="n">covariance</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">matrix2</span><span class="p">,</span> <span class="n">mu1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">)</span>
+    
+    <span class="n">ssim</span> <span class="o">=</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mu1</span> <span class="o">*</span> <span class="n">mu2</span> <span class="o">+</span> <span class="n">C1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma12</span> <span class="o">+</span> <span class="n">C2</span><span class="p">))</span> <span class="o">/</span> <span class="p">((</span><span class="n">mu1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">mu2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">C1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma1_sq</span> <span class="o">+</span> <span class="n">sigma2_sq</span> <span class="o">+</span> <span class="n">C2</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">ssim</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_most_similar_matrix</span><span class="p">(</span><span class="n">array_of_matrices</span><span class="p">,</span> 
+                             <span class="n">trg_matrix</span><span class="p">,</span>
+                             <span class="n">matrices_bit_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">return_most_similar_index</span><span class="o">=</span><span class="kc">False</span>
+                             <span class="p">):</span>
+   
+    <span class="n">max_ssim</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+    <span class="n">most_similar_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">array_of_matrices</span><span class="p">):</span>
+
+        <span class="n">ssim</span> <span class="o">=</span> <span class="n">ssim_index</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">trg_matrix</span><span class="p">,</span> <span class="n">bit_depth</span><span class="o">=</span><span class="n">matrices_bit_depth</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">ssim</span> <span class="o">&gt;</span> <span class="n">max_ssim</span><span class="p">:</span>
+            <span class="n">max_ssim</span> <span class="o">=</span> <span class="n">ssim</span>
+            <span class="n">most_similar_index</span> <span class="o">=</span> <span class="n">i</span>
+    
+    <span class="k">if</span> <span class="n">return_most_similar_index</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">most_similar_index</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">array_of_matrices</span><span class="p">[</span><span class="n">most_similar_index</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -13910,6 +14046,27 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.covariance">
+    <p>def <span class="ident">covariance</span>(</p><p>matrix1, matrix2, mean1, mean2)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.covariance', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.covariance" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">covariance</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">matrix2</span><span class="p">,</span> <span class="n">mean1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">matrix1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">matrix2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean2</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.create_enhanced_monophonic_melody">
     <p>def <span class="ident">create_enhanced_monophonic_melody</span>(</p><p>monophonic_melody)</p>
     </div>
@@ -13975,6 +14132,33 @@ Tegridy Code 2024</p></div>
           <span class="n">similarity_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sim_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">similarity_matrix</span><span class="p">,</span> <span class="n">sim_matrix</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.cubic_kernel">
+    <p>def <span class="ident">cubic_kernel</span>(</p><p>x)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.cubic_kernel', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.cubic_kernel" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cubic_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">abs_x</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">abs_x</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">abs_x</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">abs_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">abs_x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
 </pre></div>
 
   </div>
@@ -15006,6 +15190,47 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.find_most_similar_matrix">
+    <p>def <span class="ident">find_most_similar_matrix</span>(</p><p>array_of_matrices, trg_matrix, matrices_bit_depth=1, return_most_similar_index=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_most_similar_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_most_similar_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_most_similar_matrix</span><span class="p">(</span><span class="n">array_of_matrices</span><span class="p">,</span> 
+                             <span class="n">trg_matrix</span><span class="p">,</span>
+                             <span class="n">matrices_bit_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">return_most_similar_index</span><span class="o">=</span><span class="kc">False</span>
+                             <span class="p">):</span>
+   
+    <span class="n">max_ssim</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+    <span class="n">most_similar_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">array_of_matrices</span><span class="p">):</span>
+
+        <span class="n">ssim</span> <span class="o">=</span> <span class="n">ssim_index</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">trg_matrix</span><span class="p">,</span> <span class="n">bit_depth</span><span class="o">=</span><span class="n">matrices_bit_depth</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">ssim</span> <span class="o">&gt;</span> <span class="n">max_ssim</span><span class="p">:</span>
+            <span class="n">max_ssim</span> <span class="o">=</span> <span class="n">ssim</span>
+            <span class="n">most_similar_index</span> <span class="o">=</span> <span class="n">i</span>
+    
+    <span class="k">if</span> <span class="n">return_most_similar_index</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">most_similar_index</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">array_of_matrices</span><span class="p">[</span><span class="n">most_similar_index</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.find_next_bar">
     <p>def <span class="ident">find_next_bar</span>(</p><p>escore_notes, bar_time, start_note_idx, cur_bar)</p>
     </div>
@@ -15879,6 +16104,27 @@ The type of track (opus or score) is autodetected.</p></div>
     <span class="n">check</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">md5</span><span class="p">,</span> <span class="n">check</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.mean">
+    <p>def <span class="ident">mean</span>(</p><p>matrix)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.mean', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.mean" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 </pre></div>
 
   </div>
@@ -16772,7 +17018,7 @@ see opus2midi() and score2opus().</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.plot_ms_SONG">
-    <p>def <span class="ident">plot_ms_SONG</span>(</p><p>ms_song, preview_length_in_notes=0, block_lines_times_list=None, plot_title=&#39;ms Song&#39;, max_num_colors=129, drums_color_num=128, plot_size=(11, 4), note_height=0.75, show_grid_lines=False, return_plt=False, timings_multiplier=1, save_plt=&#39;&#39;)</p>
+    <p>def <span class="ident">plot_ms_SONG</span>(</p><p>ms_song, preview_length_in_notes=0, block_lines_times_list=None, plot_title=&#39;ms Song&#39;, max_num_colors=129, drums_color_num=128, plot_size=(11, 4), note_height=0.75, show_grid_lines=False, return_plt=False, timings_multiplier=1, save_plt=&#39;&#39;, save_only_plt_image=True, save_transparent=False)</p>
     </div>
     
 
@@ -16793,7 +17039,9 @@ see opus2midi() and score2opus().</p></div>
                   <span class="n">show_grid_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                   <span class="n">return_plt</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                   <span class="n">timings_multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                  <span class="n">save_plt</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                  <span class="n">save_plt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                  <span class="n">save_only_plt_image</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
@@ -16848,12 +17096,21 @@ see opus2midi() and score2opus().</p></div>
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save_plt</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-      <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">save_only_plt_image</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">save_transparent</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plt</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">return_plt</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">fig</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -16934,6 +17191,47 @@ see opus2midi() and score2opus().</p></div>
      <span class="n">replaced_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="p">[</span><span class="n">replaced_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.resize_matrix">
+    <p>def <span class="ident">resize_matrix</span>(</p><p>matrix, new_height, new_width)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.resize_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.resize_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">resize_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">new_height</span><span class="p">,</span> <span class="n">new_width</span><span class="p">):</span>
+    <span class="n">old_height</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">old_width</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">new_width</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">new_height</span><span class="p">)]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">new_height</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">new_width</span><span class="p">):</span>
+
+            <span class="n">old_i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">old_height</span> <span class="o">/</span> <span class="n">new_height</span>
+            <span class="n">old_j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> <span class="n">old_width</span> <span class="o">/</span> <span class="n">new_width</span>
+            
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                    <span class="n">i_m</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">old_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">m</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">old_height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">j_n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">old_j</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">old_width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">weight</span> <span class="o">=</span> <span class="n">cubic_kernel</span><span class="p">(</span><span class="n">old_i</span> <span class="o">-</span> <span class="n">i_m</span><span class="p">)</span> <span class="o">*</span> <span class="n">cubic_kernel</span><span class="p">(</span><span class="n">old_j</span> <span class="o">-</span> <span class="n">j_n</span><span class="p">)</span>
+                    <span class="n">value</span> <span class="o">+=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i_m</span><span class="p">][</span><span class="n">j_n</span><span class="p">]</span> <span class="o">*</span> <span class="n">weight</span>
+            
+            <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">resized_matrix</span>
 </pre></div>
 
   </div>
@@ -17360,7 +17658,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
 
     <span class="n">sp_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">sp_escore_notes</span>
+  <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">sp_escore_notes</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -17457,6 +17755,79 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
     <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">mel_chunks</span><span class="p">,</span> <span class="p">[[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mel_chunks</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mel_chunks</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.square_binary_matrix">
+    <p>def <span class="ident">square_binary_matrix</span>(</p><p>binary_matrix, matrix_size=128, return_plot_points=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.square_binary_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.square_binary_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">square_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
+                         <span class="n">matrix_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                         <span class="n">return_plot_points</span><span class="o">=</span><span class="kc">False</span>
+                         <span class="p">):</span>
+  
+  <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resize_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">)</span>
+
+  <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">if</span> <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">return_plot_points</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">resized_matrix</span><span class="p">,</span> <span class="n">points</span><span class="p">]</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">resized_matrix</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.ssim_index">
+    <p>def <span class="ident">ssim_index</span>(</p><p>matrix1, matrix2, bit_depth=1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.ssim_index', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.ssim_index" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ssim_index</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">matrix2</span><span class="p">,</span> <span class="n">bit_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix2</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix2</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">K1</span><span class="p">,</span> <span class="n">K2</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">bit_depth</span>
+    <span class="n">C1</span> <span class="o">=</span> <span class="p">(</span><span class="n">K1</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">C2</span> <span class="o">=</span> <span class="p">(</span><span class="n">K2</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    
+    <span class="n">mu1</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">matrix1</span><span class="p">)</span>
+    <span class="n">mu2</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">matrix2</span><span class="p">)</span>
+    
+    <span class="n">sigma1_sq</span> <span class="o">=</span> <span class="n">variance</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span>
+    <span class="n">sigma2_sq</span> <span class="o">=</span> <span class="n">variance</span><span class="p">(</span><span class="n">matrix2</span><span class="p">,</span> <span class="n">mu2</span><span class="p">)</span>
+    
+    <span class="n">sigma12</span> <span class="o">=</span> <span class="n">covariance</span><span class="p">(</span><span class="n">matrix1</span><span class="p">,</span> <span class="n">matrix2</span><span class="p">,</span> <span class="n">mu1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">)</span>
+    
+    <span class="n">ssim</span> <span class="o">=</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mu1</span> <span class="o">*</span> <span class="n">mu2</span> <span class="o">+</span> <span class="n">C1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma12</span> <span class="o">+</span> <span class="n">C2</span><span class="p">))</span> <span class="o">/</span> <span class="p">((</span><span class="n">mu1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">mu2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">C1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma1_sq</span> <span class="o">+</span> <span class="n">sigma2_sq</span> <span class="o">+</span> <span class="n">C2</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">ssim</span>
 </pre></div>
 
   </div>
@@ -18136,6 +18507,27 @@ but it does make it easy to mix different scores together.</p></div>
         <span class="n">fixed_pitches_chord</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fixed_pitches_chord</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.variance">
+    <p>def <span class="ident">variance</span>(</p><p>matrix, mean_value)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.variance', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.variance" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">mean_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">element</span> <span class="o">-</span> <span class="n">mean_value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 </pre></div>
 
   </div>
