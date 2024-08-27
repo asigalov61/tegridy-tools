@@ -9116,12 +9116,47 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">square_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
                          <span class="n">matrix_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                         <span class="n">use_fast_squaring</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                          <span class="n">return_plot_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
-  
-  <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resize_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">)</span>
 
-  <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">if</span> <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">use_fast_squaring</span><span class="p">:</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">)</span> <span class="o">/</span> <span class="n">matrix_size</span><span class="p">)</span>
+
+    <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">matrix_size</span><span class="p">]]))</span>
+
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">zmatrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">matrix_size</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+
+      <span class="n">samples_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+
+      <span class="n">best_sample</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">matrix_size</span><span class="p">)</span>
+      <span class="n">pm</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">zmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="k">for</span> <span class="n">sc</span> <span class="ow">in</span> <span class="n">samples_counts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">zmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">pm</span><span class="p">:</span>
+          <span class="n">best_sample</span> <span class="o">=</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="n">pm</span> <span class="o">=</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="k">break</span>
+        
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="n">resized_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_sample</span><span class="p">))</span>
+
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resized_matrix</span><span class="p">[:</span><span class="n">matrix_size</span><span class="p">]</span>
+    <span class="n">resized_matrix</span> <span class="o">+=</span> <span class="n">zmatrix</span> <span class="o">*</span> <span class="p">(</span><span class="n">matrix_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">resized_matrix</span><span class="p">))</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resize_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">)</span>
+
+  <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">matrix_size</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">matrix_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
 
   <span class="k">if</span> <span class="n">return_plot_points</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">resized_matrix</span><span class="p">,</span> <span class="n">points</span><span class="p">]</span>
@@ -17765,7 +17800,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.square_binary_matrix">
-    <p>def <span class="ident">square_binary_matrix</span>(</p><p>binary_matrix, matrix_size=128, return_plot_points=False)</p>
+    <p>def <span class="ident">square_binary_matrix</span>(</p><p>binary_matrix, matrix_size=128, use_fast_squaring=False, return_plot_points=False)</p>
     </div>
     
 
@@ -17776,12 +17811,47 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <div id="source-TMIDIX.square_binary_matrix" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">square_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
                          <span class="n">matrix_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                         <span class="n">use_fast_squaring</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                          <span class="n">return_plot_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
-  
-  <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resize_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">)</span>
 
-  <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">if</span> <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">use_fast_squaring</span><span class="p">:</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">)</span> <span class="o">/</span> <span class="n">matrix_size</span><span class="p">)</span>
+
+    <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">matrix_size</span><span class="p">]]))</span>
+
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">zmatrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">matrix_size</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+
+      <span class="n">samples_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+
+      <span class="n">best_sample</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">matrix_size</span><span class="p">)</span>
+      <span class="n">pm</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">zmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="k">for</span> <span class="n">sc</span> <span class="ow">in</span> <span class="n">samples_counts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">zmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">pm</span><span class="p">:</span>
+          <span class="n">best_sample</span> <span class="o">=</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="n">pm</span> <span class="o">=</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="k">break</span>
+        
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">sc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="n">resized_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_sample</span><span class="p">))</span>
+
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resized_matrix</span><span class="p">[:</span><span class="n">matrix_size</span><span class="p">]</span>
+    <span class="n">resized_matrix</span> <span class="o">+=</span> <span class="n">zmatrix</span> <span class="o">*</span> <span class="p">(</span><span class="n">matrix_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">resized_matrix</span><span class="p">))</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">resized_matrix</span> <span class="o">=</span> <span class="n">resize_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">,</span> <span class="n">matrix_size</span><span class="p">)</span>
+
+  <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">matrix_size</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">matrix_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">resized_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
 
   <span class="k">if</span> <span class="n">return_plot_points</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">resized_matrix</span><span class="p">,</span> <span class="n">points</span><span class="p">]</span>
