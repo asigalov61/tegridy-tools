@@ -1763,7 +1763,8 @@ def plot_ms_SONG(ms_song,
                   note_height = 0.75,
                   show_grid_lines=False,
                   return_plt = False,
-                  timings_multiplier=1
+                  timings_multiplier=1,
+                  save_plt=''
                   ):
 
   '''Tegridy ms SONG plotter/vizualizer'''
@@ -1816,6 +1817,9 @@ def plot_ms_SONG(ms_song,
     plt.ylabel('MIDI Pitch', c='black')
 
     plt.title(plot_title)
+
+    if save_plt != '':
+      plt.savefig(save_plt)
 
     if return_plt:
       return fig
@@ -6877,7 +6881,7 @@ def escore_notes_to_binary_matrix(escore_notes,
 def binary_matrix_to_original_escore_notes(binary_matrix, 
                                            channel=0, 
                                            patch=0, 
-                                           velocity=90
+                                           velocity=-1
                                            ):
 
   result = []
@@ -6904,8 +6908,14 @@ def binary_matrix_to_original_escore_notes(binary_matrix,
 
   original_escore_notes = []
 
+  vel = velocity
+
   for r in result:
-    original_escore_notes.append(['note', r[0], r[1], channel, r[2], velocity, patch])
+    
+    if velocity == -1:
+      vel = max(40, r[2])
+
+    original_escore_notes.append(['note', r[0], r[1], channel, r[2], vel, patch])
 
   return sorted(original_escore_notes, key=lambda x: (x[1], -x[4], x[6]))
 
@@ -7602,6 +7612,125 @@ def morph_tones_chord(tones_chord,
   max_len = len(max(matches, key=len))
 
   return random.choice([m for m in matches if len(m) == max_len])
+
+###################################################################################
+
+def compress_binary_matrix(binary_matrix, 
+                           only_compress_zeros=False,
+                           return_compression_ratio=False
+                           ):
+
+  compressed_bmatrix = []
+
+  zm = [0] * len(binary_matrix[0])
+  pm = [0] * len(binary_matrix[0])
+
+  mcount = 0
+
+  for m in binary_matrix:
+    
+    if only_compress_zeros:
+      if m != zm:
+        compressed_bmatrix.append(m)
+        mcount += 1
+    
+    else:
+      if m != pm:
+        compressed_bmatrix.append(m)
+        mcount += 1
+    
+    pm = m
+
+  if return_compression_ratio:
+    return [compressed_bmatrix, mcount / len(binary_matrix)]
+
+  else:
+    return compressed_bmatrix
+
+###################################################################################
+
+def solo_piano_escore_notes(escore_notes,
+                            channels_index=3,
+                            pitches_index=4,
+                            patches_index=6,
+                            keep_drums=False,
+                            ):
+
+  cscore = chordify_score([1000, escore_notes])
+
+  sp_escore_notes = []
+
+  for c in cscore:
+
+    seen = []
+    chord = []
+
+    for cc in c:
+      if cc[pitches_index] not in seen:
+
+          if cc[channels_index] != 9:
+            cc[channels_index] = 0
+            cc[patches_index] = 0
+            
+            chord.append(cc)
+            seen.append(cc[pitches_index])
+          
+          else:
+            if keep_drums:
+              chord.append(cc)
+              seen.append(cc[pitches_index])
+
+    sp_escore_notes.append(chord)
+
+  return sp_escore_notes
+
+###################################################################################
+
+def strip_drums_from_escore_notes(escore_notes, 
+                                  channels_index=3
+                                  ):
+  
+  return [e for e in escore_notes if e[channels_index] != 9]
+
+###################################################################################
+
+def fixed_escore_notes_timings(escore_notes,
+                               fixed_durations=False,
+                               fixed_timings_multiplier=1,
+                               custom_fixed_time=-1,
+                               custom_fixed_dur=-1
+                               ):
+
+  fixed_timings_escore_notes = delta_score_notes(escore_notes, even_timings=True)
+
+  mode_time = round(Counter([e[1] for e in fixed_timings_escore_notes if e[1] != 0]).most_common()[0][0] * fixed_timings_multiplier)
+
+  if mode_time % 2 != 0:
+    mode_time += 1
+
+  mode_dur = round(Counter([e[2] for e in fixed_timings_escore_notes if e[2] != 0]).most_common()[0][0] * fixed_timings_multiplier)
+
+  if mode_dur % 2 != 0:
+    mode_dur += 1
+
+  for e in fixed_timings_escore_notes:
+    if e[1] != 0:
+      
+      if custom_fixed_time > 0:
+        e[1] = custom_fixed_time
+      
+      else:
+        e[1] = mode_time
+
+    if fixed_durations:
+      
+      if custom_fixed_dur > 0:
+        e[2] = custom_fixed_dur
+      
+      else:
+        e[2] = mode_dur
+
+  return delta_score_to_abs_score(fixed_timings_escore_notes)
 
 ###################################################################################
 
