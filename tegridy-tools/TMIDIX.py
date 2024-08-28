@@ -6391,35 +6391,16 @@ def transpose_pitches(pitches, transpose_value=0):
 
 ###################################################################################
 
-def reverse_enhanced_score_notes(enhanced_score_notes):
+def reverse_enhanced_score_notes(escore_notes):
 
-  score = recalculate_score_timings(enhanced_score_notes)
+  score = recalculate_score_timings(escore_notes)
 
-  cscore = chordify_score([1000, score])
+  ematrix = escore_notes_to_escore_matrix(score, reverse_matrix=True)
+  e_score = escore_matrix_to_original_escore_notes(ematrix)
 
-  abs_dtimes = []
+  reversed_score = recalculate_score_timings(e_score)
 
-  for i, t in enumerate(cscore[:-1]):
-    abs_dtimes.append(cscore[i+1][0][1])
-  abs_dtimes.append(cscore[-1][0][1]+cscore[-1][0][2])
-
-  new_dtimes = []
-  pt = abs_dtimes[-1]
-
-  for t in abs_dtimes[::-1]:
-    new_dtimes.append(abs(pt-t))
-    pt = t
-
-  new_mel = copy.deepcopy(cscore[::-1])
-
-  time = 0
-
-  for i, t in enumerate(new_mel):
-    time += new_dtimes[i]
-    for tt in t:
-      tt[1] = time
-
-  return recalculate_score_timings(flatten(new_mel))
+  return reversed_score
 
 ###################################################################################
 
@@ -6433,6 +6414,8 @@ def count_patterns(lst, sublist):
         else:
           idx += 1
     return count
+
+###################################################################################
 
 def find_lrno_patterns(seq):
 
@@ -6935,13 +6918,21 @@ def binary_matrix_to_original_escore_notes(binary_matrix,
             count += 1
 
         else:
-            if count > 1:
+          if count > 1:
+            result.append([i-count, count, j, binary_matrix[i-1][j]])
+          
+          else:
+            if binary_matrix[i-1][j] != 0:
               result.append([i-count, count, j, binary_matrix[i-1][j]])
 
-            count = 1
+          count = 1
 
       if count > 1:
           result.append([len(binary_matrix)-count, count, j, binary_matrix[-1][j]])
+      
+      else:
+        if binary_matrix[i-1][j] != 0:
+          result.append([i-count, count, j, binary_matrix[i-1][j]])
 
   result.sort(key=lambda x: (x[0], -x[2]))
 
@@ -7776,9 +7767,9 @@ def fixed_escore_notes_timings(escore_notes,
 def cubic_kernel(x):
     abs_x = abs(x)
     if abs_x <= 1:
-        return (1.5 * abs_x**3 - 2.5 * abs_x**2 + 1)
+        return 1.5 * abs_x**3 - 2.5 * abs_x**2 + 1
     elif abs_x <= 2:
-        return (-0.5 * abs_x**3 + 2.5 * abs_x**2 - 4 * abs_x + 2)
+        return -0.5 * abs_x**3 + 2.5 * abs_x**2 - 4 * abs_x + 2
     else:
         return 0
 
@@ -7791,17 +7782,25 @@ def resize_matrix(matrix, new_height, new_width):
     
     for i in range(new_height):
         for j in range(new_width):
-
             old_i = i * old_height / new_height
             old_j = j * old_width / new_width
             
             value = 0
+            total_weight = 0
             for m in range(-1, 3):
                 for n in range(-1, 3):
                     i_m = min(max(int(old_i) + m, 0), old_height - 1)
                     j_n = min(max(int(old_j) + n, 0), old_width - 1)
+                    
+                    if matrix[i_m][j_n] == 0:
+                        continue
+                    
                     weight = cubic_kernel(old_i - i_m) * cubic_kernel(old_j - j_n)
                     value += matrix[i_m][j_n] * weight
+                    total_weight += weight
+            
+            if total_weight > 0:
+                value /= total_weight
             
             resized_matrix[i][j] = int(value > 0.5)
     
