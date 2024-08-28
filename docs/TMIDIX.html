@@ -8055,7 +8055,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">escore_notes_to_escore_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
-                                  <span class="n">alt_velocities</span><span class="o">=</span><span class="kc">False</span>
+                                  <span class="n">alt_velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">flip_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reverse_matrix</span><span class="o">=</span><span class="kc">False</span>
                                   <span class="p">):</span>
 
   <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
@@ -8095,6 +8097,18 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">]</span>
 
         <span class="n">pe</span> <span class="o">=</span> <span class="n">note</span>
+
+    <span class="k">if</span> <span class="n">flip_matrix</span><span class="p">:</span>
+
+      <span class="n">temp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="n">temp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">temp_matrix</span>
+
+    <span class="k">if</span> <span class="n">reverse_matrix</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">escore_matrixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span>
 
@@ -8184,7 +8198,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">escore_notes_to_binary_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
                                   <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
-                                  <span class="n">patch</span><span class="o">=</span><span class="mi">0</span>
+                                  <span class="n">patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                  <span class="n">flip_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reverse_matrix</span><span class="o">=</span><span class="kc">False</span>
                                   <span class="p">):</span>
 
   <span class="n">escore</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">channel</span> <span class="ow">and</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="n">patch</span><span class="p">]</span>
@@ -8216,6 +8232,18 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
           <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
 
             <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">flip_matrix</span><span class="p">:</span>
+
+      <span class="n">temp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="n">temp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">temp_matrix</span>
+
+    <span class="k">if</span> <span class="n">reverse_matrix</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">escore_matrix</span>
 
@@ -9239,9 +9267,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
       <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span><span class="p">)</span>
-  
+
   <span class="k">return</span> <span class="n">pchord</span>
 
 <span class="k">def</span> <span class="nf">summarize_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
@@ -13905,9 +13931,7 @@ Tegridy Code 2024</p></div>
   <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
       <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span><span class="p">)</span>
-  
+
   <span class="k">return</span> <span class="n">pchord</span>
 </pre></div>
 
@@ -14816,7 +14840,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_to_binary_matrix">
-    <p>def <span class="ident">escore_notes_to_binary_matrix</span>(</p><p>escore_notes, channel=0, patch=0)</p>
+    <p>def <span class="ident">escore_notes_to_binary_matrix</span>(</p><p>escore_notes, channel=0, patch=0, flip_matrix=False, reverse_matrix=False)</p>
     </div>
     
 
@@ -14827,7 +14851,9 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.escore_notes_to_binary_matrix" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_binary_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
                                   <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
-                                  <span class="n">patch</span><span class="o">=</span><span class="mi">0</span>
+                                  <span class="n">patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                  <span class="n">flip_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reverse_matrix</span><span class="o">=</span><span class="kc">False</span>
                                   <span class="p">):</span>
 
   <span class="n">escore</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">channel</span> <span class="ow">and</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="n">patch</span><span class="p">]</span>
@@ -14860,6 +14886,18 @@ Tegridy Code 2024</p></div>
 
             <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
+    <span class="k">if</span> <span class="n">flip_matrix</span><span class="p">:</span>
+
+      <span class="n">temp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="n">temp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">temp_matrix</span>
+
+    <span class="k">if</span> <span class="n">reverse_matrix</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="k">return</span> <span class="n">escore_matrix</span>
 
   <span class="k">else</span><span class="p">:</span>
@@ -14874,7 +14912,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_to_escore_matrix">
-    <p>def <span class="ident">escore_notes_to_escore_matrix</span>(</p><p>escore_notes, alt_velocities=False)</p>
+    <p>def <span class="ident">escore_notes_to_escore_matrix</span>(</p><p>escore_notes, alt_velocities=False, flip_matrix=False, reverse_matrix=False)</p>
     </div>
     
 
@@ -14884,7 +14922,9 @@ Tegridy Code 2024</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_to_escore_matrix', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.escore_notes_to_escore_matrix" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_escore_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
-                                  <span class="n">alt_velocities</span><span class="o">=</span><span class="kc">False</span>
+                                  <span class="n">alt_velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">flip_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reverse_matrix</span><span class="o">=</span><span class="kc">False</span>
                                   <span class="p">):</span>
 
   <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
@@ -14924,6 +14964,18 @@ Tegridy Code 2024</p></div>
             <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span><span class="p">]</span>
 
         <span class="n">pe</span> <span class="o">=</span> <span class="n">note</span>
+
+    <span class="k">if</span> <span class="n">flip_matrix</span><span class="p">:</span>
+
+      <span class="n">temp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="n">temp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">temp_matrix</span>
+
+    <span class="k">if</span> <span class="n">reverse_matrix</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">escore_matrixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_matrix</span><span class="p">)</span>
 
