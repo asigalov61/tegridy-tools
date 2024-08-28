@@ -6720,7 +6720,9 @@ def horizontal_ordered_list_search(list_of_lists,
 ###################################################################################
 
 def escore_notes_to_escore_matrix(escore_notes,
-                                  alt_velocities=False
+                                  alt_velocities=False,
+                                  flip_matrix=False,
+                                  reverse_matrix=False
                                   ):
 
   last_time = escore_notes[-1][1]
@@ -6760,6 +6762,18 @@ def escore_notes_to_escore_matrix(escore_notes,
             escore_matrix[t][pitch] = [velocity, patch]
 
         pe = note
+
+    if flip_matrix:
+
+      temp_matrix = []
+
+      for m in escore_matrix:
+        temp_matrix.append(m[::-1])
+
+      escore_matrix = temp_matrix
+
+    if reverse_matrix:
+      escore_matrix = escore_matrix[::-1]
 
     escore_matrixes.append(escore_matrix)
 
@@ -6849,7 +6863,9 @@ def escore_matrix_to_original_escore_notes(full_escore_matrix):
 
 def escore_notes_to_binary_matrix(escore_notes, 
                                   channel=0, 
-                                  patch=0
+                                  patch=0,
+                                  flip_matrix=False,
+                                  reverse_matrix=False
                                   ):
 
   escore = [e for e in escore_notes if e[3] == channel and e[6] == patch]
@@ -6881,6 +6897,18 @@ def escore_notes_to_binary_matrix(escore_notes,
           for t in range(time, min(time + duration, time_range)):
 
             escore_matrix[t][pitch] = 1
+
+    if flip_matrix:
+
+      temp_matrix = []
+
+      for m in escore_matrix:
+        temp_matrix.append(m[::-1])
+
+      escore_matrix = temp_matrix
+
+    if reverse_matrix:
+      escore_matrix = escore_matrix[::-1]
 
     return escore_matrix
 
@@ -7904,9 +7932,7 @@ def chord_to_pchord(chord):
   for cc in chord:
     if cc[3] != 9:
       pchord.append(cc[4])
-    else:
-      pchord.append(cc[4]+128)
-  
+
   return pchord
 
 def summarize_escore_notes(escore_notes, 
