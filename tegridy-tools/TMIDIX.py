@@ -7794,7 +7794,7 @@ def square_binary_matrix(binary_matrix,
     samples = []
 
     for i in range(0, len(binary_matrix), step):
-      samples.append(tuple([tuple(d) for d in binary_matrix[i:i+matrix_size]]))
+      samples.append(tuple([tuple(d) for d in binary_matrix[i:i+step]]))
 
     resized_matrix = []
 
@@ -7894,6 +7894,69 @@ def find_most_similar_matrix(array_of_matrices,
     
     else:
       return array_of_matrices[most_similar_index]
+
+###################################################################################
+
+def chord_to_pchord(chord):
+
+  pchord = []
+
+  for cc in chord:
+    if cc[3] != 9:
+      pchord.append(cc[4])
+    else:
+      pchord.append(cc[4]+128)
+  
+  return pchord
+
+def summarize_escore_notes(escore_notes, 
+                           summary_length_in_chords=128, 
+                           preserve_timings=True
+                           ):
+
+    cscore = chordify_score([d[1:] for d in delta_score_notes(escore_notes)])
+
+    pchords = []
+
+    for c in cscore:
+      pchords.append(chord_to_pchord(c))
+
+    step = round(len(pchords) / summary_length_in_chords)
+
+    samples = []
+
+    for i in range(0, len(pchords), step):
+      samples.append(tuple([tuple(d) for d in pchords[i:i+step]]))
+
+    summarized_escore_notes = []
+
+    for i, s in enumerate(samples):
+
+      best_chord = list(Counter(s).most_common()[0][0])
+
+      chord = copy.deepcopy(cscore[[list(ss) for ss in s].index(best_chord)+(i*step)])
+
+      if preserve_timings:
+
+        if i > 0:
+
+          pchord = summarized_escore_notes[-1]
+
+          for c in pchord:
+            c[1] = max(c[1], chord[0][0])
+
+      else:
+
+        chord[0][0] = 1
+
+        for c in chord:
+          c[1] = 1  
+
+      summarized_escore_notes.append(chord)
+
+    summarized_escore_notes = summarized_escore_notes[:summary_length_in_chords]
+
+    return [['note'] + d for d in delta_score_to_abs_score(flatten(summarized_escore_notes), times_idx=0)]
 
 ###################################################################################
 
