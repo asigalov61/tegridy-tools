@@ -1148,6 +1148,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.check_and_fix_chords_in_chordified_score">check_and_fix_chords_in_chordified_score</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_pitches_chord">check_and_fix_pitches_chord</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_tones_chord">check_and_fix_tones_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.chord_to_pchord">chord_to_pchord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
     <li class="mono"><a href="#TMIDIX.compress_binary_matrix">compress_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
@@ -1246,6 +1247,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.ssim_index">ssim_index</a></li>
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.strip_drums_from_escore_notes">strip_drums_from_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.summarize_escore_notes">summarize_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
     <li class="mono"><a href="#TMIDIX.tone_type">tone_type</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
@@ -9127,7 +9129,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
-      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">matrix_size</span><span class="p">]]))</span>
+      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">]]))</span>
 
     <span class="n">resized_matrix</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -9227,6 +9229,69 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">array_of_matrices</span><span class="p">[</span><span class="n">most_similar_index</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">chord_to_pchord</span><span class="p">(</span><span class="n">chord</span><span class="p">):</span>
+
+  <span class="n">pchord</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span><span class="p">)</span>
+  
+  <span class="k">return</span> <span class="n">pchord</span>
+
+<span class="k">def</span> <span class="nf">summarize_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                           <span class="n">summary_length_in_chords</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> 
+                           <span class="n">preserve_timings</span><span class="o">=</span><span class="kc">True</span>
+                           <span class="p">):</span>
+
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)])</span>
+
+    <span class="n">pchords</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+      <span class="n">pchords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord_to_pchord</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pchords</span><span class="p">)</span> <span class="o">/</span> <span class="n">summary_length_in_chords</span><span class="p">)</span>
+
+    <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pchords</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">pchords</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">]]))</span>
+
+    <span class="n">summarized_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+
+      <span class="n">best_chord</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cscore</span><span class="p">[[</span><span class="nb">list</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">best_chord</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">step</span><span class="p">)])</span>
+
+      <span class="k">if</span> <span class="n">preserve_timings</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+          <span class="n">pchord</span> <span class="o">=</span> <span class="n">summarized_escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pchord</span><span class="p">:</span>
+            <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">chord</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">chord</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
+          <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  
+
+      <span class="n">summarized_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+
+    <span class="n">summarized_escore_notes</span> <span class="o">=</span> <span class="n">summarized_escore_notes</span><span class="p">[:</span><span class="n">summary_length_in_chords</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[[</span><span class="s1">&#39;note&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">summarized_escore_notes</span><span class="p">),</span> <span class="n">times_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -13823,6 +13888,36 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.chord_to_pchord">
+    <p>def <span class="ident">chord_to_pchord</span>(</p><p>chord)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.chord_to_pchord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.chord_to_pchord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">chord_to_pchord</span><span class="p">(</span><span class="n">chord</span><span class="p">):</span>
+
+  <span class="n">pchord</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">pchord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span><span class="p">)</span>
+  
+  <span class="k">return</span> <span class="n">pchord</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.chordify_score">
     <p>def <span class="ident">chordify_score</span>(</p><p>score, return_choridfied_score=True, return_detected_score_information=False)</p>
     </div>
@@ -17822,7 +17917,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
     <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
-      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">matrix_size</span><span class="p">]]))</span>
+      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">]]))</span>
 
     <span class="n">resized_matrix</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -17943,6 +18038,73 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
                                   <span class="p">):</span>
   
   <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.summarize_escore_notes">
+    <p>def <span class="ident">summarize_escore_notes</span>(</p><p>escore_notes, summary_length_in_chords=128, preserve_timings=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.summarize_escore_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.summarize_escore_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">summarize_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                           <span class="n">summary_length_in_chords</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> 
+                           <span class="n">preserve_timings</span><span class="o">=</span><span class="kc">True</span>
+                           <span class="p">):</span>
+
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)])</span>
+
+    <span class="n">pchords</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+      <span class="n">pchords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord_to_pchord</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pchords</span><span class="p">)</span> <span class="o">/</span> <span class="n">summary_length_in_chords</span><span class="p">)</span>
+
+    <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pchords</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+      <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">pchords</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">]]))</span>
+
+    <span class="n">summarized_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+
+      <span class="n">best_chord</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="n">chord</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cscore</span><span class="p">[[</span><span class="nb">list</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">best_chord</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">step</span><span class="p">)])</span>
+
+      <span class="k">if</span> <span class="n">preserve_timings</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+          <span class="n">pchord</span> <span class="o">=</span> <span class="n">summarized_escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+          <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pchord</span><span class="p">:</span>
+            <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">chord</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">chord</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
+          <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  
+
+      <span class="n">summarized_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+
+    <span class="n">summarized_escore_notes</span> <span class="o">=</span> <span class="n">summarized_escore_notes</span><span class="p">[:</span><span class="n">summary_length_in_chords</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[[</span><span class="s1">&#39;note&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">summarized_escore_notes</span><span class="p">),</span> <span class="n">times_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
 </pre></div>
 
   </div>
