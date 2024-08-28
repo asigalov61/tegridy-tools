@@ -1075,6 +1075,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.calculate_similarities">calculate_similarities</a></li>
     <li class="mono"><a href="#TPLOTS.compute_mst_edges">compute_mst_edges</a></li>
     <li class="mono"><a href="#TPLOTS.find_closest_points">find_closest_points</a></li>
+    <li class="mono"><a href="#TPLOTS.find_shortest_constellation_path">find_shortest_constellation_path</a></li>
     <li class="mono"><a href="#TPLOTS.generate_colors">generate_colors</a></li>
     <li class="mono"><a href="#TPLOTS.generate_labels">generate_labels</a></li>
     <li class="mono"><a href="#TPLOTS.get_tokens_embeddings">get_tokens_embeddings</a></li>
@@ -1086,7 +1087,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.plot_points_constellation">plot_points_constellation</a></li>
     <li class="mono"><a href="#TPLOTS.plot_points_with_mst_lines">plot_points_with_mst_lines</a></li>
     <li class="mono"><a href="#TPLOTS.plot_square_matrix_points">plot_square_matrix_points</a></li>
-    <li class="mono"><a href="#TPLOTS.reduce_embeddings">reduce_embeddings</a></li>
+    <li class="mono"><a href="#TPLOTS.reduce_dimensionality">reduce_dimensionality</a></li>
     <li class="mono"><a href="#TPLOTS.remove_points_outliers">remove_points_outliers</a></li>
     <li class="mono"><a href="#TPLOTS.robust_normalize">robust_normalize</a></li>
     <li class="mono"><a href="#TPLOTS.square_binary_matrix">square_binary_matrix</a></li>
@@ -1151,6 +1152,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="pip3-install-scikit-learn">!pip3 install scikit-learn</h1>
 <h1 id="_20"></h1>
 <h6 id="_21"></h6>
+<h1 id="_22"></h1>
+<h1 id="future-critical-dependencies">Future critical dependencies</h1>
+<h1 id="_23"></h1>
+<h1 id="pip-install-umap-learn">!pip install umap-learn</h1>
+<h1 id="pip-install-alphashape">!pip install alphashape</h1>
+<h1 id="_24"></h1>
+<h6 id="_25"></h6>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS', this);">Show source &equiv;</a></p>
   <div id="source-TPLOTS" class="source">
@@ -1196,6 +1204,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd"># !pip install matplotlib</span>
 <span class="sd"># !pip install networkx[all]</span>
 <span class="sd"># !pip3 install scikit-learn</span>
+<span class="sd">#</span>
+<span class="sd">################################################################################</span>
+<span class="sd">#</span>
+<span class="sd"># Future critical dependencies</span>
+<span class="sd">#</span>
+<span class="sd"># !pip install umap-learn</span>
+<span class="sd"># !pip install alphashape</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -1360,19 +1375,25 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">################################################################################</span>
 
-<span class="k">def</span> <span class="nf">reduce_embeddings</span><span class="p">(</span><span class="n">embeddings</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">reduce_dimensionality</span><span class="p">(</span><span class="n">list_of_valies</span><span class="p">,</span>
+                          <span class="n">n_comp</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                          <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                          <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Reduces the dimensionality of the embeddings to 2D using t-SNE.</span>
+<span class="sd">  Reduces the dimensionality of the values using t-SNE.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="n">tsne</span> <span class="o">=</span> <span class="n">TSNE</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-              <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
-              <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_valies</span><span class="p">)</span>
 
-  <span class="n">reduced_embeddings</span> <span class="o">=</span> <span class="n">tsne</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+  <span class="n">tsne</span> <span class="o">=</span> <span class="n">TSNE</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">n_comp</span><span class="p">,</span>
+              <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span>
+              <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">reduced_embeddings</span>
+  <span class="n">reduced_vals</span> <span class="o">=</span> <span class="n">tsne</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">reduced_vals</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <span class="c1">################################################################################</span>
 
@@ -1560,6 +1581,54 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">ordered_values_labels</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_shortest_constellation_path</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> 
+                                     <span class="n">start_point_idx</span><span class="p">,</span> 
+                                     <span class="n">end_point_idx</span><span class="p">,</span>
+                                     <span class="n">return_path_length</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the shortest path between two points of the points constellation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+
+    <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> 
+                            <span class="n">source</span><span class="o">=</span><span class="n">start_point_idx</span><span class="p">,</span> 
+                            <span class="n">target</span><span class="o">=</span><span class="n">end_point_idx</span><span class="p">,</span> 
+                            <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span>
+                            <span class="p">)</span>
+    
+    <span class="n">path_length</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path_length</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> 
+                                          <span class="n">source</span><span class="o">=</span><span class="n">start_point_idx</span><span class="p">,</span> 
+                                          <span class="n">target</span><span class="o">=</span><span class="n">end_point_idx</span><span class="p">,</span> 
+                                          <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+        
+    <span class="n">path_points</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+
+    <span class="k">if</span> <span class="n">return_path_points</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">path_points</span>
+
+    <span class="k">if</span> <span class="n">return_path_length</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">path_length</span>
+
+    <span class="k">return</span> <span class="n">path</span>
 
 <span class="c1">################################################################################</span>
 <span class="c1"># Core functions</span>
@@ -1827,6 +1896,114 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="c1">################################################################################</span>
+<span class="c1"># [WIP] Future dev functions</span>
+<span class="c1">################################################################################</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">import umap</span>
+
+<span class="sd">def reduce_dimensionality_umap(list_of_values,</span>
+<span class="sd">                               n_comp=2,</span>
+<span class="sd">                               n_neighbors=15,</span>
+<span class="sd">                               ):</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  Reduces the dimensionality of the values using UMAP.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<span class="sd">  vals = np.array(list_of_values)</span>
+
+<span class="sd">  umap_reducer = umap.UMAP(n_components=n_comp,</span>
+<span class="sd">                           n_neighbors=n_neighbors,</span>
+<span class="sd">                           n_epochs=5000,</span>
+<span class="sd">                           verbose=True</span>
+<span class="sd">                           )</span>
+
+<span class="sd">  reduced_vals = umap_reducer.fit_transform(vals)</span>
+
+<span class="sd">  return reduced_vals.tolist()</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">import alphashape</span>
+<span class="sd">from shapely.geometry import Point</span>
+<span class="sd">from matplotlib.tri import Triangulation, LinearTriInterpolator</span>
+<span class="sd">from scipy.stats import zscore</span>
+
+<span class="sd">#===============================================================================</span>
+
+<span class="sd">coordinates = points</span>
+
+<span class="sd">dist_matrix = minkowski_distance_matrix(coordinates, p=3)  # You can change the value of p as needed</span>
+
+<span class="sd"># Centering matrix</span>
+<span class="sd">n = dist_matrix.shape[0]</span>
+<span class="sd">H = np.eye(n) - np.ones((n, n)) / n</span>
+
+<span class="sd"># Apply double centering</span>
+<span class="sd">B = -0.5 * H @ dist_matrix**2 @ H</span>
+
+<span class="sd"># Eigen decomposition</span>
+<span class="sd">eigvals, eigvecs = np.linalg.eigh(B)</span>
+
+<span class="sd"># Sort eigenvalues and eigenvectors</span>
+<span class="sd">idx = np.argsort(eigvals)[::-1]</span>
+<span class="sd">eigvals = eigvals[idx]</span>
+<span class="sd">eigvecs = eigvecs[:, idx]</span>
+
+<span class="sd"># Select the top 2 eigenvectors</span>
+<span class="sd">X_transformed = eigvecs[:, :2] * np.sqrt(eigvals[:2])</span>
+
+<span class="sd">#===============================================================================</span>
+
+<span class="sd">src_points = X_transformed</span>
+<span class="sd">src_values = np.array([[p[1]] for p in points]) #np.random.rand(X_transformed.shape[0])</span>
+
+<span class="sd">#===============================================================================</span>
+
+<span class="sd"># Normalize the points to the range [0, 1]</span>
+<span class="sd">scaler = MinMaxScaler()</span>
+<span class="sd">points_normalized = scaler.fit_transform(src_points)</span>
+
+<span class="sd">values_normalized = custom_normalize(src_values)</span>
+
+<span class="sd"># Remove outliers based on z-score</span>
+<span class="sd">z_scores = np.abs(zscore(points_normalized, axis=0))</span>
+<span class="sd">filtered_points = points_normalized[(z_scores &lt; 3).all(axis=1)]</span>
+<span class="sd">filtered_values = values_normalized[(z_scores &lt; 3).all(axis=1)]</span>
+
+<span class="sd"># Compute the concave hull (alpha shape)</span>
+<span class="sd">alpha = 8  # Adjust alpha as needed</span>
+<span class="sd">hull = alphashape.alphashape(filtered_points, alpha)</span>
+
+<span class="sd"># Create a triangulation</span>
+<span class="sd">tri = Triangulation(filtered_points[:, 0], filtered_points[:, 1])</span>
+
+<span class="sd"># Interpolate the values on the triangulation</span>
+<span class="sd">interpolator = LinearTriInterpolator(tri, filtered_values[:, 0])</span>
+<span class="sd">xi, yi = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))</span>
+<span class="sd">zi = interpolator(xi, yi)</span>
+
+<span class="sd"># Mask out points outside the concave hull</span>
+<span class="sd">mask = np.array([hull.contains(Point(x, y)) for x, y in zip(xi.flatten(), yi.flatten())])</span>
+<span class="sd">zi = np.ma.array(zi, mask=~mask.reshape(zi.shape))</span>
+
+<span class="sd"># Plot the filled contour based on the interpolated values</span>
+<span class="sd">plt.contourf(xi, yi, zi, levels=50, cmap=&#39;viridis&#39;)</span>
+
+<span class="sd"># Plot the original points</span>
+<span class="sd">#plt.scatter(filtered_points[:, 0], filtered_points[:, 1], c=filtered_values, edgecolors=&#39;k&#39;)</span>
+
+<span class="sd">plt.title(&#39;Filled Contour Plot with Original Values&#39;)</span>
+<span class="sd">plt.xlabel(&#39;X-axis&#39;)</span>
+<span class="sd">plt.ylabel(&#39;Y-axis&#39;)</span>
+<span class="sd">plt.colorbar(label=&#39;Value&#39;)</span>
+<span class="sd">plt.show()</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># This is the end of TPLOTS Python modules</span>
 <span class="c1">#</span>
@@ -1995,6 +2172,71 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">closest_matches</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.find_shortest_constellation_path">
+    <p>def <span class="ident">find_shortest_constellation_path</span>(</p><p>points, start_point_idx, end_point_idx, return_path_length=False, return_path_points=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Finds the shortest path between two points of the points constellation</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.find_shortest_constellation_path', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.find_shortest_constellation_path" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_shortest_constellation_path</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> 
+                                     <span class="n">start_point_idx</span><span class="p">,</span> 
+                                     <span class="n">end_point_idx</span><span class="p">,</span>
+                                     <span class="n">return_path_length</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the shortest path between two points of the points constellation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+
+    <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> 
+                            <span class="n">source</span><span class="o">=</span><span class="n">start_point_idx</span><span class="p">,</span> 
+                            <span class="n">target</span><span class="o">=</span><span class="n">end_point_idx</span><span class="p">,</span> 
+                            <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span>
+                            <span class="p">)</span>
+    
+    <span class="n">path_length</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path_length</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> 
+                                          <span class="n">source</span><span class="o">=</span><span class="n">start_point_idx</span><span class="p">,</span> 
+                                          <span class="n">target</span><span class="o">=</span><span class="n">end_point_idx</span><span class="p">,</span> 
+                                          <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+        
+    <span class="n">path_points</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+
+    <span class="k">if</span> <span class="n">return_path_points</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">path_points</span>
+
+    <span class="k">if</span> <span class="n">return_path_length</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">path_length</span>
+
+    <span class="k">return</span> <span class="n">path</span>
 </pre></div>
 
   </div>
@@ -2513,30 +2755,36 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
       
   <div class="item">
-    <div class="name def" id="TPLOTS.reduce_embeddings">
-    <p>def <span class="ident">reduce_embeddings</span>(</p><p>embeddings)</p>
+    <div class="name def" id="TPLOTS.reduce_dimensionality">
+    <p>def <span class="ident">reduce_dimensionality</span>(</p><p>list_of_valies, n_comp=2, n_iter=5000, verbose=True)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Reduces the dimensionality of the embeddings to 2D using t-SNE.</p></div>
+    <div class="desc"><p>Reduces the dimensionality of the values using t-SNE.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.reduce_embeddings', this);">Show source &equiv;</a></p>
-  <div id="source-TPLOTS.reduce_embeddings" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_embeddings</span><span class="p">(</span><span class="n">embeddings</span><span class="p">):</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.reduce_dimensionality', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.reduce_dimensionality" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality</span><span class="p">(</span><span class="n">list_of_valies</span><span class="p">,</span>
+                          <span class="n">n_comp</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                          <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                          <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Reduces the dimensionality of the embeddings to 2D using t-SNE.</span>
+<span class="sd">  Reduces the dimensionality of the values using t-SNE.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="n">tsne</span> <span class="o">=</span> <span class="n">TSNE</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-              <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
-              <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_valies</span><span class="p">)</span>
 
-  <span class="n">reduced_embeddings</span> <span class="o">=</span> <span class="n">tsne</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+  <span class="n">tsne</span> <span class="o">=</span> <span class="n">TSNE</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">n_comp</span><span class="p">,</span>
+              <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span>
+              <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">reduced_embeddings</span>
+  <span class="n">reduced_vals</span> <span class="o">=</span> <span class="n">tsne</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">reduced_vals</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 
   </div>
