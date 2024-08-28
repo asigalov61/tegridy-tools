@@ -6622,7 +6622,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                       <span class="n">melody_patch</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
                                       <span class="n">melody_max_velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">,</span>
                                       <span class="n">acc_max_velocity</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
-                                      <span class="n">pass_drums</span><span class="o">=</span><span class="kc">True</span>
+                                      <span class="n">pass_drums</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      <span class="n">return_melody</span><span class="o">=</span><span class="kc">False</span>
                                       <span class="p">):</span>
   
     <span class="k">if</span> <span class="n">pass_drums</span><span class="p">:</span>
@@ -6700,7 +6701,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">adjust_score_velocities</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">,</span> <span class="n">melody_max_velocity</span><span class="p">)</span>
 
-    <span class="n">final_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">smoothed_melody</span> <span class="o">+</span> <span class="n">acc_score</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">return_melody</span><span class="p">:</span>
+      <span class="n">final_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">final_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">smoothed_melody</span> <span class="o">+</span> <span class="n">acc_score</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="n">final_score</span>
     
@@ -12160,7 +12165,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.add_melody_to_enhanced_score_notes">
-    <p>def <span class="ident">add_melody_to_enhanced_score_notes</span>(</p><p>enhanced_score_notes, melody_start_time=0, melody_start_chord=0, melody_notes_min_duration=-1, melody_notes_max_duration=255, melody_duration_overlap_tolerance=4, melody_avg_duration_divider=2, melody_base_octave=5, melody_channel=3, melody_patch=40, melody_max_velocity=110, acc_max_velocity=90, pass_drums=True)</p>
+    <p>def <span class="ident">add_melody_to_enhanced_score_notes</span>(</p><p>enhanced_score_notes, melody_start_time=0, melody_start_chord=0, melody_notes_min_duration=-1, melody_notes_max_duration=255, melody_duration_overlap_tolerance=4, melody_avg_duration_divider=2, melody_base_octave=5, melody_channel=3, melody_patch=40, melody_max_velocity=110, acc_max_velocity=90, pass_drums=True, return_melody=False)</p>
     </div>
     
 
@@ -12181,7 +12186,8 @@ Tegridy Code 2024</p></div>
                                       <span class="n">melody_patch</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
                                       <span class="n">melody_max_velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">,</span>
                                       <span class="n">acc_max_velocity</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
-                                      <span class="n">pass_drums</span><span class="o">=</span><span class="kc">True</span>
+                                      <span class="n">pass_drums</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      <span class="n">return_melody</span><span class="o">=</span><span class="kc">False</span>
                                       <span class="p">):</span>
   
     <span class="k">if</span> <span class="n">pass_drums</span><span class="p">:</span>
@@ -12259,7 +12265,11 @@ Tegridy Code 2024</p></div>
 
     <span class="n">adjust_score_velocities</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">,</span> <span class="n">melody_max_velocity</span><span class="p">)</span>
 
-    <span class="n">final_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">smoothed_melody</span> <span class="o">+</span> <span class="n">acc_score</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">return_melody</span><span class="p">:</span>
+      <span class="n">final_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">smoothed_melody</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">final_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">smoothed_melody</span> <span class="o">+</span> <span class="n">acc_score</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="n">final_score</span>
 </pre></div>
