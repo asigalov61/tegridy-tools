@@ -5287,7 +5287,8 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
                                       melody_patch=40,
                                       melody_max_velocity=110,
                                       acc_max_velocity=90,
-                                      pass_drums=True
+                                      pass_drums=True,
+                                      return_melody=False
                                       ):
   
     if pass_drums:
@@ -5365,7 +5366,11 @@ def add_melody_to_enhanced_score_notes(enhanced_score_notes,
 
     adjust_score_velocities(smoothed_melody, melody_max_velocity)
 
-    final_score = sorted(smoothed_melody + acc_score, key=lambda x: (x[1], -x[4]))
+    if return_melody:
+      final_score = sorted(smoothed_melody, key=lambda x: (x[1], -x[4]))
+
+    else:
+      final_score = sorted(smoothed_melody + acc_score, key=lambda x: (x[1], -x[4]))
 
     return final_score
     
