@@ -1,6 +1,8 @@
+#================================================================
 # https://huggingface.co/spaces/asigalov61/Advanced-MIDI-Renderer
+#================================================================
 
-import os.path
+import os
 import hashlib
 import time
 import datetime
@@ -16,8 +18,6 @@ from collections import Counter
 import random
 import statistics
 
-import matplotlib.pyplot as plt
-
 #==========================================================================================================
 
 def render_midi(input_midi, 
@@ -27,12 +27,15 @@ def render_midi(input_midi,
                 custom_render_patch,
                 render_transpose_value,
                 render_transpose_to_C4,
-                render_align
-               ):
+                render_align,
+                render_output_as_solo_piano,
+                render_remove_drums 
+                ):
     
     print('*' * 70)
     print('Req start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     start_time = time.time()
+    
     print('=' * 70)
     print('Loading MIDI...')
 
@@ -44,6 +47,8 @@ def render_midi(input_midi,
     input_midi_md5hash = hashlib.md5(fdata).hexdigest()
     
     print('=' * 70)
+    print('Requested settings:')
+    print('=' * 70)
     print('Input MIDI file name:', fn)
     print('Input MIDI md5 hash', input_midi_md5hash)
     print('Render type:', render_type)
@@ -53,6 +58,8 @@ def render_midi(input_midi,
     print('Transpose value:', render_transpose_value)
     print('Transpose to C4', render_transpose_to_C4)
     print('Align to bars:', render_align)
+    print('Output as Solo Piano', render_output_as_solo_piano)
+    print('Remove drums:', render_remove_drums)
     print('=' * 70)
     print('Processing MIDI...Please wait...')
     
@@ -63,7 +70,7 @@ def render_midi(input_midi,
     
     escore = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
     
-    escore= TMIDIX.augment_enhanced_score_notes(escore, timings_divider=1)
+    escore = TMIDIX.augment_enhanced_score_notes(escore, timings_divider=1)
 
     first_note_index = [e[0] for e in raw_score[1]].index('note')
     
@@ -77,7 +84,7 @@ def render_midi(input_midi,
     print('=' * 70)
     print('Processing...Please wait...')
 
-    if render_type == 'Render as-is':
+    if render_type == 'Render as-is' or render_type == "Summarize":
         output_score = copy.deepcopy(escore)
 
     elif render_type == "Custom render" or not render_type:
@@ -135,6 +142,22 @@ def render_midi(input_midi,
         elif render_align == "Start Times and Split Durations":
             output_score = TMIDIX.recalculate_score_timings(output_score)
             output_score = TMIDIX.align_escore_notes_to_bars(output_score, split_durations=True)
+
+        if render_output_as_solo_piano:
+            output_score = TMIDIX.solo_piano_escore_notes(output_score, keep_drums=True)
+            
+        if render_remove_drums:
+            output_score = TMIDIX.strip_drums_from_escore_notes(output_score)
+            
+        if render_type == "Summarize":
+            sp_escore_notes = TMIDIX.solo_piano_escore_notes(output_score)
+            bmatrix = TMIDIX.escore_notes_to_binary_matrix(sp_escore_notes)
+            smatrix = TMIDIX.square_binary_matrix(bmatrix)
+            output_score = TMIDIX.binary_matrix_to_original_escore_notes(smatrix)
+
+            for o in output_score:
+                o[1] *= 160
+                o[2] *= 160
             
         SONG, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
                     
@@ -237,20 +260,55 @@ if __name__ == "__main__":
 
         gr.Markdown("## Select desired render type")
 
-        render_type = gr.Radio(["Render as-is", "Custom render", "Extract melody", "Flip", "Reverse", "Repair"], label="Render type", value="Render as-is")
+        render_type = gr.Radio(["Render as-is", 
+                                "Custom render", 
+                                "Extract melody", 
+                                "Flip", 
+                                "Reverse", 
+                                "Repair",
+                                "Summarize"
+                               ], 
+                               label="Render type", 
+                               value="Render as-is"
+                              )
 
         gr.Markdown("## Select desired render options")
 
-        soundfont_bank = gr.Radio(["General MIDI", "Nice strings plus orchestra", "Real choir", "Orpheus", "Super Game Boy", "Proto Square"], label="SoundFont bank", value="General MIDI")
+        soundfont_bank = gr.Radio(["General MIDI", 
+                                   "Nice strings plus orchestra", 
+                                   "Real choir", 
+                                   "Orpheus", 
+                                   "Super Game Boy", 
+                                   "Proto Square"
+                                  ], 
+                                  label="SoundFont bank", 
+                                  value="General MIDI"
+                                 )
 
-        render_sample_rate = gr.Radio(["16000", "32000", "44100"], label="MIDI audio render sample rate", value="16000")
+        render_sample_rate = gr.Radio(["16000", 
+                                       "32000", 
+                                       "44100"
+                                      ], 
+                                      label="MIDI audio render sample rate", 
+                                      value="16000"
+                                     )
 
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
         
         render_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
         render_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
-        render_align = gr.Radio(["Do not align", "Start Times", "Start Times and Durations", "Start Times and Split Durations"], label="Align output to bars", value="Do not align")
+        render_align = gr.Radio(["Do not align", 
+                                 "Start Times", 
+                                 "Start Times and Durations", 
+                                 "Start Times and Split Durations"
+                                ], 
+                                label="Align output to bars", 
+                                value="Do not align"
+                               )
 
+        render_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
+        render_remove_drums = gr.Checkbox(label="Remove drums", value=False)
+        
         submit = gr.Button()
 
         gr.Markdown("## Render results")
@@ -269,8 +327,16 @@ if __name__ == "__main__":
                                                custom_render_patch,
                                                render_transpose_value,
                                                render_transpose_to_C4,
-                                               render_align
+                                               render_align,
+                                               render_output_as_solo_piano,
+                                               render_remove_drums                                               
                                               ],
-                                                [output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
+                                                [output_midi_md5, 
+                                                 output_midi_title, 
+                                                 output_midi_summary, 
+                                                 output_midi, 
+                                                 output_audio, 
+                                                 output_plot
+                                                ])
         
     app.queue().launch()
