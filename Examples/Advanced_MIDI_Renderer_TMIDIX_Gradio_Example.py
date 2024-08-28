@@ -91,7 +91,7 @@ def render_midi(input_midi,
         output_score = copy.deepcopy(escore)
 
     elif render_type == "Extract melody":
-        output_score = TMIDIX.extract_melody(cscore, melody_range=[48, 84])
+        output_score = TMIDIX.add_melody_to_enhanced_score_notes(escore, return_melody=True)
 
     elif render_type == "Flip":
         output_score = TMIDIX.flip_enhanced_score_notes(escore)
