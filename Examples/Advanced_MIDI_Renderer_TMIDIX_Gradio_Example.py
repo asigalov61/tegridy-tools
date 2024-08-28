@@ -310,7 +310,7 @@ if __name__ == "__main__":
         render_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
         render_remove_drums = gr.Checkbox(label="Remove drums", value=False)
         
-        submit = gr.Button()
+        submit = gr.Button("Render MIDI", variant="primary")
 
         gr.Markdown("## Render results")
         
