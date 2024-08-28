@@ -97,7 +97,8 @@ def render_midi(input_midi,
         output_score = TMIDIX.flip_enhanced_score_notes(escore)
         
     elif render_type == "Reverse":
-        output_score = TMIDIX.reverse_enhanced_score_notes(escore)
+        ematrix = TMIDIX.escore_notes_to_escore_matrix(escore, reverse_matrix=True)
+        output_score = TMIDIX.escore_matrix_to_original_escore_notes(ematrix)
         
     elif render_type == 'Repair':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
