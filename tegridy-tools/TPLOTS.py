@@ -64,6 +64,7 @@ import networkx as nx
 from sklearn.manifold import TSNE
 from sklearn import metrics
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
 
 from scipy.ndimage import zoom
 from scipy.spatial import distance_matrix
@@ -211,11 +212,11 @@ def find_closest_points(points, return_points=True):
 
 ################################################################################
 
-def reduce_dimensionality(list_of_valies,
-                          n_comp=2,
-                          n_iter=5000,
-                          verbose=True
-                          ):
+def reduce_dimensionality_tsne(list_of_valies,
+                                n_comp=2,
+                                n_iter=5000,
+                                verbose=True
+                              ):
 
   """
   Reduces the dimensionality of the values using t-SNE.
@@ -343,7 +344,7 @@ def add_arrays(a, b):
 ################################################################################
 
 def calculate_similarities(lists_of_values, metric='cosine'):
-  return metrics.pairwise_distances(lists_of_values, metric=metric)
+  return metrics.pairwise_distances(lists_of_values, metric=metric).tolist()
 
 ################################################################################
 
@@ -390,7 +391,7 @@ def min_max_normalize(values):
 
   scaler = MinMaxScaler()
 
-  return scaler.fit_transform(values)
+  return scaler.fit_transform(values).tolist()
 
 ################################################################################
 
@@ -417,6 +418,73 @@ def generate_labels(lists_of_values,
   
   else:
     return ordered_values_labels
+
+################################################################################
+
+def reduce_dimensionality_pca(list_of_values, n_components=2):
+
+  """
+  Reduces the dimensionality of the values using PCA.
+  """
+
+  pca = PCA(n_components=n_components)
+  pca_data = pca.fit_transform(list_of_values)
+  
+  return pca_data.tolist()
+
+def reduce_dimensionality_simple(list_of_values, 
+                                 return_means=True,
+                                 return_std_devs=True,
+                                 return_medians=False,
+                                 return_vars=False
+                                 ):
+  
+  '''
+  Reduces dimensionality of the values in a simple way
+  '''
+
+  array = np.array(list_of_values)
+  results = []
+
+  if return_means:
+      means = np.mean(array, axis=1)
+      results.append(means)
+
+  if return_std_devs:
+      std_devs = np.std(array, axis=1)
+      results.append(std_devs)
+
+  if return_medians:
+      medians = np.median(array, axis=1)
+      results.append(medians)
+
+  if return_vars:
+      vars = np.var(array, axis=1)
+      results.append(vars)
+
+  merged_results = np.column_stack(results)
+  
+  return merged_results.tolist()
+
+################################################################################
+
+def filter_and_replace(list_of_values, 
+                        threshold, 
+                        replace_value, 
+                        replace_above_threshold=False
+                        ):
+
+  array = np.array(list_of_values)
+
+  modified_array = np.copy(array)
+  
+  if replace_above_threshold:
+    modified_array[modified_array > threshold] = replace_value
+  
+  else:
+    modified_array[modified_array < threshold] = replace_value
+  
+  return modified_array.tolist()
 
 ################################################################################
 
