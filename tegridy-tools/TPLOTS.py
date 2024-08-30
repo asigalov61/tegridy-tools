@@ -55,6 +55,7 @@ r'''############################################################################
 # Modules imports
 ################################################################################
 
+from collections import Counter
 from itertools import groupby
 
 import numpy as np
@@ -488,6 +489,42 @@ def reduce_dimensionality_2d_distance(list_of_values, p=5):
               points.append([i, j])
 
   return points
+
+################################################################################
+
+def normalize_to_range(values, n):
+    
+  min_val = min(values)
+  max_val = max(values)
+  
+  range_val = max_val - min_val
+  
+  normalized_values = [((value - min_val) / range_val * 2 * n) - n for value in values]
+  
+  return normalized_values
+
+################################################################################
+
+def reduce_dimensionality_simple_pca(list_of_values, n_components=2):
+
+  '''
+  Reduces the dimensionality of the values using simple PCA
+  '''
+
+  reduced_values = []
+
+  for l in list_of_values:
+
+    norm_values = [round(v * len(l)) for v in normalize_to_range(l, (n_components+1) // 2)]
+
+    pca_values = Counter(norm_values).most_common()
+    pca_values = [vv[0] / len(l) for vv in pca_values]
+    pca_values = pca_values[:n_components]
+    pca_values = pca_values + [0] * (n_components - len(pca_values))
+
+    reduced_values.append(pca_values)
+
+  return reduced_values
 
 ################################################################################
 
