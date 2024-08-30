@@ -395,13 +395,13 @@ def min_max_normalize(values):
 
 ################################################################################
 
-def remove_points_outliers(points):
+def remove_points_outliers(points, z_score_threshold=3):
 
   points = np.array(points)
 
   z_scores = np.abs(zscore(points, axis=0))
 
-  return points[(z_scores < 3).all(axis=1)].tolist()
+  return points[(z_scores < z_score_threshold).all(axis=1)].tolist()
 
 ################################################################################
 
@@ -468,11 +468,34 @@ def reduce_dimensionality_simple(list_of_values,
 
 ################################################################################
 
-def filter_and_replace(list_of_values, 
-                        threshold, 
-                        replace_value, 
-                        replace_above_threshold=False
-                        ):
+def reduce_dimensionality_2d_distance(list_of_values, p=5):
+
+  '''
+  Reduces the dimensionality of the values using 2d distance
+  '''
+
+  values = np.array(list_of_values)
+
+  dist_matrix = distance_matrix(values, values, p=p)
+
+  mst = minimum_spanning_tree(dist_matrix).toarray()
+
+  points = []
+
+  for i in range(len(values)):
+      for j in range(len(values)):
+          if mst[i, j] > 0:
+              points.append([i, j])
+
+  return points
+
+################################################################################
+
+def filter_and_replace_values(list_of_values, 
+                              threshold, 
+                              replace_value, 
+                              replace_above_threshold=False
+                              ):
 
   array = np.array(list_of_values)
 
@@ -491,6 +514,7 @@ def filter_and_replace(list_of_values,
 def find_shortest_constellation_path(points, 
                                      start_point_idx, 
                                      end_point_idx,
+                                     p=5,
                                      return_path_length=False,
                                      return_path_points=False,
                                      ):
@@ -501,7 +525,7 @@ def find_shortest_constellation_path(points,
 
     points = np.array(points)
 
-    dist_matrix = distance_matrix(points, points)
+    dist_matrix = distance_matrix(points, points, p=p)
 
     mst = minimum_spanning_tree(dist_matrix).toarray()
 
@@ -751,12 +775,13 @@ def plot_points_with_mst_lines(points,
 ################################################################################
 
 def plot_points_constellation(points, 
-                             points_labels,                                
-                             plot_size=(15, 15),
-                             labels_size=12,
-                             show_grid=False,
-                             save_plot=''
-                            ):
+                              points_labels,
+                              p=5,                              
+                              plot_size=(15, 15),
+                              labels_size=12,
+                              show_grid=False,
+                              save_plot=''
+                              ):
 
   """
   Plots 2D points constellation
@@ -764,7 +789,7 @@ def plot_points_constellation(points,
 
   points = np.array(points)
 
-  dist_matrix = distance_matrix(points, points)
+  dist_matrix = distance_matrix(points, points, p=p)
 
   mst = minimum_spanning_tree(dist_matrix).toarray()
 
