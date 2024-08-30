@@ -1074,7 +1074,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.add_arrays">add_arrays</a></li>
     <li class="mono"><a href="#TPLOTS.calculate_similarities">calculate_similarities</a></li>
     <li class="mono"><a href="#TPLOTS.compute_mst_edges">compute_mst_edges</a></li>
-    <li class="mono"><a href="#TPLOTS.filter_and_replace">filter_and_replace</a></li>
+    <li class="mono"><a href="#TPLOTS.filter_and_replace_values">filter_and_replace_values</a></li>
     <li class="mono"><a href="#TPLOTS.find_closest_points">find_closest_points</a></li>
     <li class="mono"><a href="#TPLOTS.find_shortest_constellation_path">find_shortest_constellation_path</a></li>
     <li class="mono"><a href="#TPLOTS.generate_colors">generate_colors</a></li>
@@ -1088,6 +1088,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.plot_points_constellation">plot_points_constellation</a></li>
     <li class="mono"><a href="#TPLOTS.plot_points_with_mst_lines">plot_points_with_mst_lines</a></li>
     <li class="mono"><a href="#TPLOTS.plot_square_matrix_points">plot_square_matrix_points</a></li>
+    <li class="mono"><a href="#TPLOTS.reduce_dimensionality_2d_distance">reduce_dimensionality_2d_distance</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_pca">reduce_dimensionality_pca</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_simple">reduce_dimensionality_simple</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_tsne">reduce_dimensionality_tsne</a></li>
@@ -1562,13 +1563,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">################################################################################</span>
 
-<span class="k">def</span> <span class="nf">remove_points_outliers</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">remove_points_outliers</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">z_score_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 
   <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
   <span class="n">z_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zscore</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
-  <span class="k">return</span> <span class="n">points</span><span class="p">[(</span><span class="n">z_scores</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">points</span><span class="p">[(</span><span class="n">z_scores</span> <span class="o">&lt;</span> <span class="n">z_score_threshold</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <span class="c1">################################################################################</span>
 
@@ -1635,11 +1636,34 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">################################################################################</span>
 
-<span class="k">def</span> <span class="nf">filter_and_replace</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> 
-                        <span class="n">threshold</span><span class="p">,</span> 
-                        <span class="n">replace_value</span><span class="p">,</span> 
-                        <span class="n">replace_above_threshold</span><span class="o">=</span><span class="kc">False</span>
-                        <span class="p">):</span>
+<span class="k">def</span> <span class="nf">reduce_dimensionality_2d_distance</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Reduces the dimensionality of the values using 2d distance</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+
+  <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span>
+
+  <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+
+  <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+  <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+          <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">points</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">filter_and_replace_values</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> 
+                              <span class="n">threshold</span><span class="p">,</span> 
+                              <span class="n">replace_value</span><span class="p">,</span> 
+                              <span class="n">replace_above_threshold</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="p">):</span>
 
   <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span>
 
@@ -1658,6 +1682,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">find_shortest_constellation_path</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> 
                                      <span class="n">start_point_idx</span><span class="p">,</span> 
                                      <span class="n">end_point_idx</span><span class="p">,</span>
+                                     <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                                      <span class="n">return_path_length</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="p">):</span>
@@ -1668,7 +1693,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
-    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
 
     <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
 
@@ -1918,12 +1943,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">################################################################################</span>
 
 <span class="k">def</span> <span class="nf">plot_points_constellation</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> 
-                             <span class="n">points_labels</span><span class="p">,</span>                                
-                             <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
-                             <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-                             <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
-                            <span class="p">):</span>
+                              <span class="n">points_labels</span><span class="p">,</span>
+                              <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>                              
+                              <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+                              <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                              <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                              <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points constellation</span>
@@ -1931,7 +1957,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
-  <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+  <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
 
   <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
 
@@ -2205,21 +2231,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
       
   <div class="item">
-    <div class="name def" id="TPLOTS.filter_and_replace">
-    <p>def <span class="ident">filter_and_replace</span>(</p><p>list_of_values, threshold, replace_value, replace_above_threshold=False)</p>
+    <div class="name def" id="TPLOTS.filter_and_replace_values">
+    <p>def <span class="ident">filter_and_replace_values</span>(</p><p>list_of_values, threshold, replace_value, replace_above_threshold=False)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.filter_and_replace', this);">Show source &equiv;</a></p>
-  <div id="source-TPLOTS.filter_and_replace" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filter_and_replace</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> 
-                        <span class="n">threshold</span><span class="p">,</span> 
-                        <span class="n">replace_value</span><span class="p">,</span> 
-                        <span class="n">replace_above_threshold</span><span class="o">=</span><span class="kc">False</span>
-                        <span class="p">):</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.filter_and_replace_values', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.filter_and_replace_values" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filter_and_replace_values</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> 
+                              <span class="n">threshold</span><span class="p">,</span> 
+                              <span class="n">replace_value</span><span class="p">,</span> 
+                              <span class="n">replace_above_threshold</span><span class="o">=</span><span class="kc">False</span>
+                              <span class="p">):</span>
 
   <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span>
 
@@ -2289,7 +2315,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <div class="item">
     <div class="name def" id="TPLOTS.find_shortest_constellation_path">
-    <p>def <span class="ident">find_shortest_constellation_path</span>(</p><p>points, start_point_idx, end_point_idx, return_path_length=False, return_path_points=False)</p>
+    <p>def <span class="ident">find_shortest_constellation_path</span>(</p><p>points, start_point_idx, end_point_idx, p=5, return_path_length=False, return_path_points=False)</p>
     </div>
     
 
@@ -2302,6 +2328,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_shortest_constellation_path</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> 
                                      <span class="n">start_point_idx</span><span class="p">,</span> 
                                      <span class="n">end_point_idx</span><span class="p">,</span>
+                                     <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                                      <span class="n">return_path_length</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="p">):</span>
@@ -2312,7 +2339,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
-    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
 
     <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
 
@@ -2669,7 +2696,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <div class="item">
     <div class="name def" id="TPLOTS.plot_points_constellation">
-    <p>def <span class="ident">plot_points_constellation</span>(</p><p>points, points_labels, plot_size=(15, 15), labels_size=12, show_grid=False, save_plot=&#39;&#39;)</p>
+    <p>def <span class="ident">plot_points_constellation</span>(</p><p>points, points_labels, p=5, plot_size=(15, 15), labels_size=12, show_grid=False, save_plot=&#39;&#39;)</p>
     </div>
     
 
@@ -2680,12 +2707,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.plot_points_constellation', this);">Show source &equiv;</a></p>
   <div id="source-TPLOTS.plot_points_constellation" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plot_points_constellation</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> 
-                             <span class="n">points_labels</span><span class="p">,</span>                                
-                             <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
-                             <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-                             <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
-                            <span class="p">):</span>
+                              <span class="n">points_labels</span><span class="p">,</span>
+                              <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>                              
+                              <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+                              <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                              <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                              <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points constellation</span>
@@ -2693,7 +2721,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
-  <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+  <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
 
   <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
 
@@ -2862,6 +2890,46 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
       
   <div class="item">
+    <div class="name def" id="TPLOTS.reduce_dimensionality_2d_distance">
+    <p>def <span class="ident">reduce_dimensionality_2d_distance</span>(</p><p>list_of_values, p=5)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Reduces the dimensionality of the values using 2d distance</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.reduce_dimensionality_2d_distance', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.reduce_dimensionality_2d_distance" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_2d_distance</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Reduces the dimensionality of the values using 2d distance</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+
+  <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span>
+
+  <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+
+  <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+  <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+          <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">points</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TPLOTS.reduce_dimensionality_pca">
     <p>def <span class="ident">reduce_dimensionality_pca</span>(</p><p>list_of_values, n_components=2)</p>
     </div>
@@ -2985,7 +3053,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <div class="item">
     <div class="name def" id="TPLOTS.remove_points_outliers">
-    <p>def <span class="ident">remove_points_outliers</span>(</p><p>points)</p>
+    <p>def <span class="ident">remove_points_outliers</span>(</p><p>points, z_score_threshold=3)</p>
     </div>
     
 
@@ -2994,13 +3062,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.remove_points_outliers', this);">Show source &equiv;</a></p>
   <div id="source-TPLOTS.remove_points_outliers" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">remove_points_outliers</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">remove_points_outliers</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">z_score_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 
   <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
   <span class="n">z_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zscore</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
-  <span class="k">return</span> <span class="n">points</span><span class="p">[(</span><span class="n">z_scores</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">points</span><span class="p">[(</span><span class="n">z_scores</span> <span class="o">&lt;</span> <span class="n">z_score_threshold</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 
   </div>
