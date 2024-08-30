@@ -2,7 +2,13 @@
 
 ***
 
-## Here are the example code snippets for all main TMIDIX module MIDI processing functions
+## Make sure to check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) for many useful and practical examples and applications
+
+***
+
+## Below are the example code snippets for all main TMIDIX module MIDI processing functions
+
+***
 
 ### MIDI input
 
@@ -317,10 +323,6 @@ if mel_score and acc_score:
                                                             list_of_MIDI_patches=patches
                                                            )
 ```
-
-***
-
-### Make sure to check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) dir for many useful and practical examples and applications
 
 ***
 
