@@ -1083,6 +1083,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.hsv_to_rgb">hsv_to_rgb</a></li>
     <li class="mono"><a href="#TPLOTS.min_max_normalize">min_max_normalize</a></li>
     <li class="mono"><a href="#TPLOTS.minkowski_distance_matrix">minkowski_distance_matrix</a></li>
+    <li class="mono"><a href="#TPLOTS.normalize_to_range">normalize_to_range</a></li>
     <li class="mono"><a href="#TPLOTS.plot_cosine_similarities">plot_cosine_similarities</a></li>
     <li class="mono"><a href="#TPLOTS.plot_ms_SONG">plot_ms_SONG</a></li>
     <li class="mono"><a href="#TPLOTS.plot_points_constellation">plot_points_constellation</a></li>
@@ -1091,6 +1092,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_2d_distance">reduce_dimensionality_2d_distance</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_pca">reduce_dimensionality_pca</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_simple">reduce_dimensionality_simple</a></li>
+    <li class="mono"><a href="#TPLOTS.reduce_dimensionality_simple_pca">reduce_dimensionality_simple_pca</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_tsne">reduce_dimensionality_tsne</a></li>
     <li class="mono"><a href="#TPLOTS.remove_points_outliers">remove_points_outliers</a></li>
     <li class="mono"><a href="#TPLOTS.robust_normalize">robust_normalize</a></li>
@@ -1223,6 +1225,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1"># Modules imports</span>
 <span class="c1">################################################################################</span>
 
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1656,6 +1659,42 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
               <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="n">points</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">normalize_to_range</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    
+  <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+  <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+  
+  <span class="n">range_val</span> <span class="o">=</span> <span class="n">max_val</span> <span class="o">-</span> <span class="n">min_val</span>
+  
+  <span class="n">normalized_values</span> <span class="o">=</span> <span class="p">[((</span><span class="n">value</span> <span class="o">-</span> <span class="n">min_val</span><span class="p">)</span> <span class="o">/</span> <span class="n">range_val</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+  
+  <span class="k">return</span> <span class="n">normalized_values</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">reduce_dimensionality_simple_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Reduces the dimensionality of the values using simple PCA</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+
+  <span class="n">reduced_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">list_of_values</span><span class="p">:</span>
+
+    <span class="n">norm_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">normalize_to_range</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="p">(</span><span class="n">n_components</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)]</span>
+
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">norm_values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">vv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">pca_values</span><span class="p">]</span>
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="n">pca_values</span><span class="p">[:</span><span class="n">n_components</span><span class="p">]</span>
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="n">pca_values</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_components</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pca_values</span><span class="p">))</span>
+
+    <span class="n">reduced_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pca_values</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">reduced_values</span>
 
 <span class="c1">################################################################################</span>
 
@@ -2541,6 +2580,35 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
       
   <div class="item">
+    <div class="name def" id="TPLOTS.normalize_to_range">
+    <p>def <span class="ident">normalize_to_range</span>(</p><p>values, n)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.normalize_to_range', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.normalize_to_range" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">normalize_to_range</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    
+  <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+  <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+  
+  <span class="n">range_val</span> <span class="o">=</span> <span class="n">max_val</span> <span class="o">-</span> <span class="n">min_val</span>
+  
+  <span class="n">normalized_values</span> <span class="o">=</span> <span class="p">[((</span><span class="n">value</span> <span class="o">-</span> <span class="n">min_val</span><span class="p">)</span> <span class="o">/</span> <span class="n">range_val</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+  
+  <span class="k">return</span> <span class="n">normalized_values</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TPLOTS.plot_cosine_similarities">
     <p>def <span class="ident">plot_cosine_similarities</span>(</p><p>lists_of_values, plot_size=(7, 7), save_plot=&#39;&#39;)</p>
     </div>
@@ -3004,6 +3072,46 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">merged_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
   
   <span class="k">return</span> <span class="n">merged_results</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.reduce_dimensionality_simple_pca">
+    <p>def <span class="ident">reduce_dimensionality_simple_pca</span>(</p><p>list_of_values, n_components=2)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Reduces the dimensionality of the values using simple PCA</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.reduce_dimensionality_simple_pca', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.reduce_dimensionality_simple_pca" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_simple_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Reduces the dimensionality of the values using simple PCA</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+
+  <span class="n">reduced_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">list_of_values</span><span class="p">:</span>
+
+    <span class="n">norm_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">normalize_to_range</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="p">(</span><span class="n">n_components</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)]</span>
+
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">norm_values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">vv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">pca_values</span><span class="p">]</span>
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="n">pca_values</span><span class="p">[:</span><span class="n">n_components</span><span class="p">]</span>
+    <span class="n">pca_values</span> <span class="o">=</span> <span class="n">pca_values</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_components</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pca_values</span><span class="p">))</span>
+
+    <span class="n">reduced_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pca_values</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">reduced_values</span>
 </pre></div>
 
   </div>
