@@ -870,7 +870,7 @@ def binary_matrix_to_images(matrix,
                             overlap,
                             output_folder='./Dataset/', 
                             output_img_prefix='image', 
-                            output_img_ext='.jpg',
+                            output_img_ext='.png',
                             save_to_array=False,
                             verbose=True
                             ):
