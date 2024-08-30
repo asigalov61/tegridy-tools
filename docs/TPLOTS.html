@@ -1072,6 +1072,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <ul>
     <li class="mono"><a href="#TPLOTS.add_arrays">add_arrays</a></li>
+    <li class="mono"><a href="#TPLOTS.binary_matrix_to_images">binary_matrix_to_images</a></li>
     <li class="mono"><a href="#TPLOTS.calculate_similarities">calculate_similarities</a></li>
     <li class="mono"><a href="#TPLOTS.compute_mst_edges">compute_mst_edges</a></li>
     <li class="mono"><a href="#TPLOTS.filter_and_replace_values">filter_and_replace_values</a></li>
@@ -1081,6 +1082,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.generate_labels">generate_labels</a></li>
     <li class="mono"><a href="#TPLOTS.get_tokens_embeddings">get_tokens_embeddings</a></li>
     <li class="mono"><a href="#TPLOTS.hsv_to_rgb">hsv_to_rgb</a></li>
+    <li class="mono"><a href="#TPLOTS.images_to_binary_matrix">images_to_binary_matrix</a></li>
     <li class="mono"><a href="#TPLOTS.min_max_normalize">min_max_normalize</a></li>
     <li class="mono"><a href="#TPLOTS.minkowski_distance_matrix">minkowski_distance_matrix</a></li>
     <li class="mono"><a href="#TPLOTS.normalize_to_range">normalize_to_range</a></li>
@@ -1243,6 +1245,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">zscore</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
 
 <span class="c1">################################################################################</span>
 <span class="c1"># Constants</span>
@@ -2032,6 +2035,72 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">binary_matrix_to_images</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> 
+                            <span class="n">step</span><span class="p">,</span>
+                            <span class="n">overlap</span><span class="p">,</span>
+                            <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;./Dataset/&#39;</span><span class="p">,</span> 
+                            <span class="n">output_img_prefix</span><span class="o">=</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> 
+                            <span class="n">output_img_ext</span><span class="o">=</span><span class="s1">&#39;.jpg&#39;</span><span class="p">,</span>
+                            <span class="n">save_to_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                            <span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">save_to_array</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Checking output folder dir...&#39;</span><span class="p">)</span>
+
+      <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_folder</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Writing images...&#39;</span><span class="p">)</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    
+    <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">),</span> <span class="n">overlap</span><span class="p">):</span>
+       
+        <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
+        
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">submatrix</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
+          <span class="n">image_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_folder</span> <span class="o">+</span> <span class="n">output_img_prefix</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="n">output_img_ext</span><span class="p">)</span>
+  
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_array</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">images_to_binary_matrix</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">):</span>
+
+    <span class="n">image_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">)</span>
+   
+    <span class="n">original_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">image_array</span><span class="p">:</span>
+
+        <span class="n">submatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">original_matrix</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">submatrix</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    
+    <span class="k">return</span> <span class="n">original_matrix</span>
+
+<span class="c1">################################################################################</span>
 <span class="c1"># [WIP] Future dev functions</span>
 <span class="c1">################################################################################</span>
 
@@ -2200,6 +2269,73 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.add_arrays" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add_arrays</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
   <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.binary_matrix_to_images">
+    <p>def <span class="ident">binary_matrix_to_images</span>(</p><p>matrix, step, overlap, output_folder=&#39;./Dataset/&#39;, output_img_prefix=&#39;image&#39;, output_img_ext=&#39;.jpg&#39;, save_to_array=False, verbose=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.binary_matrix_to_images', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.binary_matrix_to_images" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">binary_matrix_to_images</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> 
+                            <span class="n">step</span><span class="p">,</span>
+                            <span class="n">overlap</span><span class="p">,</span>
+                            <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;./Dataset/&#39;</span><span class="p">,</span> 
+                            <span class="n">output_img_prefix</span><span class="o">=</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> 
+                            <span class="n">output_img_ext</span><span class="o">=</span><span class="s1">&#39;.jpg&#39;</span><span class="p">,</span>
+                            <span class="n">save_to_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                            <span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">save_to_array</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Checking output folder dir...&#39;</span><span class="p">)</span>
+
+      <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_folder</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Writing images...&#39;</span><span class="p">)</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    
+    <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">),</span> <span class="n">overlap</span><span class="p">):</span>
+       
+        <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
+        
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">submatrix</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
+          <span class="n">image_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_folder</span> <span class="o">+</span> <span class="n">output_img_prefix</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="n">output_img_ext</span><span class="p">)</span>
+  
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_array</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -2516,6 +2652,37 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">%</span><span class="mi">6</span>
   
   <span class="k">return</span> <span class="p">[(</span><span class="n">v</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.images_to_binary_matrix">
+    <p>def <span class="ident">images_to_binary_matrix</span>(</p><p>list_of_images)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.images_to_binary_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.images_to_binary_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">images_to_binary_matrix</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">):</span>
+
+    <span class="n">image_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_images</span><span class="p">)</span>
+   
+    <span class="n">original_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">image_array</span><span class="p">:</span>
+
+        <span class="n">submatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">original_matrix</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">submatrix</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    
+    <span class="k">return</span> <span class="n">original_matrix</span>
 </pre></div>
 
   </div>
