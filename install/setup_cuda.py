@@ -10,6 +10,7 @@ sys.path.insert(0,os.getcwd()+'/tegridy-tools/tegridy-data')
 sys.path.insert(0,os.getcwd()+'/tegridy-tools/tegridy-tools/X-Transformer')
 
 import pickle
+from itertools import groupby
 from collections import Counter
 import secrets
 import tqdm
@@ -25,7 +26,21 @@ from joblib import Parallel, delayed, parallel_config
 import matplotlib.pyplot as plt
 import numpy as np
 
+import networkx as nx
+
+from sklearn.manifold import TSNE
+from sklearn import metrics
+from sklearn.metrics import pairwise_distances
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+
+from scipy.ndimage import zoom
+from scipy.spatial import distance_matrix
+from scipy.sparse.csgraph import minimum_spanning_tree
+from scipy.stats import zscore
+
 import TMIDIX
+import TPLOTS
 import TMELODIES
 import HaystackSearch
 import midi_to_colab_audio
