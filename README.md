@@ -58,6 +58,7 @@
 
 ```
 import TMIDIX
+import TPLOTS
 import TMELODIES
 import HaystackSearch
 import midi_to_colab_audio
