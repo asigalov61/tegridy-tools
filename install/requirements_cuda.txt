@@ -1,6 +1,10 @@
 tqdm
 numpy
 matplotlib
+scipy
+networkx[all]
+scikit-learn
 einops
 torch
 cupy-cuda12x
+torch-summary
