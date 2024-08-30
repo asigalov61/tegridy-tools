@@ -48,6 +48,8 @@ import midi_to_colab_audio
 import torch
 import cupy as cp
 
+from torchsummary import summary
+
 from x_transformer_1_23_2 import *
 
 import random
