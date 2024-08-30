@@ -7939,17 +7939,34 @@ def chord_to_pchord(chord):
 
   return pchord
 
+###################################################################################
+
 def summarize_escore_notes(escore_notes, 
                            summary_length_in_chords=128, 
-                           preserve_timings=True
+                           preserve_timings=True,
+                           preserve_durations=False,
+                           time_threshold=12,
+                           min_sum_chord_len=2,
+                           use_tones_chords=True
                            ):
 
     cscore = chordify_score([d[1:] for d in delta_score_notes(escore_notes)])
 
+    summary_length_in_chords = min(len(cscore), summary_length_in_chords)
+
+    ltthresh = time_threshold // 2
+    uttresh = time_threshold * 2
+
+    mc_time = Counter([c[0][0] for c in cscore if c[0][2] != 9 and ltthresh < c[0][0] < uttresh]).most_common()[0][0]
+
     pchords = []
 
     for c in cscore:
-      pchords.append(chord_to_pchord(c))
+      if use_tones_chords:
+        pchords.append([c[0][0]] + pitches_to_tones_chord(chord_to_pchord(c)))
+        
+      else:
+        pchords.append([c[0][0]] + chord_to_pchord(c))
 
     step = round(len(pchords) / summary_length_in_chords)
 
@@ -7962,18 +7979,26 @@ def summarize_escore_notes(escore_notes,
 
     for i, s in enumerate(samples):
 
-      best_chord = list(Counter(s).most_common()[0][0])
+      best_chord = list([v[0] for v in Counter(s).most_common() if v[0][0] == mc_time and len(v[0]) > min_sum_chord_len])
 
-      chord = copy.deepcopy(cscore[[list(ss) for ss in s].index(best_chord)+(i*step)])
+      if not best_chord:
+        best_chord = list([v[0] for v in Counter(s).most_common() if len(v[0]) > min_sum_chord_len])
+        
+        if not best_chord:
+          best_chord = list([Counter(s).most_common()[0][0]])
+
+      chord = copy.deepcopy(cscore[[ss for ss in s].index(best_chord[0])+(i*step)])
 
       if preserve_timings:
 
-        if i > 0:
+        if not preserve_durations:
 
-          pchord = summarized_escore_notes[-1]
+          if i > 0:
 
-          for c in pchord:
-            c[1] = max(c[1], chord[0][0])
+            pchord = summarized_escore_notes[-1]
+
+            for pc in pchord:
+              pc[1] = min(pc[1], chord[0][0])
 
       else:
 
