@@ -263,7 +263,7 @@ def compute_mst_edges(similarity_scores_list):
 def square_binary_matrix(binary_matrix, 
                          matrix_size=128,
                          interpolation_order=5,
-                         return_square_matrix=False
+                         return_square_matrix_points=False
                          ):
 
   """
@@ -281,11 +281,11 @@ def square_binary_matrix(binary_matrix,
 
   points = np.column_stack(np.where(final_matrix == 1)).tolist()
 
-  if return_square_matrix:
-    return [points, resized_matrix]
+  if return_square_matrix_points:
+    return points
 
   else:
-    return points
+    return resized_matrix
 
 ################################################################################
 
@@ -893,7 +893,7 @@ def binary_matrix_to_images(matrix,
     
     image_array = []
     
-    for i in range(0, matrix.shape[0]-max(step, overlap), overlap):
+    for i in range(0, min(1, matrix.shape[0]-max(step, overlap)), overlap):
        
         submatrix = matrix[i:i+step, :]
         
