@@ -883,7 +883,8 @@ def binary_matrix_to_images(matrix,
 
       os.makedirs(os.path.dirname(output_folder), exist_ok=True)
 
-      print('Done!')
+      if verbose:
+        print('Done!')
 
     if verbose:
       print('=' * 70)
