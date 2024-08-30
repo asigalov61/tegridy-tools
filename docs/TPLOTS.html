@@ -1227,6 +1227,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1"># Modules imports</span>
 <span class="c1">################################################################################</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
 
@@ -1434,7 +1435,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">square_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
                          <span class="n">matrix_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
                          <span class="n">interpolation_order</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                         <span class="n">return_square_matrix</span><span class="o">=</span><span class="kc">False</span>
+                         <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1452,11 +1453,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">final_matrix</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="n">return_square_matrix</span><span class="p">:</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">points</span><span class="p">,</span> <span class="n">resized_matrix</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">return_square_matrix_points</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">points</span>
 
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">points</span>
+    <span class="k">return</span> <span class="n">resized_matrix</span>
 
 <span class="c1">################################################################################</span>
 
@@ -2064,7 +2065,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
     <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
     
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">),</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)),</span> <span class="n">overlap</span><span class="p">):</span>
        
         <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
         
@@ -2316,7 +2317,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
     <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
     
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">),</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)),</span> <span class="n">overlap</span><span class="p">):</span>
        
         <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
         
@@ -3389,7 +3390,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <div class="item">
     <div class="name def" id="TPLOTS.square_binary_matrix">
-    <p>def <span class="ident">square_binary_matrix</span>(</p><p>binary_matrix, matrix_size=128, interpolation_order=5, return_square_matrix=False)</p>
+    <p>def <span class="ident">square_binary_matrix</span>(</p><p>binary_matrix, matrix_size=128, interpolation_order=5, return_square_matrix_points=False)</p>
     </div>
     
 
@@ -3402,7 +3403,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">square_binary_matrix</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">,</span> 
                          <span class="n">matrix_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
                          <span class="n">interpolation_order</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                         <span class="n">return_square_matrix</span><span class="o">=</span><span class="kc">False</span>
+                         <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
 
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3420,11 +3421,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">final_matrix</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="n">return_square_matrix</span><span class="p">:</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">points</span><span class="p">,</span> <span class="n">resized_matrix</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">return_square_matrix_points</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">points</span>
 
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">points</span>
+    <span class="k">return</span> <span class="n">resized_matrix</span>
 </pre></div>
 
   </div>
