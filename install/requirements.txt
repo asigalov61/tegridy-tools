@@ -2,5 +2,5 @@ tqdm
 numpy
 matplotlib
 scipy
-networkx[all]
+networkx
 scikit-learn
