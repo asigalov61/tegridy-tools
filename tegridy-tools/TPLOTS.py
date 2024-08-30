@@ -73,6 +73,7 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 from scipy.stats import zscore
 
 import matplotlib.pyplot as plt
+from PIL import Image
 
 ################################################################################
 # Constants
@@ -860,6 +861,72 @@ def plot_points_constellation(points,
   plt.show()
 
   plt.close()
+
+################################################################################
+
+def binary_matrix_to_images(matrix, 
+                            step,
+                            overlap,
+                            output_folder='./Dataset/', 
+                            output_img_prefix='image', 
+                            output_img_ext='.jpg',
+                            save_to_array=False,
+                            verbose=True
+                            ):
+
+    if not save_to_array:
+
+      if verbose:
+        print('=' * 70)
+        print('Checking output folder dir...')
+
+      os.makedirs(os.path.dirname(output_folder), exist_ok=True)
+
+      print('Done!')
+
+    if verbose:
+      print('=' * 70)
+      print('Writing images...')
+
+    matrix = np.array(matrix, dtype=np.uint8)
+    
+    image_array = []
+    
+    for i in range(0, matrix.shape[0]-max(step, overlap), overlap):
+       
+        submatrix = matrix[i:i+step, :]
+        
+        img = Image.fromarray(submatrix * 255).convert('1')
+        
+        if save_to_array:
+          image_array.append(np.array(img))
+
+        else:
+          img.save(output_folder + output_img_prefix + '_' + str(matrix.shape[1]) + '_' + str(i).zfill(7) + output_img_ext)
+  
+    if verbose:
+      print('Done!')
+      print('=' * 70)
+      print('Saved', (matrix.shape[0]-max(step, overlap)) // min(step, overlap)+1, 'imges!')
+      print('=' * 70)
+
+    if save_to_array:
+        return np.array(image_array).tolist()
+
+################################################################################
+
+def images_to_binary_matrix(list_of_images):
+
+    image_array = np.array(list_of_images)
+   
+    original_matrix = []
+    
+    for img in image_array:
+
+        submatrix = np.array(img)
+        original_matrix.extend(submatrix.tolist())
+    
+    return original_matrix
 
 ################################################################################
 # [WIP] Future dev functions
