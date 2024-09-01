@@ -1151,6 +1151,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.chord_to_pchord">chord_to_pchord</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
     <li class="mono"><a href="#TMIDIX.compress_binary_matrix">compress_binary_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes">compress_patches_in_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes_chords">compress_patches_in_escore_notes_chords</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.covariance">covariance</a></li>
@@ -1172,6 +1174,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_durations">escore_notes_durations</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_binary_matrix">escore_notes_to_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_escore_matrix">escore_notes_to_escore_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_to_image_matrix">escore_notes_to_image_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.even_timings">even_timings</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
@@ -1185,6 +1188,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_next_bar">find_next_bar</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.find_value_power">find_value_power</a></li>
     <li class="mono"><a href="#TMIDIX.fix_monophonic_score_durations">fix_monophonic_score_durations</a></li>
     <li class="mono"><a href="#TMIDIX.fixed_escore_notes_timings">fixed_escore_notes_timings</a></li>
     <li class="mono"><a href="#TMIDIX.flatten">flatten</a></li>
@@ -1200,6 +1204,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG">harmonize_enhanced_melody_score_notes_to_ms_SONG</a></li>
     <li class="mono"><a href="#TMIDIX.horizontal_ordered_list_search">horizontal_ordered_list_search</a></li>
     <li class="mono"><a href="#TMIDIX.hsv_to_rgb">hsv_to_rgb</a></li>
+    <li class="mono"><a href="#TMIDIX.image_matrix_to_original_escore_notes">image_matrix_to_original_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_bits">int_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_pitches_chord">int_to_pitches_chord</a></li>
     <li class="mono"><a href="#TMIDIX.jaccard_similarity">jaccard_similarity</a></li>
@@ -9350,6 +9355,306 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">compress_patches_in_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                     <span class="n">num_patches</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                     <span class="n">group_patches</span><span class="o">=</span><span class="kc">False</span>
+                                     <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">num_patches</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">4</span>
+  <span class="k">elif</span> <span class="n">num_patches</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="n">num_patches</span>
+
+  <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
+    <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_set</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">8</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+        <span class="n">trg_patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
+
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trg_patch_list</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+
+  <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">trg_patch_list</span> <span class="ow">and</span> <span class="n">n_patches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">128</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="p">]</span>
+
+  <span class="n">new_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">trg_patch_list</span><span class="p">:</span>
+      <span class="n">new_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">new_escore_notes</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">compress_patches_in_escore_notes_chords</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                            <span class="n">max_num_patches_per_chord</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                            <span class="n">group_patches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                            <span class="n">root_grouped_patches</span><span class="o">=</span><span class="kc">False</span>
+                                            <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">max_num_patches_per_chord</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">4</span>
+  <span class="k">elif</span> <span class="n">max_num_patches_per_chord</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="n">max_num_patches_per_chord</span>
+
+  <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))])</span>
+
+  <span class="n">new_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
+      <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">8</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+          <span class="n">trg_patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+          <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
+
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trg_patch_list</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">trg_patch_list</span> <span class="ow">and</span> <span class="n">n_patches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">128</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">ccc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+
+      <span class="n">cc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ccc</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span> <span class="ow">in</span> <span class="p">[</span><span class="n">t</span> <span class="o">//</span> <span class="mi">8</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">trg_patch_list</span><span class="p">]:</span>
+          <span class="k">if</span> <span class="n">root_grouped_patches</span><span class="p">:</span>
+            <span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+          <span class="n">new_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">trg_patch_list</span><span class="p">:</span>
+          <span class="n">new_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">new_escore_notes</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_to_image_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                  <span class="n">num_img_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                  <span class="n">filter_out_zero_rows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">filter_out_duplicate_rows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">flip_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reverse_matrix</span><span class="o">=</span><span class="kc">False</span>
+                                  <span class="p">):</span>
+
+  <span class="n">escore_notes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+
+  <span class="k">if</span> <span class="n">num_img_channels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">n_mat_channels</span> <span class="o">=</span> <span class="mi">3</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">n_mat_channels</span> <span class="o">=</span> <span class="mi">1</span>
+
+  <span class="k">if</span> <span class="n">escore_notes</span><span class="p">:</span>
+    <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">last_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_time</span><span class="p">]</span>
+    <span class="n">max_last_dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">last_notes</span><span class="p">])</span>
+
+    <span class="n">time_range</span> <span class="o">=</span> <span class="n">last_time</span><span class="o">+</span><span class="n">max_last_dur</span>
+
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_range</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+
+        <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">pat</span> <span class="o">=</span> <span class="n">note</span>
+
+        <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">chan</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">chan</span><span class="p">))</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">velocity</span><span class="p">))</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">pat</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">chan</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="n">pat</span> <span class="o">=</span> <span class="n">patch</span> <span class="o">+</span> <span class="mi">128</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">pat</span> <span class="o">=</span> <span class="mi">127</span>
+
+        <span class="n">seen_pats</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
+
+          <span class="n">mat_value</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span>
+
+          <span class="n">mat_value_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">mat_value</span> <span class="o">//</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span><span class="p">))</span> <span class="o">%</span> <span class="mi">256</span>
+          <span class="n">mat_value_1</span> <span class="o">=</span> <span class="p">(</span><span class="n">mat_value</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+
+          <span class="n">cur_num_chans</span> <span class="o">=</span> <span class="mi">0</span>
+
+          <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">mat_value</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="n">pat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_pats</span><span class="p">:</span>
+            <span class="n">cur_num_chans</span> <span class="o">=</span> <span class="mi">1</span>
+          <span class="k">elif</span> <span class="mi">256</span> <span class="o">&lt;</span> <span class="n">mat_value</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_pats</span><span class="p">:</span>
+            <span class="n">cur_num_chans</span> <span class="o">=</span> <span class="mi">2</span>
+
+          <span class="k">if</span> <span class="n">cur_num_chans</span> <span class="o">&lt;</span> <span class="n">n_mat_channels</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">n_mat_channels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+              <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="n">pat</span>
+              <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">n_mat_channels</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+
+              <span class="k">if</span> <span class="n">cur_num_chans</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="n">pat</span>
+                <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+              <span class="k">elif</span> <span class="n">cur_num_chans</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">*</span> <span class="n">mat_value_0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="n">pat</span><span class="p">)</span>
+                <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+              <span class="k">elif</span> <span class="n">cur_num_chans</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">*</span> <span class="n">mat_value_0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="n">mat_value_1</span><span class="p">)</span> <span class="o">+</span> <span class="n">pat</span>
+                <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filter_out_zero_rows</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_matrix</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">filter_out_duplicate_rows</span><span class="p">:</span>
+
+      <span class="n">dd_escore_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="n">pr</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">128</span>
+      <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="n">pr</span><span class="p">:</span>
+          <span class="n">dd_escore_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+          <span class="n">pr</span> <span class="o">=</span> <span class="n">e</span>
+      
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">dd_escore_matrix</span>
+
+    <span class="k">if</span> <span class="n">flip_matrix</span><span class="p">:</span>
+
+      <span class="n">temp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="n">temp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">temp_matrix</span>
+
+    <span class="k">if</span> <span class="n">reverse_matrix</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">escore_matrix</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_value_power</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">number</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">image_matrix_to_original_escore_notes</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">,</span>
+                                          <span class="n">velocity</span><span class="o">=-</span><span class="mi">1</span>
+                                          <span class="p">):</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+
+      <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">)):</span>
+
+        <span class="k">if</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+          <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+      <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">)</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+  <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+  <span class="n">original_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">vel</span> <span class="o">=</span> <span class="n">velocity</span>
+
+  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">ptc0</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ptc1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ptc2</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">find_value_power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">256</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">ptc0</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">%</span> <span class="mi">256</span>
+
+    <span class="k">elif</span> <span class="n">find_value_power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">256</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">ptc0</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span>
+      <span class="n">ptc1</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+
+    <span class="k">elif</span> <span class="n">find_value_power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">256</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="n">ptc0</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">//</span> <span class="mi">256</span>
+      <span class="n">ptc1</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+      <span class="n">ptc2</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">%</span> <span class="mi">256</span>
+
+    <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ptc0</span><span class="p">,</span> <span class="n">ptc1</span><span class="p">,</span> <span class="n">ptc2</span><span class="p">]</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ptcs</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+
+      <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="mi">9</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">p</span> <span class="o">%</span> <span class="mi">128</span>
+        <span class="n">chan</span> <span class="o">=</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">8</span>
+
+        <span class="k">if</span> <span class="n">chan</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="n">chan</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">channel</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
+
+      <span class="n">original_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">vel</span><span class="p">,</span> <span class="n">patch</span><span class="p">])</span>
+
+  <span class="n">output_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">original_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+
+  <span class="n">adjust_score_velocities</span><span class="p">(</span><span class="n">output_score</span><span class="p">,</span> <span class="mi">127</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">output_score</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 
 <span class="c1">###################################################################################</span>
@@ -14182,6 +14487,135 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.compress_patches_in_escore_notes">
+    <p>def <span class="ident">compress_patches_in_escore_notes</span>(</p><p>escore_notes, num_patches=4, group_patches=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.compress_patches_in_escore_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.compress_patches_in_escore_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compress_patches_in_escore_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                     <span class="n">num_patches</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                     <span class="n">group_patches</span><span class="o">=</span><span class="kc">False</span>
+                                     <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">num_patches</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">4</span>
+  <span class="k">elif</span> <span class="n">num_patches</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="n">num_patches</span>
+
+  <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
+    <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_set</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">8</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+        <span class="n">trg_patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
+
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trg_patch_list</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+
+  <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">trg_patch_list</span> <span class="ow">and</span> <span class="n">n_patches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">128</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="p">]</span>
+
+  <span class="n">new_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">trg_patch_list</span><span class="p">:</span>
+      <span class="n">new_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">new_escore_notes</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.compress_patches_in_escore_notes_chords">
+    <p>def <span class="ident">compress_patches_in_escore_notes_chords</span>(</p><p>escore_notes, max_num_patches_per_chord=4, group_patches=True, root_grouped_patches=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.compress_patches_in_escore_notes_chords', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.compress_patches_in_escore_notes_chords" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compress_patches_in_escore_notes_chords</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                            <span class="n">max_num_patches_per_chord</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                            <span class="n">group_patches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                            <span class="n">root_grouped_patches</span><span class="o">=</span><span class="kc">False</span>
+                                            <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">max_num_patches_per_chord</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">4</span>
+  <span class="k">elif</span> <span class="n">max_num_patches_per_chord</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">n_patches</span> <span class="o">=</span> <span class="n">max_num_patches_per_chord</span>
+
+  <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))])</span>
+
+  <span class="n">new_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
+      <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">8</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+          <span class="n">trg_patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+          <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
+
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trg_patch_list</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">trg_patch_list</span> <span class="ow">and</span> <span class="n">n_patches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">128</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">ccc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+
+      <span class="n">cc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ccc</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span> <span class="ow">in</span> <span class="p">[</span><span class="n">t</span> <span class="o">//</span> <span class="mi">8</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">trg_patch_list</span><span class="p">]:</span>
+          <span class="k">if</span> <span class="n">root_grouped_patches</span><span class="p">:</span>
+            <span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+          <span class="n">new_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="n">trg_patch_list</span><span class="p">:</span>
+          <span class="n">new_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">new_escore_notes</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.cosine_similarity">
     <p>def <span class="ident">cosine_similarity</span>(</p><p>x, y, pad_value=None)</p>
     </div>
@@ -15031,6 +15465,133 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_to_image_matrix">
+    <p>def <span class="ident">escore_notes_to_image_matrix</span>(</p><p>escore_notes, num_img_channels=3, filter_out_zero_rows=False, filter_out_duplicate_rows=False, flip_matrix=False, reverse_matrix=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_to_image_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_to_image_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_image_matrix</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                  <span class="n">num_img_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                  <span class="n">filter_out_zero_rows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">filter_out_duplicate_rows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">flip_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reverse_matrix</span><span class="o">=</span><span class="kc">False</span>
+                                  <span class="p">):</span>
+
+  <span class="n">escore_notes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+
+  <span class="k">if</span> <span class="n">num_img_channels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">n_mat_channels</span> <span class="o">=</span> <span class="mi">3</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">n_mat_channels</span> <span class="o">=</span> <span class="mi">1</span>
+
+  <span class="k">if</span> <span class="n">escore_notes</span><span class="p">:</span>
+    <span class="n">last_time</span> <span class="o">=</span> <span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">last_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_time</span><span class="p">]</span>
+    <span class="n">max_last_dur</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">last_notes</span><span class="p">])</span>
+
+    <span class="n">time_range</span> <span class="o">=</span> <span class="n">last_time</span><span class="o">+</span><span class="n">max_last_dur</span>
+
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_range</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+
+        <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">pat</span> <span class="o">=</span> <span class="n">note</span>
+
+        <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">chan</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">chan</span><span class="p">))</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">velocity</span><span class="p">))</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">pat</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">chan</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="n">pat</span> <span class="o">=</span> <span class="n">patch</span> <span class="o">+</span> <span class="mi">128</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">pat</span> <span class="o">=</span> <span class="mi">127</span>
+
+        <span class="n">seen_pats</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)):</span>
+
+          <span class="n">mat_value</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span>
+
+          <span class="n">mat_value_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">mat_value</span> <span class="o">//</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span><span class="p">))</span> <span class="o">%</span> <span class="mi">256</span>
+          <span class="n">mat_value_1</span> <span class="o">=</span> <span class="p">(</span><span class="n">mat_value</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+
+          <span class="n">cur_num_chans</span> <span class="o">=</span> <span class="mi">0</span>
+
+          <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">mat_value</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="ow">and</span> <span class="n">pat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_pats</span><span class="p">:</span>
+            <span class="n">cur_num_chans</span> <span class="o">=</span> <span class="mi">1</span>
+          <span class="k">elif</span> <span class="mi">256</span> <span class="o">&lt;</span> <span class="n">mat_value</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_pats</span><span class="p">:</span>
+            <span class="n">cur_num_chans</span> <span class="o">=</span> <span class="mi">2</span>
+
+          <span class="k">if</span> <span class="n">cur_num_chans</span> <span class="o">&lt;</span> <span class="n">n_mat_channels</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">n_mat_channels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+              <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="n">pat</span>
+              <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">n_mat_channels</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+
+              <span class="k">if</span> <span class="n">cur_num_chans</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="n">pat</span>
+                <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+              <span class="k">elif</span> <span class="n">cur_num_chans</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">*</span> <span class="n">mat_value_0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="n">pat</span><span class="p">)</span>
+                <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+              <span class="k">elif</span> <span class="n">cur_num_chans</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">escore_matrix</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">*</span> <span class="n">mat_value_0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">256</span> <span class="o">*</span> <span class="n">mat_value_1</span><span class="p">)</span> <span class="o">+</span> <span class="n">pat</span>
+                <span class="n">seen_pats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filter_out_zero_rows</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_matrix</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">filter_out_duplicate_rows</span><span class="p">:</span>
+
+      <span class="n">dd_escore_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="n">pr</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">128</span>
+      <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="n">pr</span><span class="p">:</span>
+          <span class="n">dd_escore_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+          <span class="n">pr</span> <span class="o">=</span> <span class="n">e</span>
+      
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">dd_escore_matrix</span>
+
+    <span class="k">if</span> <span class="n">flip_matrix</span><span class="p">:</span>
+
+      <span class="n">temp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">escore_matrix</span><span class="p">:</span>
+        <span class="n">temp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">temp_matrix</span>
+
+    <span class="k">if</span> <span class="n">reverse_matrix</span><span class="p">:</span>
+      <span class="n">escore_matrix</span> <span class="o">=</span> <span class="n">escore_matrix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">escore_matrix</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.even_timings">
     <p>def <span class="ident">even_timings</span>(</p><p>escore_notes, times_idx=1, durs_idx=2)</p>
     </div>
@@ -15550,6 +16111,27 @@ The type of track (opus or score) is autodetected.</p></div>
      <span class="n">similar_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="p">[</span><span class="n">similar_chord</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">match_ratios</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.find_value_power">
+    <p>def <span class="ident">find_value_power</span>(</p><p>value, number)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_value_power', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_value_power" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_value_power</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">number</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -16131,6 +16713,109 @@ The type of track (opus or score) is autodetected.</p></div>
     <span class="n">t</span> <span class="o">=</span> <span class="n">v</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">f</span><span class="p">))</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">%</span><span class="mi">6</span>
     <span class="k">return</span> <span class="p">[(</span><span class="n">v</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.image_matrix_to_original_escore_notes">
+    <p>def <span class="ident">image_matrix_to_original_escore_notes</span>(</p><p>image_matrix, velocity=-1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.image_matrix_to_original_escore_notes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.image_matrix_to_original_escore_notes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">image_matrix_to_original_escore_notes</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">,</span>
+                                          <span class="n">velocity</span><span class="o">=-</span><span class="mi">1</span>
+                                          <span class="p">):</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+
+      <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">)):</span>
+
+        <span class="k">if</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+          <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+      <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">)</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">image_matrix</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span>
+
+  <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+  <span class="n">original_escore_notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">vel</span> <span class="o">=</span> <span class="n">velocity</span>
+
+  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">velocity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">vel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">ptc0</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ptc1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ptc2</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">find_value_power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">256</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">ptc0</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">%</span> <span class="mi">256</span>
+
+    <span class="k">elif</span> <span class="n">find_value_power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">256</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">ptc0</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span>
+      <span class="n">ptc1</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+
+    <span class="k">elif</span> <span class="n">find_value_power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">256</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="n">ptc0</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">//</span> <span class="mi">256</span>
+      <span class="n">ptc1</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+      <span class="n">ptc2</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">%</span> <span class="mi">256</span>
+
+    <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ptc0</span><span class="p">,</span> <span class="n">ptc1</span><span class="p">,</span> <span class="n">ptc2</span><span class="p">]</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ptcs</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+
+      <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="mi">9</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">p</span> <span class="o">%</span> <span class="mi">128</span>
+        <span class="n">chan</span> <span class="o">=</span> <span class="n">p</span> <span class="o">//</span> <span class="mi">8</span>
+
+        <span class="k">if</span> <span class="n">chan</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+          <span class="n">chan</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">channel</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
+
+      <span class="n">original_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">channel</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">vel</span><span class="p">,</span> <span class="n">patch</span><span class="p">])</span>
+
+  <span class="n">output_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">original_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+
+  <span class="n">adjust_score_velocities</span><span class="p">(</span><span class="n">output_score</span><span class="p">,</span> <span class="mi">127</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">output_score</span>
 </pre></div>
 
   </div>
