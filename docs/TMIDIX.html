@@ -1144,6 +1144,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.bits_to_int">bits_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.bits_to_tones_chord">bits_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.calculate_combined_distances">calculate_combined_distances</a></li>
+    <li class="mono"><a href="#TMIDIX.ceil_with_precision">ceil_with_precision</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_chord">check_and_fix_chord</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_chords_in_chordified_score">check_and_fix_chords_in_chordified_score</a></li>
     <li class="mono"><a href="#TMIDIX.check_and_fix_pitches_chord">check_and_fix_pitches_chord</a></li>
@@ -6056,6 +6057,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">ceil_with_precision</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimal_places</span><span class="p">):</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">decimal_places</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)</span> <span class="o">/</span> <span class="n">factor</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="k">def</span> <span class="nf">augment_enhanced_score_notes</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">,</span>
                                   <span class="n">timings_divider</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
                                   <span class="n">full_sorting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -6065,9 +6072,20 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">esn</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">)</span>
 
+    <span class="n">prec</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">timings_divider</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
+      <span class="n">prec</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">elif</span> <span class="n">timings_divider</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+      <span class="n">prec</span> <span class="o">=</span> <span class="mi">2</span>
+
     <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esn</span><span class="p">:</span>
+
       <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">)</span> <span class="o">+</span> <span class="n">timings_shift</span>
-      <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">)</span> <span class="o">+</span> <span class="n">timings_shift</span>
+
+      <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">))</span> <span class="o">+</span> <span class="n">timings_shift</span>
+      
       <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pitch_shift</span>
 
     <span class="k">if</span> <span class="n">full_sorting</span><span class="p">:</span>
@@ -8074,7 +8092,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span> <span class="o">=</span> <span class="n">note</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
-        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
         <span class="n">channel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">channel</span><span class="p">))</span>
         <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
         <span class="n">velocity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">velocity</span><span class="p">))</span>
@@ -8214,7 +8232,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">pat</span> <span class="o">=</span> <span class="n">note</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
-        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
         <span class="n">chan</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">chan</span><span class="p">))</span>
         <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
         <span class="n">velocity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">velocity</span><span class="p">))</span>
@@ -13664,9 +13682,20 @@ Tegridy Code 2024</p></div>
 
     <span class="n">esn</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">enhanced_score_notes</span><span class="p">)</span>
 
+    <span class="n">prec</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">timings_divider</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
+      <span class="n">prec</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">elif</span> <span class="n">timings_divider</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+      <span class="n">prec</span> <span class="o">=</span> <span class="mi">2</span>
+
     <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">esn</span><span class="p">:</span>
+
       <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">)</span> <span class="o">+</span> <span class="n">timings_shift</span>
-      <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">)</span> <span class="o">+</span> <span class="n">timings_shift</span>
+
+      <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">))</span> <span class="o">+</span> <span class="n">timings_shift</span>
+      
       <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pitch_shift</span>
 
     <span class="k">if</span> <span class="n">full_sorting</span><span class="p">:</span>
@@ -14037,6 +14066,28 @@ Tegridy Code 2024</p></div>
   <span class="n">combined_metric</span> <span class="o">=</span> <span class="p">[[</span><span class="n">selected_metrics</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">binary_array_len</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">binary_array_len</span><span class="p">)]</span>
 
   <span class="k">return</span> <span class="n">combined_metric</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.ceil_with_precision">
+    <p>def <span class="ident">ceil_with_precision</span>(</p><p>value, decimal_places)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.ceil_with_precision', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.ceil_with_precision" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ceil_with_precision</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimal_places</span><span class="p">):</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">decimal_places</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)</span> <span class="o">/</span> <span class="n">factor</span>
 </pre></div>
 
   </div>
@@ -15350,7 +15401,7 @@ Tegridy Code 2024</p></div>
         <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">pat</span> <span class="o">=</span> <span class="n">note</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
-        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
         <span class="n">chan</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">chan</span><span class="p">))</span>
         <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
         <span class="n">velocity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">velocity</span><span class="p">))</span>
@@ -15424,7 +15475,7 @@ Tegridy Code 2024</p></div>
         <span class="n">etype</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">patch</span> <span class="o">=</span> <span class="n">note</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
-        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
         <span class="n">channel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">channel</span><span class="p">))</span>
         <span class="n">pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">pitch</span><span class="p">))</span>
         <span class="n">velocity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">velocity</span><span class="p">))</span>
