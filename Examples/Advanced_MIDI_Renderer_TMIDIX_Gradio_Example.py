@@ -1,9 +1,30 @@
 #================================================================
 # https://huggingface.co/spaces/asigalov61/Advanced-MIDI-Renderer
 #================================================================
+# Packages:
+#
+#   apt install fluidsynth
+#================================================================
+# Requirements:
+#   
+#   pip install gradio
+#   pip install numpy
+#   pip install scipy
+#   pip install matplotlib
+#   pip install networkx
+#   pip install scikit-learn
+#================================================================
+# Core modules:
+#
+# git clone --depth 1 https://github.com/asigalov61/tegridy-tools
+#
+# import TMIDIX
+# import TPLOTS
+#================================================================
 
 import os
 import hashlib
+
 import time
 import datetime
 from pytz import timezone
@@ -11,6 +32,8 @@ from pytz import timezone
 import gradio as gr
 
 import TMIDIX
+import TPLOTS
+
 from midi_to_colab_audio import midi_to_colab_audio
 
 import copy
@@ -84,7 +107,7 @@ def render_midi(input_midi,
     print('=' * 70)
     print('Processing...Please wait...')
 
-    if render_type == 'Render as-is' or render_type == "Summarize":
+    if render_type == 'Render as-is' or render_type == "Solo Piano Summary" or render_type == "Multi-Instrumental Summary":
         output_score = copy.deepcopy(escore)
 
     elif render_type == "Custom render" or not render_type:
@@ -144,21 +167,34 @@ def render_midi(input_midi,
             output_score = TMIDIX.recalculate_score_timings(output_score)
             output_score = TMIDIX.align_escore_notes_to_bars(output_score, split_durations=True)
 
+        if render_type == "Multi-Instrumental Summary":
+            zscore = TMIDIX.recalculate_score_timings(output_score)
+            c_escore_notes = TMIDIX.compress_patches_in_escore_notes_chords(zscore)
+            cmatrix = TMIDIX.escore_notes_to_image_matrix(c_escore_notes, filter_out_zero_rows=True, filter_out_duplicate_rows=True)
+            smatrix = TPLOTS.square_image_matrix(cmatrix)
+            output_score = TMIDIX.image_matrix_to_original_escore_notes(smatrix)
+            
+            for o in output_score:
+                o[1] *= 250
+                o[2] *= 250            
+
         if render_output_as_solo_piano:
             output_score = TMIDIX.solo_piano_escore_notes(output_score, keep_drums=True)
             
         if render_remove_drums:
             output_score = TMIDIX.strip_drums_from_escore_notes(output_score)
             
-        if render_type == "Summarize":
-            sp_escore_notes = TMIDIX.solo_piano_escore_notes(output_score)
-            bmatrix = TMIDIX.escore_notes_to_binary_matrix(sp_escore_notes)
-            smatrix = TMIDIX.square_binary_matrix(bmatrix)
+        if render_type == "Solo Piano Summary":
+            sp_escore_notes = TMIDIX.solo_piano_escore_notes(output_score, keep_drums=False)
+            zscore = TMIDIX.recalculate_score_timings(sp_escore_notes)
+            bmatrix = TMIDIX.escore_notes_to_binary_matrix(zscore)
+            cmatrix = TMIDIX.compress_binary_matrix(bmatrix, only_compress_zeros=True)
+            smatrix = TPLOTS.square_binary_matrix(cmatrix)
             output_score = TMIDIX.binary_matrix_to_original_escore_notes(smatrix)
 
             for o in output_score:
-                o[1] *= 160
-                o[2] *= 160
+                o[1] *= 200
+                o[2] *= 200
             
         SONG, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
                     
@@ -267,7 +303,8 @@ if __name__ == "__main__":
                                 "Flip", 
                                 "Reverse", 
                                 "Repair",
-                                "Summarize"
+                                "Multi-Instrumental Summary",
+                                "Solo Piano Summary"
                                ], 
                                label="Render type", 
                                value="Render as-is"
