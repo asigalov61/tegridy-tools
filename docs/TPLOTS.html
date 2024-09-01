@@ -2069,10 +2069,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
     <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
     
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)),</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">overlap</span><span class="p">):</span>
        
         <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
-        
+
+        <span class="k">if</span> <span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+          <span class="n">zeros_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">128</span><span class="o">-</span><span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">128</span><span class="p">))</span>
+          <span class="n">submatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">submatrix</span><span class="p">,</span> <span class="n">zeros_array</span><span class="p">))</span>
+
         <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">submatrix</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
@@ -2084,7 +2088,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
@@ -2156,7 +2160,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">################################################################################</span>
 
-<span class="k">def</span> <span class="nf">image_matrix_to_images</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">image_matrix_to_images</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">,</span>
                            <span class="n">step</span><span class="p">,</span>
                            <span class="n">overlap</span><span class="p">,</span>
                            <span class="n">num_img_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
@@ -2188,13 +2192,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Writing images...&#39;</span><span class="p">)</span>
 
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">)</span>
 
     <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)),</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">overlap</span><span class="p">):</span>
 
         <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+          <span class="n">zeros_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">128</span><span class="o">-</span><span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">128</span><span class="p">))</span>
+          <span class="n">submatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">submatrix</span><span class="p">,</span> <span class="n">zeros_array</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">n_mat_channels</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
 
@@ -2218,7 +2226,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
@@ -2474,10 +2482,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
     <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
     
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)),</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">overlap</span><span class="p">):</span>
        
         <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
-        
+
+        <span class="k">if</span> <span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+          <span class="n">zeros_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">128</span><span class="o">-</span><span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">128</span><span class="p">))</span>
+          <span class="n">submatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">submatrix</span><span class="p">,</span> <span class="n">zeros_array</span><span class="p">))</span>
+
         <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">submatrix</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
@@ -2489,7 +2501,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
@@ -2820,7 +2832,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       
   <div class="item">
     <div class="name def" id="TPLOTS.image_matrix_to_images">
-    <p>def <span class="ident">image_matrix_to_images</span>(</p><p>matrix, step, overlap, num_img_channels=3, output_folder=&#39;./Dataset/&#39;, output_img_prefix=&#39;image&#39;, output_img_ext=&#39;.png&#39;, save_to_array=False, verbose=True)</p>
+    <p>def <span class="ident">image_matrix_to_images</span>(</p><p>image_matrix, step, overlap, num_img_channels=3, output_folder=&#39;./Dataset/&#39;, output_img_prefix=&#39;image&#39;, output_img_ext=&#39;.png&#39;, save_to_array=False, verbose=True)</p>
     </div>
     
 
@@ -2829,7 +2841,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.image_matrix_to_images', this);">Show source &equiv;</a></p>
   <div id="source-TPLOTS.image_matrix_to_images" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">image_matrix_to_images</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">image_matrix_to_images</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">,</span>
                            <span class="n">step</span><span class="p">,</span>
                            <span class="n">overlap</span><span class="p">,</span>
                            <span class="n">num_img_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
@@ -2861,13 +2873,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Writing images...&#39;</span><span class="p">)</span>
 
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_matrix</span><span class="p">)</span>
 
     <span class="n">image_array</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)),</span> <span class="n">overlap</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">overlap</span><span class="p">):</span>
 
         <span class="n">submatrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span>
+          <span class="n">zeros_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">128</span><span class="o">-</span><span class="n">submatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">128</span><span class="p">))</span>
+          <span class="n">submatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">submatrix</span><span class="p">,</span> <span class="n">zeros_array</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">n_mat_channels</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
 
@@ -2891,7 +2907,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saved&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">overlap</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;imges!&#39;</span><span class="p">)</span>
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save_to_array</span><span class="p">:</span>
