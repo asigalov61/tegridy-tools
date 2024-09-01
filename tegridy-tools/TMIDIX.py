@@ -4716,6 +4716,12 @@ def create_similarity_matrix(list_of_values, matrix_length=0):
 
 ###################################################################################
 
+def ceil_with_precision(value, decimal_places):
+    factor = 10 ** decimal_places
+    return math.ceil(value * factor) / factor
+
+###################################################################################
+
 def augment_enhanced_score_notes(enhanced_score_notes,
                                   timings_divider=16,
                                   full_sorting=True,
@@ -4725,9 +4731,20 @@ def augment_enhanced_score_notes(enhanced_score_notes,
 
     esn = copy.deepcopy(enhanced_score_notes)
 
+    prec = 0
+
+    if timings_divider > 32:
+      prec = 1
+
+    elif timings_divider > 128:
+      prec = 2
+
     for e in esn:
+
       e[1] = int(e[1] / timings_divider) + timings_shift
-      e[2] = int(e[2] / timings_divider) + timings_shift
+
+      e[2] = max(1, int(e[2] / timings_divider)) + timings_shift
+      
       e[4] = e[4] + pitch_shift
 
     if full_sorting:
@@ -6734,7 +6751,7 @@ def escore_notes_to_escore_matrix(escore_notes,
         etype, time, duration, channel, pitch, velocity, patch = note
 
         time = max(0, time)
-        duration = max(2, duration)
+        duration = max(1, duration)
         channel = max(0, min(15, channel))
         pitch = max(0, min(127, pitch))
         velocity = max(0, min(127, velocity))
@@ -6874,7 +6891,7 @@ def escore_notes_to_binary_matrix(escore_notes,
         etype, time, duration, chan, pitch, velocity, pat = note
 
         time = max(0, time)
-        duration = max(2, duration)
+        duration = max(1, duration)
         chan = max(0, min(15, chan))
         pitch = max(0, min(127, pitch))
         velocity = max(0, min(127, velocity))
