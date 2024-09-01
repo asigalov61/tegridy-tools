@@ -913,7 +913,7 @@ def binary_matrix_to_images(matrix,
     if verbose:
       print('Done!')
       print('=' * 70)
-      print('Saved', (matrix.shape[0]-max(step, overlap)) // min(step, overlap)+1, 'imges!')
+      print('Saved', (matrix.shape[0] // min(step, overlap))+1, 'imges!')
       print('=' * 70)
 
     if save_to_array:
@@ -1051,7 +1051,7 @@ def image_matrix_to_images(image_matrix,
     if verbose:
       print('Done!')
       print('=' * 70)
-      print('Saved', (matrix.shape[0]-max(step, overlap)) // min(step, overlap)+1, 'imges!')
+      print('Saved', (matrix.shape[0] // min(step, overlap))+1, 'imges!')
       print('=' * 70)
 
     if save_to_array:
