@@ -4733,17 +4733,23 @@ def augment_enhanced_score_notes(enhanced_score_notes,
 
     pe = enhanced_score_notes[0]
 
-    abs_time = int(enhanced_score_notes[0][1] / timings_divider) 
+    abs_time = max(0, int(enhanced_score_notes[0][1] / timings_divider))
 
     for i, e in enumerate(esn):
       
-      dtime = int((e[1] / timings_divider) - (pe[1] / timings_divider))
+      dtime = (e[1] / timings_divider) - (pe[1] / timings_divider)
 
-      e[1] = abs_time + timings_shift
+      if 0.5 < dtime < 1:
+        dtime = 1
+      
+      else:
+        dtime = int(dtime)
+
+      e[1] = max(0, abs_time + timings_shift)
 
       e[2] = max(1, int(e[2] / timings_divider)) + timings_shift
       
-      e[4] = e[4] + pitch_shift
+      e[4] = max(1, min(127, e[4] + pitch_shift))
 
       abs_time += dtime
 
@@ -4751,7 +4757,7 @@ def augment_enhanced_score_notes(enhanced_score_notes,
 
     if full_sorting:
 
-      # Sorting by patch, pitch, then by start-time
+      # Sorting by patch, reverse pitch and start-time
       esn.sort(key=lambda x: x[6])
       esn.sort(key=lambda x: x[4], reverse=True)
       esn.sort(key=lambda x: x[1])

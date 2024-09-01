@@ -897,7 +897,11 @@ def binary_matrix_to_images(matrix,
     for i in range(0, max(1, matrix.shape[0]-max(step, overlap)), overlap):
        
         submatrix = matrix[i:i+step, :]
-        
+
+        if submatrix.shape[0] < 128:
+          zeros_array = np.zeros((128-submatrix.shape[0], 128))
+          submatrix = np.vstack((submatrix, zeros_array))
+
         img = Image.fromarray(submatrix * 255).convert('1')
         
         if save_to_array:
@@ -981,7 +985,7 @@ def square_image_matrix(image_matrix,
 
 ################################################################################
 
-def image_matrix_to_images(matrix,
+def image_matrix_to_images(image_matrix,
                            step,
                            overlap,
                            num_img_channels=3,
@@ -1013,13 +1017,17 @@ def image_matrix_to_images(matrix,
       print('=' * 70)
       print('Writing images...')
 
-    matrix = np.array(matrix)
+    matrix = np.array(image_matrix)
 
     image_array = []
 
-    for i in range(0, max(1, matrix.shape[0]-max(step, overlap)), overlap):
+    for i in range(0, max(1, matrix.shape[0]), overlap):
 
         submatrix = matrix[i:i+step, :]
+
+        if submatrix.shape[0] < 128:
+          zeros_array = np.zeros((128-submatrix.shape[0], 128))
+          submatrix = np.vstack((submatrix, zeros_array))
 
         if n_mat_channels == 3:
 
