@@ -894,7 +894,7 @@ def binary_matrix_to_images(matrix,
     
     image_array = []
     
-    for i in range(0, max(1, matrix.shape[0]-max(step, overlap)), overlap):
+    for i in range(0, max(1, matrix.shape[0]), overlap):
        
         submatrix = matrix[i:i+step, :]
 
