@@ -8015,6 +8015,306 @@ def summarize_escore_notes(escore_notes,
 
 ###################################################################################
 
+def compress_patches_in_escore_notes(escore_notes,
+                                     num_patches=4,
+                                     group_patches=False
+                                     ):
+
+  if num_patches > 4:
+    n_patches = 4
+  elif num_patches < 1:
+    n_patches = 1
+  else:
+    n_patches = num_patches
+
+  if group_patches:
+    patches_set = sorted(set([e[6] for e in c]))
+    trg_patch_list = []
+    seen = []
+    for p in patches_set:
+      if p // 8 not in seen:
+        trg_patch_list.append(p)
+        seen.append(p // 8)
+
+    trg_patch_list = sorted(trg_patch_list)
+
+  else:
+    trg_patch_list = sorted(set([e[6] for e in c]))
+
+  if 128 in trg_patch_list and n_patches > 1:
+    trg_patch_list = trg_patch_list[:n_patches-1] + [128]
+  else:
+    trg_patch_list = trg_patch_list[:n_patches]
+
+  new_escore_notes = []
+
+  for e in escore_notes:
+    if e[6] in trg_patch_list:
+      new_escore_notes.append(e)
+
+  return new_escore_notes
+
+###################################################################################
+
+def compress_patches_in_escore_notes_chords(escore_notes,
+                                            max_num_patches_per_chord=4,
+                                            group_patches=True,
+                                            root_grouped_patches=False
+                                            ):
+
+  if max_num_patches_per_chord > 4:
+    n_patches = 4
+  elif max_num_patches_per_chord < 1:
+    n_patches = 1
+  else:
+    n_patches = max_num_patches_per_chord
+
+  cscore = chordify_score([1000, sorted(escore_notes, key=lambda x: (x[1], x[6]))])
+
+  new_escore_notes = []
+
+  for c in cscore:
+
+    if group_patches:
+      patches_set = sorted(set([e[6] for e in c]))
+      trg_patch_list = []
+      seen = []
+      for p in patches_set:
+        if p // 8 not in seen:
+          trg_patch_list.append(p)
+          seen.append(p // 8)
+
+      trg_patch_list = sorted(trg_patch_list)
+
+    else:
+      trg_patch_list = sorted(set([e[6] for e in c]))
+
+    if 128 in trg_patch_list and n_patches > 1:
+      trg_patch_list = trg_patch_list[:n_patches-1] + [128]
+    else:
+      trg_patch_list = trg_patch_list[:n_patches]
+
+    for ccc in c:
+
+      cc = copy.deepcopy(ccc)
+
+      if group_patches:
+        if cc[6] // 8 in [t // 8 for t in trg_patch_list]:
+          if root_grouped_patches:
+            cc[6] = (cc[6] // 8) * 8
+          new_escore_notes.append(cc)
+
+      else:
+        if cc[6] in trg_patch_list:
+          new_escore_notes.append(cc)
+
+  return new_escore_notes
+
+###################################################################################
+
+def escore_notes_to_image_matrix(escore_notes,
+                                  num_img_channels=3,
+                                  filter_out_zero_rows=False,
+                                  filter_out_duplicate_rows=False,
+                                  flip_matrix=False,
+                                  reverse_matrix=False
+                                  ):
+
+  escore_notes = sorted(escore_notes, key=lambda x: (x[1], x[6]))
+
+  if num_img_channels > 1:
+    n_mat_channels = 3
+  else:
+    n_mat_channels = 1
+
+  if escore_notes:
+    last_time = escore_notes[-1][1]
+    last_notes = [e for e in escore_notes if e[1] == last_time]
+    max_last_dur = max([e[2] for e in last_notes])
+
+    time_range = last_time+max_last_dur
+
+    escore_matrix = []
+
+    escore_matrix = [[0] * 128 for _ in range(time_range)]
+
+    for note in escore_notes:
+
+        etype, time, duration, chan, pitch, velocity, pat = note
+
+        time = max(0, time)
+        duration = max(2, duration)
+        chan = max(0, min(15, chan))
+        pitch = max(0, min(127, pitch))
+        velocity = max(0, min(127, velocity))
+        patch = max(0, min(128, pat))
+
+        if chan != 9:
+          pat = patch + 128
+        else:
+          pat = 127
+
+        seen_pats = []
+
+        for t in range(time, min(time + duration, time_range)):
+
+          mat_value = escore_matrix[t][pitch]
+
+          mat_value_0 = (mat_value // (256 * 256)) % 256
+          mat_value_1 = (mat_value // 256) % 256
+
+          cur_num_chans = 0
+
+          if 0 < mat_value < 256 and pat not in seen_pats:
+            cur_num_chans = 1
+          elif 256 < mat_value < (256 * 256) and pat not in seen_pats:
+            cur_num_chans = 2
+
+          if cur_num_chans < n_mat_channels:
+
+            if n_mat_channels == 1:
+
+              escore_matrix[t][pitch] = pat
+              seen_pats.append(pat)
+
+            elif n_mat_channels == 3:
+
+              if cur_num_chans == 0:
+                escore_matrix[t][pitch] = pat
+                seen_pats.append(pat)
+              elif cur_num_chans == 1:
+                escore_matrix[t][pitch] = (256 * 256 * mat_value_0) + (256 * pat)
+                seen_pats.append(pat)
+              elif cur_num_chans == 2:
+                escore_matrix[t][pitch] = (256 * 256 * mat_value_0) + (256 * mat_value_1) + pat
+                seen_pats.append(pat)
+
+    if filter_out_zero_rows:
+      escore_matrix = [e for e in escore_matrix if sum(e) != 0]
+
+    if filter_out_duplicate_rows:
+
+      dd_escore_matrix = []
+
+      pr = [-1] * 128
+      for e in escore_matrix:
+        if e != pr:
+          dd_escore_matrix.append(e)
+          pr = e
+      
+      escore_matrix = dd_escore_matrix
+
+    if flip_matrix:
+
+      temp_matrix = []
+
+      for m in escore_matrix:
+        temp_matrix.append(m[::-1])
+
+      escore_matrix = temp_matrix
+
+    if reverse_matrix:
+      escore_matrix = escore_matrix[::-1]
+
+    return escore_matrix
+
+  else:
+    return None
+
+###################################################################################
+
+def find_value_power(value, number):
+    return math.floor(math.log(value, number))
+
+###################################################################################
+
+def image_matrix_to_original_escore_notes(image_matrix,
+                                          velocity=-1
+                                          ):
+
+  result = []
+
+  for j in range(len(image_matrix[0])):
+
+      count = 1
+
+      for i in range(1, len(image_matrix)):
+
+        if image_matrix[i][j] != 0 and image_matrix[i][j] == image_matrix[i-1][j]:
+            count += 1
+
+        else:
+          if count > 1:
+            result.append([i-count, count, j, image_matrix[i-1][j]])
+
+          else:
+            if image_matrix[i-1][j] != 0:
+              result.append([i-count, count, j, image_matrix[i-1][j]])
+
+          count = 1
+
+      if count > 1:
+          result.append([len(image_matrix)-count, count, j, image_matrix[-1][j]])
+
+      else:
+        if image_matrix[i-1][j] != 0:
+          result.append([i-count, count, j, image_matrix[i-1][j]])
+
+  result.sort(key=lambda x: (x[0], -x[2]))
+
+  original_escore_notes = []
+
+  vel = velocity
+
+  for r in result:
+
+    if velocity == -1:
+      vel = max(40, r[2])
+
+    ptc0 = 0
+    ptc1 = 0
+    ptc2 = 0
+
+    if find_value_power(r[3], 256) == 0:
+      ptc0 = r[3] % 256
+
+    elif find_value_power(r[3], 256) == 1:
+      ptc0 = r[3] // 256
+      ptc1 = (r[3] // 256) % 256
+
+    elif find_value_power(r[3], 256) == 2:
+      ptc0 = (r[3] // 256) // 256
+      ptc1 = (r[3] // 256) % 256
+      ptc2 = r[3] % 256
+
+    ptcs = [ptc0, ptc1, ptc2]
+    patches = [p for p in ptcs if p != 0]
+
+    for i, p in enumerate(patches):
+
+      if p < 128:
+        patch = 128
+        channel = 9
+
+      else:
+        patch = p % 128
+        chan = p // 8
+
+        if chan == 9:
+          chan += 1
+
+        channel = min(15, chan)
+
+      original_escore_notes.append(['note', r[0], r[1], channel, r[2], vel, patch])
+
+  output_score = sorted(original_escore_notes, key=lambda x: (x[1], -x[4], x[6]))
+
+  adjust_score_velocities(output_score, 127)
+
+  return output_score
+
+###################################################################################
+
 # This is the end of the TMIDI X Python module
 
 ###################################################################################
