@@ -4731,21 +4731,23 @@ def augment_enhanced_score_notes(enhanced_score_notes,
 
     esn = copy.deepcopy(enhanced_score_notes)
 
-    prec = 0
+    pe = enhanced_score_notes[0]
 
-    if timings_divider > 32:
-      prec = 1
+    abs_time = int(enhanced_score_notes[0][1] / timings_divider) 
 
-    elif timings_divider > 128:
-      prec = 2
+    for i, e in enumerate(esn):
+      
+      dtime = int((e[1] / timings_divider) - (pe[1] / timings_divider))
 
-    for e in esn:
-
-      e[1] = int(e[1] / timings_divider) + timings_shift
+      e[1] = abs_time + timings_shift
 
       e[2] = max(1, int(e[2] / timings_divider)) + timings_shift
       
       e[4] = e[4] + pitch_shift
+
+      abs_time += dtime
+
+      pe = enhanced_score_notes[i]
 
     if full_sorting:
 
@@ -8331,6 +8333,26 @@ def image_matrix_to_original_escore_notes(image_matrix,
   return output_score
 
 ###################################################################################
+
+def escore_notes_delta_times(escore_notes, 
+                             timings_index=1, 
+                             channels_index=3, 
+                             omit_zeros=False, 
+                             omit_drums=False
+                            ):
+
+  if omit_drums:
+
+    score = [e for e in escore_notes if e[channels_index] != 9]
+    dtimes = [score[0][timings_index]] + [b[timings_index]-a[timings_index] for a, b in zip(score[:-1], score[1:])]
+
+  else:
+    dtimes = [escore_notes[0][timings_index]] + [b[timings_index]-a[timings_index] for a, b in zip(escore_notes[:-1], escore_notes[1:])]
+  
+  if omit_zeros:
+    dtimes = [d for d in dtimes if d != 0]
+  
+  return dtimes
 
 # This is the end of the TMIDI X Python module
 
