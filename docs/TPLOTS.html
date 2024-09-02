@@ -2141,7 +2141,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_pca_components</span><span class="p">)</span>
       <span class="n">pca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
       
-      <span class="n">principal_component</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">components_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">principal_component</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pca</span><span class="o">.</span><span class="n">components_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
       <span class="n">contributions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">principal_component</span><span class="p">)</span>
       <span class="n">selected_row_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
       
@@ -3784,7 +3784,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">num_pca_components</span><span class="p">)</span>
       <span class="n">pca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
       
-      <span class="n">principal_component</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">components_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">principal_component</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pca</span><span class="o">.</span><span class="n">components_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
       <span class="n">contributions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">principal_component</span><span class="p">)</span>
       <span class="n">selected_row_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
       
