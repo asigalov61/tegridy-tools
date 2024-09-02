@@ -1239,6 +1239,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.pitches_to_tones_chord">pitches_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.play_score">play_score</a></li>
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
+    <li class="mono"><a href="#TMIDIX.proportions_counter">proportions_counter</a></li>
     <li class="mono"><a href="#TMIDIX.recalculate_score_timings">recalculate_score_timings</a></li>
     <li class="mono"><a href="#TMIDIX.replace_bad_tones_chord">replace_bad_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.resize_matrix">resize_matrix</a></li>
@@ -9757,6 +9758,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">time</span> <span class="o">+=</span> <span class="n">pause_time_value</span>
 
   <span class="k">return</span> <span class="n">medley</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">proportions_counter</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">):</span>
+
+  <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+  <span class="n">clen</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="p">[[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">clen</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
@@ -18280,6 +18290,31 @@ see opus2midi() and score2opus().</p></div>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.proportions_counter">
+    <p>def <span class="ident">proportions_counter</span>(</p><p>list_of_values)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.proportions_counter', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.proportions_counter" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">proportions_counter</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">):</span>
+
+  <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+  <span class="n">clen</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="p">[[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">clen</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
 </pre></div>
 
   </div>
