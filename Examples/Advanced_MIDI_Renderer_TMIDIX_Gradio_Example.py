@@ -20,6 +20,7 @@
 #
 # import TMIDIX
 # import TPLOTS
+# import midi_to_colab_audio
 #================================================================
 
 import os
@@ -74,6 +75,7 @@ def render_midi(input_midi,
     print('=' * 70)
     print('Input MIDI file name:', fn)
     print('Input MIDI md5 hash', input_midi_md5hash)
+    print('-' * 70)
     print('Render type:', render_type)
     print('Soudnfont bank', soundfont_bank)
     print('Audio render sample rate', render_sample_rate)
@@ -210,8 +212,23 @@ def render_midi(input_midi,
             f.write(fdata)
             f.close()
             
-    if soundfont_bank in ["General MIDI", "Nice strings plus orchestra", "Real choir", "Orpheus", "Super Game Boy", "Proto Square"]:
-        sf2bank = ["General MIDI", "Nice strings plus orchestra", "Real choir", "Orpheus", "Super Game Boy", "Proto Square"].index(soundfont_bank)
+    if soundfont_bank in ["Super GM",
+                            "Orpheus GM",
+                            "Live HQ GM",
+                            "Nice Strings + Orchestra", 
+                            "Real Choir", 
+                            "Super Game Boy", 
+                            "Proto Square"
+                            ]:
+        
+        sf2bank = ["Super GM",
+                    "Orpheus GM",
+                    "Live HQ GM",
+                    "Nice Strings + Orchestra", 
+                    "Real Choir", 
+                    "Super Game Boy", 
+                    "Proto Square"
+                    ].index(soundfont_bank)
     
     else:
         sf2bank = 0
@@ -221,6 +238,9 @@ def render_midi(input_midi,
     
     else:
         srate = 16000
+
+    print('-' * 70)
+    print('Generating audio with SF2 bank', sf2bank, 'and', srate, 'Hz sample rate')
     
     audio = midi_to_colab_audio(new_fn, 
                         soundfont_path=soundfonts[sf2bank],
@@ -228,6 +248,8 @@ def render_midi(input_midi,
                         volume_scale=10,
                         output_for_gradio=True
                         )
+
+    print('-' * 70)
 
     new_md5_hash = hashlib.md5(open(new_fn,'rb').read()).hexdigest()
     
@@ -271,10 +293,11 @@ if __name__ == "__main__":
     print('App start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     print('=' * 70)
 
-    soundfonts = ["SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2", 
+    soundfonts = ["SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2",
+                  "Orpheus_18.06.2020.sf2",
+                  "Live HQ Natural SoundFont GM.sf2",
                   "Nice-Strings-PlusOrchestra-v1.6.sf2", 
                   "KBH-Real-Choir-V2.5.sf2", 
-                  "Orpheus_18.06.2020.sf2", 
                   "SuperGameBoy.sf2", 
                   "ProtoSquare.sf2"
                  ]
@@ -295,6 +318,28 @@ if __name__ == "__main__":
         
         input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"], type="filepath")
 
+        gr.Markdown("## Select desired Sound Font bank and render sample rate")
+
+        soundfont_bank = gr.Radio(["Super GM",
+                                   "Orpheus GM",
+                                   "Live HQ GM",
+                                   "Nice Strings + Orchestra", 
+                                   "Real Choir", 
+                                   "Super Game Boy", 
+                                   "Proto Square"
+                                  ], 
+                                  label="SoundFont bank", 
+                                  value="Super GM"
+                                 )
+
+        render_sample_rate = gr.Radio(["16000", 
+                                       "32000", 
+                                       "44100"
+                                      ], 
+                                      label="MIDI audio render sample rate", 
+                                      value="16000"
+                                     )
+
         gr.Markdown("## Select desired render type")
 
         render_type = gr.Radio(["Render as-is", 
@@ -310,26 +355,7 @@ if __name__ == "__main__":
                                value="Render as-is"
                               )
 
-        gr.Markdown("## Select desired render options")
-
-        soundfont_bank = gr.Radio(["General MIDI", 
-                                   "Nice strings plus orchestra", 
-                                   "Real choir", 
-                                   "Orpheus", 
-                                   "Super Game Boy", 
-                                   "Proto Square"
-                                  ], 
-                                  label="SoundFont bank", 
-                                  value="General MIDI"
-                                 )
-
-        render_sample_rate = gr.Radio(["16000", 
-                                       "32000", 
-                                       "44100"
-                                      ], 
-                                      label="MIDI audio render sample rate", 
-                                      value="16000"
-                                     )
+        gr.Markdown("## Select custom render options")
 
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
         
