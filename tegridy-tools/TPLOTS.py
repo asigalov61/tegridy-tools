@@ -966,7 +966,7 @@ def square_image_matrix(image_matrix,
       pca = PCA(n_components=num_pca_components)
       pca.fit(group)
       
-      principal_component = pca.components_[0]
+      principal_component = np.mean(pca.components_, axis=0)
       contributions = np.dot(group, principal_component)
       selected_row_index = np.argmax(contributions)
       

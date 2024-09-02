@@ -4726,7 +4726,8 @@ def augment_enhanced_score_notes(enhanced_score_notes,
                                   timings_divider=16,
                                   full_sorting=True,
                                   timings_shift=0,
-                                  pitch_shift=0
+                                  pitch_shift=0,
+                                  legacy_timings=False
                                 ):
 
     esn = copy.deepcopy(enhanced_score_notes)
@@ -4744,6 +4745,9 @@ def augment_enhanced_score_notes(enhanced_score_notes,
       
       else:
         dtime = int(dtime)
+
+      if legacy_timings:
+        abs_time = int(e[1] / timings_divider) + timings_shift
 
       e[1] = max(0, abs_time + timings_shift)
 
