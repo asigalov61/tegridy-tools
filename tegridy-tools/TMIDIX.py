@@ -4749,13 +4749,14 @@ def augment_enhanced_score_notes(enhanced_score_notes,
       if legacy_timings:
         abs_time = int(e[1] / timings_divider) + timings_shift
 
+      else:
+        abs_time += dtime
+
       e[1] = max(0, abs_time + timings_shift)
 
       e[2] = max(1, int(e[2] / timings_divider)) + timings_shift
       
       e[4] = max(1, min(127, e[4] + pitch_shift))
-
-      abs_time += dtime
 
       pe = enhanced_score_notes[i]
 
@@ -8364,6 +8365,18 @@ def escore_notes_delta_times(escore_notes,
   
   return dtimes
 
-# This is the end of the TMIDI X Python module
+###################################################################################
 
+def monophonic_check(escore_notes, times_index=1):
+  return len(escore_notes) == len(set([e[times_index] for e in escore_notes]))
+
+###################################################################################
+
+def count_escore_notes_patches(escore_notes, patches_index=6):
+  return [list(c) for c in Counter([e[patches_index] for e in escore_notes]).most_common()]
+
+###################################################################################
+#  
+# This is the end of the TMIDI X Python module
+#
 ###################################################################################
