@@ -4953,25 +4953,26 @@ def patch_list_from_enhanced_score_notes(enhanced_score_notes,
   patches = [-1] * 16
 
   for idx, e in enumerate(enhanced_score_notes):
-    if e[3] != 9:
-        if patches[e[3]] == -1:
-            patches[e[3]] = e[6]
-        else:
-            if patches[e[3]] != e[6]:
-              if e[6] in patches:
-                e[3] = patches.index(e[6])
-              else:
-                if -1 in patches:
-                    patches[patches.index(-1)] = e[6]
+    if e[0] == 'note':
+      if e[3] != 9:
+          if patches[e[3]] == -1:
+              patches[e[3]] = e[6]
+          else:
+              if patches[e[3]] != e[6]:
+                if e[6] in patches:
+                  e[3] = patches.index(e[6])
                 else:
-                  patches[-1] = e[6]
+                  if -1 in patches:
+                      patches[patches.index(-1)] = e[6]
+                  else:
+                    patches[-1] = e[6]
 
-                  if verbose:
-                    print('=' * 70)
-                    print('WARNING! Composition has more than 15 patches!')
-                    print('Conflict note number:', idx)
-                    print('Conflict channel number:', e[3])
-                    print('Conflict patch number:', e[6])
+                    if verbose:
+                      print('=' * 70)
+                      print('WARNING! Composition has more than 15 patches!')
+                      print('Conflict note number:', idx)
+                      print('Conflict channel number:', e[3])
+                      print('Conflict patch number:', e[6])
 
   patches = [p if p != -1 else default_patch for p in patches]
 
@@ -5004,19 +5005,20 @@ def patch_enhanced_score_notes(enhanced_score_notes,
     overflow_idx = -1
 
     for idx, e in enumerate(enhanced_score_notes):
-      if e[3] != 9:
-          if patches[e[3]] == -1:
-              patches[e[3]] = e[6]
-          else:
-              if patches[e[3]] != e[6]:
-                if e[6] in patches:
-                  e[3] = patches.index(e[6])
-                else:
-                  if -1 in patches:
-                      patches[patches.index(-1)] = e[6]
+      if e[0] == 'note':
+        if e[3] != 9:
+            if patches[e[3]] == -1:
+                patches[e[3]] = e[6]
+            else:
+                if patches[e[3]] != e[6]:
+                  if e[6] in patches:
+                    e[3] = patches.index(e[6])
                   else:
-                      overflow_idx = idx
-                      break
+                    if -1 in patches:
+                        patches[patches.index(-1)] = e[6]
+                    else:
+                        overflow_idx = idx
+                        break
 
       enhanced_score_notes_with_patch_changes.append(e)
 
@@ -5026,15 +5028,16 @@ def patch_enhanced_score_notes(enhanced_score_notes,
 
     if overflow_idx != -1:
       for idx, e in enumerate(enhanced_score_notes[overflow_idx:]):
-        if e[3] != 9:
-          if e[6] not in patches:
-            if e[6] not in overflow_patches:
-              overflow_patches.append(e[6])
-              enhanced_score_notes_with_patch_changes.append(['patch_change', e[1], e[3], e[6]])
-          else:
-            e[3] = patches.index(e[6])
+        if e[0] == 'note':
+          if e[3] != 9:
+            if e[6] not in patches:
+              if e[6] not in overflow_patches:
+                overflow_patches.append(e[6])
+                enhanced_score_notes_with_patch_changes.append(['patch_change', e[1], e[3], e[6]])
+            else:
+              e[3] = patches.index(e[6])
 
-        enhanced_score_notes_with_patch_changes.append(e)
+          enhanced_score_notes_with_patch_changes.append(e)
 
     #===========================================================================
 
@@ -8374,6 +8377,42 @@ def monophonic_check(escore_notes, times_index=1):
 
 def count_escore_notes_patches(escore_notes, patches_index=6):
   return [list(c) for c in Counter([e[patches_index] for e in escore_notes]).most_common()]
+
+###################################################################################
+
+def escore_notes_medley(list_of_escore_notes, 
+                        list_of_labels=None,
+                        pause_time_value=255
+                        ):
+
+  if list_of_labels is not None:
+    labels = [str(l) for l in list_of_labels] + ['No label'] * (len(list_of_escore_notes)-len(list_of_labels))
+
+  medley = []
+
+  time = 0
+
+  for i, m in enumerate(list_of_escore_notes):
+
+    if list_of_labels is not None:
+      medley.append(['text_event', time, labels[i]])
+
+    pe = m[0]
+
+    for mm in m:
+
+      time += mm[1] - pe[1]
+
+      mmm = copy.deepcopy(mm)
+      mmm[1] = time
+
+      medley.append(mmm)
+
+      pe = mm
+
+    time += pause_time_value
+
+  return medley
 
 ###################################################################################
 #  
