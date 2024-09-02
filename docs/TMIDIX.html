@@ -1155,6 +1155,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes">compress_patches_in_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes_chords">compress_patches_in_escore_notes_chords</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
+    <li class="mono"><a href="#TMIDIX.count_escore_notes_patches">count_escore_notes_patches</a></li>
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.covariance">covariance</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
@@ -1219,6 +1220,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.midi2score">midi2score</a></li>
     <li class="mono"><a href="#TMIDIX.midi2single_track_ms_score">midi2single_track_ms_score</a></li>
     <li class="mono"><a href="#TMIDIX.minkowski_distance">minkowski_distance</a></li>
+    <li class="mono"><a href="#TMIDIX.monophonic_check">monophonic_check</a></li>
     <li class="mono"><a href="#TMIDIX.morph_tones_chord">morph_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.norm">norm</a></li>
     <li class="mono"><a href="#TMIDIX.normalize_chord_durations">normalize_chord_durations</a></li>
@@ -6090,13 +6092,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="k">if</span> <span class="n">legacy_timings</span><span class="p">:</span>
         <span class="n">abs_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">)</span> <span class="o">+</span> <span class="n">timings_shift</span>
 
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
+
       <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_time</span> <span class="o">+</span> <span class="n">timings_shift</span><span class="p">)</span>
 
       <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">))</span> <span class="o">+</span> <span class="n">timings_shift</span>
       
       <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pitch_shift</span><span class="p">))</span>
-
-      <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
 
       <span class="n">pe</span> <span class="o">=</span> <span class="n">enhanced_score_notes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
@@ -9705,8 +9708,20 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
   <span class="k">return</span> <span class="n">dtimes</span>
 
-<span class="c1"># This is the end of the TMIDI X Python module</span>
+<span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">monophonic_check</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">count_escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+
+<span class="c1">###################################################################################</span>
+<span class="c1">#  </span>
+<span class="c1"># This is the end of the TMIDI X Python module</span>
+<span class="c1">#</span>
 <span class="c1">###################################################################################</span>
 </pre></div>
 
@@ -13732,13 +13747,14 @@ Tegridy Code 2024</p></div>
       <span class="k">if</span> <span class="n">legacy_timings</span><span class="p">:</span>
         <span class="n">abs_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">)</span> <span class="o">+</span> <span class="n">timings_shift</span>
 
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
+
       <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_time</span> <span class="o">+</span> <span class="n">timings_shift</span><span class="p">)</span>
 
       <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">timings_divider</span><span class="p">))</span> <span class="o">+</span> <span class="n">timings_shift</span>
       
       <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">pitch_shift</span><span class="p">))</span>
-
-      <span class="n">abs_time</span> <span class="o">+=</span> <span class="n">dtime</span>
 
       <span class="n">pe</span> <span class="o">=</span> <span class="n">enhanced_score_notes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
@@ -14733,6 +14749,27 @@ Tegridy Code 2024</p></div>
         <span class="k">return</span> <span class="mf">0.0</span>
     
     <span class="k">return</span> <span class="n">dot_prod</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm_x</span> <span class="o">*</span> <span class="n">norm_y</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.count_escore_notes_patches">
+    <p>def <span class="ident">count_escore_notes_patches</span>(</p><p>escore_notes, patches_index=6)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.count_escore_notes_patches', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.count_escore_notes_patches" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
 </pre></div>
 
   </div>
@@ -17389,6 +17426,27 @@ tick per millisecond</p></div>
         <span class="n">distance</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">**</span> <span class="n">p</span>
 
     <span class="k">return</span> <span class="n">distance</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.monophonic_check">
+    <p>def <span class="ident">monophonic_check</span>(</p><p>escore_notes, times_index=1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.monophonic_check', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.monophonic_check" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">monophonic_check</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
 </pre></div>
 
   </div>
