@@ -1091,6 +1091,46 @@ def images_to_image_matrix(list_of_images,
     return original_matrix
 
 ################################################################################
+
+def square_matrix_to_RGB_matrix(square_matrix):
+
+  smatrix = np.array(square_matrix)
+  sq_matrix = smatrix[:smatrix.shape[1]]
+
+  r = (sq_matrix // (256 ** 2)) % 256
+  g = (sq_matrix // 256) % 256
+  b = sq_matrix % 256
+
+  rgb_array = np.stack((r, g, b), axis=-1)
+
+  return rgb_array.tolist()
+
+################################################################################
+
+def upsample_square_matrix(square_matrix, upsampling_factor=4):
+
+  smatrix = np.array(square_matrix)
+  sq_matrix = smatrix[:smatrix.shape[1]]
+
+  scaling_array = np.ones((upsampling_factor, upsampling_factor))
+  scaled_array = np.kron(sq_matrix, scaling_array)
+  scaled_array = scaled_array.astype('int')
+
+  return scaled_array.tolist()
+
+################################################################################
+
+def downsample_square_matrix(square_matrix, downsampling_factor=4):
+
+  smatrix = np.array(square_matrix)
+  sq_matrix = smatrix[:smatrix.shape[1]]
+
+  dmatrix = sq_matrix[::downsampling_factor, ::downsampling_factor]
+  dmatrix = dmatrix.astype('int')
+
+  return dmatrix.tolist()
+
+################################################################################
 # [WIP] Future dev functions
 ################################################################################
 
