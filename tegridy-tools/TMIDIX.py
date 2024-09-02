@@ -8415,6 +8415,15 @@ def escore_notes_medley(list_of_escore_notes,
   return medley
 
 ###################################################################################
+
+def proportions_counter(list_of_values):
+
+  counts = Counter(list_of_values).most_common()
+  clen = sum([c[1] for c in counts])
+
+  return [[c[0], c[1], c[1] / clen] for c in counts]
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
