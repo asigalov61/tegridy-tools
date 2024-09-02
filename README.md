@@ -57,12 +57,28 @@
 ### Manual imports/re-imports
 
 ```
+import os
+import copy
+import math
+import statistics
+import pickle
+import shutil
+from itertools import groupby
+from collections import Counter
+from sklearn.metrics import pairwise_distances
+from joblib import Parallel, delayed, parallel_config
+import numpy as np
+from tqdm import tqdm
+from PIL import Image
+import matplotlib.pyplot as plt
+
 import TMIDIX
 import TPLOTS
 import TMELODIES
 import HaystackSearch
 import midi_to_colab_audio
 from x_transformer_1_23_2 import *
+
 import random
 ```
 
