@@ -1075,6 +1075,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.binary_matrix_to_images">binary_matrix_to_images</a></li>
     <li class="mono"><a href="#TPLOTS.calculate_similarities">calculate_similarities</a></li>
     <li class="mono"><a href="#TPLOTS.compute_mst_edges">compute_mst_edges</a></li>
+    <li class="mono"><a href="#TPLOTS.downsample_square_matrix">downsample_square_matrix</a></li>
     <li class="mono"><a href="#TPLOTS.filter_and_replace_values">filter_and_replace_values</a></li>
     <li class="mono"><a href="#TPLOTS.find_closest_points">find_closest_points</a></li>
     <li class="mono"><a href="#TPLOTS.find_shortest_constellation_path">find_shortest_constellation_path</a></li>
@@ -1103,8 +1104,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.square_binary_matrix">square_binary_matrix</a></li>
     <li class="mono"><a href="#TPLOTS.square_image_matrix">square_image_matrix</a></li>
     <li class="mono"><a href="#TPLOTS.square_matrix_points_colors">square_matrix_points_colors</a></li>
+    <li class="mono"><a href="#TPLOTS.square_matrix_to_RGB_matrix">square_matrix_to_RGB_matrix</a></li>
     <li class="mono"><a href="#TPLOTS.tone_type">tone_type</a></li>
     <li class="mono"><a href="#TPLOTS.tones_chord_type">tones_chord_type</a></li>
+    <li class="mono"><a href="#TPLOTS.upsample_square_matrix">upsample_square_matrix</a></li>
   </ul>
 
     </li>
@@ -2266,6 +2269,46 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">original_matrix</span>
 
 <span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">square_matrix_to_RGB_matrix</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">):</span>
+
+  <span class="n">smatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">)</span>
+  <span class="n">sq_matrix</span> <span class="o">=</span> <span class="n">smatrix</span><span class="p">[:</span><span class="n">smatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+  <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">sq_matrix</span> <span class="o">//</span> <span class="p">(</span><span class="mi">256</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">%</span> <span class="mi">256</span>
+  <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">sq_matrix</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+  <span class="n">b</span> <span class="o">=</span> <span class="n">sq_matrix</span> <span class="o">%</span> <span class="mi">256</span>
+
+  <span class="n">rgb_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">rgb_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">upsample_square_matrix</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">,</span> <span class="n">upsampling_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">smatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">)</span>
+  <span class="n">sq_matrix</span> <span class="o">=</span> <span class="n">smatrix</span><span class="p">[:</span><span class="n">smatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+  <span class="n">scaling_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">upsampling_factor</span><span class="p">,</span> <span class="n">upsampling_factor</span><span class="p">))</span>
+  <span class="n">scaled_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">sq_matrix</span><span class="p">,</span> <span class="n">scaling_array</span><span class="p">)</span>
+  <span class="n">scaled_array</span> <span class="o">=</span> <span class="n">scaled_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">scaled_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">downsample_square_matrix</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">,</span> <span class="n">downsampling_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">smatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">)</span>
+  <span class="n">sq_matrix</span> <span class="o">=</span> <span class="n">smatrix</span><span class="p">[:</span><span class="n">smatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+  <span class="n">dmatrix</span> <span class="o">=</span> <span class="n">sq_matrix</span><span class="p">[::</span><span class="n">downsampling_factor</span><span class="p">,</span> <span class="p">::</span><span class="n">downsampling_factor</span><span class="p">]</span>
+  <span class="n">dmatrix</span> <span class="o">=</span> <span class="n">dmatrix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">dmatrix</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1">################################################################################</span>
 <span class="c1"># [WIP] Future dev functions</span>
 <span class="c1">################################################################################</span>
 
@@ -2567,6 +2610,34 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">mst_edges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mst</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
   <span class="k">return</span> <span class="n">mst_edges</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.downsample_square_matrix">
+    <p>def <span class="ident">downsample_square_matrix</span>(</p><p>square_matrix, downsampling_factor=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.downsample_square_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.downsample_square_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">downsample_square_matrix</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">,</span> <span class="n">downsampling_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">smatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">)</span>
+  <span class="n">sq_matrix</span> <span class="o">=</span> <span class="n">smatrix</span><span class="p">[:</span><span class="n">smatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+  <span class="n">dmatrix</span> <span class="o">=</span> <span class="n">sq_matrix</span><span class="p">[::</span><span class="n">downsampling_factor</span><span class="p">,</span> <span class="p">::</span><span class="n">downsampling_factor</span><span class="p">]</span>
+  <span class="n">dmatrix</span> <span class="o">=</span> <span class="n">dmatrix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">dmatrix</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -3857,6 +3928,37 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
       
   <div class="item">
+    <div class="name def" id="TPLOTS.square_matrix_to_RGB_matrix">
+    <p>def <span class="ident">square_matrix_to_RGB_matrix</span>(</p><p>square_matrix)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.square_matrix_to_RGB_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.square_matrix_to_RGB_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">square_matrix_to_RGB_matrix</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">):</span>
+
+  <span class="n">smatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">)</span>
+  <span class="n">sq_matrix</span> <span class="o">=</span> <span class="n">smatrix</span><span class="p">[:</span><span class="n">smatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+  <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">sq_matrix</span> <span class="o">//</span> <span class="p">(</span><span class="mi">256</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">%</span> <span class="mi">256</span>
+  <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">sq_matrix</span> <span class="o">//</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+  <span class="n">b</span> <span class="o">=</span> <span class="n">sq_matrix</span> <span class="o">%</span> <span class="mi">256</span>
+
+  <span class="n">rgb_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">rgb_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TPLOTS.tone_type">
     <p>def <span class="ident">tone_type</span>(</p><p>tone, return_tone_type_index=True)</p>
     </div>
@@ -3952,6 +4054,35 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">ctype</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.upsample_square_matrix">
+    <p>def <span class="ident">upsample_square_matrix</span>(</p><p>square_matrix, upsampling_factor=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.upsample_square_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.upsample_square_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">upsample_square_matrix</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">,</span> <span class="n">upsampling_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+  <span class="n">smatrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">square_matrix</span><span class="p">)</span>
+  <span class="n">sq_matrix</span> <span class="o">=</span> <span class="n">smatrix</span><span class="p">[:</span><span class="n">smatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+  <span class="n">scaling_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">upsampling_factor</span><span class="p">,</span> <span class="n">upsampling_factor</span><span class="p">))</span>
+  <span class="n">scaled_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">sq_matrix</span><span class="p">,</span> <span class="n">scaling_array</span><span class="p">)</span>
+  <span class="n">scaled_array</span> <span class="o">=</span> <span class="n">scaled_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">scaled_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 
   </div>
