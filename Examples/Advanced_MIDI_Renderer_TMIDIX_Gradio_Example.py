@@ -30,6 +30,11 @@ import time
 import datetime
 from pytz import timezone
 
+import copy
+from collections import Counter
+import random
+import statistics
+
 import gradio as gr
 
 import TMIDIX
@@ -37,20 +42,14 @@ import TPLOTS
 
 from midi_to_colab_audio import midi_to_colab_audio
 
-import copy
-from collections import Counter
-import random
-import statistics
-
 #==========================================================================================================
 
-def render_midi(input_midi, 
+def Render_MIDI(input_midi, 
                 render_type, 
                 soundfont_bank, 
                 render_sample_rate, 
                 custom_render_patch,
                 render_align,
-                render_summary_type,
                 render_transpose_value,
                 render_transpose_to_C4,
                 render_output_as_solo_piano,
@@ -82,7 +81,6 @@ def render_midi(input_midi,
     print('Audio render sample rate', render_sample_rate)
     print('Custom MIDI render patch', custom_render_patch)
     print('Align to bars:', render_align)
-    print('Summary type:', render_summary_type)
     print('Transpose value:', render_transpose_value)
     print('Transpose to C4', render_transpose_to_C4)
     print('Output as Solo Piano', render_output_as_solo_piano)
@@ -111,13 +109,9 @@ def render_midi(input_midi,
     print('=' * 70)
     print('Processing...Please wait...')
 
-    if render_type == 'Render as-is' or render_type == "Summarize":
-        output_score = copy.deepcopy(escore)
+    output_score = copy.deepcopy(escore)
 
-    elif render_type == "Custom render" or not render_type:
-        output_score = copy.deepcopy(escore)
-
-    elif render_type == "Extract melody":
+    if render_type == "Extract melody":
         output_score = TMIDIX.add_melody_to_enhanced_score_notes(escore, return_melody=True)
         output_score = TMIDIX.recalculate_score_timings(output_score)
 
@@ -127,7 +121,7 @@ def render_midi(input_midi,
     elif render_type == "Reverse":
         output_score = TMIDIX.reverse_enhanced_score_notes(escore)
         
-    elif render_type == 'Repair':
+    elif render_type == 'Repair Chords':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
         output_score = TMIDIX.flatten(fixed_cscore)
 
@@ -171,7 +165,7 @@ def render_midi(input_midi,
             output_score = TMIDIX.recalculate_score_timings(output_score)
             output_score = TMIDIX.align_escore_notes_to_bars(output_score, split_durations=True)
 
-        if render_type == "Summarize" and render_summary_type == "Longest Repeating Phrase":
+        if render_type == "Longest Repeating Phrase":
             zscore = TMIDIX.recalculate_score_timings(output_score)
             lrno_score = TMIDIX.escore_notes_lrno_pattern(zscore)
 
@@ -181,16 +175,18 @@ def render_midi(input_midi,
             else:
                 output_score = TMIDIX.recalculate_score_timings(TMIDIX.escore_notes_middle(output_score, 50))
 
-        if render_type == "Summarize" and render_summary_type == "Multi-Instrumental":
+        if render_type == "Multi-Instrumental Summary":
             zscore = TMIDIX.recalculate_score_timings(output_score)
             c_escore_notes = TMIDIX.compress_patches_in_escore_notes_chords(zscore)
-            cmatrix = TMIDIX.escore_notes_to_image_matrix(c_escore_notes, filter_out_zero_rows=True, filter_out_duplicate_rows=True)
-            smatrix = TPLOTS.square_image_matrix(cmatrix)
-            output_score = TMIDIX.image_matrix_to_original_escore_notes(smatrix)
             
-            for o in output_score:
-                o[1] *= 250
-                o[2] *= 250            
+            if len(c_escore_notes) > 128:
+                cmatrix = TMIDIX.escore_notes_to_image_matrix(c_escore_notes, filter_out_zero_rows=True, filter_out_duplicate_rows=True)
+                smatrix = TPLOTS.square_image_matrix(cmatrix)
+                output_score = TMIDIX.image_matrix_to_original_escore_notes(smatrix)
+                
+                for o in output_score:
+                    o[1] *= 250
+                    o[2] *= 250            
 
         if render_output_as_solo_piano:
             output_score = TMIDIX.solo_piano_escore_notes(output_score, keep_drums=True)
@@ -198,17 +194,20 @@ def render_midi(input_midi,
         if render_remove_drums:
             output_score = TMIDIX.strip_drums_from_escore_notes(output_score)
             
-        if render_type == "Summarize" and render_summary_type == "Solo Piano":
+        if render_type == "Solo Piano Summary":
             sp_escore_notes = TMIDIX.solo_piano_escore_notes(output_score, keep_drums=False)
             zscore = TMIDIX.recalculate_score_timings(sp_escore_notes)
-            bmatrix = TMIDIX.escore_notes_to_binary_matrix(zscore)
-            cmatrix = TMIDIX.compress_binary_matrix(bmatrix, only_compress_zeros=True)
-            smatrix = TPLOTS.square_binary_matrix(cmatrix)
-            output_score = TMIDIX.binary_matrix_to_original_escore_notes(smatrix)
 
-            for o in output_score:
-                o[1] *= 200
-                o[2] *= 200
+            if len(zscore) > 128:
+                
+                bmatrix = TMIDIX.escore_notes_to_binary_matrix(zscore)
+                cmatrix = TMIDIX.compress_binary_matrix(bmatrix, only_compress_zeros=True)
+                smatrix = TPLOTS.square_binary_matrix(cmatrix)
+                output_score = TMIDIX.binary_matrix_to_original_escore_notes(smatrix)
+    
+                for o in output_score:
+                    o[1] *= 200
+                    o[2] *= 200
             
         SONG, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(output_score)
                     
@@ -359,8 +358,10 @@ if __name__ == "__main__":
                                 "Extract melody", 
                                 "Flip", 
                                 "Reverse", 
-                                "Repair",
-                                "Summarize",
+                                "Repair Chords",
+                                "Longest Repeating Phrase",
+                                "Multi-Instrumental Summary",
+                                "Solo Piano Summary"
                                ], 
                                label="Render type", 
                                value="Render as-is"
@@ -369,14 +370,6 @@ if __name__ == "__main__":
         gr.Markdown("## Select custom render options")
 
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
-
-        render_summary_type = gr.Radio(["Multi-Instrumental", 
-                                         "Solo Piano", 
-                                         "Longest Repeating Phrase", 
-                                        ], 
-                                        label="Summary type", 
-                                        value="Multi-Instrumental"
-                                       )
         
         render_align = gr.Radio(["Do not align", 
                                  "Start Times", 
@@ -405,13 +398,12 @@ if __name__ == "__main__":
         output_plot = gr.Plot(label="Output MIDI score plot")
         output_midi = gr.File(label="Output MIDI file", file_types=[".mid"])
         
-        run_event = submit.click(render_midi, [input_midi, 
+        run_event = submit.click(Render_MIDI, [input_midi, 
                                                render_type, 
                                                soundfont_bank, 
                                                render_sample_rate, 
                                                custom_render_patch,
                                                render_align,
-                                               render_summary_type,
                                                render_transpose_value,
                                                render_transpose_to_C4,
                                                render_output_as_solo_piano,
