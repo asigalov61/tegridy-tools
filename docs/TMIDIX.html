@@ -1179,6 +1179,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_durations">escore_notes_durations</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_lrno_pattern">escore_notes_lrno_pattern</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_medley">escore_notes_medley</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_middle">escore_notes_middle</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_times_tones">escore_notes_times_tones</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_binary_matrix">escore_notes_to_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_escore_matrix">escore_notes_to_escore_matrix</a></li>
@@ -9924,14 +9925,16 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">chords_toks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
       <span class="n">chords_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-  <span class="n">lrno_pattern</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">find_lrno_patterns</span><span class="p">(</span><span class="n">chords_toks</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+  <span class="n">lrno_pats</span> <span class="o">=</span> <span class="n">find_lrno_patterns</span><span class="p">(</span><span class="n">chords_toks</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">lrno_pattern</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">lrno_pats</span><span class="p">:</span>
+
+    <span class="n">lrno_pattern</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lrno_pats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
 
     <span class="n">start_idx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">find_pattern_start_indexes</span><span class="p">(</span><span class="n">chords_toks</span><span class="p">,</span> <span class="n">lrno_pattern</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
     <span class="n">end_idx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">lrno_pattern</span><span class="p">)]</span>
 
-    <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">checked_cscore</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]))</span>
 
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">None</span>
@@ -10038,6 +10041,32 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">times</span>
 
   <span class="k">return</span> <span class="p">[[</span><span class="n">t</span><span class="p">,</span> <span class="n">to</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">to</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">tones</span><span class="p">)]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_middle</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                        <span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+                        <span class="n">use_chords</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">use_chords</span><span class="p">:</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">escore_notes</span>
+
+  <span class="n">middle_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+
+  <span class="n">slen</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+
+  <span class="n">start_idx</span> <span class="o">=</span> <span class="n">middle_idx</span> <span class="o">-</span> <span class="n">slen</span>
+  <span class="n">end_idx</span> <span class="o">=</span> <span class="n">middle_idx</span> <span class="o">+</span> <span class="n">slen</span>
+
+  <span class="k">if</span> <span class="n">use_chords</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
@@ -16024,14 +16053,16 @@ Tegridy Code 2024</p></div>
       <span class="n">chords_toks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
       <span class="n">chords_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-  <span class="n">lrno_pattern</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">find_lrno_patterns</span><span class="p">(</span><span class="n">chords_toks</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+  <span class="n">lrno_pats</span> <span class="o">=</span> <span class="n">find_lrno_patterns</span><span class="p">(</span><span class="n">chords_toks</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">lrno_pattern</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">lrno_pats</span><span class="p">:</span>
+
+    <span class="n">lrno_pattern</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lrno_pats</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
 
     <span class="n">start_idx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">find_pattern_start_indexes</span><span class="p">(</span><span class="n">chords_toks</span><span class="p">,</span> <span class="n">lrno_pattern</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
     <span class="n">end_idx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">lrno_pattern</span><span class="p">)]</span>
 
-    <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">checked_cscore</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]))</span>
 
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">None</span>
@@ -16087,6 +16118,48 @@ Tegridy Code 2024</p></div>
     <span class="n">time</span> <span class="o">+=</span> <span class="n">pause_time_value</span>
 
   <span class="k">return</span> <span class="n">medley</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_middle">
+    <p>def <span class="ident">escore_notes_middle</span>(</p><p>escore_notes, length=10, use_chords=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_middle', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_middle" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_middle</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                        <span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+                        <span class="n">use_chords</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">use_chords</span><span class="p">:</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">escore_notes</span>
+
+  <span class="n">middle_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+
+  <span class="n">slen</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+
+  <span class="n">start_idx</span> <span class="o">=</span> <span class="n">middle_idx</span> <span class="o">-</span> <span class="n">slen</span>
+  <span class="n">end_idx</span> <span class="o">=</span> <span class="n">middle_idx</span> <span class="o">+</span> <span class="n">slen</span>
+
+  <span class="k">if</span> <span class="n">use_chords</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
 </pre></div>
 
   </div>
