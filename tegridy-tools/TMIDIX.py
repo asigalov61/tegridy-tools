@@ -8572,14 +8572,16 @@ def escore_notes_lrno_pattern(escore_notes, mode='chords'):
       chords_toks.append(token)
       chords_idxs.append(i)
 
-  lrno_pattern = list(find_lrno_patterns(chords_toks)[0][2])
+  lrno_pats = find_lrno_patterns(chords_toks)
 
-  if lrno_pattern:
+  if lrno_pats:
+
+    lrno_pattern = list(lrno_pats[0][2])
 
     start_idx = chords_idxs[find_pattern_start_indexes(chords_toks, lrno_pattern)[0]]
     end_idx = chords_idxs[start_idx + len(lrno_pattern)]
 
-    return recalculate_score_timings(flatten(checked_cscore[0][start_idx:end_idx]))
+    return recalculate_score_timings(flatten(cscore[start_idx:end_idx]))
 
   else:
     return None
@@ -8686,6 +8688,32 @@ def escore_notes_times_tones(escore_notes,
       times = [0] + times
 
   return [[t, to] for t, to in zip(times, tones)]
+
+###################################################################################
+
+def escore_notes_middle(escore_notes, 
+                        length=10, 
+                        use_chords=True
+                        ):
+
+  if use_chords:
+    score = chordify_score([1000, escore_notes])
+
+  else:
+    score = escore_notes
+
+  middle_idx = len(score) // 2
+
+  slen = min(len(score) // 2, length // 2)
+
+  start_idx = middle_idx - slen
+  end_idx = middle_idx + slen
+
+  if use_chords:
+    return flatten(score[start_idx:end_idx])
+
+  else:
+    return score[start_idx:end_idx]
 
 ###################################################################################
 #  
