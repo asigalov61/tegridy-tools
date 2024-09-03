@@ -49,9 +49,10 @@ def render_midi(input_midi,
                 soundfont_bank, 
                 render_sample_rate, 
                 custom_render_patch,
+                render_align,
+                render_summary_type,
                 render_transpose_value,
                 render_transpose_to_C4,
-                render_align,
                 render_output_as_solo_piano,
                 render_remove_drums 
                 ):
@@ -80,9 +81,10 @@ def render_midi(input_midi,
     print('Soudnfont bank', soundfont_bank)
     print('Audio render sample rate', render_sample_rate)
     print('Custom MIDI render patch', custom_render_patch)
+    print('Align to bars:', render_align)
+    print('Summary type:', render_summary_type)
     print('Transpose value:', render_transpose_value)
     print('Transpose to C4', render_transpose_to_C4)
-    print('Align to bars:', render_align)
     print('Output as Solo Piano', render_output_as_solo_piano)
     print('Remove drums:', render_remove_drums)
     print('=' * 70)
@@ -109,7 +111,7 @@ def render_midi(input_midi,
     print('=' * 70)
     print('Processing...Please wait...')
 
-    if render_type == 'Render as-is' or render_type == "Solo Piano Summary" or render_type == "Multi-Instrumental Summary":
+    if render_type == 'Render as-is' or render_type == "Summarize":
         output_score = copy.deepcopy(escore)
 
     elif render_type == "Custom render" or not render_type:
@@ -169,7 +171,17 @@ def render_midi(input_midi,
             output_score = TMIDIX.recalculate_score_timings(output_score)
             output_score = TMIDIX.align_escore_notes_to_bars(output_score, split_durations=True)
 
-        if render_type == "Multi-Instrumental Summary":
+        if render_type == "Summarize" and render_summary_type == "Longest Repeating Phrase":
+            zscore = TMIDIX.recalculate_score_timings(output_score)
+            lrno_score = TMIDIX.escore_notes_lrno_pattern(zscore)
+
+            if lrno_score is not None:
+                output_score = TMIDIX.recalculate_score_timings(lrno_score)
+
+            else:
+                output_score = TMIDIX.recalculate_score_timings(TMIDIX.escore_notes_middle(output_score, 50))
+
+        if render_type == "Summarize" and render_summary_type == "Multi-Instrumental":
             zscore = TMIDIX.recalculate_score_timings(output_score)
             c_escore_notes = TMIDIX.compress_patches_in_escore_notes_chords(zscore)
             cmatrix = TMIDIX.escore_notes_to_image_matrix(c_escore_notes, filter_out_zero_rows=True, filter_out_duplicate_rows=True)
@@ -186,7 +198,7 @@ def render_midi(input_midi,
         if render_remove_drums:
             output_score = TMIDIX.strip_drums_from_escore_notes(output_score)
             
-        if render_type == "Solo Piano Summary":
+        if render_type == "Summarize" and render_summary_type == "Solo Piano":
             sp_escore_notes = TMIDIX.solo_piano_escore_notes(output_score, keep_drums=False)
             zscore = TMIDIX.recalculate_score_timings(sp_escore_notes)
             bmatrix = TMIDIX.escore_notes_to_binary_matrix(zscore)
@@ -348,8 +360,7 @@ if __name__ == "__main__":
                                 "Flip", 
                                 "Reverse", 
                                 "Repair",
-                                "Multi-Instrumental Summary",
-                                "Solo Piano Summary"
+                                "Summarize",
                                ], 
                                label="Render type", 
                                value="Render as-is"
@@ -358,9 +369,15 @@ if __name__ == "__main__":
         gr.Markdown("## Select custom render options")
 
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
+
+        render_summary_type = gr.Radio(["Multi-Instrumental", 
+                                         "Solo Piano", 
+                                         "Longest Repeating Phrase", 
+                                        ], 
+                                        label="Summary type", 
+                                        value="Multi-Instrumental"
+                                       )
         
-        render_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
-        render_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
         render_align = gr.Radio(["Do not align", 
                                  "Start Times", 
                                  "Start Times and Durations", 
@@ -368,7 +385,11 @@ if __name__ == "__main__":
                                 ], 
                                 label="Align output to bars", 
                                 value="Do not align"
-                               )
+                               )        
+        
+        render_transpose_value = gr.Slider(-12, 12, value=0, step=1, label="Transpose value")
+        render_transpose_to_C4 = gr.Checkbox(label="Transpose to C4", value=False)
+
 
         render_output_as_solo_piano = gr.Checkbox(label="Output as Solo Piano", value=False)
         render_remove_drums = gr.Checkbox(label="Remove drums", value=False)
@@ -389,11 +410,12 @@ if __name__ == "__main__":
                                                soundfont_bank, 
                                                render_sample_rate, 
                                                custom_render_patch,
+                                               render_align,
+                                               render_summary_type,
                                                render_transpose_value,
                                                render_transpose_to_C4,
-                                               render_align,
                                                render_output_as_solo_piano,
-                                               render_remove_drums                                               
+                                               render_remove_drums                                              
                                               ],
                                                 [output_midi_md5, 
                                                  output_midi_title, 
