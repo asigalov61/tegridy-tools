@@ -8524,6 +8524,170 @@ def add_drums_to_escore_notes(escore_notes,
   return final_score
 
 ###################################################################################
+
+def find_pattern_start_indexes(values, pattern):
+
+  start_indexes = []
+
+  count = 0
+
+  for i in range(len(values)- len(pattern)):
+    chunk = values[i:i+len(pattern)]
+
+    if chunk == pattern:
+      start_indexes.append(i)
+
+  return start_indexes
+
+###################################################################################
+
+def escore_notes_lrno_pattern(escore_notes, mode='chords'):
+
+  cscore = chordify_score([1000, escore_notes])
+
+  checked_cscore = advanced_check_and_fix_chords_in_chordified_score(cscore)
+
+  chords_toks = []
+  chords_idxs = []
+
+  for i, c in enumerate(checked_cscore[0]):
+
+    pitches = sorted([p[4] for p in c if p[3] != 9], reverse=True)
+    tchord = pitches_to_tones_chord(pitches)
+
+    if tchord:
+      
+      if mode == 'chords':
+        token = ALL_CHORDS_FILTERED.index(tchord)
+      
+      elif mode == 'high pitches':
+        token = pitches[0]
+
+      elif mode == 'high pitches tones':
+        token = pitches[0] % 12
+
+      else:
+        token = ALL_CHORDS_FILTERED.index(tchord)
+
+      chords_toks.append(token)
+      chords_idxs.append(i)
+
+  lrno_pattern = list(find_lrno_patterns(chords_toks)[0][2])
+
+  if lrno_pattern:
+
+    start_idx = chords_idxs[find_pattern_start_indexes(chords_toks, lrno_pattern)[0]]
+    end_idx = chords_idxs[start_idx + len(lrno_pattern)]
+
+    return recalculate_score_timings(flatten(checked_cscore[0][start_idx:end_idx]))
+
+  else:
+    return None
+
+###################################################################################
+
+def chordified_score_pitches(chordified_score, 
+                             mode='dominant',
+                             return_tones=False,
+                             omit_drums=True,
+                             score_patch=-1,
+                             channels_index=3,
+                             pitches_index=4,
+                             patches_index=6                          
+                            ):
+
+  results = []
+
+  for c in chordified_score:
+    
+    if -1 < score_patch < 128:
+      ptcs = sorted([e[pitches_index] for e in c if e[channels_index] != 9 and e[patches_index] == score_patch], reverse=True)
+    
+    else:
+      ptcs = sorted([e[pitches_index] for e in c if e[channels_index] != 9], reverse=True)
+
+    if ptcs:
+
+      if mode == 'dominant':
+        
+        mtone = statistics.mode([p % 12 for p in ptcs])
+        
+        if return_tones:
+          results.append(mtone)
+        
+        else:
+          results.append(sorted(set([p for p in ptcs if p % 12 == mtone]), reverse=True))
+      
+      elif mode == 'high':
+        
+        if return_tones:
+          results.append(ptcs[0] % 12)
+
+        else:
+          results.append([ptcs[0]])
+
+      elif mode == 'base':
+
+        if return_tones:
+          results.append(ptcs[-1] % 12)
+
+        else:
+          results.append([ptcs[-1]])
+
+      elif mode == 'average':
+
+        if return_tones:
+          results.append(statistics.mean(ptcs) % 12)
+
+        else:
+          results.append([statistics.mean(ptcs)])
+
+      else:
+
+        mtone = statistics.mode([p % 12 for p in ptcs])
+        
+        if return_tones:
+          results.append(mtone)
+        
+        else:
+          results.append(sorted(set([p for p in ptcs if p % 12 == mtone]), reverse=True))
+
+    else:
+
+      if not omit_drums:
+        
+        if return_tones:
+          results.append(-1)
+        
+        else:
+          results.append([-1])
+
+  return results
+  
+###################################################################################
+
+def escore_notes_times_tones(escore_notes, 
+                             tones_mode='dominant', 
+                             return_abs_times=True,
+                             omit_drums=False
+                             ):
+
+  cscore = chordify_score([1000, escore_notes])
+  
+  tones = chordified_score_pitches(cscore, return_tones=True, mode=tones_mode, omit_drums=omit_drums)
+
+  if return_abs_times:
+    times = sorted([c[0][1] for c in cscore])
+  
+  else:
+    times = escore_notes_delta_times(escore_notes, omit_zeros=True, omit_drums=omit_drums)
+    
+    if len(times) != len(tones):
+      times = [0] + times
+
+  return [[t, to] for t, to in zip(times, tones)]
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
