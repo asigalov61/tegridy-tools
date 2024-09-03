@@ -8424,6 +8424,106 @@ def proportions_counter(list_of_values):
   return [[c[0], c[1], c[1] / clen] for c in counts]
 
 ###################################################################################
+
+def smooth_escore_notes(escore_notes):
+
+  values = [e[4] % 24 for e in escore_notes]
+
+  smoothed = [values[0]]
+
+  for i in range(1, len(values)):
+      if abs(smoothed[-1] - values[i]) >= 12:
+          if smoothed[-1] < values[i]:
+              smoothed.append(values[i] - 12)
+          else:
+              smoothed.append(values[i] + 12)
+      else:
+          smoothed.append(values[i])
+
+  smoothed_score = copy.deepcopy(escore_notes)
+
+  for i, e in enumerate(smoothed_score):
+    esn_octave = escore_notes[i][4] // 12
+    e[4] = (esn_octave * 12) + smoothed[i]
+
+  return smoothed_score
+
+###################################################################################
+
+def add_base_to_escore_notes(escore_notes,
+                             base_octave=2, 
+                             base_channel=2, 
+                             base_patch=35, 
+                             base_max_velocity=120,
+                             return_base=False
+                             ):
+  
+
+  score = copy.deepcopy(escore_notes)
+
+  cscore = chordify_score([1000, score])
+
+  base_score = []
+
+  for c in cscore:
+    chord = sorted([e for e in c if e[3] != 9], key=lambda x: x[4], reverse=True)
+    base_score.append(chord[-1])
+
+  base_score = smooth_escore_notes(base_score)
+
+  for e in base_score:
+    e[3] = base_channel
+    e[4] = (base_octave * 12) + (e[4] % 12)
+    e[5] = e[4]
+    e[6] = base_patch
+
+  adjust_score_velocities(base_score, base_max_velocity)
+
+  if return_base:
+    final_score = sorted(base_score, key=lambda x: (x[1], -x[4], x[6]))
+
+  else:
+    final_score = sorted(escore_notes + base_score, key=lambda x: (x[1], -x[4], x[6]))
+
+  return final_score
+
+###################################################################################
+
+def add_drums_to_escore_notes(escore_notes, 
+                              heavy_drums_pitches=[36, 38, 47],
+                              heavy_drums_velocity=110,
+                              light_drums_pitches=[51, 54],
+                              light_drums_velocity=127,
+                              drums_max_velocity=127,
+                              drums_ratio_time_divider=4,
+                              return_drums=False
+                              ):
+
+  score = copy.deepcopy([e for e in escore_notes if e[3] != 9])
+
+  cscore = chordify_score([1000, score])
+
+  drums_score = []
+
+  for c in cscore:
+    min_dur = max(1, min([e[2] for e in c]))
+    if not (c[0][1] % drums_ratio_time_divider):
+      drum_note = ['note', c[0][1], min_dur, 9, heavy_drums_pitches[c[0][4] % len(heavy_drums_pitches)], heavy_drums_velocity, 128]
+    else:
+      drum_note = ['note', c[0][1], min_dur, 9, light_drums_pitches[c[0][4] % len(light_drums_pitches)], light_drums_velocity, 128]
+    drums_score.append(drum_note)
+
+  adjust_score_velocities(drums_score, drums_max_velocity)
+
+  if return_drums:
+    final_score = sorted(drums_score, key=lambda x: (x[1], -x[4], x[6]))
+
+  else:
+    final_score = sorted(score + drums_score, key=lambda x: (x[1], -x[4], x[6]))
+
+  return final_score
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
