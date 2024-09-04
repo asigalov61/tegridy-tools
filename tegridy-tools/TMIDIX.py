@@ -4675,6 +4675,8 @@ def augment_enhanced_score_notes(enhanced_score_notes,
                                   full_sorting=True,
                                   timings_shift=0,
                                   pitch_shift=0,
+                                  ceil_timings=False,
+                                  round_timings=False,
                                   legacy_timings=False
                                 ):
 
@@ -4688,11 +4690,15 @@ def augment_enhanced_score_notes(enhanced_score_notes,
       
       dtime = (e[1] / timings_divider) - (pe[1] / timings_divider)
 
-      if 0.5 < dtime < 1:
-        dtime = 1
+      if round_timings:
+        dtime = round(dtime)
       
       else:
-        dtime = int(dtime)
+        if ceil_timings:
+          dtime = math.ceil(dtime)
+        
+        else:
+          dtime = int(dtime)
 
       if legacy_timings:
         abs_time = int(e[1] / timings_divider) + timings_shift
@@ -4702,7 +4708,14 @@ def augment_enhanced_score_notes(enhanced_score_notes,
 
       e[1] = max(0, abs_time + timings_shift)
 
-      e[2] = max(1, int(e[2] / timings_divider)) + timings_shift
+      if round_timings:
+        e[2] = max(1, round(e[2] / timings_divider)) + timings_shift
+      
+      else:
+        if ceil_timings:
+          e[2] = max(1, math.ceil(e[2] / timings_divider)) + timings_shift
+        else:
+          e[2] = max(1, int(e[2] / timings_divider)) + timings_shift
       
       e[4] = max(1, min(127, e[4] + pitch_shift))
 
@@ -5172,14 +5185,16 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 
   for c in chordified_score:
 
+    chord = copy.deepcopy(c)
+
     if remove_duplicate_pitches:
 
-      c.sort(key = lambda x: x[pitches_index], reverse=True)
+      chord.sort(key = lambda x: x[pitches_index], reverse=True)
 
       seen = set()
       ddchord = []
 
-      for cc in c:
+      for cc in chord:
         if cc[channels_index] != 9:
 
           if tuple([cc[pitches_index], cc[patches_index]]) not in seen:
@@ -5191,9 +5206,9 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
         else:
           ddchord.append(cc)
       
-      c = copy.deepcopy(ddchord)
+      chord = copy.deepcopy(ddchord)
       
-    tones_chord = sorted(set([t[pitches_index] % 12 for t in c if t[channels_index] != 9]))
+    tones_chord = sorted(set([t[pitches_index] % 12 for t in chord if t[channels_index] != 9]))
 
     if tones_chord:
 
@@ -5206,33 +5221,82 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
 
             if tones_counts[0][1] > 1:
               tones_chord = [tones_counts[0][0]]
+            
             elif tones_counts[1][1] > 1:
               tones_chord = [tones_counts[1][0]]
+            
             else:
               tones_chord = [pitches_chord[0] % 12]
 
           else:
-            tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
+            tones_chord_combs = [list(comb) for i in range(len(tones_chord)-1, 0, -1) for comb in combinations(tones_chord, i)]
 
             for co in tones_chord_combs:
               if co in CHORDS:
                 tones_chord = co
                 break
 
+          if len(tones_chord) == 1:
+            tones_chord = [pitches_chord[0] % 12]
+            
           bad_chords_counter += 1
 
-    new_chord = []
+    chord.sort(key = lambda x: x[pitches_index], reverse=True)
 
-    c.sort(key = lambda x: x[pitches_index], reverse=True)
+    new_chord = set()
+    pipa = []
 
-    for e in c:
+    for e in chord:
       if e[channels_index] != 9:
         if e[pitches_index] % 12 in tones_chord:
-          new_chord.append(e)
+          new_chord.add(tuple(e))
+          pipa.append([e[pitches_index], e[patches_index]])
 
-      else:
-        if not skip_drums:
-          new_chord.append(e)
+        elif (e[pitches_index]+1) % 12 in tones_chord:
+          e[pitches_index] += 1
+          new_chord.add(tuple(e))
+          pipa.append([e[pitches_index], e[patches_index]])
+
+        elif (e[pitches_index]-1) % 12 in tones_chord:
+          e[pitches_index] -= 1
+          new_chord.add(tuple(e))
+          pipa.append([e[pitches_index], e[patches_index]])
+
+    bad_chord = set()
+
+    for e in chord:
+      if e[channels_index] != 9:
+        
+        if e[pitches_index] % 12 not in tones_chord:
+          bad_chord.add(tuple(e))
+        
+        elif (e[pitches_index]+1) % 12 not in tones_chord:
+          bad_chord.add(tuple(e))
+        
+        elif (e[pitches_index]-1) % 12 not in tones_chord:
+          bad_chord.add(tuple(e))
+          
+    for bc in bad_chord:
+
+      bc = list(bc)
+
+      tone = find_closest_tone(tones_chord, bc[pitches_index] % 12)
+
+      new_pitch =  ((bc[pitches_index] // 12) * 12) + tone
+
+      if [new_pitch, bc[patches_index]] not in pipa:
+        bc[pitches_index] = new_pitch
+        new_chord.add(tuple(bc))
+        pipa.append([[new_pitch], bc[patches_index]])
+
+    if not skip_drums:
+      for e in c:
+        if e[channels_index] == 9:
+          new_chord.append(tuple(e))
+
+    new_chord = [list(e) for e in new_chord]
+
+    new_chord.sort(key = lambda x: (-x[pitches_index], x[patches_index]))
 
     fixed_chordified_score.append(new_chord)
 
@@ -7391,11 +7455,15 @@ def harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes,
 ###################################################################################
 
 def check_and_fix_pitches_chord(pitches_chord,
+                                remove_duplicate_pitches=True,
                                 use_filtered_chords=False,
                                 use_full_chords=True
                                 ):
   
-  pitches_chord = sorted(pitches_chord, reverse=True)
+  if remove_duplicate_pitches:
+    pitches_chord = sorted(set(pitches_chord), reverse=True)
+  else:
+    pitches_chord = sorted(pitches_chord, reverse=True)
 
   if use_filtered_chords:
     CHORDS = ALL_CHORDS_FILTERED
@@ -7405,44 +7473,83 @@ def check_and_fix_pitches_chord(pitches_chord,
   if use_full_chords:
     CHORDS = ALL_CHORDS_FULL
 
-  tones_chord = sorted(set([p % 12 for p in pitches_chord]))
+  chord = copy.deepcopy(pitches_chord)
+    
+  tones_chord = sorted(set([t % 12 for t in chord]))
 
-  if tones_chord not in CHORDS:
+  if tones_chord:
 
-    if len(tones_chord) == 2:
+      if tones_chord not in CHORDS:
+        
+        if len(tones_chord) == 2:
+          tones_counts = Counter([p % 12 for p in pitches_chord]).most_common()
 
-      tones_counts = Counter([p % 12 for p in pitches_chord]).most_common()
+          if tones_counts[0][1] > 1:
+            tones_chord = [tones_counts[0][0]]
+          
+          elif tones_counts[1][1] > 1:
+            tones_chord = [tones_counts[1][0]]
+          
+          else:
+            tones_chord = [pitches_chord[0] % 12]
 
-      if tones_counts[0][1] > 1:
-        tones_chord = [tones_counts[0][0]]
-      elif tones_counts[1][1] > 1:
-        tones_chord = [tones_counts[1][0]]
-      else:
-        tones_chord = [pitches_chord[0] % 12]
+        else:
+          tones_chord_combs = [list(comb) for i in range(len(tones_chord)-1, 0, -1) for comb in combinations(tones_chord, i)]
 
-    if len(tones_chord) > 2:
+          for co in tones_chord_combs:
+            if co in CHORDS:
+              tones_chord = co
+              break
 
-      tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
-      
-      tchord = []
+          if len(tones_chord) == 1:
+            tones_chord = [pitches_chord[0] % 12]
+              
+  chord.sort(reverse=True)
 
-      for co in tones_chord_combs:
-        if co in CHORDS:
-          tchord = co
-          break
+  new_chord = set()
+  pipa = []
 
-      if tchord:
-        tones_chord = tchord
-      
-      else:
-        tones_chord = [pitches_chord[0] % 12]
+  for e in chord:
+    if e % 12 in tones_chord:
+      new_chord.add(tuple([e]))
+      pipa.append(e)
 
-  new_pitches_chord = []
+    elif (e+1) % 12 in tones_chord:
+      e += 1
+      new_chord.add(tuple([e]))
+      pipa.append(e)
 
-  for p in pitches_chord:
+    elif (e-1) % 12 in tones_chord:
+      e -= 1
+      new_chord.add(tuple([e]))
+      pipa.append(e)
 
-    if p % 12 in tones_chord:
-      new_pitches_chord.append(p)
+  bad_chord = set()
+
+  for e in chord:
+  
+    if e % 12 not in tones_chord:
+      bad_chord.add(tuple([e]))
+    
+    elif (e+1) % 12 not in tones_chord:
+      bad_chord.add(tuple([e]))
+    
+    elif (e-1) % 12 not in tones_chord:
+      bad_chord.add(tuple([e]))
+        
+  for bc in bad_chord:
+
+    bc = list(bc)
+
+    tone = find_closest_tone(tones_chord, bc[0] % 12)
+
+    new_pitch = ((bc[0] // 12) * 12) + tone
+
+    if new_pitch not in pipa:
+      new_chord.add(tuple([new_pitch]))
+      pipa.append(new_pitch)
+
+  new_pitches_chord = [e[0] for e in new_chord]
 
   return sorted(new_pitches_chord, reverse=True)
 
