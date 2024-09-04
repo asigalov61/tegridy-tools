@@ -1062,6 +1062,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <ul>
     <li class="mono"><a href="#TMIDIX.ALL_CHORDS">ALL_CHORDS</a></li>
     <li class="mono"><a href="#TMIDIX.ALL_CHORDS_FILTERED">ALL_CHORDS_FILTERED</a></li>
+    <li class="mono"><a href="#TMIDIX.ALL_CHORDS_FULL">ALL_CHORDS_FULL</a></li>
     <li class="mono"><a href="#TMIDIX.ALL_CHORDS_GROUPED">ALL_CHORDS_GROUPED</a></li>
     <li class="mono"><a href="#TMIDIX.ALL_CHORDS_PAIRS_FILTERED">ALL_CHORDS_PAIRS_FILTERED</a></li>
     <li class="mono"><a href="#TMIDIX.ALL_CHORDS_PAIRS_SORTED">ALL_CHORDS_PAIRS_SORTED</a></li>
@@ -5963,86 +5964,34 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">):</span>
 
-    <span class="n">lst</span> <span class="o">=</span> <span class="n">tones_chord</span>
+  <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">lst</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-          <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">lst</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+      <span class="n">checked_tones_chord</span> <span class="o">=</span> <span class="n">c</span>
+      <span class="k">break</span>
 
-    <span class="n">non_consecutive</span> <span class="o">=</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> 
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-          <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
-              <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">non_consecutive</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">non_consecutive</span><span class="p">:</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">non_consecutive</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">checked_tones_chord</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">find_closest_tone</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">tone</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">tone</span><span class="p">))</span>
 
+<span class="c1">###################################################################################</span>
+
 <span class="k">def</span> <span class="nf">advanced_check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">high_pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
-    <span class="n">lst</span> <span class="o">=</span> <span class="n">tones_chord</span>
+  <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
-    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">high_pitch</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span> 
-      <span class="n">ht</span> <span class="o">=</span> <span class="n">high_pitch</span> <span class="o">%</span> <span class="mi">12</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">ht</span> <span class="o">=</span> <span class="mi">12</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+      <span class="n">tchord</span> <span class="o">=</span> <span class="n">c</span>
 
-    <span class="n">cht</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">ht</span><span class="p">)</span>
+  <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">high_pitch</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">tchord</span> <span class="o">=</span> <span class="p">[</span><span class="n">high_pitch</span> <span class="o">%</span> <span class="mi">12</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">cht</span><span class="p">]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">lst</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">find_closest_tone</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">cht</span><span class="p">)</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
-            <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">lst</span>
-
-    <span class="n">non_consecutive</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> 
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-          <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-      <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">cht</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">non_consecutive</span><span class="p">:</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cht</span><span class="p">)</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-      <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">non_consecutive</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">non_consecutive</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">non_consecutive</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)):</span>
-        <span class="n">final_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">non_consecutive</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">cht</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">cht</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_list</span> <span class="o">=</span> <span class="n">non_consecutive</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">final_list</span> <span class="o">=</span> <span class="n">non_consecutive</span>
-
-    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">final_list</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">final_list</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">find_closest_tone</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">cht</span><span class="p">)</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
-        <span class="n">final_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">cht</span> <span class="ow">in</span> <span class="n">final_list</span> <span class="ow">or</span> <span class="n">ht</span> <span class="ow">in</span> <span class="n">final_list</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">final_list</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">tchord</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -6557,7 +6506,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                                       <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                       <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                                                       <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-                                                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                      <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
                                                       <span class="p">):</span>
@@ -6570,6 +6520,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score</span><span class="p">:</span>
 
@@ -6829,11 +6782,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">cur_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
       <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">while</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
+      <span class="k">while</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
         <span class="n">cur_chord</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
       <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
@@ -7033,7 +6986,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">enhanced_chord_to_chord_token</span><span class="p">(</span><span class="n">enhanced_chord</span><span class="p">,</span> 
                                   <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
                                   <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
-                                  <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                                  <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                                   <span class="p">):</span>
   
   <span class="n">bad_chords_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -7043,6 +6997,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">enhanced_chord</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
@@ -8487,7 +8444,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">tones_chord_type</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
                      <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                     <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                     <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                      <span class="p">):</span>
 
   <span class="n">WN</span> <span class="o">=</span> <span class="n">WHITE_NOTES</span>
@@ -8499,6 +8457,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
 
@@ -8590,13 +8551,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">find_matching_tones_chords</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span>
                                <span class="n">matching_chord_length</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                <span class="n">match_chord_type</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                               <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                               <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                                <span class="p">):</span>
 
   <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
 
@@ -8780,7 +8745,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">check_and_fix_pitches_chord</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span>
-                                <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                                <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                                 <span class="p">):</span>
   
   <span class="n">pitches_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -8789,6 +8755,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches_chord</span><span class="p">]))</span>
 
@@ -8808,11 +8777,19 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
 
       <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+      
+      <span class="n">tchord</span> <span class="o">=</span> <span class="p">[]</span>
 
       <span class="k">for</span> <span class="n">co</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">co</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
-          <span class="n">tones_chord</span> <span class="o">=</span> <span class="n">co</span>
+          <span class="n">tchord</span> <span class="o">=</span> <span class="n">co</span>
           <span class="k">break</span>
+
+      <span class="k">if</span> <span class="n">tchord</span><span class="p">:</span>
+        <span class="n">tones_chord</span> <span class="o">=</span> <span class="n">tchord</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">tones_chord</span> <span class="o">=</span> <span class="p">[</span><span class="n">pitches_chord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">]</span>
 
   <span class="n">new_pitches_chord</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -9011,7 +8988,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">morph_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
                       <span class="n">trg_tone</span><span class="p">,</span> 
-                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                       <span class="p">):</span>
 
   <span class="n">src_tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="n">trg_tone</span><span class="p">])</span>
@@ -9025,6 +9003,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combs</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
@@ -9911,7 +9892,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">if</span> <span class="n">tchord</span><span class="p">:</span>
       
       <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;chords&#39;</span><span class="p">:</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
       
       <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;high pitches&#39;</span><span class="p">:</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">pitches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -9920,7 +9901,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">token</span> <span class="o">=</span> <span class="n">pitches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span>
 
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
 
       <span class="n">chords_toks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
       <span class="n">chords_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -10069,6 +10050,28 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">score</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="n">ALL_CHORDS_FULL</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">11</span><span class="p">]]</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -10091,6 +10094,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.ALL_CHORDS_FILTERED" class="name">var <span class="ident">ALL_CHORDS_FILTERED</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.ALL_CHORDS_FULL" class="name">var <span class="ident">ALL_CHORDS_FULL</span></p>
       
   
   <div class="source_cont">
@@ -13387,7 +13398,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.advanced_check_and_fix_chords_in_chordified_score">
-    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, patches_index=6, use_filtered_chords=True, remove_duplicate_pitches=True, skip_drums=False)</p>
+    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, patches_index=6, use_filtered_chords=False, use_full_chords=True, remove_duplicate_pitches=True, skip_drums=False)</p>
     </div>
     
 
@@ -13400,7 +13411,8 @@ Tegridy Code 2024</p></div>
                                                       <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                       <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                                                       <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-                                                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                      <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
                                                       <span class="p">):</span>
@@ -13413,6 +13425,9 @@ Tegridy Code 2024</p></div>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score</span><span class="p">:</span>
 
@@ -13502,56 +13517,16 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.advanced_check_and_fix_tones_chord" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">advanced_check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">high_pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
-    <span class="n">lst</span> <span class="o">=</span> <span class="n">tones_chord</span>
+  <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
-    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">high_pitch</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">:</span> 
-      <span class="n">ht</span> <span class="o">=</span> <span class="n">high_pitch</span> <span class="o">%</span> <span class="mi">12</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">ht</span> <span class="o">=</span> <span class="mi">12</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+      <span class="n">tchord</span> <span class="o">=</span> <span class="n">c</span>
 
-    <span class="n">cht</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">ht</span><span class="p">)</span>
+  <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">high_pitch</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">tchord</span> <span class="o">=</span> <span class="p">[</span><span class="n">high_pitch</span> <span class="o">%</span> <span class="mi">12</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">cht</span><span class="p">]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">lst</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">find_closest_tone</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">cht</span><span class="p">)</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
-            <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">lst</span>
-
-    <span class="n">non_consecutive</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> 
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-          <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-      <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">cht</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">non_consecutive</span><span class="p">:</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cht</span><span class="p">)</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-      <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">non_consecutive</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">non_consecutive</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">non_consecutive</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)):</span>
-        <span class="n">final_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">non_consecutive</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">cht</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">cht</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_list</span> <span class="o">=</span> <span class="n">non_consecutive</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">final_list</span> <span class="o">=</span> <span class="n">non_consecutive</span>
-
-    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">final_list</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">final_list</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">find_closest_tone</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">cht</span><span class="p">)</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
-        <span class="n">final_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">cht</span> <span class="ow">in</span> <span class="n">final_list</span> <span class="ow">or</span> <span class="n">ht</span> <span class="ow">in</span> <span class="n">final_list</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">final_list</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">tchord</span>
 </pre></div>
 
   </div>
@@ -14725,7 +14700,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.check_and_fix_pitches_chord">
-    <p>def <span class="ident">check_and_fix_pitches_chord</span>(</p><p>pitches_chord, use_filtered_chords=True)</p>
+    <p>def <span class="ident">check_and_fix_pitches_chord</span>(</p><p>pitches_chord, use_filtered_chords=False, use_full_chords=True)</p>
     </div>
     
 
@@ -14735,7 +14710,8 @@ Tegridy Code 2024</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.check_and_fix_pitches_chord', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.check_and_fix_pitches_chord" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_and_fix_pitches_chord</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span>
-                                <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                                <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                                 <span class="p">):</span>
   
   <span class="n">pitches_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -14744,6 +14720,9 @@ Tegridy Code 2024</p></div>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches_chord</span><span class="p">]))</span>
 
@@ -14763,11 +14742,19 @@ Tegridy Code 2024</p></div>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
 
       <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+      
+      <span class="n">tchord</span> <span class="o">=</span> <span class="p">[]</span>
 
       <span class="k">for</span> <span class="n">co</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">co</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
-          <span class="n">tones_chord</span> <span class="o">=</span> <span class="n">co</span>
+          <span class="n">tchord</span> <span class="o">=</span> <span class="n">co</span>
           <span class="k">break</span>
+
+      <span class="k">if</span> <span class="n">tchord</span><span class="p">:</span>
+        <span class="n">tones_chord</span> <span class="o">=</span> <span class="n">tchord</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">tones_chord</span> <span class="o">=</span> <span class="p">[</span><span class="n">pitches_chord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">]</span>
 
   <span class="n">new_pitches_chord</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -14798,28 +14785,14 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.check_and_fix_tones_chord" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">):</span>
 
-    <span class="n">lst</span> <span class="o">=</span> <span class="n">tones_chord</span>
+  <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">lst</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-          <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">lst</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+      <span class="n">checked_tones_chord</span> <span class="o">=</span> <span class="n">c</span>
+      <span class="k">break</span>
 
-    <span class="n">non_consecutive</span> <span class="o">=</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> 
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-          <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
-              <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">non_consecutive</span> <span class="ow">and</span> <span class="mi">11</span> <span class="ow">in</span> <span class="n">non_consecutive</span><span class="p">:</span>
-      <span class="n">non_consecutive</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">non_consecutive</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">checked_tones_chord</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -15647,7 +15620,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.enhanced_chord_to_chord_token">
-    <p>def <span class="ident">enhanced_chord_to_chord_token</span>(</p><p>enhanced_chord, channels_index=3, pitches_index=4, use_filtered_chords=True)</p>
+    <p>def <span class="ident">enhanced_chord_to_chord_token</span>(</p><p>enhanced_chord, channels_index=3, pitches_index=4, use_filtered_chords=False, use_full_chords=True)</p>
     </div>
     
 
@@ -15659,7 +15632,8 @@ Tegridy Code 2024</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">enhanced_chord_to_chord_token</span><span class="p">(</span><span class="n">enhanced_chord</span><span class="p">,</span> 
                                   <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
                                   <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
-                                  <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                                  <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                                   <span class="p">):</span>
   
   <span class="n">bad_chords_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -15669,6 +15643,9 @@ Tegridy Code 2024</p></div>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">enhanced_chord</span> <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]))</span>
 
@@ -16039,7 +16016,7 @@ Tegridy Code 2024</p></div>
     <span class="k">if</span> <span class="n">tchord</span><span class="p">:</span>
       
       <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;chords&#39;</span><span class="p">:</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
       
       <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;high pitches&#39;</span><span class="p">:</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">pitches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -16048,7 +16025,7 @@ Tegridy Code 2024</p></div>
         <span class="n">token</span> <span class="o">=</span> <span class="n">pitches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span>
 
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span>
 
       <span class="n">chords_toks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
       <span class="n">chords_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -16805,7 +16782,7 @@ The type of track (opus or score) is autodetected.</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.find_matching_tones_chords">
-    <p>def <span class="ident">find_matching_tones_chords</span>(</p><p>tones_chord, matching_chord_length=-1, match_chord_type=True, use_filtered_chords=True)</p>
+    <p>def <span class="ident">find_matching_tones_chords</span>(</p><p>tones_chord, matching_chord_length=-1, match_chord_type=True, use_filtered_chords=True, use_full_chords=True)</p>
     </div>
     
 
@@ -16817,13 +16794,17 @@ The type of track (opus or score) is autodetected.</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_matching_tones_chords</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span>
                                <span class="n">matching_chord_length</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                <span class="n">match_chord_type</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                               <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                               <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                                <span class="p">):</span>
 
   <span class="k">if</span> <span class="n">use_filtered_chords</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FILTERED</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
 
@@ -17479,11 +17460,11 @@ The type of track (opus or score) is autodetected.</p></div>
     <span class="n">cur_chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
       <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">while</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FILTERED</span><span class="p">:</span>
+      <span class="k">while</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
         <span class="n">cur_chord</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       <span class="n">cc</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_chord</span><span class="p">))</span>
       <span class="n">song</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
@@ -18238,7 +18219,7 @@ tick per millisecond</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.morph_tones_chord">
-    <p>def <span class="ident">morph_tones_chord</span>(</p><p>tones_chord, trg_tone, use_filtered_chords=True)</p>
+    <p>def <span class="ident">morph_tones_chord</span>(</p><p>tones_chord, trg_tone, use_filtered_chords=True, use_full_chords=True)</p>
     </div>
     
 
@@ -18249,7 +18230,8 @@ tick per millisecond</p></div>
   <div id="source-TMIDIX.morph_tones_chord" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">morph_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
                       <span class="n">trg_tone</span><span class="p">,</span> 
-                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                      <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                       <span class="p">):</span>
 
   <span class="n">src_tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="n">trg_tone</span><span class="p">])</span>
@@ -18263,6 +18245,9 @@ tick per millisecond</p></div>
   
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combs</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
@@ -20111,7 +20096,7 @@ but it does make it easy to mix different scores together.</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.tones_chord_type">
-    <p>def <span class="ident">tones_chord_type</span>(</p><p>tones_chord, return_chord_type_index=True, use_filtered_chords=True)</p>
+    <p>def <span class="ident">tones_chord_type</span>(</p><p>tones_chord, return_chord_type_index=True, use_filtered_chords=False, use_full_chords=True)</p>
     </div>
     
 
@@ -20122,7 +20107,8 @@ but it does make it easy to mix different scores together.</p></div>
   <div id="source-TMIDIX.tones_chord_type" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tones_chord_type</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> 
                      <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                     <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">True</span>
+                     <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
                      <span class="p">):</span>
 
   <span class="n">WN</span> <span class="o">=</span> <span class="n">WHITE_NOTES</span>
@@ -20134,6 +20120,9 @@ but it does make it easy to mix different scores together.</p></div>
   
   <span class="k">else</span><span class="p">:</span>
     <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
 
   <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
 
