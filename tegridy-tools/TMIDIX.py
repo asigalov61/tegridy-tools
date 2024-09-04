@@ -4610,86 +4610,34 @@ def ascii_text_words_counter(ascii_text):
 
 def check_and_fix_tones_chord(tones_chord):
 
-    lst = tones_chord
+  tones_chord_combs = [list(comb) for i in range(len(tones_chord), 0, -1) for comb in combinations(tones_chord, i)]
 
-    if len(lst) == 2:
-      if lst[1] - lst[0] == 1:
-        return [lst[-1]]
-      else:
-        if 0 in lst and 11 in lst:
-          lst.remove(0)
-        return lst
+  for c in tones_chord_combs:
+    if c in ALL_CHORDS_FULL:
+      checked_tones_chord = c
+      break
 
-    non_consecutive = [lst[0]]
-
-    if len(lst) > 2: 
-      for i in range(1, len(lst) - 1):
-          if lst[i-1] + 1 != lst[i] and lst[i] + 1 != lst[i+1]:
-              non_consecutive.append(lst[i])
-      non_consecutive.append(lst[-1])
-
-    if 0 in non_consecutive and 11 in non_consecutive:
-      non_consecutive.remove(0)
-
-    return non_consecutive
+  return sorted(checked_tones_chord)
 
 ###################################################################################
 
 def find_closest_tone(tones, tone):
   return min(tones, key=lambda x:abs(x-tone))
 
+###################################################################################
+
 def advanced_check_and_fix_tones_chord(tones_chord, high_pitch=0):
 
-    lst = tones_chord
+  tones_chord_combs = [list(comb) for i in range(len(tones_chord), 0, -1) for comb in combinations(tones_chord, i)]
 
-    if 0 < high_pitch < 128: 
-      ht = high_pitch % 12
-    else:
-      ht = 12
+  for c in tones_chord_combs:
+    if c in ALL_CHORDS_FULL:
+      tchord = c
 
-    cht = find_closest_tone(lst, ht)
+  if 0 < high_pitch < 128 and len(tchord) == 1:
+    tchord = [high_pitch % 12]
 
-    if len(lst) == 2:
-      if lst[1] - lst[0] == 1:
-        return [cht]
-      else:
-        if 0 in lst and 11 in lst:
-          if find_closest_tone([0, 11], cht) == 11:
-            lst.remove(0)
-          else:
-            lst.remove(11)
-        return lst
-
-    non_consecutive = []
-
-    if len(lst) > 2: 
-      for i in range(0, len(lst) - 1):
-          if lst[i] + 1 != lst[i+1]:
-            non_consecutive.append(lst[i])
-      if lst[-1] - lst[-2] > 1:
-        non_consecutive.append(lst[-1])
-
-    if cht not in non_consecutive:
-      non_consecutive.append(cht)
-      non_consecutive.sort()
-      if any(abs(non_consecutive[i+1] - non_consecutive[i]) == 1 for i in range(len(non_consecutive) - 1)):
-        final_list = [x for x in non_consecutive if x == cht or abs(x - cht) > 1]
-      else:
-        final_list = non_consecutive
-
-    else:
-      final_list = non_consecutive
-
-    if 0 in final_list and 11 in final_list:
-      if find_closest_tone([0, 11], cht) == 11:
-        final_list.remove(0)
-      else:
-        final_list.remove(11)
-
-    if cht in final_list or ht in final_list:
-      return final_list
-    else:
-      return ['Error']
+  return tchord
 
 ###################################################################################
 
@@ -5204,7 +5152,8 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
                                                       channels_index=3,
                                                       pitches_index=4,
                                                       patches_index=6,
-                                                      use_filtered_chords=True,
+                                                      use_filtered_chords=False,
+                                                      use_full_chords=True,
                                                       remove_duplicate_pitches=True,
                                                       skip_drums=False
                                                       ):
@@ -5217,6 +5166,9 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
     CHORDS = ALL_CHORDS_FILTERED
   else:
     CHORDS = ALL_CHORDS_SORTED
+
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
 
   for c in chordified_score:
 
@@ -5476,11 +5428,11 @@ def harmonize_enhanced_melody_score_notes(enhanced_melody_score_notes):
     cur_chord.append(m)
     cc = sorted(set(cur_chord))
 
-    if cc in ALL_CHORDS_FILTERED:
+    if cc in ALL_CHORDS_FULL:
       song.append(cc)
 
     else:
-      while sorted(set(cur_chord)) not in ALL_CHORDS_FILTERED:
+      while sorted(set(cur_chord)) not in ALL_CHORDS_FULL:
         cur_chord.pop(0)
       cc = sorted(set(cur_chord))
       song.append(cc)
@@ -5680,7 +5632,8 @@ def basic_enhanced_delta_score_notes_detokenizer(tokenized_seq,
 def enhanced_chord_to_chord_token(enhanced_chord, 
                                   channels_index=3, 
                                   pitches_index=4, 
-                                  use_filtered_chords=True
+                                  use_filtered_chords=False,
+                                  use_full_chords=True
                                   ):
   
   bad_chords_counter = 0
@@ -5690,6 +5643,9 @@ def enhanced_chord_to_chord_token(enhanced_chord,
     CHORDS = ALL_CHORDS_FILTERED
   else:
     CHORDS = ALL_CHORDS_SORTED
+
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
 
   tones_chord = sorted(set([t[pitches_index] % 12 for t in enhanced_chord if t[channels_index] != 9]))
 
@@ -7134,7 +7090,8 @@ CHORDS_TYPES = ['WHITE', 'BLACK', 'UNKNOWN', 'MIXED WHITE', 'MIXED BLACK', 'MIXE
 
 def tones_chord_type(tones_chord, 
                      return_chord_type_index=True,
-                     use_filtered_chords=True
+                     use_filtered_chords=False,
+                     use_full_chords=True
                      ):
 
   WN = WHITE_NOTES
@@ -7146,6 +7103,9 @@ def tones_chord_type(tones_chord,
   
   else:
     CHORDS = ALL_CHORDS_SORTED
+
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
 
   tones_chord = sorted(tones_chord)
 
@@ -7237,13 +7197,17 @@ def find_best_tones_chord(src_tones_chords,
 def find_matching_tones_chords(tones_chord,
                                matching_chord_length=-1,
                                match_chord_type=True,
-                               use_filtered_chords=True
+                               use_filtered_chords=True,
+                               use_full_chords=True
                                ):
 
   if use_filtered_chords:
     CHORDS = ALL_CHORDS_FILTERED
   else:
     CHORDS = ALL_CHORDS_SORTED
+
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
 
   tones_chord = sorted(tones_chord)
 
@@ -7427,7 +7391,8 @@ def harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes,
 ###################################################################################
 
 def check_and_fix_pitches_chord(pitches_chord,
-                                use_filtered_chords=True
+                                use_filtered_chords=False,
+                                use_full_chords=True
                                 ):
   
   pitches_chord = sorted(pitches_chord, reverse=True)
@@ -7436,6 +7401,9 @@ def check_and_fix_pitches_chord(pitches_chord,
     CHORDS = ALL_CHORDS_FILTERED
   else:
     CHORDS = ALL_CHORDS_SORTED
+
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
 
   tones_chord = sorted(set([p % 12 for p in pitches_chord]))
 
@@ -7455,11 +7423,19 @@ def check_and_fix_pitches_chord(pitches_chord,
     if len(tones_chord) > 2:
 
       tones_chord_combs = [list(comb) for i in range(len(tones_chord)-2, 0, -1) for comb in combinations(tones_chord, i+1)]
+      
+      tchord = []
 
       for co in tones_chord_combs:
         if co in CHORDS:
-          tones_chord = co
+          tchord = co
           break
+
+      if tchord:
+        tones_chord = tchord
+      
+      else:
+        tones_chord = [pitches_chord[0] % 12]
 
   new_pitches_chord = []
 
@@ -7658,7 +7634,8 @@ def tones_chords_to_types(tones_chords,
 
 def morph_tones_chord(tones_chord, 
                       trg_tone, 
-                      use_filtered_chords=True
+                      use_filtered_chords=True,
+                      use_full_chords=True
                       ):
 
   src_tones_chord = sorted(sorted(set(tones_chord)) + [trg_tone])
@@ -7672,6 +7649,9 @@ def morph_tones_chord(tones_chord,
   
   else:
     CHORDS = ALL_CHORDS_SORTED
+
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
 
   for c in combs:
     if sorted(set(c)) in CHORDS:
@@ -8558,7 +8538,7 @@ def escore_notes_lrno_pattern(escore_notes, mode='chords'):
     if tchord:
       
       if mode == 'chords':
-        token = ALL_CHORDS_FILTERED.index(tchord)
+        token = ALL_CHORDS_FULL.index(tchord)
       
       elif mode == 'high pitches':
         token = pitches[0]
@@ -8567,7 +8547,7 @@ def escore_notes_lrno_pattern(escore_notes, mode='chords'):
         token = pitches[0] % 12
 
       else:
-        token = ALL_CHORDS_FILTERED.index(tchord)
+        token = ALL_CHORDS_FULL.index(tchord)
 
       chords_toks.append(token)
       chords_idxs.append(i)
@@ -8714,6 +8694,28 @@ def escore_notes_middle(escore_notes,
 
   else:
     return score[start_idx:end_idx]
+
+###################################################################################
+
+ALL_CHORDS_FULL = [[0], [0, 3], [0, 3, 5], [0, 3, 5, 8], [0, 3, 5, 9], [0, 3, 5, 10], [0, 3, 6],
+                  [0, 3, 6, 9], [0, 3, 6, 10], [0, 3, 7], [0, 3, 7, 10], [0, 3, 8], [0, 3, 9],
+                  [0, 3, 10], [0, 4], [0, 4, 6], [0, 4, 6, 9], [0, 4, 6, 10], [0, 4, 7],
+                  [0, 4, 7, 10], [0, 4, 8], [0, 4, 9], [0, 4, 10], [0, 5], [0, 5, 8], [0, 5, 9],
+                  [0, 5, 10], [0, 6], [0, 6, 9], [0, 6, 10], [0, 7], [0, 7, 10], [0, 8], [0, 9],
+                  [0, 10], [1], [1, 4], [1, 4, 6], [1, 4, 6, 9], [1, 4, 6, 10], [1, 4, 6, 11],
+                  [1, 4, 7], [1, 4, 7, 10], [1, 4, 7, 11], [1, 4, 8], [1, 4, 8, 11], [1, 4, 9],
+                  [1, 4, 10], [1, 4, 11], [1, 5], [1, 5, 8], [1, 5, 8, 11], [1, 5, 9],
+                  [1, 5, 10], [1, 5, 11], [1, 6], [1, 6, 9], [1, 6, 10], [1, 6, 11], [1, 7],
+                  [1, 7, 10], [1, 7, 11], [1, 8], [1, 8, 11], [1, 9], [1, 10], [1, 11], [2],
+                  [2, 5], [2, 5, 8], [2, 5, 8, 11], [2, 5, 9], [2, 5, 10], [2, 5, 11], [2, 6],
+                  [2, 6, 9], [2, 6, 10], [2, 6, 11], [2, 7], [2, 7, 10], [2, 7, 11], [2, 8],
+                  [2, 8, 11], [2, 9], [2, 10], [2, 11], [3], [3, 5], [3, 5, 8], [3, 5, 8, 11],
+                  [3, 5, 9], [3, 5, 10], [3, 5, 11], [3, 6], [3, 6, 9], [3, 6, 10], [3, 6, 11],
+                  [3, 7], [3, 7, 10], [3, 7, 11], [3, 8], [3, 8, 11], [3, 9], [3, 10], [3, 11],
+                  [4], [4, 6], [4, 6, 9], [4, 6, 10], [4, 6, 11], [4, 7], [4, 7, 10], [4, 7, 11],
+                  [4, 8], [4, 8, 11], [4, 9], [4, 10], [4, 11], [5], [5, 8], [5, 8, 11], [5, 9],
+                  [5, 10], [5, 11], [6], [6, 9], [6, 10], [6, 11], [7], [7, 10], [7, 11], [8],
+                  [8, 11], [9], [10], [11]]
 
 ###################################################################################
 #  
