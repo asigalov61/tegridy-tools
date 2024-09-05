@@ -1132,6 +1132,129 @@ def downsample_square_matrix(square_matrix, downsampling_factor=4):
   return dmatrix.tolist()
 
 ################################################################################
+
+def plot_parsons_code(parsons_code, 
+                      start_pitch=60, 
+                      return_plot_dict=False, 
+                      return_plot_string=False,
+                      plot_size=(10, 10),
+                      labels_size=16,
+                      save_plot=''
+                      ):
+  
+  '''
+  Plot parsons code string
+  '''
+
+  if parsons_code[0] != "*":
+      return None
+
+  contour_dict = {}
+  pitch = 0
+  index = 0
+
+  maxp = 0
+  minp = 0
+
+  contour_dict[(pitch, index)] = "*"
+
+  for point in parsons_code:
+      if point == "R":
+          index += 1
+          contour_dict[(pitch, index)] = "-"
+
+          index += 1
+          contour_dict[(pitch, index)] = "*"
+          
+      elif point == "U":
+          index += 1
+          pitch -= 1
+          contour_dict[(pitch, index)] = "/"
+
+          index += 1
+          pitch -= 1
+          contour_dict[(pitch, index)] = "*"
+
+          if pitch < maxp:
+              maxp = pitch
+
+      elif point == "D":
+          index += 1
+          pitch += 1
+          contour_dict[(pitch, index)] = "\\"
+
+          index += 1
+          pitch += 1
+          contour_dict[(pitch, index)] = "*"
+
+          if pitch > minp:
+              minp = pitch
+
+  if return_plot_dict:
+    return contour_dict
+  
+  if return_plot_string:
+
+    plot_string = ''
+
+    for pitch in range(maxp, minp+1):
+        line = [" " for _ in range(index + 1)]
+        for pos in range(index + 1):
+            if (pitch, pos) in contour_dict:
+                line[pos] = contour_dict[(pitch, pos)]
+
+        plot_string = "".join(line)
+
+    return plot_string
+
+  labels = []
+  pitches = []
+  positions = []
+  cur_pitch = start_pitch
+  pitch_idx = 0
+
+  for k, v in contour_dict.items():
+
+    if v != '*':
+
+      pitches.append(cur_pitch)
+      positions.append(pitch_idx)
+
+      if v == '/':
+        cur_pitch += 1
+        labels.append('U')
+      
+      elif v == '\\':
+        cur_pitch -= 1
+        labels.append('D')
+
+      elif v == '-':
+        labels.append('R')
+
+      pitch_idx += 1
+
+  plt.figure(figsize=plot_size)
+
+  
+  plt.plot(pitches)
+
+  for i, point in enumerate(zip(positions, pitches)):
+    plt.annotate(labels[i], point, fontsize=labels_size)
+  
+
+  plt.title('Parsons Code with Labels', fontsize=labels_size)
+  plt.xlabel('Position', fontsize=labels_size)
+  plt.ylabel('Pitch', fontsize=labels_size)
+
+  if save_plot != '':
+    plt.savefig(save_plot, bbox_inches="tight")
+    plt.close()
+
+  plt.show()
+
+  plt.close()
+  
+################################################################################
 # [WIP] Future dev functions
 ################################################################################
 

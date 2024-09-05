@@ -5168,6 +5168,7 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
                                                       use_filtered_chords=False,
                                                       use_full_chords=True,
                                                       remove_duplicate_pitches=True,
+                                                      fix_bad_pitches=False,
                                                       skip_drums=False
                                                       ):
   fixed_chordified_score = []
@@ -5262,32 +5263,34 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
           new_chord.add(tuple(e))
           pipa.append([e[pitches_index], e[patches_index]])
 
-    bad_chord = set()
+    if fix_bad_pitches:
 
-    for e in chord:
-      if e[channels_index] != 9:
-        
-        if e[pitches_index] % 12 not in tones_chord:
-          bad_chord.add(tuple(e))
-        
-        elif (e[pitches_index]+1) % 12 not in tones_chord:
-          bad_chord.add(tuple(e))
-        
-        elif (e[pitches_index]-1) % 12 not in tones_chord:
-          bad_chord.add(tuple(e))
+      bad_chord = set()
+
+      for e in chord:
+        if e[channels_index] != 9:
           
-    for bc in bad_chord:
+          if e[pitches_index] % 12 not in tones_chord:
+            bad_chord.add(tuple(e))
+          
+          elif (e[pitches_index]+1) % 12 not in tones_chord:
+            bad_chord.add(tuple(e))
+          
+          elif (e[pitches_index]-1) % 12 not in tones_chord:
+            bad_chord.add(tuple(e))
+      
+      for bc in bad_chord:
 
-      bc = list(bc)
+        bc = list(bc)
 
-      tone = find_closest_tone(tones_chord, bc[pitches_index] % 12)
+        tone = find_closest_tone(tones_chord, bc[pitches_index] % 12)
 
-      new_pitch =  ((bc[pitches_index] // 12) * 12) + tone
+        new_pitch =  ((bc[pitches_index] // 12) * 12) + tone
 
-      if [new_pitch, bc[patches_index]] not in pipa:
-        bc[pitches_index] = new_pitch
-        new_chord.add(tuple(bc))
-        pipa.append([[new_pitch], bc[patches_index]])
+        if [new_pitch, bc[patches_index]] not in pipa:
+          bc[pitches_index] = new_pitch
+          new_chord.add(tuple(bc))
+          pipa.append([[new_pitch], bc[patches_index]])
 
     if not skip_drums:
       for e in c:
@@ -7457,7 +7460,8 @@ def harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes,
 def check_and_fix_pitches_chord(pitches_chord,
                                 remove_duplicate_pitches=True,
                                 use_filtered_chords=False,
-                                use_full_chords=True
+                                use_full_chords=True,
+                                fix_bad_pitches=False,
                                 ):
   
   if remove_duplicate_pitches:
@@ -7524,30 +7528,32 @@ def check_and_fix_pitches_chord(pitches_chord,
       new_chord.add(tuple([e]))
       pipa.append(e)
 
-  bad_chord = set()
+  if fix_bad_pitches:
 
-  for e in chord:
-  
-    if e % 12 not in tones_chord:
-      bad_chord.add(tuple([e]))
+    bad_chord = set()
+
+    for e in chord:
     
-    elif (e+1) % 12 not in tones_chord:
-      bad_chord.add(tuple([e]))
-    
-    elif (e-1) % 12 not in tones_chord:
-      bad_chord.add(tuple([e]))
-        
-  for bc in bad_chord:
+      if e % 12 not in tones_chord:
+        bad_chord.add(tuple([e]))
+      
+      elif (e+1) % 12 not in tones_chord:
+        bad_chord.add(tuple([e]))
+      
+      elif (e-1) % 12 not in tones_chord:
+        bad_chord.add(tuple([e]))
+          
+    for bc in bad_chord:
 
-    bc = list(bc)
+      bc = list(bc)
 
-    tone = find_closest_tone(tones_chord, bc[0] % 12)
+      tone = find_closest_tone(tones_chord, bc[0] % 12)
 
-    new_pitch = ((bc[0] // 12) * 12) + tone
+      new_pitch = ((bc[0] // 12) * 12) + tone
 
-    if new_pitch not in pipa:
-      new_chord.add(tuple([new_pitch]))
-      pipa.append(new_pitch)
+      if new_pitch not in pipa:
+        new_chord.add(tuple([new_pitch]))
+        pipa.append(new_pitch)
 
   new_pitches_chord = [e[0] for e in new_chord]
 
@@ -8823,6 +8829,36 @@ ALL_CHORDS_FULL = [[0], [0, 3], [0, 3, 5], [0, 3, 5, 8], [0, 3, 5, 9], [0, 3, 5,
                   [4, 8], [4, 8, 11], [4, 9], [4, 10], [4, 11], [5], [5, 8], [5, 8, 11], [5, 9],
                   [5, 10], [5, 11], [6], [6, 9], [6, 10], [6, 11], [7], [7, 10], [7, 11], [8],
                   [8, 11], [9], [10], [11]]
+
+###################################################################################
+
+def escore_notes_to_parsons_code(escore_notes,
+                                 times_index=1,
+                                 pitches_index=4
+                                 ):
+  
+  parsons = ""
+
+  prev = ['note', -1, -1, -1, -1, -1, -1]
+
+  for e in escore_notes:
+    if e[times_index] != prev[times_index]:
+
+      if parsons == "":
+          parsons += "*"
+
+      elif e[pitches_index] > prev[pitches_index]:
+          parsons += "U"
+
+      elif e[pitches_index] < prev[pitches_index]:
+          parsons += "D"
+
+      elif e[pitches_index] == prev[pitches_index]:
+          parsons += "R"
+      
+      prev = e
+
+  return parsons
 
 ###################################################################################
 #  
