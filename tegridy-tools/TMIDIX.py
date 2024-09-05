@@ -5292,7 +5292,7 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
     if not skip_drums:
       for e in c:
         if e[channels_index] == 9:
-          new_chord.append(tuple(e))
+          new_chord.add(tuple(e))
 
     new_chord = [list(e) for e in new_chord]
 
