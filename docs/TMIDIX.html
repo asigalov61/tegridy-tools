@@ -1185,6 +1185,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_to_binary_matrix">escore_notes_to_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_escore_matrix">escore_notes_to_escore_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_image_matrix">escore_notes_to_image_matrix</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_to_parsons_code">escore_notes_to_parsons_code</a></li>
     <li class="mono"><a href="#TMIDIX.even_timings">even_timings</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
@@ -6522,6 +6523,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                                       <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                       <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">fix_bad_pitches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
                                                       <span class="p">):</span>
   <span class="n">fixed_chordified_score</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6616,32 +6618,34 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
           <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
           <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span>
 
-    <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">fix_bad_pitches</span><span class="p">:</span>
 
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
-        
-        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-          <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        
-        <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-          <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        
-        <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-          <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+      <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+      <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
           
-    <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+          
+          <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+          
+          <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
 
-      <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
 
-      <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
 
-      <span class="n">new_pitch</span> <span class="o">=</span>  <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
+        <span class="n">new_pitch</span> <span class="o">=</span>  <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
 
-      <span class="k">if</span> <span class="p">[</span><span class="n">new_pitch</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
-        <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_pitch</span>
-        <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
-        <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">new_pitch</span><span class="p">],</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="p">[</span><span class="n">new_pitch</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
+          <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_pitch</span>
+          <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+          <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">new_pitch</span><span class="p">],</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_drums</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
@@ -8811,7 +8815,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="k">def</span> <span class="nf">check_and_fix_pitches_chord</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span>
                                 <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                 <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
+                                <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">fix_bad_pitches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                 <span class="p">):</span>
   
   <span class="k">if</span> <span class="n">remove_duplicate_pitches</span><span class="p">:</span>
@@ -8878,30 +8883,32 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
       <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
-  <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">fix_bad_pitches</span><span class="p">:</span>
 
-  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
-  
-    <span class="k">if</span> <span class="n">e</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-      <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+    <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
     
-    <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-      <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
-    
-    <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-      <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
-        
-  <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">e</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+        <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+      
+      <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+        <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+      
+      <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+        <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+          
+    <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
 
-    <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+      <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
 
-    <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
+      <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
 
-    <span class="n">new_pitch</span> <span class="o">=</span> <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
+      <span class="n">new_pitch</span> <span class="o">=</span> <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
 
-    <span class="k">if</span> <span class="n">new_pitch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
-      <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">new_pitch</span><span class="p">]))</span>
-      <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_pitch</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">new_pitch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
+        <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">new_pitch</span><span class="p">]))</span>
+        <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_pitch</span><span class="p">)</span>
 
   <span class="n">new_pitches_chord</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">new_chord</span><span class="p">]</span>
 
@@ -10177,6 +10184,36 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
                   <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">],</span>
                   <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">11</span><span class="p">]]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_to_parsons_code</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                 <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                                 <span class="p">):</span>
+  
+  <span class="n">parsons</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+  <span class="n">prev</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev</span><span class="p">[</span><span class="n">times_index</span><span class="p">]:</span>
+
+      <span class="k">if</span> <span class="n">parsons</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;*&quot;</span>
+
+      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;U&quot;</span>
+
+      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;D&quot;</span>
+
+      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">==</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;R&quot;</span>
+      
+      <span class="n">prev</span> <span class="o">=</span> <span class="n">e</span>
+
+  <span class="k">return</span> <span class="n">parsons</span>
 
 <span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
@@ -13505,7 +13542,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.advanced_check_and_fix_chords_in_chordified_score">
-    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, patches_index=6, use_filtered_chords=False, use_full_chords=True, remove_duplicate_pitches=True, skip_drums=False)</p>
+    <p>def <span class="ident">advanced_check_and_fix_chords_in_chordified_score</span>(</p><p>chordified_score, channels_index=3, pitches_index=4, patches_index=6, use_filtered_chords=False, use_full_chords=True, remove_duplicate_pitches=True, fix_bad_pitches=False, skip_drums=False)</p>
     </div>
     
 
@@ -13521,6 +13558,7 @@ Tegridy Code 2024</p></div>
                                                       <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                       <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">fix_bad_pitches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                       <span class="n">skip_drums</span><span class="o">=</span><span class="kc">False</span>
                                                       <span class="p">):</span>
   <span class="n">fixed_chordified_score</span> <span class="o">=</span> <span class="p">[]</span>
@@ -13615,32 +13653,34 @@ Tegridy Code 2024</p></div>
           <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
           <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span>
 
-    <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">fix_bad_pitches</span><span class="p">:</span>
 
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
-        
-        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-          <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        
-        <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-          <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        
-        <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-          <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+      <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+      <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
           
-    <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+          
+          <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+          
+          <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+            <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
 
-      <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
 
-      <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
 
-      <span class="n">new_pitch</span> <span class="o">=</span>  <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
+        <span class="n">new_pitch</span> <span class="o">=</span>  <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
 
-      <span class="k">if</span> <span class="p">[</span><span class="n">new_pitch</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
-        <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_pitch</span>
-        <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
-        <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">new_pitch</span><span class="p">],</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="p">[</span><span class="n">new_pitch</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
+          <span class="n">bc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_pitch</span>
+          <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+          <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">new_pitch</span><span class="p">],</span> <span class="n">bc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]])</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_drums</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
@@ -14871,7 +14911,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.check_and_fix_pitches_chord">
-    <p>def <span class="ident">check_and_fix_pitches_chord</span>(</p><p>pitches_chord, remove_duplicate_pitches=True, use_filtered_chords=False, use_full_chords=True)</p>
+    <p>def <span class="ident">check_and_fix_pitches_chord</span>(</p><p>pitches_chord, remove_duplicate_pitches=True, use_filtered_chords=False, use_full_chords=True, fix_bad_pitches=False)</p>
     </div>
     
 
@@ -14883,7 +14923,8 @@ Tegridy Code 2024</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_and_fix_pitches_chord</span><span class="p">(</span><span class="n">pitches_chord</span><span class="p">,</span>
                                 <span class="n">remove_duplicate_pitches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                 <span class="n">use_filtered_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span>
+                                <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">fix_bad_pitches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                 <span class="p">):</span>
   
   <span class="k">if</span> <span class="n">remove_duplicate_pitches</span><span class="p">:</span>
@@ -14950,30 +14991,32 @@ Tegridy Code 2024</p></div>
       <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
       <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
-  <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">fix_bad_pitches</span><span class="p">:</span>
 
-  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
-  
-    <span class="k">if</span> <span class="n">e</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-      <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+    <span class="n">bad_chord</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">chord</span><span class="p">:</span>
     
-    <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-      <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
-    
-    <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
-      <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
-        
-  <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">e</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+        <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+      
+      <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+        <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+      
+      <span class="k">elif</span> <span class="p">(</span><span class="n">e</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tones_chord</span><span class="p">:</span>
+        <span class="n">bad_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">e</span><span class="p">]))</span>
+          
+    <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bad_chord</span><span class="p">:</span>
 
-    <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+      <span class="n">bc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
 
-    <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
+      <span class="n">tone</span> <span class="o">=</span> <span class="n">find_closest_tone</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span><span class="p">)</span>
 
-    <span class="n">new_pitch</span> <span class="o">=</span> <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
+      <span class="n">new_pitch</span> <span class="o">=</span> <span class="p">((</span><span class="n">bc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">12</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">tone</span>
 
-    <span class="k">if</span> <span class="n">new_pitch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
-      <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">new_pitch</span><span class="p">]))</span>
-      <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_pitch</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">new_pitch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipa</span><span class="p">:</span>
+        <span class="n">new_chord</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">new_pitch</span><span class="p">]))</span>
+        <span class="n">pipa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_pitch</span><span class="p">)</span>
 
   <span class="n">new_pitches_chord</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">new_chord</span><span class="p">]</span>
 
@@ -16667,6 +16710,52 @@ Tegridy Code 2024</p></div>
 
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_to_parsons_code">
+    <p>def <span class="ident">escore_notes_to_parsons_code</span>(</p><p>escore_notes, times_index=1, pitches_index=4)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_to_parsons_code', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_to_parsons_code" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_parsons_code</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                 <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                                 <span class="p">):</span>
+  
+  <span class="n">parsons</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+  <span class="n">prev</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev</span><span class="p">[</span><span class="n">times_index</span><span class="p">]:</span>
+
+      <span class="k">if</span> <span class="n">parsons</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;*&quot;</span>
+
+      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;U&quot;</span>
+
+      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;D&quot;</span>
+
+      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">==</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;R&quot;</span>
+      
+      <span class="n">prev</span> <span class="o">=</span> <span class="n">e</span>
+
+  <span class="k">return</span> <span class="n">parsons</span>
 </pre></div>
 
   </div>
