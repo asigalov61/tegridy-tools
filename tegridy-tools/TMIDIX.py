@@ -8834,33 +8834,44 @@ ALL_CHORDS_FULL = [[0], [0, 3], [0, 3, 5], [0, 3, 5, 8], [0, 3, 5, 9], [0, 3, 5,
 
 def escore_notes_to_parsons_code(escore_notes,
                                  times_index=1,
-                                 pitches_index=4
+                                 pitches_index=4,
+                                 return_as_list=False
                                  ):
   
-  parsons = ""
+  parsons = "*"
+  parsons_list = []
 
   prev = ['note', -1, -1, -1, -1, -1, -1]
 
   for e in escore_notes:
     if e[times_index] != prev[times_index]:
 
-      if parsons == "":
-          parsons += "*"
-
-      elif e[pitches_index] > prev[pitches_index]:
+      if e[pitches_index] > prev[pitches_index]:
           parsons += "U"
+          parsons_list.append(1)
 
       elif e[pitches_index] < prev[pitches_index]:
           parsons += "D"
+          parsons_list.append(-1)
 
       elif e[pitches_index] == prev[pitches_index]:
           parsons += "R"
+          parsons_list.append(0)
       
       prev = e
 
-  return parsons
+  if return_as_list:
+    return parsons_list
+  
+  else:
+    return parsons
 
 ###################################################################################
+
+def all_consequtive(list_of_values):
+  return all(b > a for a, b in zip(list_of_values[:-1], list_of_values[1:]))
+
+###################################################################################  
 #  
 # This is the end of the TMIDI X Python module
 #
