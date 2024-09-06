@@ -1136,6 +1136,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.advanced_score_processor">advanced_score_processor</a></li>
     <li class="mono"><a href="#TMIDIX.advanced_validate_chord_pitches">advanced_validate_chord_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.align_escore_notes_to_bars">align_escore_notes_to_bars</a></li>
+    <li class="mono"><a href="#TMIDIX.all_consequtive">all_consequtive</a></li>
     <li class="mono"><a href="#TMIDIX.analyze_score_pitches">analyze_score_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.ascii_text_words_counter">ascii_text_words_counter</a></li>
     <li class="mono"><a href="#TMIDIX.ascii_texts_search">ascii_texts_search</a></li>
@@ -10189,33 +10190,44 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">escore_notes_to_parsons_code</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
                                  <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                 <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                                 <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                 <span class="n">return_as_list</span><span class="o">=</span><span class="kc">False</span>
                                  <span class="p">):</span>
   
-  <span class="n">parsons</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+  <span class="n">parsons</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+  <span class="n">parsons_list</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="n">prev</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
   <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev</span><span class="p">[</span><span class="n">times_index</span><span class="p">]:</span>
 
-      <span class="k">if</span> <span class="n">parsons</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;*&quot;</span>
-
-      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
           <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;U&quot;</span>
+          <span class="n">parsons_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
           <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;D&quot;</span>
+          <span class="n">parsons_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">==</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
           <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;R&quot;</span>
+          <span class="n">parsons_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       
       <span class="n">prev</span> <span class="o">=</span> <span class="n">e</span>
 
-  <span class="k">return</span> <span class="n">parsons</span>
+  <span class="k">if</span> <span class="n">return_as_list</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">parsons_list</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">parsons</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">all_consequtive</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span> <span class="o">&gt;</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">list_of_values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+<span class="c1">###################################################################################  </span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -14167,6 +14179,27 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.all_consequtive">
+    <p>def <span class="ident">all_consequtive</span>(</p><p>list_of_values)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.all_consequtive', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.all_consequtive" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">all_consequtive</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span> <span class="o">&gt;</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">list_of_values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.analyze_score_pitches">
     <p>def <span class="ident">analyze_score_pitches</span>(</p><p>score, channels_to_analyze=[0])</p>
     </div>
@@ -16720,7 +16753,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_to_parsons_code">
-    <p>def <span class="ident">escore_notes_to_parsons_code</span>(</p><p>escore_notes, times_index=1, pitches_index=4)</p>
+    <p>def <span class="ident">escore_notes_to_parsons_code</span>(</p><p>escore_notes, times_index=1, pitches_index=4, return_as_list=False)</p>
     </div>
     
 
@@ -16731,31 +16764,37 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.escore_notes_to_parsons_code" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_parsons_code</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
                                  <span class="n">times_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                 <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span>
+                                 <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                 <span class="n">return_as_list</span><span class="o">=</span><span class="kc">False</span>
                                  <span class="p">):</span>
   
-  <span class="n">parsons</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+  <span class="n">parsons</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+  <span class="n">parsons_list</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="n">prev</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
   <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">times_index</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev</span><span class="p">[</span><span class="n">times_index</span><span class="p">]:</span>
 
-      <span class="k">if</span> <span class="n">parsons</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-          <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;*&quot;</span>
-
-      <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
           <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;U&quot;</span>
+          <span class="n">parsons_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
           <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;D&quot;</span>
+          <span class="n">parsons_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="o">==</span> <span class="n">prev</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]:</span>
           <span class="n">parsons</span> <span class="o">+=</span> <span class="s2">&quot;R&quot;</span>
+          <span class="n">parsons_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       
       <span class="n">prev</span> <span class="o">=</span> <span class="n">e</span>
 
-  <span class="k">return</span> <span class="n">parsons</span>
+  <span class="k">if</span> <span class="n">return_as_list</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">parsons_list</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">parsons</span>
 </pre></div>
 
   </div>
