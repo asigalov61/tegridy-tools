@@ -1247,7 +1247,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.pitches_chord_to_int">pitches_chord_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_to_tones">pitches_to_tones</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_to_tones_chord">pitches_to_tones_chord</a></li>
-    <li class="mono"><a href="#TMIDIX.play_score">play_score</a></li>
     <li class="mono"><a href="#TMIDIX.plot_ms_SONG">plot_ms_SONG</a></li>
     <li class="mono"><a href="#TMIDIX.proportions_counter">proportions_counter</a></li>
     <li class="mono"><a href="#TMIDIX.recalculate_score_timings">recalculate_score_timings</a></li>
@@ -1826,19 +1825,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 <span class="n">new_score</span><span class="p">[</span><span class="n">itrack</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="n">itrack</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">new_score</span>
-
-<span class="k">def</span> <span class="nf">play_score</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts the &quot;score&quot; to midi, and feeds it into &#39;aplaymidi -&#39;</span>
-<span class="sd">&#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span>
-    <span class="kn">import</span> <span class="nn">subprocess</span>
-    <span class="n">pipe</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;aplaymidi&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">],</span> <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">score_type</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;opus&#39;</span><span class="p">:</span>
-        <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">opus2midi</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">score2midi</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
-    <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="k">def</span> <span class="nf">score2stats</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
@@ -3415,7 +3401,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="c1">#print(&#39;Loading MIDI file...&#39;)</span>
     <span class="n">midi_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">MIDI_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing File:&#39;</span><span class="p">,</span> <span class="n">file_address</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing File:&#39;</span><span class="p">,</span> <span class="n">MIDI_file</span><span class="p">)</span>
     
     <span class="k">try</span><span class="p">:</span>
       <span class="n">opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="n">midi_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
@@ -6992,7 +6978,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">max_seq_len</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-    <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flat_score_tokens_ints_seq</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="p">]</span>
+    <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">final_score_tokens_ints_seq</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="p">]</span>
 
   <span class="k">if</span> <span class="n">seq_pad_value</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
     <span class="n">final_score_tokens_ints_seq</span> <span class="o">+=</span> <span class="p">[</span><span class="n">seq_pad_value</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_seq_len</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_score_tokens_ints_seq</span><span class="p">))</span>
@@ -9510,7 +9496,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">n_patches</span> <span class="o">=</span> <span class="n">num_patches</span>
 
   <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
-    <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
     <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_set</span><span class="p">:</span>
@@ -9521,7 +9507,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trg_patch_list</span><span class="p">)</span>
 
   <span class="k">else</span><span class="p">:</span>
-    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
 
   <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">trg_patch_list</span> <span class="ow">and</span> <span class="n">n_patches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">128</span><span class="p">]</span>
@@ -10655,7 +10641,7 @@ Tegridy Code 2021</p></div>
 
     <span class="c1">#print(&#39;Loading MIDI file...&#39;)</span>
     <span class="n">midi_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">MIDI_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing File:&#39;</span><span class="p">,</span> <span class="n">file_address</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing File:&#39;</span><span class="p">,</span> <span class="n">MIDI_file</span><span class="p">)</span>
     
     <span class="k">try</span><span class="p">:</span>
       <span class="n">opus</span> <span class="o">=</span> <span class="n">midi2opus</span><span class="p">(</span><span class="n">midi_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
@@ -14605,7 +14591,7 @@ Tegridy Code 2024</p></div>
   <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">score_tokens_ints_seq</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">max_seq_len</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-    <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">flat_score_tokens_ints_seq</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="p">]</span>
+    <span class="n">final_score_tokens_ints_seq</span> <span class="o">=</span> <span class="n">final_score_tokens_ints_seq</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="p">]</span>
 
   <span class="k">if</span> <span class="n">seq_pad_value</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
     <span class="n">final_score_tokens_ints_seq</span> <span class="o">+=</span> <span class="p">[</span><span class="n">seq_pad_value</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_seq_len</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_score_tokens_ints_seq</span><span class="p">))</span>
@@ -15437,7 +15423,7 @@ Tegridy Code 2024</p></div>
     <span class="n">n_patches</span> <span class="o">=</span> <span class="n">num_patches</span>
 
   <span class="k">if</span> <span class="n">group_patches</span><span class="p">:</span>
-    <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    <span class="n">patches_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
     <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_set</span><span class="p">:</span>
@@ -15448,7 +15434,7 @@ Tegridy Code 2024</p></div>
     <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trg_patch_list</span><span class="p">)</span>
 
   <span class="k">else</span><span class="p">:</span>
-    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
 
   <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">trg_patch_list</span> <span class="ow">and</span> <span class="n">n_patches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">trg_patch_list</span> <span class="o">=</span> <span class="n">trg_patch_list</span><span class="p">[:</span><span class="n">n_patches</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">128</span><span class="p">]</span>
@@ -19161,38 +19147,6 @@ see opus2midi() and score2opus().</p></div>
   <div id="source-TMIDIX.pitches_to_tones_chord" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pitches_to_tones_chord</span><span class="p">(</span><span class="n">pitches</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]))</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="TMIDIX.play_score">
-    <p>def <span class="ident">play_score</span>(</p><p>score=None)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Converts the "score" to midi, and feeds it into 'aplaymidi -'</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.play_score', this);">Show source &equiv;</a></p>
-  <div id="source-TMIDIX.play_score" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">play_score</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts the &quot;score&quot; to midi, and feeds it into &#39;aplaymidi -&#39;</span>
-<span class="sd">&#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span>
-    <span class="kn">import</span> <span class="nn">subprocess</span>
-    <span class="n">pipe</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;aplaymidi&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">],</span> <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">score_type</span><span class="p">(</span><span class="n">score</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;opus&#39;</span><span class="p">:</span>
-        <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">opus2midi</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">score2midi</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
-    <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 
   </div>
