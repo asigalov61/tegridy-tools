@@ -471,19 +471,6 @@ def grep(score=None, channels=None):
         itrack += 1
     return new_score
 
-def play_score(score=None):
-    r'''Converts the "score" to midi, and feeds it into 'aplaymidi -'
-'''
-    if score == None:
-        return
-    import subprocess
-    pipe = subprocess.Popen(['aplaymidi','-'], stdin=subprocess.PIPE)
-    if score_type(score) == 'opus':
-        pipe.stdin.write(opus2midi(score))
-    else:
-        pipe.stdin.write(score2midi(score))
-    pipe.stdin.close()
-
 def score2stats(opus_or_score=None):
     r'''Returns a dict of some basic stats about the score, like
 bank_select (list of tuples (msb,lsb)),
@@ -2059,7 +2046,7 @@ def Optimus_MIDI_TXT_Processor(MIDI_file,
 
     #print('Loading MIDI file...')
     midi_file = open(MIDI_file, 'rb')
-    if debug: print('Processing File:', file_address)
+    if debug: print('Processing File:', MIDI_file)
     
     try:
       opus = midi2opus(midi_file.read())
@@ -5636,7 +5623,7 @@ def basic_enhanced_delta_score_notes_tokenizer(enhanced_delta_score_notes,
   final_score_tokens_ints_seq = flatten(score_tokens_ints_seq)
 
   if max_seq_len > -1:
-    final_score_tokens_ints_seq = flat_score_tokens_ints_seq[:max_seq_len]
+    final_score_tokens_ints_seq = final_score_tokens_ints_seq[:max_seq_len]
 
   if seq_pad_value > -1:
     final_score_tokens_ints_seq += [seq_pad_value] * (max_seq_len - len(final_score_tokens_ints_seq))
@@ -8154,7 +8141,7 @@ def compress_patches_in_escore_notes(escore_notes,
     n_patches = num_patches
 
   if group_patches:
-    patches_set = sorted(set([e[6] for e in c]))
+    patches_set = sorted(set([e[6] for e in escore_notes]))
     trg_patch_list = []
     seen = []
     for p in patches_set:
@@ -8165,7 +8152,7 @@ def compress_patches_in_escore_notes(escore_notes,
     trg_patch_list = sorted(trg_patch_list)
 
   else:
-    trg_patch_list = sorted(set([e[6] for e in c]))
+    trg_patch_list = sorted(set([e[6] for e in escore_notes]))
 
   if 128 in trg_patch_list and n_patches > 1:
     trg_patch_list = trg_patch_list[:n_patches-1] + [128]
