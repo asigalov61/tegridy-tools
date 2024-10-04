@@ -5153,8 +5153,9 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
                                                       pitches_index=4,
                                                       patches_index=6,
                                                       use_filtered_chords=False,
-                                                      use_full_chords=True,
+                                                      use_full_chords=False,
                                                       remove_duplicate_pitches=True,
+                                                      fix_bad_tones_chords=False,
                                                       fix_bad_pitches=False,
                                                       skip_drums=False
                                                       ):
@@ -5208,21 +5209,63 @@ def advanced_check_and_fix_chords_in_chordified_score(chordified_score,
             tones_counts = Counter([p % 12 for p in pitches_chord]).most_common()
 
             if tones_counts[0][1] > 1:
-              tones_chord = [tones_counts[0][0]]
+              good_tone = tones_counts[0][0]
+              bad_tone = tones_counts[1][0]
             
             elif tones_counts[1][1] > 1:
-              tones_chord = [tones_counts[1][0]]
+              good_tone = tones_counts[1][0]
+              bad_tone = tones_counts[0][0]
             
             else:
-              tones_chord = [pitches_chord[0] % 12]
+              good_tone = pitches_chord[0] % 12
+              bad_tone = [t for t in tones_chord if t != good_tone][0]
 
-          else:
+            tones_chord = [good_tone]
+
+            if fix_bad_tones_chords:
+
+              if good_tone > bad_tone:
+
+                if sorted([good_tone, (12+(bad_tone+1)) % 12]) in CHORDS:
+                  tones_chord = sorted([good_tone, (12+(bad_tone-1)) % 12])
+
+                elif sorted([good_tone, (12+(bad_tone-1)) % 12]) in CHORDS:
+                  tones_chord = sorted([good_tone, (12+(bad_tone+1)) % 12])
+
+              else:
+
+                if sorted([good_tone, (12+(bad_tone-1)) % 12]) in CHORDS:
+                  tones_chord = sorted([good_tone, (12+(bad_tone-1)) % 12])
+
+                elif sorted([good_tone, (12+(bad_tone+1)) % 12]) in CHORDS:
+                  tones_chord = sorted([good_tone, (12+(bad_tone+1)) % 12])          
+
+          if len(tones_chord) > 2:
             tones_chord_combs = [list(comb) for i in range(len(tones_chord)-1, 0, -1) for comb in combinations(tones_chord, i)]
 
             for co in tones_chord_combs:
               if co in CHORDS:
-                tones_chord = co
                 break
+
+            if fix_bad_tones_chords:
+
+              dt_chord = list(set(co) ^ set(tones_chord))
+
+              for t in dt_chord:
+                tones_chord.append((12+(t+1)) % 12)
+                tones_chord.append((12+(t-1)) % 12)
+
+              ex_tones_chord = sorted(set(tones_chord))
+
+              tones_chord_combs = [list(comb) for i in range(4, 0, -2) for comb in combinations(ex_tones_chord, i) if all(t in list(comb) for t in co)]
+              
+              for eco in tones_chord_combs:
+                if eco in CHORDS:
+                  tones_chord = eco
+                  break              
+
+            else:
+              tones_chord = co
 
           if len(tones_chord) == 1:
             tones_chord = [pitches_chord[0] % 12]
@@ -8857,6 +8900,140 @@ def escore_notes_to_parsons_code(escore_notes,
 
 def all_consequtive(list_of_values):
   return all(b > a for a, b in zip(list_of_values[:-1], list_of_values[1:]))
+
+###################################################################################
+
+def escore_notes_patches(escore_notes, patches_index=6):
+  return sorted(set([e[patches_index] for e in escore_notes]))
+
+###################################################################################
+
+def build_suffix_array(lst):
+
+    n = len(lst)
+
+    suffixes = [(lst[i:], i) for i in range(n)]
+    suffixes.sort()
+    suffix_array = [suffix[1] for suffix in suffixes]
+
+    return suffix_array
+
+###################################################################################
+
+def build_lcp_array(lst, suffix_array):
+
+    n = len(lst)
+    rank = [0] * n
+    lcp = [0] * n
+
+    for i, suffix in enumerate(suffix_array):
+      rank[suffix] = i
+
+    h = 0
+
+    for i in range(n):
+      if rank[i] > 0:
+
+        j = suffix_array[rank[i] - 1]
+
+        while i + h < n and j + h < n and lst[i + h] == lst[j + h]:
+          h += 1
+
+        lcp[rank[i]] = h
+
+        if h > 0:
+          h -= 1
+
+    return lcp
+
+###################################################################################
+
+def find_lrno_pattern_fast(lst):
+    n = len(lst)
+    if n == 0:
+      return []
+
+    suffix_array = build_suffix_array(lst)
+    lcp_array = build_lcp_array(lst, suffix_array)
+
+    max_len = 0
+    start_index = 0
+
+    for i in range(1, n):
+      if lcp_array[i] > max_len:
+        if suffix_array[i] + lcp_array[i] <= suffix_array[i - 1] or suffix_array[i - 1] + lcp_array[i - 1] <= suffix_array[i]:
+          max_len = lcp_array[i]
+          start_index = suffix_array[i]
+
+    return lst[start_index:start_index + max_len]
+
+###################################################################################
+
+def find_chunk_indexes(original_list, chunk, ignore_index=-1):
+
+  chunk_length = len(chunk)
+
+  for i in range(len(original_list) - chunk_length + 1):
+
+    chunk_index = 0
+    start_index = ignore_index
+
+    for j in range(i, len(original_list)):
+      if original_list[j] == chunk[chunk_index]:
+
+        if start_index == ignore_index:
+          start_index = j
+
+        chunk_index += 1
+
+        if chunk_index == chunk_length:
+          return [start_index, j]
+
+      elif original_list[j] != ignore_index:
+        break
+
+  return None
+
+###################################################################################
+
+def escore_notes_lrno_pattern_fast(escore_notes, 
+                                   channels_index=3, 
+                                   pitches_index=4, 
+                                   zero_start_time=True
+                                  ):
+
+  cscore = chordify_score([1000, escore_notes])
+
+  score_chords = []
+
+  for c in cscore:
+
+    tchord = sorted(set([e[pitches_index] % 12 for e in c if e[channels_index] != 9]))
+
+    chord_tok = -1
+
+    if tchord:
+
+      if tchord not in ALL_CHORDS_FULL:
+        tchord = check_and_fix_tones_chord(tchord)
+
+      chord_tok = ALL_CHORDS_FULL.index(tchord)
+
+    score_chords.append(chord_tok)
+
+  schords = [c for c in score_chords if c != -1]
+
+  lrno = find_lrno_pattern_fast(schords)
+
+  sidx, eidx = find_chunk_indexes(score_chords, lrno)
+
+  escore_notes_lrno_pattern = flatten(cscore[sidx:eidx])
+
+  if zero_start_time:
+    return recalculate_score_timings(escore_notes_lrno_pattern)
+
+  else:
+    return escore_notes_lrno_pattern
 
 ###################################################################################  
 #  
