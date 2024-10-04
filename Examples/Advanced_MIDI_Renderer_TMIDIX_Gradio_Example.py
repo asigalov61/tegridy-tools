@@ -167,10 +167,10 @@ def Render_MIDI(input_midi,
 
         if render_type == "Longest Repeating Phrase":
             zscore = TMIDIX.recalculate_score_timings(output_score)
-            lrno_score = TMIDIX.escore_notes_lrno_pattern(zscore)
+            lrno_score = TMIDIX.escore_notes_lrno_pattern_fast(zscore)
 
             if lrno_score is not None:
-                output_score = TMIDIX.recalculate_score_timings(lrno_score)
+                output_score = lrno_score
 
             else:
                 output_score = TMIDIX.recalculate_score_timings(TMIDIX.escore_notes_middle(output_score, 50))
@@ -181,7 +181,7 @@ def Render_MIDI(input_midi,
             
             if len(c_escore_notes) > 128:
                 cmatrix = TMIDIX.escore_notes_to_image_matrix(c_escore_notes, filter_out_zero_rows=True, filter_out_duplicate_rows=True)
-                smatrix = TPLOTS.square_image_matrix(cmatrix)
+                smatrix = TPLOTS.square_image_matrix(cmatrix, num_pca_components=max(1, min(5, len(c_escore_notes) // 128)))
                 output_score = TMIDIX.image_matrix_to_original_escore_notes(smatrix)
                 
                 for o in output_score:
@@ -202,7 +202,7 @@ def Render_MIDI(input_midi,
                 
                 bmatrix = TMIDIX.escore_notes_to_binary_matrix(zscore)
                 cmatrix = TMIDIX.compress_binary_matrix(bmatrix, only_compress_zeros=True)
-                smatrix = TPLOTS.square_binary_matrix(cmatrix)
+                smatrix = TPLOTS.square_binary_matrix(cmatrix, interpolation_order=max(1, min(5, len(zscore) // 128)))
                 output_score = TMIDIX.binary_matrix_to_original_escore_notes(smatrix)
     
                 for o in output_score:
