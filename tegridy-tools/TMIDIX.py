@@ -9025,15 +9025,25 @@ def escore_notes_lrno_pattern_fast(escore_notes,
 
   lrno = find_lrno_pattern_fast(schords)
 
-  sidx, eidx = find_chunk_indexes(score_chords, lrno)
+  if lrno:
 
-  escore_notes_lrno_pattern = flatten(cscore[sidx:eidx])
+    sidx, eidx = find_chunk_indexes(score_chords, lrno)
 
-  if zero_start_time:
-    return recalculate_score_timings(escore_notes_lrno_pattern)
+    escore_notes_lrno_pattern = flatten(cscore[sidx:eidx+1])
 
+    if escore_notes_lrno_pattern is not None:
+
+      if zero_start_time:
+        return recalculate_score_timings(escore_notes_lrno_pattern)
+
+      else:
+        return escore_notes_lrno_pattern
+
+    else:
+      return None
+  
   else:
-    return escore_notes_lrno_pattern
+    return None
 
 ###################################################################################  
 #  
