@@ -26,10 +26,16 @@
 from functools import partial
 from typing import Optional, Tuple
 
+import os
+os.environ['USE_FLASH_ATTENTION'] = '1'
+
 import torch
 from torch import nn, einsum, Tensor
 import torch.nn.functional as F
+
+# Flash attention
 from torch.nn.attention import SDPBackend, sdpa_kernel
+torch.backends.cuda.enable_flash_sdp(True)
 
 from collections import namedtuple
 from functools import wraps
@@ -259,11 +265,10 @@ class Attend(nn.Module):
         
         # Legacy code...
         # with torch.backends.cuda.sdp_kernel(enable_math=True, enable_mem_efficient=True):
+        # with sdpa_kernel([SDPBackend.MATH, SDPBackend.EFFICIENT_ATTENTION]):
 
         # New SDP kernel code...
-        # with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
-        with sdpa_kernel([SDPBackend.MATH, SDPBackend.EFFICIENT_ATTENTION]):
-
+        with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
             out = F.scaled_dot_product_attention(
                 q, k, v,
                 attn_mask = mask,
