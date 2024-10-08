@@ -9067,9 +9067,9 @@ def escore_notes_durations_counter(escore_notes,
   
   escore = [e for e in escore_notes if e[channels_index] != 9]
   durs = [e[durations_index] for e in escore if e[durations_index] >= min_duration]
-
-  return [len(durs), len(escore), Counter(durs).most_common()]
-
+  zero_durs = sum([1 for e in escore if e[durations_index] == 0])
+  
+  return [len(durs), len(escore), zero_durs, Counter(durs).most_common()]
 
 ###################################################################################
 
