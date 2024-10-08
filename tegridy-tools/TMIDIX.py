@@ -4595,12 +4595,18 @@ def ascii_text_words_counter(ascii_text):
     
 ###################################################################################
 
-def check_and_fix_tones_chord(tones_chord):
+def check_and_fix_tones_chord(tones_chord, use_full_chords=True):
 
   tones_chord_combs = [list(comb) for i in range(len(tones_chord), 0, -1) for comb in combinations(tones_chord, i)]
 
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
+
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
   for c in tones_chord_combs:
-    if c in ALL_CHORDS_FULL:
+    if c in CHORDS:
       checked_tones_chord = c
       break
 
@@ -4613,12 +4619,18 @@ def find_closest_tone(tones, tone):
 
 ###################################################################################
 
-def advanced_check_and_fix_tones_chord(tones_chord, high_pitch=0):
+def advanced_check_and_fix_tones_chord(tones_chord, high_pitch=0, use_full_chords=True):
 
   tones_chord_combs = [list(comb) for i in range(len(tones_chord), 0, -1) for comb in combinations(tones_chord, i)]
 
+  if use_full_chords:
+    CHORDS = ALL_CHORDS_FULL
+
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
   for c in tones_chord_combs:
-    if c in ALL_CHORDS_FULL:
+    if c in CHORDS:
       tchord = c
 
   if 0 < high_pitch < 128 and len(tchord) == 1:
