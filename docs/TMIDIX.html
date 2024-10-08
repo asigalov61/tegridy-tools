@@ -1162,6 +1162,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes">compress_patches_in_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes_chords">compress_patches_in_escore_notes_chords</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
+    <li class="mono"><a href="#TMIDIX.count_bad_chords_in_chordified_score">count_bad_chords_in_chordified_score</a></li>
     <li class="mono"><a href="#TMIDIX.count_escore_notes_patches">count_escore_notes_patches</a></li>
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.covariance">covariance</a></li>
@@ -1181,6 +1182,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_averages">escore_notes_averages</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_delta_times">escore_notes_delta_times</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_durations">escore_notes_durations</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_durations_counter">escore_notes_durations_counter</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_lrno_pattern">escore_notes_lrno_pattern</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_lrno_pattern_fast">escore_notes_lrno_pattern_fast</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_medley">escore_notes_medley</a></li>
@@ -10418,7 +10420,49 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">None</span>
 
-<span class="c1">###################################################################################  </span>
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_durations_counter</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                   <span class="n">min_duration</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                   <span class="n">durations_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                   <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span>
+                                   <span class="p">):</span>
+  
+  <span class="n">escore</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durations_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durations_index</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_duration</span><span class="p">]</span>
+  <span class="n">zero_durs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durations_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span> <span class="n">zero_durs</span><span class="p">,</span> <span class="n">Counter</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">count_bad_chords_in_chordified_score</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">,</span>  
+                                         <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                         <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                                         <span class="n">max_patch</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> 
+                                         <span class="n">use_full_chord</span><span class="o">=</span><span class="kc">False</span>
+                                         <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">use_full_chord</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="n">bad_chords_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score</span><span class="p">:</span>
+
+    <span class="n">cpitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_patch</span><span class="p">]</span>
+    <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cpitches</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+        <span class="n">bad_chords_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">bad_chords_count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">)]</span> 
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -15892,6 +15936,50 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.count_bad_chords_in_chordified_score">
+    <p>def <span class="ident">count_bad_chords_in_chordified_score</span>(</p><p>chordified_score, pitches_index=4, patches_index=6, max_patch=127, use_full_chord=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.count_bad_chords_in_chordified_score', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.count_bad_chords_in_chordified_score" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_bad_chords_in_chordified_score</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">,</span>  
+                                         <span class="n">pitches_index</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                         <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                                         <span class="n">max_patch</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> 
+                                         <span class="n">use_full_chord</span><span class="o">=</span><span class="kc">False</span>
+                                         <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">use_full_chord</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
+  <span class="n">bad_chords_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chordified_score</span><span class="p">:</span>
+
+    <span class="n">cpitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_patch</span><span class="p">]</span>
+    <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cpitches</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="n">tones_chord</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
+        <span class="n">bad_chords_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">return</span> <span class="p">[</span><span class="n">bad_chords_count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chordified_score</span><span class="p">)]</span> 
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.count_escore_notes_patches">
     <p>def <span class="ident">count_escore_notes_patches</span>(</p><p>escore_notes, patches_index=6)</p>
     </div>
@@ -16588,6 +16676,36 @@ Tegridy Code 2024</p></div>
   <span class="n">descore_notes</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">descore_notes</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_durations_counter">
+    <p>def <span class="ident">escore_notes_durations_counter</span>(</p><p>escore_notes, min_duration=0, durations_index=2, channels_index=3)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_durations_counter', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_durations_counter" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_durations_counter</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                   <span class="n">min_duration</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                   <span class="n">durations_index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                   <span class="n">channels_index</span><span class="o">=</span><span class="mi">3</span>
+                                   <span class="p">):</span>
+  
+  <span class="n">escore</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durations_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durations_index</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_duration</span><span class="p">]</span>
+  <span class="n">zero_durs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durations_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+  
+  <span class="k">return</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore</span><span class="p">),</span> <span class="n">zero_durs</span><span class="p">,</span> <span class="n">Counter</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
 </pre></div>
 
   </div>
