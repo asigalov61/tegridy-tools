@@ -9057,7 +9057,49 @@ def escore_notes_lrno_pattern_fast(escore_notes,
   else:
     return None
 
-###################################################################################  
+###################################################################################
+
+def escore_notes_durations_counter(escore_notes, 
+                                   min_duration=0, 
+                                   durations_index=2, 
+                                   channels_index=3
+                                   ):
+  
+  escore = [e for e in escore_notes if e[channels_index] != 9]
+  durs = [e[durations_index] for e in escore if e[durations_index] >= min_duration]
+
+  return [len(durs), len(escore), Counter(durs).most_common()]
+
+
+###################################################################################
+
+def count_bad_chords_in_chordified_score(chordified_score,  
+                                         pitches_index=4,
+                                         patches_index=6,
+                                         max_patch=127, 
+                                         use_full_chord=False
+                                         ):
+
+  if use_full_chord:
+    CHORDS = ALL_CHORDS_FULL
+
+  else:
+    CHORDS = ALL_CHORDS_SORTED
+
+  bad_chords_count = 0
+
+  for c in chordified_score:
+
+    cpitches = [e[pitches_index] for e in c if e[patches_index] <= max_patch]
+    tones_chord = sorted(set([p % 12 for p in cpitches]))
+
+    if tones_chord:
+      if tones_chord not in CHORDS:
+        bad_chords_count += 1
+
+  return [bad_chords_count, len(chordified_score)] 
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
