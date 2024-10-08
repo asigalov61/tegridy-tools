@@ -5956,12 +5956,18 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span> <span class="nf">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
   <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
       <span class="n">checked_tones_chord</span> <span class="o">=</span> <span class="n">c</span>
       <span class="k">break</span>
 
@@ -5974,12 +5980,18 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span> <span class="nf">advanced_check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">high_pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">advanced_check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">high_pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
   <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
       <span class="n">tchord</span> <span class="o">=</span> <span class="n">c</span>
 
   <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">high_pitch</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -10386,15 +10398,25 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
   <span class="n">lrno</span> <span class="o">=</span> <span class="n">find_lrno_pattern_fast</span><span class="p">(</span><span class="n">schords</span><span class="p">)</span>
 
-  <span class="n">sidx</span><span class="p">,</span> <span class="n">eidx</span> <span class="o">=</span> <span class="n">find_chunk_indexes</span><span class="p">(</span><span class="n">score_chords</span><span class="p">,</span> <span class="n">lrno</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">lrno</span><span class="p">:</span>
 
-  <span class="n">escore_notes_lrno_pattern</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">sidx</span><span class="p">:</span><span class="n">eidx</span><span class="p">])</span>
+    <span class="n">sidx</span><span class="p">,</span> <span class="n">eidx</span> <span class="o">=</span> <span class="n">find_chunk_indexes</span><span class="p">(</span><span class="n">score_chords</span><span class="p">,</span> <span class="n">lrno</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">zero_start_time</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">escore_notes_lrno_pattern</span><span class="p">)</span>
+    <span class="n">escore_notes_lrno_pattern</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">sidx</span><span class="p">:</span><span class="n">eidx</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
 
+    <span class="k">if</span> <span class="n">escore_notes_lrno_pattern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">zero_start_time</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">escore_notes_lrno_pattern</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">escore_notes_lrno_pattern</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+  
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">escore_notes_lrno_pattern</span>
+    <span class="k">return</span> <span class="kc">None</span>
 
 <span class="c1">###################################################################################  </span>
 <span class="c1">#  </span>
@@ -13928,7 +13950,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.advanced_check_and_fix_tones_chord">
-    <p>def <span class="ident">advanced_check_and_fix_tones_chord</span>(</p><p>tones_chord, high_pitch=0)</p>
+    <p>def <span class="ident">advanced_check_and_fix_tones_chord</span>(</p><p>tones_chord, high_pitch=0, use_full_chords=True)</p>
     </div>
     
 
@@ -13937,12 +13959,18 @@ Tegridy Code 2024</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.advanced_check_and_fix_tones_chord', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.advanced_check_and_fix_tones_chord" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">advanced_check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">high_pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">advanced_check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">high_pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
   <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
       <span class="n">tchord</span> <span class="o">=</span> <span class="n">c</span>
 
   <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">high_pitch</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tchord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -15348,7 +15376,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.check_and_fix_tones_chord">
-    <p>def <span class="ident">check_and_fix_tones_chord</span>(</p><p>tones_chord)</p>
+    <p>def <span class="ident">check_and_fix_tones_chord</span>(</p><p>tones_chord, use_full_chords=True)</p>
     </div>
     
 
@@ -15357,12 +15385,18 @@ Tegridy Code 2024</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.check_and_fix_tones_chord', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.check_and_fix_tones_chord" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">use_full_chords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
   <span class="n">tones_chord_combs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">comb</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
 
+  <span class="k">if</span> <span class="n">use_full_chords</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_FULL</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">CHORDS</span> <span class="o">=</span> <span class="n">ALL_CHORDS_SORTED</span>
+
   <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chord_combs</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_FULL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CHORDS</span><span class="p">:</span>
       <span class="n">checked_tones_chord</span> <span class="o">=</span> <span class="n">c</span>
       <span class="k">break</span>
 
@@ -16665,15 +16699,25 @@ Tegridy Code 2024</p></div>
 
   <span class="n">lrno</span> <span class="o">=</span> <span class="n">find_lrno_pattern_fast</span><span class="p">(</span><span class="n">schords</span><span class="p">)</span>
 
-  <span class="n">sidx</span><span class="p">,</span> <span class="n">eidx</span> <span class="o">=</span> <span class="n">find_chunk_indexes</span><span class="p">(</span><span class="n">score_chords</span><span class="p">,</span> <span class="n">lrno</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">lrno</span><span class="p">:</span>
 
-  <span class="n">escore_notes_lrno_pattern</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">sidx</span><span class="p">:</span><span class="n">eidx</span><span class="p">])</span>
+    <span class="n">sidx</span><span class="p">,</span> <span class="n">eidx</span> <span class="o">=</span> <span class="n">find_chunk_indexes</span><span class="p">(</span><span class="n">score_chords</span><span class="p">,</span> <span class="n">lrno</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">zero_start_time</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">escore_notes_lrno_pattern</span><span class="p">)</span>
+    <span class="n">escore_notes_lrno_pattern</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">sidx</span><span class="p">:</span><span class="n">eidx</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
 
+    <span class="k">if</span> <span class="n">escore_notes_lrno_pattern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">zero_start_time</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">escore_notes_lrno_pattern</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">escore_notes_lrno_pattern</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+  
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">escore_notes_lrno_pattern</span>
+    <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
   </div>
