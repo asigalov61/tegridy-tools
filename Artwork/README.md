@@ -2,7 +2,7 @@
 
 ***
 
-## Images were created with Stable Diffusion 3.5 Large Diffusion AI Model
+## Images were created with Stable Diffusion 3.5 Large AI Model
 
 ***
 
