@@ -4676,7 +4676,7 @@ def augment_enhanced_score_notes(enhanced_score_notes,
                                   pitch_shift=0,
                                   ceil_timings=False,
                                   round_timings=False,
-                                  legacy_timings=False
+                                  legacy_timings=True
                                 ):
 
     esn = copy.deepcopy(enhanced_score_notes)
