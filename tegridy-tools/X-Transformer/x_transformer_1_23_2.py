@@ -267,8 +267,12 @@ class Attend(nn.Module):
         # with torch.backends.cuda.sdp_kernel(enable_math=True, enable_mem_efficient=True):
         # with sdpa_kernel([SDPBackend.MATH, SDPBackend.EFFICIENT_ATTENTION]):
 
-        # New SDP kernel code...
+        # PyTorch 2.3-2.4 SDPA backend code...
         with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+
+        # New PyTorch 2.5 SDPA backend code:
+        # with sdpa_kernel(SDPBackend.CUDNN_ATTENTION):
+            
             out = F.scaled_dot_product_attention(
                 q, k, v,
                 attn_mask = mask,
