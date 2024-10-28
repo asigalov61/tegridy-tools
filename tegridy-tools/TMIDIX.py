@@ -1819,6 +1819,7 @@ def plot_ms_SONG(ms_song,
         plt.close()
 
     if return_plt:
+      plt.close(fig)
       return fig
 
     plt.show()
@@ -9077,10 +9078,10 @@ def count_bad_chords_in_chordified_score(chordified_score,
                                          pitches_index=4,
                                          patches_index=6,
                                          max_patch=127, 
-                                         use_full_chord=False
+                                         use_full_chords=False
                                          ):
 
-  if use_full_chord:
+  if use_full_chords:
     CHORDS = ALL_CHORDS_FULL
 
   else:
