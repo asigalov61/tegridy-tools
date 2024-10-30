@@ -12,7 +12,7 @@
 
 ### MIDI input
 
-```
+```python
 import TMIDIX
 
 #===============================================================================
@@ -48,7 +48,7 @@ melody = TMIDIX.fix_monophonic_score_durations(TMIDIX.extract_melody(cscore, mel
 
 ### MIDI output
 
-```
+```python
 import copy
 import TMIDIX
 import midi_to_colab_audio
@@ -110,7 +110,7 @@ TMIDIX.plot_ms_SONG(output_score, plot_title=output_file_name+'.mid')
 
 ### MIDI Melody Harmonization
 
-```
+```python
 import TMIDIX
 
 #===============================================================================
@@ -173,7 +173,7 @@ detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
 
 ### MIDI alignment
 
-```
+```python
 import TMIDIX
 
 #===============================================================================
@@ -221,7 +221,7 @@ detailed_stats = TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(output_score,
 
 ### Advanced MIDI processing
 
-```
+```python
 import TMIDIX
 
 #===============================================================================
