@@ -12,7 +12,7 @@
 
 ## Recommended and required for the latest version of the modules/files: 
 
-```
+```sh
 !git clone --depth 1 https://github.com/asigalov61/tegridy-tools
 ```
 
@@ -20,7 +20,7 @@
 
 ## Hassle-free automatic install , setup, and all core modules imports
 
-```
+```sh
 !curl -O https://raw.githubusercontent.com/asigalov61/tegridy-tools/main/install/setup.sh
 # !wget https://raw.githubusercontent.com/asigalov61/tegridy-tools/main/install/setup.sh
 !chmod +x setup.sh
@@ -34,31 +34,31 @@
 
 ### Standard Python auto-imports/re-imports
 
-```
+```sh
 # CPU setup and imports
 !python ./tegridy-tools/install/setup.py
 ```
 
-```
+```sh
 # GPU setup and imports
 !python ./tegridy-tools/install/setup_cuda.py
 ```
 
 ### Google Colab auto-imports/re-imports
 
-```
+```sh
 # CPU setup and imports
 %run ./tegridy-tools/install/setup.py
 ```
 
-```
+```sh
 # GPU setup and imports
 %run ./tegridy-tools/install/setup_cuda.py
 ```
 
 ### Manual imports/re-imports
 
-```
+```python
 import os
 import copy
 import math
