@@ -56,6 +56,8 @@ VersionDate = '20201120'
 
 _previous_warning = ''  # 5.4
 _previous_times = 0     # 5.4
+_no_warning = False
+
 #------------------------------- Encoding stuff --------------------------
 
 def opus2midi(opus=[], text_encoding='ISO-8859-1'):
@@ -845,10 +847,11 @@ def _unshift_ber_int(ba):
     r'''Given a bytearray, returns a tuple of (the ber-integer at the
 start, and the remainder of the bytearray).
 '''
-    if not len(ba):   # 6.7
+    if not len(ba):  # 6.7
         _warn('_unshift_ber_int: no integer found')
         return ((0, b""))
-    byte = ba.pop(0)
+    byte = ba[0]
+    ba = ba[1:]
     integer = 0
     while True:
         integer += (byte & 0x7F)
@@ -857,13 +860,17 @@ start, and the remainder of the bytearray).
         if not len(ba):
             _warn('_unshift_ber_int: no end-of-integer found')
             return ((0, ba))
-        byte = ba.pop(0)
+        byte = ba[0]
+        ba = ba[1:]
         integer <<= 7
+
 
 def _clean_up_warnings():  # 5.4
     # Call this before returning from any publicly callable function
     # whenever there's a possibility that a warning might have been printed
     # by the function, or by any private functions it might have called.
+    if _no_warning:
+        return
     global _previous_times
     global _previous_warning
     if _previous_times > 1:
@@ -876,27 +883,32 @@ def _clean_up_warnings():  # 5.4
     _previous_times = 0
     _previous_warning = ''
 
+
 def _warn(s=''):
+    if _no_warning:
+        return
     global _previous_times
     global _previous_warning
     if s == _previous_warning:  # 5.4
         _previous_times = _previous_times + 1
     else:
         _clean_up_warnings()
-        sys.stderr.write(str(s)+"\n")
+        sys.stderr.write(str(s) + "\n")
         _previous_warning = s
 
-def _some_text_event(which_kind=0x01, text=b'some_text', text_encoding='ISO-8859-1'):
-    if str(type(text)).find("'str'") >= 0:   # 6.4 test for back-compatibility
-        data = bytes(text, encoding=text_encoding)
+
+def _some_text_event(which_kind=0x01, text=b'some_text'):
+    if str(type(text)).find("'str'") >= 0:  # 6.4 test for back-compatibility
+        data = bytes(text, encoding='ISO-8859-1')
     else:
         data = bytes(text)
-    return b'\xFF'+bytes((which_kind,))+_ber_compressed_int(len(data))+data
+    return b'\xFF' + bytes((which_kind,)) + _ber_compressed_int(len(data)) + data
+
 
 def _consistentise_ticks(scores):  # 3.6
     # used by mix_scores, merge_scores, concatenate_scores
     if len(scores) == 1:
-         return copy.deepcopy(scores)
+        return copy.deepcopy(scores)
     are_consistent = True
     ticks = scores[0][0]
     iscore = 1
@@ -917,9 +929,8 @@ def _consistentise_ticks(scores):  # 3.6
 
 
 ###########################################################################
-
 def _decode(trackdata=b'', exclude=None, include=None,
- event_callback=None, exclusive_event_callback=None, no_eot_magic=False):
+            event_callback=None, exclusive_event_callback=None, no_eot_magic=False):
     r'''Decodes MIDI track data into an opus-style list of events.
 The options:
   'exclude' is a list of event types which will be ignored SHOULD BE A SET
@@ -939,24 +950,24 @@ The options:
     exclude = set(exclude)
 
     # Pointer = 0;  not used here; we eat through the bytearray instead.
-    event_code = -1; # used for running status
+    event_code = -1;  # used for running status
     event_count = 0;
     events = []
 
-    while(len(trackdata)):
+    while (len(trackdata)):
         # loop while there's anything to analyze ...
-        eot = False   # When True, the event registrar aborts this loop
+        eot = False  # When True, the event registrar aborts this loop
         event_count += 1
 
         E = []
         # E for events - we'll feed it to the event registrar at the end.
 
         # Slice off the delta time code, and analyze it
-        [time, remainder] = _unshift_ber_int(trackdata)
+        [time, trackdata] = _unshift_ber_int(trackdata)
 
         # Now let's see what we can make of the command
-        first_byte = trackdata.pop(0) & 0xFF
-
+        first_byte = trackdata[0] & 0xFF
+        trackdata = trackdata[1:]
         if (first_byte < 0xF0):  # It's a MIDI event
             if (first_byte & 0x80):
                 event_code = first_byte
@@ -970,17 +981,19 @@ The options:
             command = event_code & 0xF0
             channel = event_code & 0x0F
 
-            if (command == 0xF6):  #  0-byte argument
+            if (command == 0xF6):  # 0-byte argument
                 pass
-            elif (command == 0xC0 or command == 0xD0):  #  1-byte argument
-                parameter = trackdata.pop(0)  # could be B
-            else: # 2-byte argument could be BB or 14-bit
-                parameter = (trackdata.pop(0), trackdata.pop(0))
+            elif (command == 0xC0 or command == 0xD0):  # 1-byte argument
+                parameter = trackdata[0]  # could be B
+                trackdata = trackdata[1:]
+            else:  # 2-byte argument could be BB or 14-bit
+                parameter = (trackdata[0], trackdata[1])
+                trackdata = trackdata[2:]
 
             #################################################################
             # MIDI events
 
-            if (command      == 0x80):
+            if (command == 0x80):
                 if 'note_off' in exclude:
                     continue
                 E = ['note_off', time, channel, parameter[0], parameter[1]]
@@ -991,11 +1004,11 @@ The options:
             elif (command == 0xA0):
                 if 'key_after_touch' in exclude:
                     continue
-                E = ['key_after_touch',time,channel,parameter[0],parameter[1]]
+                E = ['key_after_touch', time, channel, parameter[0], parameter[1]]
             elif (command == 0xB0):
                 if 'control_change' in exclude:
                     continue
-                E = ['control_change',time,channel,parameter[0],parameter[1]]
+                E = ['control_change', time, channel, parameter[0], parameter[1]]
             elif (command == 0xC0):
                 if 'patch_change' in exclude:
                     continue
@@ -1008,93 +1021,94 @@ The options:
                 if 'pitch_wheel_change' in exclude:
                     continue
                 E = ['pitch_wheel_change', time, channel,
-                 _read_14_bit(parameter)-0x2000]
+                     _read_14_bit(parameter) - 0x2000]
             else:
-                _warn("Shouldn't get here; command="+hex(command))
+                _warn("Shouldn't get here; command=" + hex(command))
 
         elif (first_byte == 0xFF):  # It's a Meta-Event! ##################
-            #[command, length, remainder] =
+            # [command, length, remainder] =
             #    unpack("xCwa*", substr(trackdata, $Pointer, 6));
-            #Pointer += 6 - len(remainder);
+            # Pointer += 6 - len(remainder);
             #    # Move past JUST the length-encoded.
-            command = trackdata.pop(0) & 0xFF
+            command = trackdata[0] & 0xFF
+            trackdata = trackdata[1:]
             [length, trackdata] = _unshift_ber_int(trackdata)
-            if (command      == 0x00):
-                 if (length == 2):
-                     E = ['set_sequence_number',time,_twobytes2int(trackdata)]
-                 else:
-                     _warn('set_sequence_number: length must be 2, not '+str(length))
-                     E = ['set_sequence_number', time, 0]
+            if (command == 0x00):
+                if (length == 2):
+                    E = ['set_sequence_number', time, _twobytes2int(trackdata)]
+                else:
+                    _warn('set_sequence_number: length must be 2, not ' + str(length))
+                    E = ['set_sequence_number', time, 0]
 
-            elif command >= 0x01 and command <= 0x0f:   # Text events
+            elif command >= 0x01 and command <= 0x0f:  # Text events
                 # 6.2 take it in bytes; let the user get the right encoding.
                 # text_str = trackdata[0:length].decode('ascii','ignore')
                 # text_str = trackdata[0:length].decode('ISO-8859-1')
                 # 6.4 take it in bytes; let the user get the right encoding.
-                text_data = bytes(trackdata[0:length])   # 6.4
+                text_data = bytes(trackdata[0:length])  # 6.4
                 # Defined text events
                 if (command == 0x01):
-                     E = ['text_event', time, text_data]
+                    E = ['text_event', time, text_data]
                 elif (command == 0x02):
-                     E = ['copyright_text_event', time, text_data]
+                    E = ['copyright_text_event', time, text_data]
                 elif (command == 0x03):
-                     E = ['track_name', time, text_data]
+                    E = ['track_name', time, text_data]
                 elif (command == 0x04):
-                     E = ['instrument_name', time, text_data]
+                    E = ['instrument_name', time, text_data]
                 elif (command == 0x05):
-                     E = ['lyric', time, text_data]
+                    E = ['lyric', time, text_data]
                 elif (command == 0x06):
-                     E = ['marker', time, text_data]
+                    E = ['marker', time, text_data]
                 elif (command == 0x07):
-                     E = ['cue_point', time, text_data]
+                    E = ['cue_point', time, text_data]
                 # Reserved but apparently unassigned text events
                 elif (command == 0x08):
-                     E = ['text_event_08', time, text_data]
+                    E = ['text_event_08', time, text_data]
                 elif (command == 0x09):
-                     E = ['text_event_09', time, text_data]
+                    E = ['text_event_09', time, text_data]
                 elif (command == 0x0a):
-                     E = ['text_event_0a', time, text_data]
+                    E = ['text_event_0a', time, text_data]
                 elif (command == 0x0b):
-                     E = ['text_event_0b', time, text_data]
+                    E = ['text_event_0b', time, text_data]
                 elif (command == 0x0c):
-                     E = ['text_event_0c', time, text_data]
+                    E = ['text_event_0c', time, text_data]
                 elif (command == 0x0d):
-                     E = ['text_event_0d', time, text_data]
+                    E = ['text_event_0d', time, text_data]
                 elif (command == 0x0e):
-                     E = ['text_event_0e', time, text_data]
+                    E = ['text_event_0e', time, text_data]
                 elif (command == 0x0f):
-                     E = ['text_event_0f', time, text_data]
+                    E = ['text_event_0f', time, text_data]
 
             # Now the sticky events -------------------------------------
             elif (command == 0x2F):
-                 E = ['end_track', time]
-                     # The code for handling this, oddly, comes LATER,
-                     # in the event registrar.
-            elif (command == 0x51): # DTime, Microseconds/Crochet
-                 if length != 3:
-                     _warn('set_tempo event, but length='+str(length))
-                 E = ['set_tempo', time,
-                      struct.unpack(">I", b'\x00'+trackdata[0:3])[0]]
+                E = ['end_track', time]
+                # The code for handling this, oddly, comes LATER,
+                # in the event registrar.
+            elif (command == 0x51):  # DTime, Microseconds/Crochet
+                if length != 3:
+                    _warn('set_tempo event, but length=' + str(length))
+                E = ['set_tempo', time,
+                     struct.unpack(">I", b'\x00' + trackdata[0:3])[0]]
             elif (command == 0x54):
-                 if length != 5:   # DTime, HR, MN, SE, FR, FF
-                     _warn('smpte_offset event, but length='+str(length))
-                 E = ['smpte_offset',time] + list(struct.unpack(">BBBBB",trackdata[0:5]))
+                if length != 5:  # DTime, HR, MN, SE, FR, FF
+                    _warn('smpte_offset event, but length=' + str(length))
+                E = ['smpte_offset', time] + list(struct.unpack(">BBBBB", trackdata[0:5]))
             elif (command == 0x58):
-                 if length != 4:   # DTime, NN, DD, CC, BB
-                     _warn('time_signature event, but length='+str(length))
-                 E = ['time_signature', time]+list(trackdata[0:4])
+                if length != 4:  # DTime, NN, DD, CC, BB
+                    _warn('time_signature event, but length=' + str(length))
+                E = ['time_signature', time] + list(trackdata[0:4])
             elif (command == 0x59):
-                 if length != 2:   # DTime, SF(signed), MI
-                     _warn('key_signature event, but length='+str(length))
-                 E = ['key_signature',time] + list(struct.unpack(">bB",trackdata[0:2]))
-            elif (command == 0x7F):   # 6.4
-                 E = ['sequencer_specific',time, bytes(trackdata[0:length])]
+                if length != 2:  # DTime, SF(signed), MI
+                    _warn('key_signature event, but length=' + str(length))
+                E = ['key_signature', time] + list(struct.unpack(">bB", trackdata[0:2]))
+            elif (command == 0x7F):  # 6.4
+                E = ['sequencer_specific', time, bytes(trackdata[0:length])]
             else:
-                 E = ['raw_meta_event', time, command,
-                   bytes(trackdata[0:length])]   # 6.0
-                 #"[uninterpretable meta-event command of length length]"
-                 # DTime, Command, Binary Data
-                 # It's uninterpretable; record it as raw_data.
+                E = ['raw_meta_event', time, command,
+                     bytes(trackdata[0:length])]  # 6.0
+                # "[uninterpretable meta-event command of length length]"
+                # DTime, Command, Binary Data
+                # It's uninterpretable; record it as raw_data.
 
             # Pointer += length; #  Now move Pointer
             trackdata = trackdata[length:]
@@ -1111,7 +1125,7 @@ The options:
             # is omitted if this is a non-final block in a multiblock sysex;
             # but the F7 (if there) is counted in the message's declared
             # length, so we don't have to think about it anyway.)
-            #command = trackdata.pop(0)
+            # command = trackdata.pop(0)
             [length, trackdata] = _unshift_ber_int(trackdata)
             if first_byte == 0xF0:
                 # 20091008 added ISO-8859-1 to get an 8-bit str
@@ -1135,32 +1149,32 @@ The options:
         # from the MIDI file spec.  So, I'm going to assume that
         # they CAN, in practice, occur.  I don't know whether it's
         # proper for you to actually emit these into a MIDI file.
-        
-        elif (first_byte == 0xF2):   # DTime, Beats
+
+        elif (first_byte == 0xF2):  # DTime, Beats
             #  <song position msg> ::=     F2 <data pair>
             E = ['song_position', time, _read_14_bit(trackdata[:2])]
             trackdata = trackdata[2:]
 
-        elif (first_byte == 0xF3):   # <song select msg> ::= F3 <data singlet>
+        elif (first_byte == 0xF3):  # <song select msg> ::= F3 <data singlet>
             # E = ['song_select', time, struct.unpack('>B',trackdata.pop(0))[0]]
             E = ['song_select', time, trackdata[0]]
             trackdata = trackdata[1:]
             # DTime, Thing (what?! song number?  whatever ...)
 
-        elif (first_byte == 0xF6):   # DTime
+        elif (first_byte == 0xF6):  # DTime
             E = ['tune_request', time]
             # What would a tune request be doing in a MIDI /file/?
 
-        #########################################################
-        # ADD MORE META-EVENTS HERE.  TODO:
-        # f1 -- MTC Quarter Frame Message. One data byte follows
-        #     the Status; it's the time code value, from 0 to 127.
-        # f8 -- MIDI clock.    no data.
-        # fa -- MIDI start.    no data.
-        # fb -- MIDI continue. no data.
-        # fc -- MIDI stop.     no data.
-        # fe -- Active sense.  no data.
-        # f4 f5 f9 fd -- unallocated
+            #########################################################
+            # ADD MORE META-EVENTS HERE.  TODO:
+            # f1 -- MTC Quarter Frame Message. One data byte follows
+            #     the Status; it's the time code value, from 0 to 127.
+            # f8 -- MIDI clock.    no data.
+            # fa -- MIDI start.    no data.
+            # fb -- MIDI continue. no data.
+            # fc -- MIDI stop.     no data.
+            # fe -- Active sense.  no data.
+            # f4 f5 f9 fd -- unallocated
 
             r'''
         elif (first_byte > 0xF0) { # Some unknown kinda F-series event ####
@@ -1175,31 +1189,30 @@ The options:
         elif first_byte > 0xF0:  # Some unknown F-series event
             # Here we only produce a one-byte piece of raw data.
             # E = ['raw_data', time, bytest(trackdata[0])]   # 6.4
-            E = ['raw_data', time, trackdata[0]]   # 6.4 6.7
+            E = ['raw_data', time, trackdata[0]]  # 6.4 6.7
             trackdata = trackdata[1:]
         else:  # Fallthru.
-            _warn("Aborting track.  Command-byte first_byte="+hex(first_byte))
+            _warn("Aborting track.  Command-byte first_byte=" + hex(first_byte))
             break
         # End of the big if-group
 
-
         ######################################################################
         #  THE EVENT REGISTRAR...
-        if E and  (E[0] == 'end_track'):
+        if E and (E[0] == 'end_track'):
             # This is the code for exceptional handling of the EOT event.
             eot = True
             if not no_eot_magic:
                 if E[1] > 0:  # a null text-event to carry the delta-time
                     E = ['text_event', E[1], '']
                 else:
-                    E = []   # EOT with a delta-time of 0; ignore it.
-        
+                    E = []  # EOT with a delta-time of 0; ignore it.
+
         if E and not (E[0] in exclude):
-            #if ( $exclusive_event_callback ):
+            # if ( $exclusive_event_callback ):
             #    &{ $exclusive_event_callback }( @E );
-            #else:
+            # else:
             #    &{ $event_callback }( @E ) if $event_callback;
-                events.append(E)
+            events.append(E)
         if eot:
             break
 
