@@ -897,9 +897,9 @@ def _warn(s=''):
         _previous_warning = s
 
 
-def _some_text_event(which_kind=0x01, text=b'some_text'):
+def _some_text_event(which_kind=0x01, text=b'some_text', text_encoding='ISO-8859-1'):
     if str(type(text)).find("'str'") >= 0:  # 6.4 test for back-compatibility
-        data = bytes(text, encoding='ISO-8859-1')
+        data = bytes(text, encoding=text_encoding)
     else:
         data = bytes(text)
     return b'\xFF' + bytes((which_kind,)) + _ber_compressed_int(len(data)) + data
