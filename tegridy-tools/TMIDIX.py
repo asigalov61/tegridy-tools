@@ -9119,7 +9119,7 @@ def needleman_wunsch_aligner(seq1,
                              seq2,
                              align_idx,
                              gap_penalty=-1,
-                             match_score=1,
+                             match_score=2,
                              mismatch_penalty=-1
                              ):
     
