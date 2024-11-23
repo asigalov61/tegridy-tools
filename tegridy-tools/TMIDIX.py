@@ -9111,7 +9111,90 @@ def count_bad_chords_in_chordified_score(chordified_score,
       if tones_chord not in CHORDS:
         bad_chords_count += 1
 
-  return [bad_chords_count, len(chordified_score)] 
+  return [bad_chords_count, len(chordified_score)]
+
+###################################################################################
+
+def needleman_wunsch_aligner(seq1,
+                             seq2,
+                             align_idx,
+                             gap_penalty=-1,
+                             match_score=1,
+                             mismatch_penalty=-1
+                             ):
+    
+    n = len(seq1)
+    m = len(seq2)
+    
+    score_matrix = [[0] * (m + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        score_matrix[i][0] = gap_penalty * i
+    for j in range(1, m + 1):
+        score_matrix[0][j] = gap_penalty * j
+
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            match = score_matrix[i-1][j-1] + (match_score if seq1[i-1][align_idx] == seq2[j-1][align_idx] else mismatch_penalty)
+            delete = score_matrix[i-1][j] + gap_penalty
+            insert = score_matrix[i][j-1] + gap_penalty
+            score_matrix[i][j] = max(match, delete, insert)
+
+    align1, align2 = [], []
+    i, j = n, m
+    
+    while i > 0 and j > 0:
+        
+        score = score_matrix[i][j]
+        score_diag = score_matrix[i-1][j-1]
+        score_up = score_matrix[i-1][j]
+        score_left = score_matrix[i][j-1]
+
+        if score == score_diag + (match_score if seq1[i-1][align_idx] == seq2[j-1][align_idx] else mismatch_penalty):
+            align1.append(seq1[i-1])
+            align2.append(seq2[j-1])
+            i -= 1
+            j -= 1
+        elif score == score_up + gap_penalty:
+            align1.append(seq1[i-1])
+            align2.append([None] * 6)
+            i -= 1
+        elif score == score_left + gap_penalty:
+            align1.append([None] * 6)
+            align2.append(seq2[j-1])
+            j -= 1
+
+    while i > 0:
+        align1.append(seq1[i-1])
+        align2.append([None] * 6)
+        i -= 1
+    while j > 0:
+        align1.append([None] * 6)
+        align2.append(seq2[j-1])
+        j -= 1
+
+    align1.reverse()
+    align2.reverse()
+
+    return align1, align2
+
+###################################################################################
+
+def align_escore_notes_to_escore_notes(src_escore_notes,
+                                       trg_escore_notes,
+                                       recalculate_scores_timings=True,
+                                       pitches_idx=4
+                                       ):
+    
+    if recalculate_scores_timings:
+        src_escore_notes = recalculate_score_timings(src_escore_notes)
+        trg_escore_notes = recalculate_score_timings(trg_escore_notes)
+        
+    src_align1, trg_align2 = needleman_wunsch_aligner(src_escore_notes, trg_escore_notes, pitches_idx)
+
+    aligned_scores = [[al[0], al[1]] for al in zip(src_align1, trg_align2) if al[0][0] is not None and al[1][0] is not None]
+    
+    return aligned_scores
 
 ###################################################################################
 #  
