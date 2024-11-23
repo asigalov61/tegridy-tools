@@ -1,4 +1,5 @@
 # MIDI Loops Extractor
+## Detect and extract loops from MIDIs
 
 ***
 
