@@ -9197,6 +9197,64 @@ def align_escore_notes_to_escore_notes(src_escore_notes,
     return aligned_scores
 
 ###################################################################################
+
+def t_to_n(arr, si, t):
+
+    ct = 0
+    ci = si
+    
+    while ct + arr[ci][1] < t and ci < len(arr)-1:
+        ct += arr[ci][1]
+        ci += 1
+
+    return ci+1
+
+###################################################################################
+
+def max_sum_chunk_idxs(arr, t=255):
+
+    n = t_to_n(arr, 0, t)
+    
+    if n > len(arr):
+        return [0, n]
+
+    max_sum = 0
+    max_sum_start_index = 0
+    
+    max_sum_start_idxs = [0, len(arr), sum([a[0] for a in arr])]
+
+    for i in range(len(arr)):
+
+        n = t_to_n(arr, i, t)
+
+        current_sum  = sum([a[0] for a in arr[i:n]])
+        current_time = sum([a[1] for a in arr[i:n]])
+
+        if current_sum > max_sum and current_time <= t:
+            max_sum = current_sum
+            max_sum_start_idxs = [i, n, max_sum]
+
+    return max_sum_start_idxs
+
+###################################################################################
+
+def find_highest_density_escore_notes_chunk(escore_notes, max_chunk_time=512):
+
+    dscore = delta_score_notes(escore_notes)
+    
+    cscore = chordify_score([d[1:] for d in dscore])
+
+    notes_counts = [[len(c), c[0][0]] for c in cscore]
+
+    msc_idxs = max_sum_chunk_idxs(notes_counts, max_chunk_time)
+
+    chunk_dscore = [['note'] + c for c in flatten(cscore[msc_idxs[0]:msc_idxs[1]])]
+
+    chunk_escore = recalculate_score_timings(delta_score_to_abs_score(chunk_dscore))
+    
+    return chunk_escore
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
