@@ -1201,6 +1201,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_closest_tone">find_closest_tone</a></li>
     <li class="mono"><a href="#TMIDIX.find_closest_value">find_closest_value</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
+    <li class="mono"><a href="#TMIDIX.find_highest_density_escore_notes_chunk">find_highest_density_escore_notes_chunk</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_pattern_fast">find_lrno_pattern_fast</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_patterns">find_lrno_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.find_matching_tones_chords">find_matching_tones_chords</a></li>
@@ -1232,6 +1233,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.lists_differences">lists_differences</a></li>
     <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
     <li class="mono"><a href="#TMIDIX.lists_sym_differences">lists_sym_differences</a></li>
+    <li class="mono"><a href="#TMIDIX.max_sum_chunk_idxs">max_sum_chunk_idxs</a></li>
     <li class="mono"><a href="#TMIDIX.md5_hash">md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.mean">mean</a></li>
     <li class="mono"><a href="#TMIDIX.midi2ms_score">midi2ms_score</a></li>
@@ -1277,6 +1279,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.strip_drums_from_escore_notes">strip_drums_from_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.summarize_escore_notes">summarize_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.t_to_n">t_to_n</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
     <li class="mono"><a href="#TMIDIX.tone_type">tone_type</a></li>
     <li class="mono"><a href="#TMIDIX.tones_chord_to_bits">tones_chord_to_bits</a></li>
@@ -10561,6 +10564,64 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">aligned_scores</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">t_to_n</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">si</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+
+    <span class="n">ct</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">si</span>
+    
+    <span class="k">while</span> <span class="n">ct</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[</span><span class="n">ci</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">t</span> <span class="ow">and</span> <span class="n">ci</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ct</span> <span class="o">+=</span> <span class="n">arr</span><span class="p">[</span><span class="n">ci</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ci</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">ci</span><span class="o">+</span><span class="mi">1</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">max_sum_chunk_idxs</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">255</span><span class="p">):</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">t_to_n</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">]</span>
+
+    <span class="n">max_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_sum_start_index</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">max_sum_start_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">])]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)):</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="n">t_to_n</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="n">current_sum</span>  <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">n</span><span class="p">]])</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">n</span><span class="p">]])</span>
+
+        <span class="k">if</span> <span class="n">current_sum</span> <span class="o">&gt;</span> <span class="n">max_sum</span> <span class="ow">and</span> <span class="n">current_time</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">max_sum</span> <span class="o">=</span> <span class="n">current_sum</span>
+            <span class="n">max_sum_start_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">max_sum</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">max_sum_start_idxs</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_highest_density_escore_notes_chunk</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">max_chunk_time</span><span class="o">=</span><span class="mi">512</span><span class="p">):</span>
+
+    <span class="n">dscore</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+    
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dscore</span><span class="p">])</span>
+
+    <span class="n">notes_counts</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">]</span>
+
+    <span class="n">msc_idxs</span> <span class="o">=</span> <span class="n">max_sum_chunk_idxs</span><span class="p">(</span><span class="n">notes_counts</span><span class="p">,</span> <span class="n">max_chunk_time</span><span class="p">)</span>
+
+    <span class="n">chunk_dscore</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;note&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">msc_idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">msc_idxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]])]</span>
+
+    <span class="n">chunk_escore</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">chunk_dscore</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">chunk_escore</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -17763,6 +17824,40 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.find_highest_density_escore_notes_chunk">
+    <p>def <span class="ident">find_highest_density_escore_notes_chunk</span>(</p><p>escore_notes, max_chunk_time=512)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_highest_density_escore_notes_chunk', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_highest_density_escore_notes_chunk" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_highest_density_escore_notes_chunk</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">max_chunk_time</span><span class="o">=</span><span class="mi">512</span><span class="p">):</span>
+
+    <span class="n">dscore</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">)</span>
+    
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dscore</span><span class="p">])</span>
+
+    <span class="n">notes_counts</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">]</span>
+
+    <span class="n">msc_idxs</span> <span class="o">=</span> <span class="n">max_sum_chunk_idxs</span><span class="p">(</span><span class="n">notes_counts</span><span class="p">,</span> <span class="n">max_chunk_time</span><span class="p">)</span>
+
+    <span class="n">chunk_dscore</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;note&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">msc_idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">msc_idxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]])]</span>
+
+    <span class="n">chunk_escore</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">chunk_dscore</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">chunk_escore</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.find_lrno_pattern_fast">
     <p>def <span class="ident">find_lrno_pattern_fast</span>(</p><p>lst)</p>
     </div>
@@ -18944,6 +19039,49 @@ The type of track (opus or score) is autodetected.</p></div>
   <div id="source-TMIDIX.lists_sym_differences" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_sym_differences</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.max_sum_chunk_idxs">
+    <p>def <span class="ident">max_sum_chunk_idxs</span>(</p><p>arr, t=255)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.max_sum_chunk_idxs', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.max_sum_chunk_idxs" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">max_sum_chunk_idxs</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">255</span><span class="p">):</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">t_to_n</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">]</span>
+
+    <span class="n">max_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_sum_start_index</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">max_sum_start_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">])]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)):</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="n">t_to_n</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="n">current_sum</span>  <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">n</span><span class="p">]])</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">n</span><span class="p">]])</span>
+
+        <span class="k">if</span> <span class="n">current_sum</span> <span class="o">&gt;</span> <span class="n">max_sum</span> <span class="ow">and</span> <span class="n">current_time</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">max_sum</span> <span class="o">=</span> <span class="n">current_sum</span>
+            <span class="n">max_sum_start_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">max_sum</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">max_sum_start_idxs</span>
 </pre></div>
 
   </div>
@@ -21024,6 +21162,35 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
     <span class="n">summarized_escore_notes</span> <span class="o">=</span> <span class="n">summarized_escore_notes</span><span class="p">[:</span><span class="n">summary_length_in_chords</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="p">[[</span><span class="s1">&#39;note&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">summarized_escore_notes</span><span class="p">),</span> <span class="n">times_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.t_to_n">
+    <p>def <span class="ident">t_to_n</span>(</p><p>arr, si, t)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.t_to_n', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.t_to_n" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">t_to_n</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">si</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+
+    <span class="n">ct</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">si</span>
+    
+    <span class="k">while</span> <span class="n">ct</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[</span><span class="n">ci</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">t</span> <span class="ow">and</span> <span class="n">ci</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ct</span> <span class="o">+=</span> <span class="n">arr</span><span class="p">[</span><span class="n">ci</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ci</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">ci</span><span class="o">+</span><span class="mi">1</span>
 </pre></div>
 
   </div>
