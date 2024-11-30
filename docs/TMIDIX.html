@@ -9250,19 +9250,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">chord</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
 
-          <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            
             <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            
+        
             <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
             <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
-          
-          <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">keep_drums</span><span class="p">:</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">keep_drums</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
               <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-              <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+              <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span><span class="p">)</span>
 
     <span class="n">sp_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
 
@@ -20806,19 +20808,21 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
     <span class="n">chord</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
 
-          <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            
             <span class="n">cc</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">cc</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            
+        
             <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
             <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
-          
-          <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">keep_drums</span><span class="p">:</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">keep_drums</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
               <span class="n">chord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-              <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">])</span>
+              <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">pitches_index</span><span class="p">]</span><span class="o">+</span><span class="mi">128</span><span class="p">)</span>
 
     <span class="n">sp_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
 
