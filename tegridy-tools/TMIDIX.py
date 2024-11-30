@@ -7883,19 +7883,21 @@ def solo_piano_escore_notes(escore_notes,
     chord = []
 
     for cc in c:
-      if cc[pitches_index] not in seen:
 
-          if cc[channels_index] != 9:
+      if cc[channels_index] != 9:
+        if cc[pitches_index] not in seen:
+            
             cc[channels_index] = 0
             cc[patches_index] = 0
-            
+        
             chord.append(cc)
             seen.append(cc[pitches_index])
-          
-          else:
-            if keep_drums:
+      
+      else:
+        if keep_drums:
+          if cc[pitches_index]+128 not in seen:
               chord.append(cc)
-              seen.append(cc[pitches_index])
+              seen.append(cc[pitches_index]+128)
 
     sp_escore_notes.append(chord)
 
