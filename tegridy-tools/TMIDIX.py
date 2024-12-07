@@ -4690,7 +4690,8 @@ def augment_enhanced_score_notes(enhanced_score_notes,
                                   pitch_shift=0,
                                   ceil_timings=False,
                                   round_timings=False,
-                                  legacy_timings=True
+                                  legacy_timings=True,
+                                  sort_drums_last=False
                                 ):
 
     esn = copy.deepcopy(enhanced_score_notes)
@@ -4740,6 +4741,9 @@ def augment_enhanced_score_notes(enhanced_score_notes,
       esn.sort(key=lambda x: x[6])
       esn.sort(key=lambda x: x[4], reverse=True)
       esn.sort(key=lambda x: x[1])
+      
+    if sort_drums_last:
+        esn.sort(key=lambda x: (x[1], -x[4], x[6]) if x[6] != 128 else (x[1], x[6], -x[4]))
 
     return esn
 
