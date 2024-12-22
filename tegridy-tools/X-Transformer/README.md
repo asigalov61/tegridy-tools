@@ -13,9 +13,10 @@
 ### [einops](https://github.com/arogozhnikov/einops)
 ### [einx](https://github.com/fferflo/einx)
 
-```
+```sh
 !pip install torch
 !pip install einops
+!pip install einx
 ```
 
 ***
