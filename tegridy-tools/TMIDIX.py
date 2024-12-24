@@ -9261,6 +9261,127 @@ def find_highest_density_escore_notes_chunk(escore_notes, max_chunk_time=512):
     return chunk_escore
 
 ###################################################################################
+
+def advanced_add_drums_to_escore_notes(escore_notes,
+                                       main_beat_min_dtime=5,
+                                       main_beat_dtime_thres=1,
+                                       drums_durations_value=2,
+                                       drums_pitches_velocities=[(36, 100), 
+                                                                 (38, 100), 
+                                                                 (41, 125)],
+                                       recalculate_score_timings=True,
+                                       intro_drums_count=4,
+                                       intro_drums_time_k=4,
+                                       intro_drums_pitch_velocity=[37, 110]
+                                      ):
+
+    #===========================================================
+    
+    new_dscore = delta_score_notes(escore_notes)
+
+    times = [d[1] for d in new_dscore if d[1] != 0]
+
+    time = [c[0] for c in Counter(times).most_common() if c[0] >= main_beat_min_dtime][0]
+
+    #===========================================================
+
+    if intro_drums_count > 0:
+
+        drums_score = []
+
+        for i in range(intro_drums_count):
+
+            if i == 0:
+                dtime = 0
+
+            else:
+                dtime = time
+            
+            drums_score.append(['note', 
+                                dtime * intro_drums_time_k, 
+                                drums_durations_value, 
+                                9, 
+                                intro_drums_pitch_velocity[0], 
+                                intro_drums_pitch_velocity[1], 
+                                128]
+                              )
+            
+        new_dscore[0][1] = time * intro_drums_time_k
+
+        new_dscore = drums_score + new_dscore
+
+    #===========================================================
+
+    for e in new_dscore:
+    
+        if abs(e[1] - time) == main_beat_dtime_thres:
+            e[1] = time
+
+        if recalculate_score_timings:
+        
+            if e[1] % time != 0 and e[1] > time:
+                if e[1] % time < time // 2:
+                    e[1] -= e[1] % time
+        
+                else:
+                    e[1] += time - (e[1] % time)
+
+    #===========================================================
+
+    drums_score = []
+    
+    dtime = 0
+    
+    idx = 0
+    
+    for i, e in enumerate(new_dscore):
+        
+        drums_score.append(e)
+        
+        dtime += e[1]
+
+        if e[1] != 0:
+            idx += 1
+
+        if i >= intro_drums_count:
+    
+            if (e[1] % time == 0 and e[1] != 0) or i == 0:
+                
+                if idx % 2 == 0 and e[1] != 0:
+                    drums_score.append(['note', 
+                                        0, 
+                                        drums_durations_value, 
+                                        9, 
+                                        drums_pitches_velocities[0][0], 
+                                        drums_pitches_velocities[0][1], 
+                                        128]
+                                      )
+                    
+                if idx % 2 != 0 and e[1] != 0:
+                    drums_score.append(['note', 
+                                        0, 
+                                        drums_durations_value, 
+                                        9, 
+                                        drums_pitches_velocities[1][0], 
+                                        drums_pitches_velocities[1][1], 
+                                        128]
+                                      )
+        
+                if idx % 4 == 0 and e[1] != 0:
+                    drums_score.append(['note', 
+                                        0, 
+                                        drums_durations_value, 
+                                        9, 
+                                        drums_pitches_velocities[2][0], 
+                                        drums_pitches_velocities[2][1], 
+                                        128]
+                                      )
+
+    #===========================================================
+    
+    return delta_score_to_abs_score(drums_score)
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
