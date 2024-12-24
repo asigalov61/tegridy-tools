@@ -3,7 +3,8 @@
 #================================================================
 # Packages:
 #
-#   apt install fluidsynth
+#   sudo apt install fluidsynth
+#
 #================================================================
 # Requirements:
 #   
@@ -13,6 +14,7 @@
 #   pip install matplotlib
 #   pip install networkx
 #   pip install scikit-learn
+#
 #================================================================
 # Core modules:
 #
@@ -21,6 +23,7 @@
 # import TMIDIX
 # import TPLOTS
 # import midi_to_colab_audio
+#
 #================================================================
 
 import os
@@ -124,6 +127,15 @@ def Render_MIDI(input_midi,
     elif render_type == 'Repair Chords':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
         output_score = TMIDIX.flatten(fixed_cscore)
+
+    elif render_type == "Add Drums Track":
+        nd_escore = [e for e in escore if e[3] != 9]
+        nd_escore = TMIDIX.augment_enhanced_score_notes(nd_escore)
+        output_score = TMIDIX.advanced_add_drums_to_escore_notes(nd_escore)
+
+        for e in output_score:
+            e[1] *= 16
+            e[2] *= 16
 
     print('Done processing!')
     print('=' * 70)
@@ -361,7 +373,8 @@ if __name__ == "__main__":
                                 "Repair Chords",
                                 "Longest Repeating Phrase",
                                 "Multi-Instrumental Summary",
-                                "Solo Piano Summary"
+                                "Solo Piano Summary",
+                                "Add Drums Track"
                                ], 
                                label="Render type", 
                                value="Render as-is"
