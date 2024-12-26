@@ -1076,6 +1076,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.CHORDS_TYPES">CHORDS_TYPES</a></li>
     <li class="mono"><a href="#TMIDIX.Event2channelindex">Event2channelindex</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_Instruments_Families">MIDI_Instruments_Families</a></li>
+    <li class="mono"><a href="#TMIDIX.MIDI_TEXT_EVENTS">MIDI_TEXT_EVENTS</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_events">MIDI_events</a></li>
     <li class="mono"><a href="#TMIDIX.Meta_events">Meta_events</a></li>
     <li class="mono"><a href="#TMIDIX.Nontext_meta_events">Nontext_meta_events</a></li>
@@ -1159,6 +1160,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.chord_to_pchord">chord_to_pchord</a></li>
     <li class="mono"><a href="#TMIDIX.chordified_score_pitches">chordified_score_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.chordify_score">chordify_score</a></li>
+    <li class="mono"><a href="#TMIDIX.clean_string">clean_string</a></li>
     <li class="mono"><a href="#TMIDIX.compress_binary_matrix">compress_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes">compress_patches_in_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes_chords">compress_patches_in_escore_notes_chords</a></li>
@@ -1170,11 +1172,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.cubic_kernel">cubic_kernel</a></li>
+    <li class="mono"><a href="#TMIDIX.decode_from_ord">decode_from_ord</a></li>
     <li class="mono"><a href="#TMIDIX.delta_pitches">delta_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_notes">delta_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.delta_score_to_abs_score">delta_score_to_abs_score</a></li>
     <li class="mono"><a href="#TMIDIX.destack_list">destack_list</a></li>
     <li class="mono"><a href="#TMIDIX.dot_product">dot_product</a></li>
+    <li class="mono"><a href="#TMIDIX.encode_to_ord">encode_to_ord</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_chord_to_chord_token">enhanced_chord_to_chord_token</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_chord_to_tones_chord">enhanced_chord_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.enhanced_delta_score_notes">enhanced_delta_score_notes</a></li>
@@ -1219,6 +1223,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.frame_monophonic_melody">frame_monophonic_melody</a></li>
     <li class="mono"><a href="#TMIDIX.generate_colors">generate_colors</a></li>
     <li class="mono"><a href="#TMIDIX.generate_tones_chords_progression">generate_tones_chords_progression</a></li>
+    <li class="mono"><a href="#TMIDIX.get_md5_hash">get_md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.grep">grep</a></li>
     <li class="mono"><a href="#TMIDIX.group_sublists_by_length">group_sublists_by_length</a></li>
     <li class="mono"><a href="#TMIDIX.grouped_set">grouped_set</a></li>
@@ -1230,6 +1235,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.image_matrix_to_original_escore_notes">image_matrix_to_original_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_bits">int_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_pitches_chord">int_to_pitches_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.is_valid_md5_hash">is_valid_md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.jaccard_similarity">jaccard_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.lists_differences">lists_differences</a></li>
     <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
@@ -10750,6 +10756,98 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">delta_score_to_abs_score</span><span class="p">(</span><span class="n">drums_score</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="n">MIDI_TEXT_EVENTS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;text_event&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;copyright_text_event&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;track_name&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;instrument_name&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;lyric&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;marker&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;cue_point&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_08&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_09&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_0a&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_0b&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_0c&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_0d&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_0e&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;text_event_0f&#39;</span>
+                  <span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">get_md5_hash</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">is_valid_md5_hash</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[a-fA-F0-9]</span><span class="si">{32}</span><span class="s1">$&#39;</span><span class="p">,</span> <span class="n">string</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">clean_string</span><span class="p">(</span><span class="n">original_string</span><span class="p">,</span>
+                 <span class="n">regex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;[^a-zA-Z0-9 ]&#39;</span><span class="p">,</span>
+                 <span class="n">remove_duplicate_spaces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">title</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">):</span>
+    
+    <span class="n">cstr1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">original_string</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+        <span class="n">cstr1</span> <span class="o">=</span> <span class="n">cstr1</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">remove_duplicate_spaces</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">cstr1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cstr1</span>
+    
+<span class="c1">###################################################################################</span>
+    
+<span class="k">def</span> <span class="nf">encode_to_ord</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">chars_range</span><span class="o">=</span><span class="p">[],</span> <span class="n">sub_char</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">chars_shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chars_range</span><span class="p">:</span>
+        <span class="n">chars_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">91</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">97</span><span class="p">,</span> <span class="mi">123</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">sub_char</span><span class="p">:</span>
+        <span class="n">chars_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">sub_char</span><span class="p">))</span>
+
+    <span class="n">chars_range</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">chars_range</span><span class="p">))</span>
+
+    <span class="n">encoded</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="ow">in</span> <span class="n">chars_range</span><span class="p">:</span>
+            <span class="n">encoded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chars_range</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">))</span> <span class="o">+</span> <span class="n">chars_shift</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sub_char</span><span class="p">:</span>
+                <span class="n">encoded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chars_range</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">sub_char</span><span class="p">))</span> <span class="o">+</span> <span class="n">chars_shift</span><span class="p">)</span>
+        
+    
+    <span class="k">return</span> <span class="p">[</span><span class="n">encoded</span><span class="p">,</span> <span class="n">chars_range</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">decode_from_ord</span><span class="p">(</span><span class="n">ord_list</span><span class="p">,</span> <span class="n">chars_range</span><span class="o">=</span><span class="p">[],</span> <span class="n">sub_char</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">chars_shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chars_range</span><span class="p">:</span>
+        <span class="n">chars_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">91</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">97</span><span class="p">,</span> <span class="mi">123</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">sub_char</span><span class="p">:</span>
+        <span class="n">chars_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">sub_char</span><span class="p">))</span>
+
+    <span class="n">chars_range</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">chars_range</span><span class="p">))</span>
+        
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">chars_range</span><span class="p">[</span><span class="n">num</span><span class="o">-</span><span class="n">chars_shift</span><span class="p">])</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">num</span><span class="o">-</span><span class="n">chars_shift</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars_range</span><span class="p">)</span> <span class="k">else</span> <span class="n">sub_char</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">ord_list</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -10892,6 +10990,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.MIDI_Instruments_Families" class="name">var <span class="ident">MIDI_Instruments_Families</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.MIDI_TEXT_EVENTS" class="name">var <span class="ident">MIDI_TEXT_EVENTS</span></p>
       
   
   <div class="source_cont">
@@ -16188,6 +16294,41 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.clean_string">
+    <p>def <span class="ident">clean_string</span>(</p><p>original_string, regex=&#39;[^a-zA-Z0-9 ]&#39;, remove_duplicate_spaces=True, title=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.clean_string', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.clean_string" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">clean_string</span><span class="p">(</span><span class="n">original_string</span><span class="p">,</span>
+                 <span class="n">regex</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;[^a-zA-Z0-9 ]&#39;</span><span class="p">,</span>
+                 <span class="n">remove_duplicate_spaces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">title</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">):</span>
+    
+    <span class="n">cstr1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">original_string</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+        <span class="n">cstr1</span> <span class="o">=</span> <span class="n">cstr1</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">remove_duplicate_spaces</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">cstr1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cstr1</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.compress_binary_matrix">
     <p>def <span class="ident">compress_binary_matrix</span>(</p><p>binary_matrix, only_compress_zeros=False, return_compression_ratio=False)</p>
     </div>
@@ -16614,6 +16755,36 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.decode_from_ord">
+    <p>def <span class="ident">decode_from_ord</span>(</p><p>ord_list, chars_range=[], sub_char=&#39;&#39;, chars_shift=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.decode_from_ord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.decode_from_ord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">decode_from_ord</span><span class="p">(</span><span class="n">ord_list</span><span class="p">,</span> <span class="n">chars_range</span><span class="o">=</span><span class="p">[],</span> <span class="n">sub_char</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">chars_shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chars_range</span><span class="p">:</span>
+        <span class="n">chars_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">91</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">97</span><span class="p">,</span> <span class="mi">123</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">sub_char</span><span class="p">:</span>
+        <span class="n">chars_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">sub_char</span><span class="p">))</span>
+
+    <span class="n">chars_range</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">chars_range</span><span class="p">))</span>
+        
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">chars_range</span><span class="p">[</span><span class="n">num</span><span class="o">-</span><span class="n">chars_shift</span><span class="p">])</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">num</span><span class="o">-</span><span class="n">chars_shift</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars_range</span><span class="p">)</span> <span class="k">else</span> <span class="n">sub_char</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">ord_list</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.delta_pitches">
     <p>def <span class="ident">delta_pitches</span>(</p><p>escore_notes, pitches_index=4)</p>
     </div>
@@ -16768,6 +16939,47 @@ Tegridy Code 2024</p></div>
   <div id="source-TMIDIX.dot_product" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">dot_product</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pad_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xi</span> <span class="o">*</span> <span class="n">yi</span> <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="n">xi</span> <span class="o">!=</span> <span class="n">pad_value</span> <span class="ow">and</span> <span class="n">yi</span> <span class="o">!=</span> <span class="n">pad_value</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.encode_to_ord">
+    <p>def <span class="ident">encode_to_ord</span>(</p><p>text, chars_range=[], sub_char=&#39;&#39;, chars_shift=0)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.encode_to_ord', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.encode_to_ord" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">encode_to_ord</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">chars_range</span><span class="o">=</span><span class="p">[],</span> <span class="n">sub_char</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">chars_shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chars_range</span><span class="p">:</span>
+        <span class="n">chars_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">91</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">97</span><span class="p">,</span> <span class="mi">123</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">sub_char</span><span class="p">:</span>
+        <span class="n">chars_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">sub_char</span><span class="p">))</span>
+
+    <span class="n">chars_range</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">chars_range</span><span class="p">))</span>
+
+    <span class="n">encoded</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="ow">in</span> <span class="n">chars_range</span><span class="p">:</span>
+            <span class="n">encoded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chars_range</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">))</span> <span class="o">+</span> <span class="n">chars_shift</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sub_char</span><span class="p">:</span>
+                <span class="n">encoded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chars_range</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">sub_char</span><span class="p">))</span> <span class="o">+</span> <span class="n">chars_shift</span><span class="p">)</span>
+        
+    
+    <span class="k">return</span> <span class="p">[</span><span class="n">encoded</span><span class="p">,</span> <span class="n">chars_range</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -18773,6 +18985,27 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.get_md5_hash">
+    <p>def <span class="ident">get_md5_hash</span>(</p><p>data)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.get_md5_hash', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.get_md5_hash" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_md5_hash</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.grep">
     <p>def <span class="ident">grep</span>(</p><p>score=None, channels=None)</p>
     </div>
@@ -19222,6 +19455,27 @@ The type of track (opus or score) is autodetected.</p></div>
     
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="c1"># Bad integer code</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.is_valid_md5_hash">
+    <p>def <span class="ident">is_valid_md5_hash</span>(</p><p>string)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.is_valid_md5_hash', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.is_valid_md5_hash" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">is_valid_md5_hash</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[a-fA-F0-9]</span><span class="si">{32}</span><span class="s1">$&#39;</span><span class="p">,</span> <span class="n">string</span><span class="p">))</span>
 </pre></div>
 
   </div>
