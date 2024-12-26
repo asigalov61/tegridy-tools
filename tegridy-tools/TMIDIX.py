@@ -9382,6 +9382,98 @@ def advanced_add_drums_to_escore_notes(escore_notes,
     return delta_score_to_abs_score(drums_score)
 
 ###################################################################################
+
+MIDI_TEXT_EVENTS = ['text_event',
+                    'copyright_text_event',
+                    'track_name',
+                    'instrument_name',
+                    'lyric',
+                    'marker',
+                    'cue_point',
+                    'text_event_08',
+                    'text_event_09',
+                    'text_event_0a',
+                    'text_event_0b',
+                    'text_event_0c',
+                    'text_event_0d',
+                    'text_event_0e',
+                    'text_event_0f'
+                  ]
+
+###################################################################################
+
+import hashlib
+import re
+
+###################################################################################
+
+def get_md5_hash(data):
+    return hashlib.md5(data).hexdigest()
+
+###################################################################################
+
+def is_valid_md5_hash(string):
+    return bool(re.match(r'^[a-fA-F0-9]{32}$', string))
+
+###################################################################################
+
+def clean_string(original_string,
+                 regex=r'[^a-zA-Z0-9 ]',
+                 remove_duplicate_spaces=True,
+                 title=False
+                ):
+    
+    cstr1 = re.sub(regex, '', original_string)
+
+    if title:
+        cstr1 = cstr1.title()
+
+    if remove_duplicate_spaces:
+        return re.sub(r'\s+', ' ', cstr1).strip()
+
+    else:
+        return cstr1
+    
+###################################################################################
+    
+def encode_to_ord(text, chars_range=[], sub_char='', chars_shift=0):
+
+    if not chars_range:
+        chars_range = [32] + list(range(65, 91)) + list(range(97, 123))
+
+    if sub_char:
+        chars_range.append(ord(sub_char))
+
+    chars_range = sorted(set(chars_range))
+
+    encoded = []
+    
+    for char in text:
+        if ord(char) in chars_range:
+            encoded.append(chars_range.index(ord(char)) + chars_shift)
+            
+        else:
+            if sub_char:
+                encoded.append(chars_range.index(ord(sub_char)) + chars_shift)
+        
+    
+    return [encoded, chars_range]
+
+###################################################################################
+
+def decode_from_ord(ord_list, chars_range=[], sub_char='', chars_shift=0):
+
+    if not chars_range:
+        chars_range = [32] + list(range(65, 91)) + list(range(97, 123))
+
+    if sub_char:
+        chars_range.append(ord(sub_char))
+
+    chars_range = sorted(set(chars_range))
+        
+    return ''.join(chr(chars_range[num-chars_shift]) if 0 <= num-chars_shift < len(chars_range) else sub_char for num in ord_list)
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
