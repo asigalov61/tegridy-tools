@@ -9474,6 +9474,58 @@ def decode_from_ord(ord_list, chars_range=[], sub_char='', chars_shift=0):
     return ''.join(chr(chars_range[num-chars_shift]) if 0 <= num-chars_shift < len(chars_range) else sub_char for num in ord_list)
 
 ###################################################################################
+
+def lists_similarity(list1, list2, by_elements=True, by_sum=True):
+    
+    if len(list1) != len(list2) or len(list1) % 2 != 0:
+        return -1
+    
+    element_ratios = []
+    total_counts1 = sum(list1)
+    total_counts2 = sum(list2)
+
+    for a, b in zip(list1, list2):
+        if a == 0 and b == 0:
+            element_ratios.append(1)
+        elif a == 0 or b == 0:
+            element_ratios.append(0)
+        else:
+            element_ratios.append(min(a, b) / max(a, b))
+
+    average_element_ratio = sum(element_ratios) / len(element_ratios)
+
+    total_counts_ratio = min(total_counts1, total_counts2) / max(total_counts1, total_counts2)
+
+    if by_elements and by_sum:
+        return (average_element_ratio + total_counts_ratio) / 2
+
+    elif by_elements and not by_sum:
+        return average_element_ratio
+
+    elif not by_elements and by_sum:
+        return total_counts_ratio
+
+    else:
+        return -1
+
+###################################################################################
+
+def find_indexes(lst, value, mode='equal', dual_mode=True):
+
+    indexes = []
+
+    if mode == 'equal' or dual_mode:    
+        indexes.extend([index for index, elem in enumerate(lst) if elem == value])
+
+    if mode == 'smaller':
+        indexes.extend([index for index, elem in enumerate(lst) if elem <= value])
+
+    if mode == 'larger':
+        indexes.extend([index for index, elem in enumerate(lst) if elem >= value])
+
+    return sorted(set(indexes))
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
