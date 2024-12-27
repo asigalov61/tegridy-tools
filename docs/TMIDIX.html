@@ -1207,6 +1207,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_closest_value">find_closest_value</a></li>
     <li class="mono"><a href="#TMIDIX.find_exact_match_variable_length">find_exact_match_variable_length</a></li>
     <li class="mono"><a href="#TMIDIX.find_highest_density_escore_notes_chunk">find_highest_density_escore_notes_chunk</a></li>
+    <li class="mono"><a href="#TMIDIX.find_indexes">find_indexes</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_pattern_fast">find_lrno_pattern_fast</a></li>
     <li class="mono"><a href="#TMIDIX.find_lrno_patterns">find_lrno_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.find_matching_tones_chords">find_matching_tones_chords</a></li>
@@ -1239,6 +1240,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.jaccard_similarity">jaccard_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.lists_differences">lists_differences</a></li>
     <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
+    <li class="mono"><a href="#TMIDIX.lists_similarity">lists_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.lists_sym_differences">lists_sym_differences</a></li>
     <li class="mono"><a href="#TMIDIX.max_sum_chunk_idxs">max_sum_chunk_idxs</a></li>
     <li class="mono"><a href="#TMIDIX.md5_hash">md5_hash</a></li>
@@ -10848,6 +10850,58 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">chars_range</span><span class="p">[</span><span class="n">num</span><span class="o">-</span><span class="n">chars_shift</span><span class="p">])</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">num</span><span class="o">-</span><span class="n">chars_shift</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars_range</span><span class="p">)</span> <span class="k">else</span> <span class="n">sub_char</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">ord_list</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">lists_similarity</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">,</span> <span class="n">by_elements</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">by_sum</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">element_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total_counts1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span>
+    <span class="n">total_counts2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">element_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">element_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">element_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+
+    <span class="n">average_element_ratio</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">element_ratios</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_ratios</span><span class="p">)</span>
+
+    <span class="n">total_counts_ratio</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">total_counts1</span><span class="p">,</span> <span class="n">total_counts2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">total_counts1</span><span class="p">,</span> <span class="n">total_counts2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">by_elements</span> <span class="ow">and</span> <span class="n">by_sum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">average_element_ratio</span> <span class="o">+</span> <span class="n">total_counts_ratio</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">elif</span> <span class="n">by_elements</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">by_sum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">average_element_ratio</span>
+
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">by_elements</span> <span class="ow">and</span> <span class="n">by_sum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">total_counts_ratio</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_indexes</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">dual_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;equal&#39;</span> <span class="ow">or</span> <span class="n">dual_mode</span><span class="p">:</span>    
+        <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">==</span> <span class="n">value</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;smaller&#39;</span><span class="p">:</span>
+        <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;larger&#39;</span><span class="p">:</span>
+        <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">&gt;</span> <span class="n">value</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indexes</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -18339,6 +18393,39 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.find_indexes">
+    <p>def <span class="ident">find_indexes</span>(</p><p>lst, value, mode=&#39;equal&#39;, dual_mode=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_indexes', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_indexes" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_indexes</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">dual_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;equal&#39;</span> <span class="ow">or</span> <span class="n">dual_mode</span><span class="p">:</span>    
+        <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">==</span> <span class="n">value</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;smaller&#39;</span><span class="p">:</span>
+        <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;larger&#39;</span><span class="p">:</span>
+        <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">&gt;</span> <span class="n">value</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indexes</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.find_lrno_pattern_fast">
     <p>def <span class="ident">find_lrno_pattern_fast</span>(</p><p>lst)</p>
     </div>
@@ -19541,6 +19628,57 @@ The type of track (opus or score) is autodetected.</p></div>
   <div id="source-TMIDIX.lists_intersections" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_intersections</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
   <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">trg_list</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.lists_similarity">
+    <p>def <span class="ident">lists_similarity</span>(</p><p>list1, list2, by_elements=True, by_sum=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.lists_similarity', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.lists_similarity" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_similarity</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">,</span> <span class="n">by_elements</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">by_sum</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">element_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total_counts1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span>
+    <span class="n">total_counts2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">element_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">element_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">element_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+
+    <span class="n">average_element_ratio</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">element_ratios</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_ratios</span><span class="p">)</span>
+
+    <span class="n">total_counts_ratio</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">total_counts1</span><span class="p">,</span> <span class="n">total_counts2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">total_counts1</span><span class="p">,</span> <span class="n">total_counts2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">by_elements</span> <span class="ow">and</span> <span class="n">by_sum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">average_element_ratio</span> <span class="o">+</span> <span class="n">total_counts_ratio</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">elif</span> <span class="n">by_elements</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">by_sum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">average_element_ratio</span>
+
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">by_elements</span> <span class="ow">and</span> <span class="n">by_sum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">total_counts_ratio</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 </pre></div>
 
   </div>
