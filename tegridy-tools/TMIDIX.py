@@ -9518,10 +9518,10 @@ def find_indexes(lst, value, mode='equal', dual_mode=True):
         indexes.extend([index for index, elem in enumerate(lst) if elem == value])
 
     if mode == 'smaller':
-        indexes.extend([index for index, elem in enumerate(lst) if elem <= value])
+        indexes.extend([index for index, elem in enumerate(lst) if elem < value])
 
     if mode == 'larger':
-        indexes.extend([index for index, elem in enumerate(lst) if elem >= value])
+        indexes.extend([index for index, elem in enumerate(lst) if elem > value])
 
     return sorted(set(indexes))
 
