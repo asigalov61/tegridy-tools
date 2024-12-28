@@ -1078,10 +1078,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.MIDI_Instruments_Families">MIDI_Instruments_Families</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_TEXT_EVENTS">MIDI_TEXT_EVENTS</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_events">MIDI_events</a></li>
+    <li class="mono"><a href="#TMIDIX.MOOD_SCALES">MOOD_SCALES</a></li>
     <li class="mono"><a href="#TMIDIX.Meta_events">Meta_events</a></li>
+    <li class="mono"><a href="#TMIDIX.NUMERALS">NUMERALS</a></li>
     <li class="mono"><a href="#TMIDIX.Nontext_meta_events">Nontext_meta_events</a></li>
     <li class="mono"><a href="#TMIDIX.Notenum2percussion">Notenum2percussion</a></li>
     <li class="mono"><a href="#TMIDIX.Number2patch">Number2patch</a></li>
+    <li class="mono"><a href="#TMIDIX.SEMITONES">SEMITONES</a></li>
     <li class="mono"><a href="#TMIDIX.Text_events">Text_events</a></li>
     <li class="mono"><a href="#TMIDIX.Version">Version</a></li>
     <li class="mono"><a href="#TMIDIX.VersionDate">VersionDate</a></li>
@@ -1139,6 +1142,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.align_escore_notes_to_bars">align_escore_notes_to_bars</a></li>
     <li class="mono"><a href="#TMIDIX.align_escore_notes_to_escore_notes">align_escore_notes_to_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.all_consequtive">all_consequtive</a></li>
+    <li class="mono"><a href="#TMIDIX.alpha_str">alpha_str</a></li>
     <li class="mono"><a href="#TMIDIX.analyze_score_pitches">analyze_score_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.ascii_text_words_counter">ascii_text_words_counter</a></li>
     <li class="mono"><a href="#TMIDIX.ascii_texts_search">ascii_texts_search</a></li>
@@ -1198,6 +1202,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_to_escore_matrix">escore_notes_to_escore_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_image_matrix">escore_notes_to_image_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_parsons_code">escore_notes_to_parsons_code</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_to_text_description">escore_notes_to_text_description</a></li>
     <li class="mono"><a href="#TMIDIX.even_timings">even_timings</a></li>
     <li class="mono"><a href="#TMIDIX.event2alsaseq">event2alsaseq</a></li>
     <li class="mono"><a href="#TMIDIX.extract_melody">extract_melody</a></li>
@@ -10853,7 +10858,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">lists_similarity</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">,</span> <span class="n">by_elements</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">by_sum</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
     
     <span class="n">element_ratios</span> <span class="o">=</span> <span class="p">[]</span>
@@ -10900,6 +10905,207 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="n">indexes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">&gt;</span> <span class="n">value</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indexes</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="n">NUMERALS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;five&quot;</span><span class="p">,</span> <span class="s2">&quot;six&quot;</span><span class="p">,</span> <span class="s2">&quot;seven&quot;</span><span class="p">,</span> <span class="s2">&quot;eight&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;nine&quot;</span><span class="p">,</span> <span class="s2">&quot;ten&quot;</span><span class="p">,</span> <span class="s2">&quot;eleven&quot;</span><span class="p">,</span> <span class="s2">&quot;twelve&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;thirteen&quot;</span><span class="p">,</span> <span class="s2">&quot;fourteen&quot;</span><span class="p">,</span> <span class="s2">&quot;fifteen&quot;</span><span class="p">,</span> <span class="s2">&quot;sixteen&quot;</span>
+           <span class="p">]</span>
+
+<span class="n">SEMITONES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C#&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;D#&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;F#&quot;</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="s2">&quot;G#&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;A#&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">]</span>
+
+<span class="n">MOOD_SCALES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Major&#39;</span><span class="p">,</span> <span class="s1">&#39;Minor&#39;</span><span class="p">,</span> <span class="s1">&#39;Major Minor&#39;</span><span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">alpha_str</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^a-zA-Z ()]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_to_text_description</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">artist_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">song_time_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">60</span>
+
+    <span class="k">if</span> <span class="n">song_time_min</span> <span class="o">&lt;</span> <span class="mf">1.5</span><span class="p">:</span>
+        <span class="n">song_length</span> <span class="o">=</span> <span class="s1">&#39;short&#39;</span>
+    
+    <span class="k">elif</span> <span class="mf">1.5</span> <span class="o">&lt;=</span> <span class="n">song_time_min</span> <span class="o">&lt;</span> <span class="mf">2.5</span><span class="p">:</span>
+        <span class="n">song_length</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">song_time_min</span> <span class="o">&gt;=</span> <span class="mf">2.5</span><span class="p">:</span>
+        <span class="n">song_length</span> <span class="o">=</span> <span class="s1">&#39;long&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">escore_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)):</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody only&#39;</span>
+        
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody and accompaniment&#39;</span>
+        
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;accompaniment only&#39;</span>
+    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;mixed&#39;</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;drums only&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
+    
+    <span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="n">drums_present</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">drums_present</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">drums_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="n">most_common_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Notenum2percussion</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">drums_pitches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">SEMITONES</span><span class="p">[</span><span class="n">statistics</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span><span class="p">]</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+    <span class="n">tones_chords</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tones_chords</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">])))]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">most_common_tones_chords</span> <span class="o">=</span> <span class="p">[</span><span class="n">check_and_fix_tones_chord</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chords</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+
+    <span class="n">mood_scale</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">tones_chords_to_types</span><span class="p">(</span><span class="n">most_common_tones_chords</span><span class="p">,</span> <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="o">%</span> <span class="mi">3</span>
+
+    <span class="n">mood</span> <span class="o">=</span> <span class="n">MOOD_SCALES</span><span class="p">[</span><span class="n">mood_scale</span><span class="p">]</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">escore_averages</span> <span class="o">=</span> <span class="n">escore_notes_averages</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">return_ptcs_and_vels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="n">rythm</span> <span class="o">=</span> <span class="s1">&#39;fast&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">8</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">rythm</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">rythm</span> <span class="o">=</span> <span class="s1">&#39;slow&#39;</span>
+    
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">tempo</span> <span class="o">=</span> <span class="s1">&#39;fast&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">16</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="n">tempo</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="n">tempo</span> <span class="o">=</span> <span class="s1">&#39;slow&#39;</span>
+    
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;bass&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">50</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">70</span><span class="p">:</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;midrange&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">:</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;treble&#39;</span>
+    
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">80</span><span class="p">:</span>
+        <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;quiet&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">80</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;loud&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+        
+    <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">song_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Song &quot;&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+    
+    <span class="k">if</span> <span class="n">artist_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; by &#39;</span> <span class="o">+</span> <span class="n">artist_name</span>
+
+    <span class="k">if</span> <span class="n">song_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">artist_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;.&#39;</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song is &#39;</span>
+
+    <span class="k">if</span> <span class="n">song_length</span> <span class="o">!=</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;a &#39;</span> <span class="o">+</span> <span class="n">song_length</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;an &#39;</span> <span class="o">+</span> <span class="n">song_length</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; duration &#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">comp_type</span> <span class="o">+</span> <span class="s1">&#39; composition&#39;</span>
+
+    <span class="k">if</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;drums only&#39;</span> <span class="ow">or</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;mixed&#39;</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; with drums&#39;</span>
+    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; without drums&#39;</span>
+    
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">mood</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; in &#39;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">mood</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;It has &#39;</span>
+    
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">rythm</span> <span class="o">+</span> <span class="s1">&#39; rythm, &#39;</span>
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">tempo</span> <span class="o">+</span> <span class="s1">&#39; tempo, &#39;</span>
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">tone</span> <span class="o">+</span> <span class="s1">&#39; tone and &#39;</span>
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">dynamics</span> <span class="o">+</span> <span class="s1">&#39; dynamics.&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song &#39;</span> 
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;is played on a solo &#39;</span> <span class="o">+</span> <span class="n">instruments</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;features &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; instruments: &#39;</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instruments</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The drum track has predominant &#39;</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">most_common_drums</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">most_common_drums</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="k">return</span> <span class="n">description</span>
 
 <span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
@@ -11067,7 +11273,23 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       </div>
       <div class="item">
+      <p id="TMIDIX.MOOD_SCALES" class="name">var <span class="ident">MOOD_SCALES</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
       <p id="TMIDIX.Meta_events" class="name">var <span class="ident">Meta_events</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.NUMERALS" class="name">var <span class="ident">NUMERALS</span></p>
       
   
   <div class="source_cont">
@@ -11092,6 +11314,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.Number2patch" class="name">var <span class="ident">Number2patch</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.SEMITONES" class="name">var <span class="ident">SEMITONES</span></p>
       
   
   <div class="source_cont">
@@ -15102,6 +15332,27 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.alpha_str">
+    <p>def <span class="ident">alpha_str</span>(</p><p>string)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.alpha_str', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.alpha_str" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">alpha_str</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^a-zA-Z ()]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.analyze_score_pitches">
     <p>def <span class="ident">analyze_score_pitches</span>(</p><p>score, channels_to_analyze=[0])</p>
     </div>
@@ -18056,6 +18307,206 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_to_text_description">
+    <p>def <span class="ident">escore_notes_to_text_description</span>(</p><p>escore_notes, song_name=&#39;&#39;, artist_name=&#39;&#39;)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_to_text_description', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_to_text_description" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_to_text_description</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">song_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">artist_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">song_time_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">escore_notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">60</span>
+
+    <span class="k">if</span> <span class="n">song_time_min</span> <span class="o">&lt;</span> <span class="mf">1.5</span><span class="p">:</span>
+        <span class="n">song_length</span> <span class="o">=</span> <span class="s1">&#39;short&#39;</span>
+    
+    <span class="k">elif</span> <span class="mf">1.5</span> <span class="o">&lt;=</span> <span class="n">song_time_min</span> <span class="o">&lt;</span> <span class="mf">2.5</span><span class="p">:</span>
+        <span class="n">song_length</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">song_time_min</span> <span class="o">&gt;=</span> <span class="mf">2.5</span><span class="p">:</span>
+        <span class="n">song_length</span> <span class="o">=</span> <span class="s1">&#39;long&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">escore_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)):</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody only&#39;</span>
+        
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody and accompaniment&#39;</span>
+        
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;accompaniment only&#39;</span>
+    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;mixed&#39;</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;drums only&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]))</span>
+    
+    <span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="mi">128</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="n">drums_present</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">drums_present</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">drums_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="n">most_common_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Notenum2percussion</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">drums_pitches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">SEMITONES</span><span class="p">[</span><span class="n">statistics</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span><span class="p">]</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+    <span class="n">tones_chords</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cscore</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tones_chords</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">])))]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">most_common_tones_chords</span> <span class="o">=</span> <span class="p">[</span><span class="n">check_and_fix_tones_chord</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tones_chords</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+
+    <span class="n">mood_scale</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">tones_chords_to_types</span><span class="p">(</span><span class="n">most_common_tones_chords</span><span class="p">,</span> <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="o">%</span> <span class="mi">3</span>
+
+    <span class="n">mood</span> <span class="o">=</span> <span class="n">MOOD_SCALES</span><span class="p">[</span><span class="n">mood_scale</span><span class="p">]</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="n">escore_averages</span> <span class="o">=</span> <span class="n">escore_notes_averages</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">return_ptcs_and_vels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="n">rythm</span> <span class="o">=</span> <span class="s1">&#39;fast&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">8</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">rythm</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">rythm</span> <span class="o">=</span> <span class="s1">&#39;slow&#39;</span>
+    
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">tempo</span> <span class="o">=</span> <span class="s1">&#39;fast&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">16</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="n">tempo</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="n">tempo</span> <span class="o">=</span> <span class="s1">&#39;slow&#39;</span>
+    
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;bass&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">50</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">70</span><span class="p">:</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;midrange&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">:</span>
+        <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;treble&#39;</span>
+    
+    <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">80</span><span class="p">:</span>
+        <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;quiet&#39;</span>
+    
+    <span class="k">elif</span> <span class="mi">80</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
+    
+    <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;loud&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+        
+    <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">song_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Song &quot;&#39;</span> <span class="o">+</span> <span class="n">song_name</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+    
+    <span class="k">if</span> <span class="n">artist_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; by &#39;</span> <span class="o">+</span> <span class="n">artist_name</span>
+
+    <span class="k">if</span> <span class="n">song_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">artist_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;.&#39;</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song is &#39;</span>
+
+    <span class="k">if</span> <span class="n">song_length</span> <span class="o">!=</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;a &#39;</span> <span class="o">+</span> <span class="n">song_length</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;an &#39;</span> <span class="o">+</span> <span class="n">song_length</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; duration &#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">comp_type</span> <span class="o">+</span> <span class="s1">&#39; composition&#39;</span>
+
+    <span class="k">if</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;drums only&#39;</span> <span class="ow">or</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;mixed&#39;</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; with drums&#39;</span>
+    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; without drums&#39;</span>
+    
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">mood</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; in &#39;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">mood</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;It has &#39;</span>
+    
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">rythm</span> <span class="o">+</span> <span class="s1">&#39; rythm, &#39;</span>
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">tempo</span> <span class="o">+</span> <span class="s1">&#39; tempo, &#39;</span>
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">tone</span> <span class="o">+</span> <span class="s1">&#39; tone and &#39;</span>
+    <span class="n">description</span> <span class="o">+=</span> <span class="n">dynamics</span> <span class="o">+</span> <span class="s1">&#39; dynamics.&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song &#39;</span> 
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;is played on a solo &#39;</span> <span class="o">+</span> <span class="n">instruments</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;features &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; instruments: &#39;</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instruments</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The drum track has predominant &#39;</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">most_common_drums</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">most_common_drums</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+
+    <span class="k">return</span> <span class="n">description</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.even_timings">
     <p>def <span class="ident">even_timings</span>(</p><p>escore_notes, times_idx=1, durs_idx=2)</p>
     </div>
@@ -19649,7 +20100,7 @@ The type of track (opus or score) is autodetected.</p></div>
   <div id="source-TMIDIX.lists_similarity" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lists_similarity</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">,</span> <span class="n">by_elements</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">by_sum</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
     
     <span class="n">element_ratios</span> <span class="o">=</span> <span class="p">[]</span>
