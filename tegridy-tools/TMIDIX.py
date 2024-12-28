@@ -9562,6 +9562,8 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
     #==============================================================================
 
     escore_times = [e[1] for e in escore_notes if e[3] != 9]
+    
+    comp_type = ''
 
     if len(escore_times) > 0:
         if len(escore_times) == len(set(escore_times)):
@@ -9572,9 +9574,6 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
         
         elif len(escore_times) >= len(set(escore_times)) and 1 not in Counter(escore_times).values():
             comp_type = 'accompaniment only'
-    
-        else:
-            comp_type = 'mixed'
     
     else:
         comp_type = 'drums only'
@@ -9692,7 +9691,7 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
 
     description += comp_type + ' composition'
 
-    if comp_type != 'drums only' or comp_type != 'mixed':
+    if comp_type != 'drums only':
 
         if drums_present:
             description += ' with drums'
