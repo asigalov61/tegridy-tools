@@ -9477,7 +9477,7 @@ def decode_from_ord(ord_list, chars_range=[], sub_char='', chars_shift=0):
 
 def lists_similarity(list1, list2, by_elements=True, by_sum=True):
     
-    if len(list1) != len(list2) or len(list1) % 2 != 0:
+    if len(list1) != len(list2):
         return -1
     
     element_ratios = []
