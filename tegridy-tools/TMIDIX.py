@@ -9526,6 +9526,207 @@ def find_indexes(lst, value, mode='equal', dual_mode=True):
     return sorted(set(indexes))
 
 ###################################################################################
+
+NUMERALS = ["one", "two", "three", "four", 
+            "five", "six", "seven", "eight", 
+            "nine", "ten", "eleven", "twelve", 
+            "thirteen", "fourteen", "fifteen", "sixteen"
+           ]
+
+SEMITONES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+MOOD_SCALES = ['Major', 'Minor', 'Major Minor']
+
+###################################################################################
+
+def alpha_str(string):
+    return re.sub(r'[^a-zA-Z ()]', '', string).strip()
+
+###################################################################################
+
+def escore_notes_to_text_description(escore_notes, song_name='', artist_name=''):
+
+    #==============================================================================
+
+    song_time_min = (escore_notes[-1][1] * 16) / 1000 / 60
+
+    if song_time_min < 1.5:
+        song_length = 'short'
+    
+    elif 1.5 <= song_time_min < 2.5:
+        song_length = 'average'
+    
+    elif song_time_min >= 2.5:
+        song_length = 'long'
+
+    #==============================================================================
+
+    escore_times = [e[1] for e in escore_notes if e[3] != 9]
+
+    if len(escore_times) > 0:
+        if len(escore_times) == len(set(escore_times)):
+            comp_type = 'melody only'
+        
+        elif len(escore_times) >= len(set(escore_times)) and 1 in Counter(escore_times).values():
+            comp_type = 'melody and accompaniment'
+        
+        elif len(escore_times) >= len(set(escore_times)) and 1 not in Counter(escore_times).values():
+            comp_type = 'accompaniment only'
+    
+        else:
+            comp_type = 'mixed'
+    
+    else:
+        comp_type = 'drums only'
+
+    #==============================================================================
+
+    patches = sorted(set([e[6] for e in escore_notes]))
+    
+    instruments = [alpha_str(Number2patch[p]) for p in patches if p < 128]
+
+    if 128 in patches:
+        drums_present = True
+
+    else:
+        drums_present = False
+
+    drums_pitches = [e[4] for e in escore_notes if e[3] == 9]
+
+    most_common_drums = [alpha_str(Notenum2percussion[p[0]]) for p in Counter(drums_pitches).most_common(3)]
+
+    #==============================================================================
+
+    pitches = [e[4] for e in escore_notes if e[3] != 9]
+
+    key = SEMITONES[statistics.mode(pitches) % 12]
+
+    #==============================================================================
+
+    cscore = chordify_score([1000, escore_notes])
+
+    tones_chords = Counter()
+
+    for c in cscore:
+        if len([e for e in c if e[3] != 9]) > 1:
+            tones_chords[tuple(sorted(set([e[4] % 12 for e in c if e[3] != 9])))] += 1
+
+    most_common_tones_chords = [check_and_fix_tones_chord(list(c[0])) for c in tones_chords.most_common(10)]
+
+    mood_scale = statistics.mode(tones_chords_to_types(most_common_tones_chords, return_chord_type_index=True)) % 3
+
+    mood = MOOD_SCALES[mood_scale]
+
+    #==============================================================================
+
+    escore_averages = escore_notes_averages(escore_notes, return_ptcs_and_vels=True)
+
+    if escore_averages[0] < 8:
+        rythm = 'fast'
+    
+    elif 8 <= escore_averages[0] <= 12:
+        rythm = 'average'
+    
+    elif escore_averages[0] > 12:
+        rythm = 'slow'
+    
+    if escore_averages[1] < 16:
+        tempo = 'fast'
+    
+    elif 16 <= escore_averages[1] <= 24:
+        tempo = 'average'
+    
+    elif escore_averages[1] > 24:
+        tempo = 'slow'
+    
+    if escore_averages[2] < 50:
+        tone = 'bass'
+    
+    elif 50 <= escore_averages[2] <= 70:
+        tone = 'midrange'
+    
+    elif escore_averages[2] > 70:
+        tone = 'treble'
+    
+    if escore_averages[3] < 80:
+        dynamics = 'quiet'
+    
+    elif 80 <= escore_averages[3] <= 100:
+        dynamics = 'average'
+    
+    elif escore_averages[3] > 100:
+        dynamics = 'loud'
+
+    #==============================================================================
+        
+    description = ''
+
+    if song_name != '':
+        description = 'Song "' + song_name + '"'
+    
+    if artist_name != '':
+        description += ' by ' + artist_name
+
+    if song_name != '' or artist_name != '':
+        description += '.'
+        description += '\n'
+    
+    description += 'The song is '
+
+    if song_length != 'average':
+        description += 'a ' + song_length
+
+    else:
+        description += 'an ' + song_length
+
+    description += ' duration '
+
+    description += comp_type + ' composition'
+
+    if comp_type != 'drums only' or comp_type != 'mixed':
+
+        if drums_present:
+            description += ' with drums'
+    
+        else:
+            description += ' without drums'
+    
+        if key and mood:
+            description += ' in ' + key + ' ' + mood
+
+    description += '.'
+
+    description += '\n'
+
+    description += 'It has '
+    
+    description += rythm + ' rythm, '
+    description += tempo + ' tempo, '
+    description += tone + ' tone and '
+    description += dynamics + ' dynamics.'
+
+    description += '\n'
+
+    description += 'The song ' 
+
+    if len(instruments) == 1:
+        description += 'is played on a solo ' + instruments + '.'
+
+    else:
+        description += 'features ' + NUMERALS[len(instruments)-1] + ' instruments: '
+        description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+
+    description += '\n'
+
+    if drums_present:
+        description += 'The drum track has predominant '
+        description += ', '.join(most_common_drums[:-1]) + ' and ' + most_common_drums[-1] + '.'
+
+    #==============================================================================
+
+    return description
+
+###################################################################################
 #  
 # This is the end of the TMIDI X Python module
 #
