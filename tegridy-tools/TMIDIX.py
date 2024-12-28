@@ -9598,64 +9598,73 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
     #==============================================================================
 
     pitches = [e[4] for e in escore_notes if e[3] != 9]
-
-    key = SEMITONES[statistics.mode(pitches) % 12]
-
-    #==============================================================================
-
-    cscore = chordify_score([1000, escore_notes])
-
-    tones_chords = Counter()
-
-    for c in cscore:
-        if len([e for e in c if e[3] != 9]) > 1:
-            tones_chords[tuple(sorted(set([e[4] % 12 for e in c if e[3] != 9])))] += 1
-
-    most_common_tones_chords = [check_and_fix_tones_chord(list(c[0])) for c in tones_chords.most_common(10)]
-
-    mood_scale = statistics.mode(tones_chords_to_types(most_common_tones_chords, return_chord_type_index=True)) % 3
-
-    mood = MOOD_SCALES[mood_scale]
+    
+    key = ''
+    
+    if pitches:
+        key = SEMITONES[statistics.mode(pitches) % 12]
 
     #==============================================================================
+        
+    mood = ''
+    
+    if pitches:
+    
+        cscore = chordify_score([1000, escore_notes])
 
-    escore_averages = escore_notes_averages(escore_notes, return_ptcs_and_vels=True)
+        tones_chords = Counter()
 
-    if escore_averages[0] < 8:
-        rythm = 'fast'
+        for c in cscore:
+            if len([e for e in c if e[3] != 9]) > 0:
+                tones_chords[tuple(sorted(set([e[4] % 12 for e in c if e[3] != 9])))] += 1
+                
+        most_common_tones_chords = [check_and_fix_tones_chord(list(c[0])) for c in tones_chords.most_common(10)]
+        
+        mood_scale = statistics.mode(tones_chords_to_types(most_common_tones_chords, return_chord_type_index=True)) % 3
+
+        mood = MOOD_SCALES[mood_scale]
+
+    #==============================================================================
     
-    elif 8 <= escore_averages[0] <= 12:
-        rythm = 'average'
+    if pitches:
     
-    elif escore_averages[0] > 12:
-        rythm = 'slow'
-    
-    if escore_averages[1] < 16:
-        tempo = 'fast'
-    
-    elif 16 <= escore_averages[1] <= 24:
-        tempo = 'average'
-    
-    elif escore_averages[1] > 24:
-        tempo = 'slow'
-    
-    if escore_averages[2] < 50:
-        tone = 'bass'
-    
-    elif 50 <= escore_averages[2] <= 70:
-        tone = 'midrange'
-    
-    elif escore_averages[2] > 70:
-        tone = 'treble'
-    
-    if escore_averages[3] < 80:
-        dynamics = 'quiet'
-    
-    elif 80 <= escore_averages[3] <= 100:
-        dynamics = 'average'
-    
-    elif escore_averages[3] > 100:
-        dynamics = 'loud'
+        escore_averages = escore_notes_averages(escore_notes, return_ptcs_and_vels=True)
+
+        if escore_averages[0] < 8:
+            rythm = 'fast'
+        
+        elif 8 <= escore_averages[0] <= 12:
+            rythm = 'average'
+        
+        elif escore_averages[0] > 12:
+            rythm = 'slow'
+        
+        if escore_averages[1] < 16:
+            tempo = 'fast'
+        
+        elif 16 <= escore_averages[1] <= 24:
+            tempo = 'average'
+        
+        elif escore_averages[1] > 24:
+            tempo = 'slow'
+        
+        if escore_averages[2] < 50:
+            tone = 'bass'
+        
+        elif 50 <= escore_averages[2] <= 70:
+            tone = 'midrange'
+        
+        elif escore_averages[2] > 70:
+            tone = 'treble'
+        
+        if escore_averages[3] < 80:
+            dynamics = 'quiet'
+        
+        elif 80 <= escore_averages[3] <= 100:
+            dynamics = 'average'
+        
+        elif escore_averages[3] > 100:
+            dynamics = 'loud'
 
     #==============================================================================
         
@@ -9697,26 +9706,28 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
     description += '.'
 
     description += '\n'
-
-    description += 'It has '
     
-    description += rythm + ' rythm, '
-    description += tempo + ' tempo, '
-    description += tone + ' tone and '
-    description += dynamics + ' dynamics.'
+    if pitches:
 
-    description += '\n'
+        description += 'It has '
+        
+        description += rythm + ' rythm, '
+        description += tempo + ' tempo, '
+        description += tone + ' tone and '
+        description += dynamics + ' dynamics.'
 
-    description += 'The song ' 
+        description += '\n'
 
-    if len(instruments) == 1:
-        description += 'is played on a solo ' + instruments + '.'
+        description += 'The song ' 
 
-    else:
-        description += 'features ' + NUMERALS[len(instruments)-1] + ' instruments: '
-        description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+        if len(instruments) == 1:
+            description += 'is played on a solo ' + instruments[0] + '.'
 
-    description += '\n'
+        else:
+            description += 'features ' + NUMERALS[len(instruments)-1] + ' instruments: '
+            description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+
+        description += '\n'
 
     if drums_present:
         description += 'The drum track has predominant '
