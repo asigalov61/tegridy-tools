@@ -105,10 +105,15 @@ def Render_MIDI(input_midi,
     cscore = TMIDIX.chordify_score([1000, escore])
 
     meta_data = raw_score[1][:first_note_index] + [escore[0]] + [escore[-1]] + [raw_score[1][-1]]
+
+    aux_escore_notes = TMIDIX.augment_enhanced_score_notes(escore, sort_drums_last=True)
+    song_description = TMIDIX.escore_notes_to_text_description(aux_escore_notes)
     
     print('Done!')
     print('=' * 70)
     print('Input MIDI metadata:', meta_data[:5])
+    print('=' * 70)
+    print('Input MIDI song description:', song_description)
     print('=' * 70)
     print('Processing...Please wait...')
 
@@ -304,7 +309,7 @@ def Render_MIDI(input_midi,
     
     #========================================================
     
-    return output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot
+    return output_midi_md5, output_midi_title, output_midi_summary, output_midi, output_audio, output_plot, song_description
     
 #==========================================================================================================
 
@@ -406,6 +411,7 @@ if __name__ == "__main__":
         
         output_midi_md5 = gr.Textbox(label="Output MIDI md5 hash")
         output_midi_title = gr.Textbox(label="Output MIDI title")
+        output_song_description = gr.Textbox(label="Output MIDI description")
         output_midi_summary = gr.Textbox(label="Output MIDI summary")
         output_audio = gr.Audio(label="Output MIDI audio", format="wav", elem_id="midi_audio")
         output_plot = gr.Plot(label="Output MIDI score plot")
@@ -427,7 +433,8 @@ if __name__ == "__main__":
                                                  output_midi_summary, 
                                                  output_midi, 
                                                  output_audio, 
-                                                 output_plot
+                                                 output_plot,
+                                                 output_song_description
                                                 ])
         
     app.queue().launch()
