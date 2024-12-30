@@ -7101,13 +7101,25 @@ def escore_notes_averages(escore_notes,
   else:
     durs = [e[durs_index] for e in escore_notes if e[chans_index] != 9]
 
+  if len(times) == 0:
+      times = [0]
+      
+  if len(durs) == 0:
+      durs = [0]
+
   if return_ptcs_and_vels:
     if average_drums:
       ptcs = [e[ptcs_index] for e in escore_notes]
       vels = [e[vels_index] for e in escore_notes]
     else:
       ptcs = [e[ptcs_index] for e in escore_notes if e[chans_index] != 9]
-      vels = [e[vels_index] for e in escore_notes if e[chans_index] != 9]      
+      vels = [e[vels_index] for e in escore_notes if e[chans_index] != 9]
+      
+    if len(ptcs) == 0:
+        ptcs = [0]
+      
+    if len(vels) == 0:
+        vels = [0]
 
     return [sum(times) / len(times), sum(durs) / len(durs), sum(ptcs) / len(ptcs), sum(vels) / len(vels)]
   
@@ -9567,13 +9579,13 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
 
     if len(escore_times) > 0:
         if len(escore_times) == len(set(escore_times)):
-            comp_type = 'melody only'
+            comp_type = 'monophonic melody'
         
         elif len(escore_times) >= len(set(escore_times)) and 1 in Counter(escore_times).values():
             comp_type = 'melody and accompaniment'
         
         elif len(escore_times) >= len(set(escore_times)) and 1 not in Counter(escore_times).values():
-            comp_type = 'accompaniment only'
+            comp_type = 'accompaniment'
     
     else:
         comp_type = 'drums only'
@@ -9592,7 +9604,7 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
 
     drums_pitches = [e[4] for e in escore_notes if e[3] == 9]
 
-    most_common_drums = [alpha_str(Notenum2percussion[p[0]]) for p in Counter(drums_pitches).most_common(3)]
+    most_common_drums = [alpha_str(Notenum2percussion[p[0]]) for p in Counter(drums_pitches).most_common(3) if p[0] in Notenum2percussion]
 
     #==============================================================================
 
@@ -9691,7 +9703,7 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
 
     description += comp_type + ' composition'
 
-    if comp_type != 'drums only':
+    if comp_type != 'drum track':
 
         if drums_present:
             description += ' with drums'
@@ -9723,12 +9735,12 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
             description += 'is played on a solo ' + instruments[0] + '.'
 
         else:
-            description += 'features ' + NUMERALS[len(instruments)-1] + ' instruments: '
+            description += 'features ' + NUMERALS[max(0, min(15, len(instruments)-1))] + ' instruments: '
             description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
 
         description += '\n'
 
-    if drums_present:
+    if drums_present and most_common_drums:
         description += 'The drum track has predominant '
         description += ', '.join(most_common_drums[:-1]) + ' and ' + most_common_drums[-1] + '.'
 
