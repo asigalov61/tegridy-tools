@@ -1178,6 +1178,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.compress_binary_matrix">compress_binary_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes">compress_patches_in_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.compress_patches_in_escore_notes_chords">compress_patches_in_escore_notes_chords</a></li>
+    <li class="mono"><a href="#TMIDIX.computeLPSArray">computeLPSArray</a></li>
     <li class="mono"><a href="#TMIDIX.cosine_similarity">cosine_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.count_bad_chords_in_chordified_score">count_bad_chords_in_chordified_score</a></li>
     <li class="mono"><a href="#TMIDIX.count_escore_notes_patches">count_escore_notes_patches</a></li>
@@ -1202,10 +1203,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_delta_times">escore_notes_delta_times</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_durations">escore_notes_durations</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_durations_counter">escore_notes_durations_counter</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_grouped_patches">escore_notes_grouped_patches</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_lrno_pattern">escore_notes_lrno_pattern</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_lrno_pattern_fast">escore_notes_lrno_pattern_fast</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_medley">escore_notes_medley</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_middle">escore_notes_middle</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_monoponic_melodies">escore_notes_monoponic_melodies</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_patch_lrno_patterns">escore_notes_patch_lrno_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_patches">escore_notes_patches</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_times_tones">escore_notes_times_tones</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_binary_matrix">escore_notes_to_binary_matrix</a></li>
@@ -1229,6 +1233,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.find_most_similar_matrix">find_most_similar_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.find_next_bar">find_next_bar</a></li>
     <li class="mono"><a href="#TMIDIX.find_paths">find_paths</a></li>
+    <li class="mono"><a href="#TMIDIX.find_pattern_idxs">find_pattern_idxs</a></li>
     <li class="mono"><a href="#TMIDIX.find_pattern_start_indexes">find_pattern_start_indexes</a></li>
     <li class="mono"><a href="#TMIDIX.find_similar_tones_chord">find_similar_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.find_value_power">find_value_power</a></li>
@@ -1241,6 +1246,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.generate_tones_chords_progression">generate_tones_chords_progression</a></li>
     <li class="mono"><a href="#TMIDIX.get_md5_hash">get_md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.grep">grep</a></li>
+    <li class="mono"><a href="#TMIDIX.group_by_threshold">group_by_threshold</a></li>
     <li class="mono"><a href="#TMIDIX.group_sublists_by_length">group_sublists_by_length</a></li>
     <li class="mono"><a href="#TMIDIX.grouped_set">grouped_set</a></li>
     <li class="mono"><a href="#TMIDIX.hamming_distance">hamming_distance</a></li>
@@ -1278,6 +1284,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.patch_enhanced_score_notes">patch_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.patch_list_from_enhanced_score_notes">patch_list_from_enhanced_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.patch_to_instrument_family">patch_to_instrument_family</a></li>
+    <li class="mono"><a href="#TMIDIX.patches_onset_times">patches_onset_times</a></li>
     <li class="mono"><a href="#TMIDIX.pearson_correlation">pearson_correlation</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_chord_to_int">pitches_chord_to_int</a></li>
     <li class="mono"><a href="#TMIDIX.pitches_to_tones">pitches_to_tones</a></li>
@@ -1296,6 +1303,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.smooth_escore_notes">smooth_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.solo_piano_escore_notes">solo_piano_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.sort_list_by_other">sort_list_by_other</a></li>
+    <li class="mono"><a href="#TMIDIX.split_escore_notes_by_time">split_escore_notes_by_time</a></li>
     <li class="mono"><a href="#TMIDIX.split_list">split_list</a></li>
     <li class="mono"><a href="#TMIDIX.split_melody">split_melody</a></li>
     <li class="mono"><a href="#TMIDIX.square_binary_matrix">square_binary_matrix</a></li>
@@ -1351,14 +1359,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_7"></h1>
 <h1 id="project-los-angeles">Project Los Angeles</h1>
 <h1 id="_8"></h1>
-<h1 id="tegridy-code-2021">Tegridy Code 2021</h1>
+<h1 id="tegridy-code-2024">Tegridy Code 2024</h1>
 <h1 id="_9"></h1>
 <h1 id="httpsgithubcomtegridy-codeproject-los-angeles">https://github.com/Tegridy-Code/Project-Los-Angeles</h1>
 <h1 id="_10"></h1>
 <h1 id="_11"></h1>
 <h6 id="_12"></h6>
 <h6 id="_13"></h6>
-<h1 id="copyright-2021-project-los-angeles-tegridy-code">Copyright 2021 Project Los Angeles / Tegridy Code</h1>
+<h1 id="copyright-2024-project-los-angeles-tegridy-code">Copyright 2024 Project Los Angeles / Tegridy Code</h1>
 <h1 id="_14"></h1>
 <h1 id="licensed-under-the-apache-license-version-20-the-license">Licensed under the Apache License, Version 2.0 (the "License");</h1>
 <h1 id="you-may-not-use-this-file-except-in-compliance-with-the-license">you may not use this file except in compliance with the License.</h1>
@@ -1405,14 +1413,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#</span>
 <span class="sd">#	Project Los Angeles</span>
 <span class="sd">#</span>
-<span class="sd">#	Tegridy Code 2021</span>
+<span class="sd">#	Tegridy Code 2024</span>
 <span class="sd">#</span>
 <span class="sd">#   https://github.com/Tegridy-Code/Project-Los-Angeles</span>
 <span class="sd">#</span>
 <span class="sd">#</span>
 <span class="sd">###################################################################################</span>
 <span class="sd">###################################################################################</span>
-<span class="sd">#       Copyright 2021 Project Los Angeles / Tegridy Code</span>
+<span class="sd">#       Copyright 2024 Project Los Angeles / Tegridy Code</span>
 <span class="sd">#</span>
 <span class="sd">#       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="sd">#       you may not use this file except in compliance with the License.</span>
@@ -11457,6 +11465,219 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="p">}</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">patches_onset_times</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+    
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="n">patches_oset</span> <span class="o">=</span> <span class="n">ordered_set</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span>
+
+    <span class="n">patches_onset_times</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_oset</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">p</span><span class="p">:</span>
+                <span class="n">patches_onset_times</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">p</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]])</span>
+                <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">patches_onset_times</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">count_escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">Counter</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_monoponic_melodies</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                    <span class="n">bad_notes_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                                    <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                    <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
+                                    <span class="p">):</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_index</span><span class="o">=</span><span class="n">patches_idx</span><span class="p">)</span>
+
+    <span class="n">monophonic_melodies</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="n">patch_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">p</span><span class="p">]</span>
+
+        <span class="n">ps_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">patch_score</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ps_times</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ps_times</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">bad_notes_ratio</span><span class="p">):</span>
+            <span class="n">monophonic_melodies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">p</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch_score</span><span class="p">)])</span>
+            
+    <span class="k">return</span> <span class="n">monophonic_melodies</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+
+<span class="k">def</span> <span class="nf">group_by_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">groupby_idx</span><span class="p">):</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="n">groupby_idx</span><span class="p">))</span>
+
+    <span class="n">grouped_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cluster</span><span class="p">:</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">groupby_idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">cluster</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">groupby_idx</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grouped_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">cluster</span><span class="p">:</span>
+        <span class="n">grouped_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">grouped_data</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">split_escore_notes_by_time</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">time_threshold</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+
+    <span class="n">dscore</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">timings_clip_value</span><span class="o">=</span><span class="n">time_threshold</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">score_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">ctime</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pchunk_idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dscore</span><span class="p">):</span>
+        
+        <span class="n">ctime</span> <span class="o">+=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ctime</span> <span class="o">&gt;=</span> <span class="n">time_threshold</span><span class="p">:</span>
+            <span class="n">score_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">[</span><span class="n">pchunk_idx</span><span class="p">:</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">pchunk_idx</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">ctime</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">score_chunks</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_grouped_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">time_threshold</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    
+    <span class="n">split_score_chunks</span> <span class="o">=</span> <span class="n">split_escore_notes_by_time</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                                    <span class="n">time_threshold</span><span class="o">=</span><span class="n">time_threshold</span>
+                                                    <span class="p">)</span>
+
+    <span class="n">chunks_patches</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">split_score_chunks</span><span class="p">:</span>
+        <span class="n">chunks_patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_notes_patches</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">chunks_patches</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">computeLPSArray</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">lps</span><span class="p">):</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="n">lps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pattern</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">pattern</span><span class="p">[</span><span class="n">length</span><span class="p">]:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">lps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">lps</span><span class="p">[</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_pattern_idxs</span><span class="p">(</span><span class="n">sub_pattern</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+
+    <span class="n">lst</span> <span class="o">=</span> <span class="n">pattern</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">sub_pattern</span>
+    
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+    
+    <span class="n">lps</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">M</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># index for pattern[]</span>
+
+    <span class="n">computeLPSArray</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">lps</span><span class="p">)</span>
+    
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># index for lst[]</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pattern</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">M</span><span class="p">:</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">end_index</span> <span class="o">-</span> <span class="n">M</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">indexes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">))</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">lps</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span> <span class="ow">and</span> <span class="n">pattern</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">lps</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+    <span class="k">return</span> <span class="n">indexes</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_patch_lrno_patterns</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                     <span class="n">patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                     <span class="n">zero_score_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">pitches_idx</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                     <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
+                                    <span class="p">):</span>
+
+    <span class="n">patch_escore</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">patch</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">patch_escore</span><span class="p">:</span>
+        
+        <span class="n">patch_cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">patch_escore</span><span class="p">])</span>
+    
+        <span class="n">patch_tscore</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">patch_cscore</span><span class="p">:</span>
+    
+            <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">pitches_idx</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    
+            <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_SORTED</span><span class="p">:</span>
+                <span class="n">tnoes_chord</span> <span class="o">=</span> <span class="n">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+    
+            <span class="n">patch_tscore</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ALL_CHORDS_SORTED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))</span>
+    
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">find_lrno_pattern_fast</span><span class="p">(</span><span class="n">patch_tscore</span><span class="p">)</span>
+    
+        <span class="n">patterns_idxs</span> <span class="o">=</span> <span class="n">find_pattern_idxs</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">patch_tscore</span><span class="p">)</span>
+    
+        <span class="n">patch_lrno_scores</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="k">for</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="n">patterns_idxs</span><span class="p">:</span>
+            
+            <span class="n">score</span> <span class="o">=</span> <span class="n">patch_escore</span><span class="p">[</span><span class="n">idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">idxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            
+            <span class="k">if</span> <span class="n">zero_score_timings</span><span class="p">:</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+                
+            <span class="n">patch_lrno_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">patch_lrno_scores</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -17242,6 +17463,42 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.computeLPSArray">
+    <p>def <span class="ident">computeLPSArray</span>(</p><p>pattern, M, lps)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.computeLPSArray', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.computeLPSArray" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">computeLPSArray</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">lps</span><span class="p">):</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="n">lps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pattern</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">pattern</span><span class="p">[</span><span class="n">length</span><span class="p">]:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">lps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">lps</span><span class="p">[</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.cosine_similarity">
     <p>def <span class="ident">cosine_similarity</span>(</p><p>x, y, pad_value=None)</p>
     </div>
@@ -17318,7 +17575,7 @@ Tegridy Code 2024</p></div>
       
   <div class="item">
     <div class="name def" id="TMIDIX.count_escore_notes_patches">
-    <p>def <span class="ident">count_escore_notes_patches</span>(</p><p>escore_notes, patches_index=6)</p>
+    <p>def <span class="ident">count_escore_notes_patches</span>(</p><p>escore_notes, patches_idx=6)</p>
     </div>
     
 
@@ -17327,8 +17584,11 @@ Tegridy Code 2024</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.count_escore_notes_patches', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.count_escore_notes_patches" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_index</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
-  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="n">patches_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">])</span><span class="o">.</span><span class="n">most_common</span><span class="p">()]</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">Counter</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -18135,6 +18395,37 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_grouped_patches">
+    <p>def <span class="ident">escore_notes_grouped_patches</span>(</p><p>escore_notes, time_threshold=256)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_grouped_patches', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_grouped_patches" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_grouped_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">time_threshold</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    
+    <span class="n">split_score_chunks</span> <span class="o">=</span> <span class="n">split_escore_notes_by_time</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                                    <span class="n">time_threshold</span><span class="o">=</span><span class="n">time_threshold</span>
+                                                    <span class="p">)</span>
+
+    <span class="n">chunks_patches</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">split_score_chunks</span><span class="p">:</span>
+        <span class="n">chunks_patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_notes_patches</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">chunks_patches</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_lrno_pattern">
     <p>def <span class="ident">escore_notes_lrno_pattern</span>(</p><p>escore_notes, mode=&#39;chords&#39;)</p>
     </div>
@@ -18350,6 +18641,106 @@ Tegridy Code 2024</p></div>
 
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">score</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_monoponic_melodies">
+    <p>def <span class="ident">escore_notes_monoponic_melodies</span>(</p><p>escore_notes, bad_notes_ratio=0.0, times_idx=1, patches_idx=6)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_monoponic_melodies', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_monoponic_melodies" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_monoponic_melodies</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                                    <span class="n">bad_notes_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                                    <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                    <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
+                                    <span class="p">):</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">escore_notes_patches</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">patches_index</span><span class="o">=</span><span class="n">patches_idx</span><span class="p">)</span>
+
+    <span class="n">monophonic_melodies</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="n">patch_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">p</span><span class="p">]</span>
+
+        <span class="n">ps_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">patch_score</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ps_times</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ps_times</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">bad_notes_ratio</span><span class="p">):</span>
+            <span class="n">monophonic_melodies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">p</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch_score</span><span class="p">)])</span>
+            
+    <span class="k">return</span> <span class="n">monophonic_melodies</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_patch_lrno_patterns">
+    <p>def <span class="ident">escore_notes_patch_lrno_patterns</span>(</p><p>escore_notes, patch=0, zero_score_timings=False, pitches_idx=4, patches_idx=6)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_patch_lrno_patterns', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_patch_lrno_patterns" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_patch_lrno_patterns</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> 
+                                     <span class="n">patch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                     <span class="n">zero_score_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">pitches_idx</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                     <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
+                                    <span class="p">):</span>
+
+    <span class="n">patch_escore</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">patch</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">patch_escore</span><span class="p">:</span>
+        
+        <span class="n">patch_cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">patch_escore</span><span class="p">])</span>
+    
+        <span class="n">patch_tscore</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">patch_cscore</span><span class="p">:</span>
+    
+            <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">pitches_idx</span><span class="p">]</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]))</span>
+    
+            <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_SORTED</span><span class="p">:</span>
+                <span class="n">tnoes_chord</span> <span class="o">=</span> <span class="n">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+    
+            <span class="n">patch_tscore</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ALL_CHORDS_SORTED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))</span>
+    
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">find_lrno_pattern_fast</span><span class="p">(</span><span class="n">patch_tscore</span><span class="p">)</span>
+    
+        <span class="n">patterns_idxs</span> <span class="o">=</span> <span class="n">find_pattern_idxs</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">patch_tscore</span><span class="p">)</span>
+    
+        <span class="n">patch_lrno_scores</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="k">for</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="n">patterns_idxs</span><span class="p">:</span>
+            
+            <span class="n">score</span> <span class="o">=</span> <span class="n">patch_escore</span><span class="p">[</span><span class="n">idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">idxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            
+            <span class="k">if</span> <span class="n">zero_score_timings</span><span class="p">:</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+                
+            <span class="n">patch_lrno_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">patch_lrno_scores</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 
   </div>
@@ -19579,6 +19970,58 @@ The type of track (opus or score) is autodetected.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.find_pattern_idxs">
+    <p>def <span class="ident">find_pattern_idxs</span>(</p><p>sub_pattern, pattern)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.find_pattern_idxs', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.find_pattern_idxs" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_pattern_idxs</span><span class="p">(</span><span class="n">sub_pattern</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+
+    <span class="n">lst</span> <span class="o">=</span> <span class="n">pattern</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">sub_pattern</span>
+    
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+    
+    <span class="n">lps</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">M</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># index for pattern[]</span>
+
+    <span class="n">computeLPSArray</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">lps</span><span class="p">)</span>
+    
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># index for lst[]</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pattern</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">M</span><span class="p">:</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">end_index</span> <span class="o">-</span> <span class="n">M</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">indexes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">))</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">lps</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span> <span class="ow">and</span> <span class="n">pattern</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">lps</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+    <span class="k">return</span> <span class="n">indexes</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.find_pattern_start_indexes">
     <p>def <span class="ident">find_pattern_start_indexes</span>(</p><p>values, pattern)</p>
     </div>
@@ -20029,6 +20472,45 @@ The type of track (opus or score) is autodetected.</p></div>
                 <span class="n">new_score</span><span class="p">[</span><span class="n">itrack</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="n">itrack</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">new_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.group_by_threshold">
+    <p>def <span class="ident">group_by_threshold</span>(</p><p>data, threshold, groupby_idx)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.group_by_threshold', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.group_by_threshold" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">group_by_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">groupby_idx</span><span class="p">):</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="n">groupby_idx</span><span class="p">))</span>
+
+    <span class="n">grouped_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cluster</span><span class="p">:</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">groupby_idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">cluster</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">groupby_idx</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grouped_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">cluster</span><span class="p">:</span>
+        <span class="n">grouped_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">grouped_data</span>
 </pre></div>
 
   </div>
@@ -21581,6 +22063,40 @@ see opus2midi() and score2opus().</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.patches_onset_times">
+    <p>def <span class="ident">patches_onset_times</span>(</p><p>escore_notes, times_idx=1, patches_idx=6)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.patches_onset_times', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.patches_onset_times" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">patches_onset_times</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+    
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="n">patches_oset</span> <span class="o">=</span> <span class="n">ordered_set</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span>
+
+    <span class="n">patches_onset_times</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches_oset</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">p</span><span class="p">:</span>
+                <span class="n">patches_onset_times</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">p</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">times_idx</span><span class="p">]])</span>
+                <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">patches_onset_times</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.pearson_correlation">
     <p>def <span class="ident">pearson_correlation</span>(</p><p>arr1, arr2, pad_value)</p>
     </div>
@@ -22409,6 +22925,44 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <div id="source-TMIDIX.sort_list_by_other" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sort_list_by_other</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">list2</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list2</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.split_escore_notes_by_time">
+    <p>def <span class="ident">split_escore_notes_by_time</span>(</p><p>escore_notes, time_threshold=256)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.split_escore_notes_by_time', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.split_escore_notes_by_time" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">split_escore_notes_by_time</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">time_threshold</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+
+    <span class="n">dscore</span> <span class="o">=</span> <span class="n">delta_score_notes</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">timings_clip_value</span><span class="o">=</span><span class="n">time_threshold</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">score_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">ctime</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pchunk_idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dscore</span><span class="p">):</span>
+        
+        <span class="n">ctime</span> <span class="o">+=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ctime</span> <span class="o">&gt;=</span> <span class="n">time_threshold</span><span class="p">:</span>
+            <span class="n">score_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">[</span><span class="n">pchunk_idx</span><span class="p">:</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">pchunk_idx</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">ctime</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">score_chunks</span>
 </pre></div>
 
   </div>
