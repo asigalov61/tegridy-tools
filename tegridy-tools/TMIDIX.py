@@ -14,14 +14,14 @@ r'''############################################################################
 #
 #	Project Los Angeles
 #
-#	Tegridy Code 2021
+#	Tegridy Code 2024
 #
 #   https://github.com/Tegridy-Code/Project-Los-Angeles
 #
 #
 ###################################################################################
 ###################################################################################
-#       Copyright 2021 Project Los Angeles / Tegridy Code
+#       Copyright 2024 Project Los Angeles / Tegridy Code
 #
 #       Licensed under the Apache License, Version 2.0 (the "License");
 #       you may not use this file except in compliance with the License.
@@ -10064,6 +10064,219 @@ CONTROL_CHANGES = {
     126: "Mono Mode On",  # + poly off, + all notes off
     127: "Poly Mode On",  # + mono off, +all notes off
 }
+
+###################################################################################
+
+def patches_onset_times(escore_notes, times_idx=1, patches_idx=6):
+    
+    patches = [e[patches_idx] for e in escore_notes]
+
+    patches_oset = ordered_set(patches)
+
+    patches_onset_times = []
+
+    for p in patches_oset:
+        for e in escore_notes:
+            if e[patches_idx] == p:
+                patches_onset_times.append([p, e[times_idx]])
+                break
+
+    return patches_onset_times
+
+###################################################################################
+
+def count_escore_notes_patches(escore_notes, patches_idx=6):
+
+    patches = [e[patches_idx] for e in escore_notes]
+
+    return Counter(patches).most_common()
+
+###################################################################################
+
+def escore_notes_monoponic_melodies(escore_notes,
+                                    bad_notes_ratio=0.0,
+                                    times_idx=1,
+                                    patches_idx=6
+                                    ):
+
+    patches = escore_notes_patches(escore_notes, patches_index=patches_idx)
+
+    monophonic_melodies = []
+
+    for p in patches:
+        patch_score = [e for e in escore_notes if e[patches_idx] == p]
+
+        ps_times = [e[times_idx] for e in patch_score]
+
+        if len(ps_times) <= len(set(ps_times)) * (1+bad_notes_ratio):
+            monophonic_melodies.append([p, len(patch_score)])
+            
+    return monophonic_melodies
+
+###################################################################################
+
+from itertools import groupby
+from operator import itemgetter
+
+def group_by_threshold(data, threshold, groupby_idx):
+
+    data.sort(key=itemgetter(groupby_idx))
+
+    grouped_data = []
+    cluster = []
+
+    for i, item in enumerate(data):
+        if not cluster:
+            cluster.append(item)
+        elif abs(item[groupby_idx] - cluster[-1][groupby_idx]) <= threshold:
+            cluster.append(item)
+        else:
+            grouped_data.append(cluster)
+            cluster = [item]
+    
+    if cluster:
+        grouped_data.append(cluster)
+        
+    return grouped_data
+
+###################################################################################
+
+def split_escore_notes_by_time(escore_notes, time_threshold=256):
+
+    dscore = delta_score_notes(escore_notes, timings_clip_value=time_threshold-1)
+
+    score_chunks = []
+
+    ctime = 0
+    pchunk_idx = 0
+
+    for i, e in enumerate(dscore):
+        
+        ctime += e[1]
+
+        if ctime >= time_threshold:
+            score_chunks.append(escore_notes[pchunk_idx:i])
+            pchunk_idx = i
+            ctime = 0
+
+    return score_chunks
+
+###################################################################################
+
+def escore_notes_grouped_patches(escore_notes, time_threshold=256):
+    
+    split_score_chunks = split_escore_notes_by_time(escore_notes,
+                                                    time_threshold=time_threshold
+                                                    )
+
+    chunks_patches = []
+
+    for s in split_score_chunks:
+        chunks_patches.append(escore_notes_patches(s))
+
+    return chunks_patches
+
+###################################################################################
+
+def computeLPSArray(pattern, M, lps):
+    length = 0
+    i = 1
+    
+    lps[0] = 0
+    
+    while i < M:
+        if pattern[i] == pattern[length]:
+            length += 1
+            lps[i] = length
+            i += 1
+        else:
+            if length != 0:
+                length = lps[length-1]
+            else:
+                lps[i] = 0
+                i += 1
+                
+###################################################################################
+
+def find_pattern_idxs(sub_pattern, pattern):
+
+    lst = pattern
+    pattern = sub_pattern
+    
+    M = len(pattern)
+    N = len(lst)
+    
+    lps = [0] * M
+    j = 0  # index for pattern[]
+
+    computeLPSArray(pattern, M, lps)
+    
+    i = 0  # index for lst[]
+    indexes = []
+    
+    while i < N:
+        if pattern[j] == lst[i]:
+            i += 1
+            j += 1
+        
+        if j == M:
+            end_index = i - 1
+            start_index = end_index - M + 1
+            indexes.append((start_index, end_index))
+            j = lps[j-1]
+        elif i < N and pattern[j] != lst[i]:
+            if j != 0:
+                j = lps[j-1]
+            else:
+                i += 1
+                
+    return indexes
+
+###################################################################################
+
+def escore_notes_patch_lrno_patterns(escore_notes, 
+                                     patch=0, 
+                                     zero_score_timings=False,
+                                     pitches_idx=4,
+                                     patches_idx=6
+                                    ):
+
+    patch_escore = [e for e in escore_notes if e[patches_idx] == patch]
+
+    if patch_escore:
+        
+        patch_cscore = chordify_score([1000, patch_escore])
+    
+        patch_tscore = []
+    
+        for c in patch_cscore:
+    
+            tones_chord = sorted(set([p[pitches_idx] % 12 for p in c]))
+    
+            if tones_chord not in ALL_CHORDS_SORTED:
+                tnoes_chord = check_and_fix_tones_chord(tones_chord)
+    
+            patch_tscore.append(ALL_CHORDS_SORTED.index(tones_chord))
+    
+        pattern = find_lrno_pattern_fast(patch_tscore)
+    
+        patterns_idxs = find_pattern_idxs(pattern, patch_tscore)
+    
+        patch_lrno_scores = []
+    
+        for idxs in patterns_idxs:
+            
+            score = patch_escore[idxs[0]:idxs[1]]
+            
+            if zero_score_timings:
+                score = recalculate_score_timings(score)
+                
+            patch_lrno_scores.append(score)
+    
+        return patch_lrno_scores
+        
+    else:
+        return []
 
 ###################################################################################
 #  
