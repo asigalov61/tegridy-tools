@@ -9977,7 +9977,7 @@ INSTRUMENTS_CLASSES = [
 # To easily get the class index of any instrument program
 CLASS_OF_INST = [
     i
-    for i, inst_class in enumerate(INSTRUMENT_CLASSES)
+    for i, inst_class in enumerate(INSTRUMENTS_CLASSES)
     for _ in inst_class["program_range"]
 ]
 
