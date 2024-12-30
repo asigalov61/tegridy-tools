@@ -1072,9 +1072,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.ALL_PITCHES_CHORDS_FILTERED">ALL_PITCHES_CHORDS_FILTERED</a></li>
     <li class="mono"><a href="#TMIDIX.ALL_PITCHES_CHORDS_SORTED">ALL_PITCHES_CHORDS_SORTED</a></li>
     <li class="mono"><a href="#TMIDIX.All_events">All_events</a></li>
+    <li class="mono"><a href="#TMIDIX.BASIC_CHORDS_MAP">BASIC_CHORDS_MAP</a></li>
     <li class="mono"><a href="#TMIDIX.BLACK_NOTES">BLACK_NOTES</a></li>
     <li class="mono"><a href="#TMIDIX.CHORDS_TYPES">CHORDS_TYPES</a></li>
+    <li class="mono"><a href="#TMIDIX.CLASS_OF_INST">CLASS_OF_INST</a></li>
+    <li class="mono"><a href="#TMIDIX.CONTROL_CHANGES">CONTROL_CHANGES</a></li>
+    <li class="mono"><a href="#TMIDIX.DRUMS_PITCH_RANGE">DRUMS_PITCH_RANGE</a></li>
+    <li class="mono"><a href="#TMIDIX.DRUMS_SETS">DRUMS_SETS</a></li>
     <li class="mono"><a href="#TMIDIX.Event2channelindex">Event2channelindex</a></li>
+    <li class="mono"><a href="#TMIDIX.INSTRUMENTS_CLASSES">INSTRUMENTS_CLASSES</a></li>
+    <li class="mono"><a href="#TMIDIX.MIDI_FILES_EXTENSIONS">MIDI_FILES_EXTENSIONS</a></li>
+    <li class="mono"><a href="#TMIDIX.MIDI_INSTRUMENTS">MIDI_INSTRUMENTS</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_Instruments_Families">MIDI_Instruments_Families</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_TEXT_EVENTS">MIDI_TEXT_EVENTS</a></li>
     <li class="mono"><a href="#TMIDIX.MIDI_events">MIDI_events</a></li>
@@ -1084,6 +1092,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.Nontext_meta_events">Nontext_meta_events</a></li>
     <li class="mono"><a href="#TMIDIX.Notenum2percussion">Notenum2percussion</a></li>
     <li class="mono"><a href="#TMIDIX.Number2patch">Number2patch</a></li>
+    <li class="mono"><a href="#TMIDIX.PIANO_PITCH_RANGE">PIANO_PITCH_RANGE</a></li>
+    <li class="mono"><a href="#TMIDIX.PITCH_CLASSES">PITCH_CLASSES</a></li>
     <li class="mono"><a href="#TMIDIX.SEMITONES">SEMITONES</a></li>
     <li class="mono"><a href="#TMIDIX.Text_events">Text_events</a></li>
     <li class="mono"><a href="#TMIDIX.Version">Version</a></li>
@@ -8482,13 +8492,25 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="k">else</span><span class="p">:</span>
     <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
 
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
   <span class="k">if</span> <span class="n">return_ptcs_and_vels</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">average_drums</span><span class="p">:</span>
       <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">ptcs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
       <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">ptcs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
-      <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>      
+      <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+      
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptcs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ptcs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptcs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vels</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">vels</span><span class="p">)]</span>
   
@@ -10948,13 +10970,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)):</span>
-            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody only&#39;</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;monophonic melody&#39;</span>
         
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody and accompaniment&#39;</span>
         
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;accompaniment only&#39;</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;accompaniment&#39;</span>
     
     <span class="k">else</span><span class="p">:</span>
         <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;drums only&#39;</span>
@@ -10973,7 +10995,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">drums_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
 
-    <span class="n">most_common_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Notenum2percussion</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">drums_pitches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+    <span class="n">most_common_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Notenum2percussion</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">drums_pitches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">Notenum2percussion</span><span class="p">]</span>
 
     <span class="c1">#==============================================================================</span>
 
@@ -11072,7 +11094,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">description</span> <span class="o">+=</span> <span class="n">comp_type</span> <span class="o">+</span> <span class="s1">&#39; composition&#39;</span>
 
-    <span class="k">if</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;drums only&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;drum track&#39;</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
             <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; with drums&#39;</span>
@@ -11104,18 +11126,335 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;is played on a solo &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;features &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; instruments: &#39;</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;features &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))]</span> <span class="o">+</span> <span class="s1">&#39; instruments: &#39;</span>
             <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instruments</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
 
         <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
-    <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">drums_present</span> <span class="ow">and</span> <span class="n">most_common_drums</span><span class="p">:</span>
         <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The drum track has predominant &#39;</span>
         <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">most_common_drums</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">most_common_drums</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
 
     <span class="c1">#==============================================================================</span>
 
     <span class="k">return</span> <span class="n">description</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="c1">#==================================================================================</span>
+<span class="c1">#</span>
+<span class="c1"># Below constants code is a courtesy of MidiTok</span>
+<span class="c1">#</span>
+<span class="c1"># Retrieved on 12/29/2024</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/Natooz/MidiTok/blob/main/src/miditok/constants.py</span>
+<span class="c1">#</span>
+<span class="c1">#==================================================================================</span>
+
+<span class="n">MIDI_FILES_EXTENSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.mid&quot;</span><span class="p">,</span> <span class="s2">&quot;.midi&quot;</span><span class="p">,</span> <span class="s2">&quot;.kar&quot;</span><span class="p">,</span> <span class="s2">&quot;.MID&quot;</span><span class="p">,</span> <span class="s2">&quot;.MIDI&quot;</span><span class="p">,</span> <span class="s2">&quot;.KAR&quot;</span><span class="p">]</span>
+
+<span class="c1"># The recommended pitches for piano in the GM2 specs are from 21 to 108</span>
+<span class="n">PIANO_PITCH_RANGE</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)</span>
+
+<span class="c1"># Chord params</span>
+<span class="c1"># &quot;chord_unknown&quot; specifies the range of number of notes that can form &quot;unknown&quot; chords</span>
+<span class="c1"># (that do not fit in &quot;chord_maps&quot;) to add in tokens.</span>
+<span class="c1"># Known chord maps, with 0 as root note</span>
+<span class="n">BASIC_CHORDS_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="s2">&quot;maj&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="s2">&quot;dim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="s2">&quot;aug&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+    <span class="s2">&quot;sus2&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="s2">&quot;sus4&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="s2">&quot;7dom&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;7min&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;7maj&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+    <span class="s2">&quot;7halfdim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;7dim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+    <span class="s2">&quot;7aug&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+    <span class="s2">&quot;9maj&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
+    <span class="s2">&quot;9min&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
+    <span class="p">}</span>
+
+<span class="c1"># Drums</span>
+<span class="c1"># Recommended range from the GM2 specs</span>
+<span class="n">DRUMS_PITCH_RANGE</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">27</span><span class="p">,</span> <span class="mi">90</span><span class="p">)</span>
+
+<span class="c1"># Used with chords</span>
+<span class="n">PITCH_CLASSES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C#&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;D#&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;F#&quot;</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="s2">&quot;G#&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;A#&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">]</span>
+
+<span class="c1"># http://newt.phys.unsw.edu.au/jw/notes.html</span>
+<span class="c1"># https://www.midi.org/specifications</span>
+
+<span class="c1"># index i = program i+1 in the GM2 specs (7. Appendix A)</span>
+<span class="c1"># index i = program i as retrieved by packages</span>
+<span class="n">MIDI_INSTRUMENTS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Piano</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Acoustic Grand Piano&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bright Acoustic Piano&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Grand Piano&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Honky-tonk Piano&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Piano 1&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">104</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Piano 2&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">104</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Harpsichord&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mi">90</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Clavi&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="c1"># Chromatic Percussion</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Celesta&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Glockenspiel&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">72</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Music Box&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Vibraphone&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">90</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Marimba&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Xylophone&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tubular Bells&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">78</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Dulcimer&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="c1"># Organs</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Drawbar Organ&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Percussive Organ&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rock Organ&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Church Organ&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Reed Organ&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Accordion&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">90</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Harmonica&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tango Accordion&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">90</span><span class="p">)},</span>
+    <span class="c1"># Guitars</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Acoustic Guitar (nylon)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Acoustic Guitar (steel)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Guitar (jazz)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">87</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Guitar (clean)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">87</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Guitar (muted)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">87</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Overdriven Guitar&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">87</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Distortion Guitar&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">87</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guitar Harmonics&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">87</span><span class="p">)},</span>
+    <span class="c1"># Bass</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Acoustic Bass&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Bass (finger)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Electric Bass (pick)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Fretless Bass&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Slap Bass 1&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Slap Bass 2&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Bass 1&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Bass 2&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="c1"># Strings &amp; Orchestral instruments</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Violin&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">94</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Viola&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cello&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">73</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Contrabass&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tremolo Strings&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">94</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pizzicato Strings&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">94</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Orchestral Harp&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">104</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Timpani&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">58</span><span class="p">)},</span>
+    <span class="c1"># Ensembles</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;String Ensembles 1&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;String Ensembles 2&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SynthStrings 1&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SynthStrings 2&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Choir Aahs&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">80</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Voice Oohs&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">80</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Voice&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Orchestra Hit&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">73</span><span class="p">)},</span>
+    <span class="c1"># Brass</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Trumpet&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">58</span><span class="p">,</span> <span class="mi">95</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Trombone&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">34</span><span class="p">,</span> <span class="mi">76</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tuba&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Muted Trumpet&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">58</span><span class="p">,</span> <span class="mi">83</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;French Horn&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mi">78</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Brass Section&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Brass 1&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Brass 2&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="c1"># Reed</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Soprano Sax&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">54</span><span class="p">,</span> <span class="mi">88</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alto Sax&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span> <span class="mi">81</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tenor Sax&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">76</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Baritone Sax&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">37</span><span class="p">,</span> <span class="mi">69</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Oboe&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">58</span><span class="p">,</span> <span class="mi">92</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;English Horn&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span> <span class="mi">82</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bassoon&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">34</span><span class="p">,</span> <span class="mi">73</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Clarinet&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">92</span><span class="p">)},</span>
+    <span class="c1"># Pipe</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Piccolo&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">74</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Flute&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Recorder&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pan Flute&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Blown Bottle&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Shakuhachi&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Whistle&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ocarina&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="c1"># Synth Lead</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 1 (square)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 2 (sawtooth)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 3 (calliope)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 4 (chiff)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 5 (charang)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 6 (voice)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 7 (fifths)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lead 8 (bass + lead)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">109</span><span class="p">)},</span>
+    <span class="c1"># Synth Pad</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 1 (new age)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 2 (warm)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 3 (polysynth)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 4 (choir)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 5 (bowed)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 6 (metallic)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 7 (halo)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pad 8 (sweep)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="c1"># Synth SFX</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 1 (rain)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 2 (soundtrack)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 3 (crystal)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 4 (atmosphere)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 5 (brightness)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 6 (goblins)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 7 (echoes)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FX 8 (sci-fi)&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="c1"># Ethnic Misc.</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sitar&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">78</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Banjo&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Shamisen&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">80</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Koto&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kalimba&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">80</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bag pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">78</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Fiddle&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">97</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Shanai&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">73</span><span class="p">)},</span>
+    <span class="c1"># Percussive</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tinkle Bell&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">72</span><span class="p">,</span> <span class="mi">85</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Agogo&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">73</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Steel Drums&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span> <span class="mi">77</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Woodblock&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Taiko Drum&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Melodic Tom&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Drum&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Reverse Cymbal&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="c1"># SFX</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guitar Fret Noise, Guitar Cutting Noise&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Breath Noise, Flute Key Click&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Seashore, Rain, Thunder, Wind, Stream, Bubbles&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bird Tweet, Dog, Horse Gallop&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Telephone Ring, Door Creaking, Door, Scratch, Wind Chime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Helicopter, Car Sounds&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Applause, Laughing, Screaming, Punch, Heart Beat, Footstep&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gunshot, Machine Gun, Lasergun, Explosion&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">)},</span>
+<span class="p">]</span>
+
+<span class="n">INSTRUMENTS_CLASSES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Piano&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)},</span>  <span class="c1"># 0</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Chromatic Percussion&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Organ&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">24</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guitar&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">32</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bass&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">40</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Strings&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">48</span><span class="p">)},</span>  <span class="c1"># 5</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensemble&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Brass&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">56</span><span class="p">,</span> <span class="mi">64</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">72</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">72</span><span class="p">,</span> <span class="mi">80</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Lead&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">88</span><span class="p">)},</span>  <span class="c1"># 10</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Pad&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">88</span><span class="p">,</span> <span class="mi">96</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Synth Effects&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">96</span><span class="p">,</span> <span class="mi">104</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethnic&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">104</span><span class="p">,</span> <span class="mi">112</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Percussive&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">112</span><span class="p">,</span> <span class="mi">120</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sound Effects&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">128</span><span class="p">)},</span>  <span class="c1"># 15</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Drums&quot;</span><span class="p">,</span> <span class="s2">&quot;program_range&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)},</span>
+<span class="p">]</span>
+
+<span class="c1"># To easily get the class index of any instrument program</span>
+<span class="n">CLASS_OF_INST</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">i</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst_class</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">INSTRUMENTS_CLASSES</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">inst_class</span><span class="p">[</span><span class="s2">&quot;program_range&quot;</span><span class="p">]</span>
+<span class="p">]</span>
+
+<span class="c1"># index i = program i+1 in the GM2 specs (8. Appendix B)</span>
+<span class="c1"># index i = program i retrieved by packages</span>
+<span class="n">DRUMS_SETS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;Standard&quot;</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="s2">&quot;Room&quot;</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">:</span> <span class="s2">&quot;Power&quot;</span><span class="p">,</span>
+    <span class="mi">24</span><span class="p">:</span> <span class="s2">&quot;Electronic&quot;</span><span class="p">,</span>
+    <span class="mi">25</span><span class="p">:</span> <span class="s2">&quot;Analog&quot;</span><span class="p">,</span>
+    <span class="mi">32</span><span class="p">:</span> <span class="s2">&quot;Jazz&quot;</span><span class="p">,</span>
+    <span class="mi">40</span><span class="p">:</span> <span class="s2">&quot;Brush&quot;</span><span class="p">,</span>
+    <span class="mi">48</span><span class="p">:</span> <span class="s2">&quot;Orchestra&quot;</span><span class="p">,</span>
+    <span class="mi">56</span><span class="p">:</span> <span class="s2">&quot;SFX&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Control changes list (without specifications):</span>
+<span class="c1"># https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2</span>
+<span class="c1"># Undefined and general control changes are not considered here</span>
+<span class="c1"># All these attributes can take values from 0 to 127, with some of them being on/off</span>
+<span class="n">CONTROL_CHANGES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># MSB</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;Bank Select&quot;</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Modulation Depth&quot;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Breath Controller&quot;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Foot Controller&quot;</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s2">&quot;Portamento Time&quot;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s2">&quot;Data Entry&quot;</span><span class="p">,</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="s2">&quot;Channel Volume&quot;</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="s2">&quot;Balance&quot;</span><span class="p">,</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="s2">&quot;Pan&quot;</span><span class="p">,</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="s2">&quot;Expression Controller&quot;</span><span class="p">,</span>
+    <span class="c1"># LSB</span>
+    <span class="mi">32</span><span class="p">:</span> <span class="s2">&quot;Bank Select&quot;</span><span class="p">,</span>
+    <span class="mi">33</span><span class="p">:</span> <span class="s2">&quot;Modulation Depth&quot;</span><span class="p">,</span>
+    <span class="mi">34</span><span class="p">:</span> <span class="s2">&quot;Breath Controller&quot;</span><span class="p">,</span>
+    <span class="mi">36</span><span class="p">:</span> <span class="s2">&quot;Foot Controller&quot;</span><span class="p">,</span>
+    <span class="mi">37</span><span class="p">:</span> <span class="s2">&quot;Portamento Time&quot;</span><span class="p">,</span>
+    <span class="mi">38</span><span class="p">:</span> <span class="s2">&quot;Data Entry&quot;</span><span class="p">,</span>
+    <span class="mi">39</span><span class="p">:</span> <span class="s2">&quot;Channel Volume&quot;</span><span class="p">,</span>
+    <span class="mi">40</span><span class="p">:</span> <span class="s2">&quot;Balance&quot;</span><span class="p">,</span>
+    <span class="mi">42</span><span class="p">:</span> <span class="s2">&quot;Pan&quot;</span><span class="p">,</span>
+    <span class="mi">43</span><span class="p">:</span> <span class="s2">&quot;Expression Controller&quot;</span><span class="p">,</span>
+    <span class="c1"># On / Off control changes, ≤63 off, ≥64 on</span>
+    <span class="mi">64</span><span class="p">:</span> <span class="s2">&quot;Damper Pedal&quot;</span><span class="p">,</span>
+    <span class="mi">65</span><span class="p">:</span> <span class="s2">&quot;Portamento&quot;</span><span class="p">,</span>
+    <span class="mi">66</span><span class="p">:</span> <span class="s2">&quot;Sostenuto&quot;</span><span class="p">,</span>
+    <span class="mi">67</span><span class="p">:</span> <span class="s2">&quot;Soft Pedal&quot;</span><span class="p">,</span>
+    <span class="mi">68</span><span class="p">:</span> <span class="s2">&quot;Legato Footswitch&quot;</span><span class="p">,</span>
+    <span class="mi">69</span><span class="p">:</span> <span class="s2">&quot;Hold 2&quot;</span><span class="p">,</span>
+    <span class="c1"># Continuous controls</span>
+    <span class="mi">70</span><span class="p">:</span> <span class="s2">&quot;Sound Variation&quot;</span><span class="p">,</span>
+    <span class="mi">71</span><span class="p">:</span> <span class="s2">&quot;Timbre/Harmonic Intensity&quot;</span><span class="p">,</span>
+    <span class="mi">72</span><span class="p">:</span> <span class="s2">&quot;Release Time&quot;</span><span class="p">,</span>
+    <span class="mi">73</span><span class="p">:</span> <span class="s2">&quot;Attack Time&quot;</span><span class="p">,</span>
+    <span class="mi">74</span><span class="p">:</span> <span class="s2">&quot;Brightness&quot;</span><span class="p">,</span>
+    <span class="mi">75</span><span class="p">:</span> <span class="s2">&quot;Decay Time&quot;</span><span class="p">,</span>
+    <span class="mi">76</span><span class="p">:</span> <span class="s2">&quot;Vibrato Rate&quot;</span><span class="p">,</span>
+    <span class="mi">77</span><span class="p">:</span> <span class="s2">&quot;Vibrato Depth&quot;</span><span class="p">,</span>
+    <span class="mi">78</span><span class="p">:</span> <span class="s2">&quot;Vibrato Delay&quot;</span><span class="p">,</span>
+    <span class="mi">84</span><span class="p">:</span> <span class="s2">&quot;Portamento Control&quot;</span><span class="p">,</span>
+    <span class="mi">88</span><span class="p">:</span> <span class="s2">&quot;High Resolution Velocity Prefix&quot;</span><span class="p">,</span>
+    <span class="c1"># Effects depths</span>
+    <span class="mi">91</span><span class="p">:</span> <span class="s2">&quot;Reverb Depth&quot;</span><span class="p">,</span>
+    <span class="mi">92</span><span class="p">:</span> <span class="s2">&quot;Tremolo Depth&quot;</span><span class="p">,</span>
+    <span class="mi">93</span><span class="p">:</span> <span class="s2">&quot;Chorus Depth&quot;</span><span class="p">,</span>
+    <span class="mi">94</span><span class="p">:</span> <span class="s2">&quot;Celeste Depth&quot;</span><span class="p">,</span>
+    <span class="mi">95</span><span class="p">:</span> <span class="s2">&quot;Phaser Depth&quot;</span><span class="p">,</span>
+    <span class="c1"># Registered parameters numbers</span>
+    <span class="mi">96</span><span class="p">:</span> <span class="s2">&quot;Data Increment&quot;</span><span class="p">,</span>
+    <span class="mi">97</span><span class="p">:</span> <span class="s2">&quot;Data Decrement&quot;</span><span class="p">,</span>
+    <span class="c1">#  98: &#39;Non-Registered Parameter Number (NRPN) - LSB&#39;,</span>
+    <span class="c1">#  99: &#39;Non-Registered Parameter Number (NRPN) - MSB&#39;,</span>
+    <span class="mi">100</span><span class="p">:</span> <span class="s2">&quot;Registered Parameter Number (RPN) - LSB&quot;</span><span class="p">,</span>
+    <span class="mi">101</span><span class="p">:</span> <span class="s2">&quot;Registered Parameter Number (RPN) - MSB&quot;</span><span class="p">,</span>
+    <span class="c1"># Channel mode controls</span>
+    <span class="mi">120</span><span class="p">:</span> <span class="s2">&quot;All Sound Off&quot;</span><span class="p">,</span>
+    <span class="mi">121</span><span class="p">:</span> <span class="s2">&quot;Reset All Controllers&quot;</span><span class="p">,</span>
+    <span class="mi">122</span><span class="p">:</span> <span class="s2">&quot;Local Control On/Off&quot;</span><span class="p">,</span>
+    <span class="mi">123</span><span class="p">:</span> <span class="s2">&quot;All Notes Off&quot;</span><span class="p">,</span>
+    <span class="mi">124</span><span class="p">:</span> <span class="s2">&quot;Omni Mode Off&quot;</span><span class="p">,</span>  <span class="c1"># + all notes off</span>
+    <span class="mi">125</span><span class="p">:</span> <span class="s2">&quot;Omni Mode On&quot;</span><span class="p">,</span>  <span class="c1"># + all notes off</span>
+    <span class="mi">126</span><span class="p">:</span> <span class="s2">&quot;Mono Mode On&quot;</span><span class="p">,</span>  <span class="c1"># + poly off, + all notes off</span>
+    <span class="mi">127</span><span class="p">:</span> <span class="s2">&quot;Poly Mode On&quot;</span><span class="p">,</span>  <span class="c1"># + mono off, +all notes off</span>
+<span class="p">}</span>
 
 <span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
@@ -11235,6 +11574,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       </div>
       <div class="item">
+      <p id="TMIDIX.BASIC_CHORDS_MAP" class="name">var <span class="ident">BASIC_CHORDS_MAP</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
       <p id="TMIDIX.BLACK_NOTES" class="name">var <span class="ident">BLACK_NOTES</span></p>
       
   
@@ -11251,7 +11598,63 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       </div>
       <div class="item">
+      <p id="TMIDIX.CLASS_OF_INST" class="name">var <span class="ident">CLASS_OF_INST</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.CONTROL_CHANGES" class="name">var <span class="ident">CONTROL_CHANGES</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.DRUMS_PITCH_RANGE" class="name">var <span class="ident">DRUMS_PITCH_RANGE</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.DRUMS_SETS" class="name">var <span class="ident">DRUMS_SETS</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
       <p id="TMIDIX.Event2channelindex" class="name">var <span class="ident">Event2channelindex</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.INSTRUMENTS_CLASSES" class="name">var <span class="ident">INSTRUMENTS_CLASSES</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.MIDI_FILES_EXTENSIONS" class="name">var <span class="ident">MIDI_FILES_EXTENSIONS</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.MIDI_INSTRUMENTS" class="name">var <span class="ident">MIDI_INSTRUMENTS</span></p>
       
   
   <div class="source_cont">
@@ -11324,6 +11727,22 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.Number2patch" class="name">var <span class="ident">Number2patch</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.PIANO_PITCH_RANGE" class="name">var <span class="ident">PIANO_PITCH_RANGE</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.PITCH_CLASSES" class="name">var <span class="ident">PITCH_CLASSES</span></p>
       
   
   <div class="source_cont">
@@ -17589,13 +18008,25 @@ Tegridy Code 2024</p></div>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">durs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
 
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">durs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
   <span class="k">if</span> <span class="n">return_ptcs_and_vels</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">average_drums</span><span class="p">:</span>
       <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">ptcs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
       <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">ptcs_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
-      <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>      
+      <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">vels_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">chans_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+      
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptcs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ptcs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">vels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">durs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">durs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ptcs</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptcs</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vels</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">vels</span><span class="p">)]</span>
   
@@ -18350,13 +18781,13 @@ Tegridy Code 2024</p></div>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)):</span>
-            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody only&#39;</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;monophonic melody&#39;</span>
         
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;melody and accompaniment&#39;</span>
         
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">escore_times</span><span class="p">))</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">escore_times</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;accompaniment only&#39;</span>
+            <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;accompaniment&#39;</span>
     
     <span class="k">else</span><span class="p">:</span>
         <span class="n">comp_type</span> <span class="o">=</span> <span class="s1">&#39;drums only&#39;</span>
@@ -18375,7 +18806,7 @@ Tegridy Code 2024</p></div>
 
     <span class="n">drums_pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
 
-    <span class="n">most_common_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Notenum2percussion</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">drums_pitches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+    <span class="n">most_common_drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Notenum2percussion</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">drums_pitches</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">Notenum2percussion</span><span class="p">]</span>
 
     <span class="c1">#==============================================================================</span>
 
@@ -18474,7 +18905,7 @@ Tegridy Code 2024</p></div>
 
     <span class="n">description</span> <span class="o">+=</span> <span class="n">comp_type</span> <span class="o">+</span> <span class="s1">&#39; composition&#39;</span>
 
-    <span class="k">if</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;drums only&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">comp_type</span> <span class="o">!=</span> <span class="s1">&#39;drum track&#39;</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
             <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; with drums&#39;</span>
@@ -18506,12 +18937,12 @@ Tegridy Code 2024</p></div>
             <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;is played on a solo &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;features &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; instruments: &#39;</span>
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;features &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))]</span> <span class="o">+</span> <span class="s1">&#39; instruments: &#39;</span>
             <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instruments</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
 
         <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
-    <span class="k">if</span> <span class="n">drums_present</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">drums_present</span> <span class="ow">and</span> <span class="n">most_common_drums</span><span class="p">:</span>
         <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The drum track has predominant &#39;</span>
         <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">most_common_drums</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">most_common_drums</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
 
