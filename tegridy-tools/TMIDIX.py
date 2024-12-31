@@ -9552,15 +9552,20 @@ MOOD_SCALES = ['Major', 'Minor', 'Major Minor']
 ###################################################################################
 
 def alpha_str(string):
-    return re.sub(r'[^a-zA-Z ()]', '', string).strip()
+    astr = re.sub(r'[^a-zA-Z ()]', '', string).strip()
+    return re.sub(r'\s+', ' ', astr).strip()
 
 ###################################################################################
 
-def escore_notes_to_text_description(escore_notes, song_name='', artist_name=''):
+def escore_notes_to_text_description(escore_notes, 
+                                     song_name='', 
+                                     artist_name='',
+                                     timings_divider=16,
+                                    ):
 
     #==============================================================================
 
-    song_time_min = (escore_notes[-1][1] * 16) / 1000 / 60
+    song_time_min = (escore_notes[-1][1] * timings_divider) / 1000 / 60
 
     if song_time_min < 1.5:
         song_length = 'short'
@@ -9592,9 +9597,15 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
 
     #==============================================================================
 
-    patches = sorted(set([e[6] for e in escore_notes]))
+    all_patches = [e[6] for e in escore_notes]
+
+    patches = ordered_set(all_patches)
     
     instruments = [alpha_str(Number2patch[p]) for p in patches if p < 128]
+
+    nd_patches_counts = Counter([p for p in all_patches if p < 128]).most_common()
+
+    dominant_instrument = alpha_str(Number2patch[nd_patches_counts[0][0]])
 
     if 128 in patches:
         drums_present = True
@@ -9641,22 +9652,22 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
     
         escore_averages = escore_notes_averages(escore_notes, return_ptcs_and_vels=True)
 
-        if escore_averages[0] < 8:
+        if escore_averages[0] < (128 / timings_divider):
             rythm = 'fast'
         
-        elif 8 <= escore_averages[0] <= 12:
+        elif (128 / timings_divider) <= escore_averages[0] <= (192 / timings_divider):
             rythm = 'average'
         
-        elif escore_averages[0] > 12:
+        elif escore_averages[0] > (192 / timings_divider):
             rythm = 'slow'
         
-        if escore_averages[1] < 16:
+        if escore_averages[1] < (256 / timings_divider):
             tempo = 'fast'
         
-        elif 16 <= escore_averages[1] <= 24:
+        elif (256 / timings_divider) <= escore_averages[1] <= (384 / timings_divider):
             tempo = 'average'
         
-        elif escore_averages[1] > 24:
+        elif escore_averages[1] > (384 / timings_divider):
             tempo = 'slow'
         
         if escore_averages[2] < 50:
@@ -9740,10 +9751,20 @@ def escore_notes_to_text_description(escore_notes, song_name='', artist_name='')
 
         description += '\n'
 
+        description += 'The song starts with ' + instruments[0] + '.'
+
+        description += '\n'
+
+        description += 'The song main instrument is ' + dominant_instrument + '.'
+
+        description += '\n'
+
     if drums_present and most_common_drums:
         description += 'The drum track has predominant '
         description += ', '.join(most_common_drums[:-1]) + ' and ' + most_common_drums[-1] + '.'
 
+        description += '\n'
+        
     #==============================================================================
 
     return description
