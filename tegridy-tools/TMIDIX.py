@@ -9552,7 +9552,7 @@ MOOD_SCALES = ['Major', 'Minor', 'Major Minor']
 ###################################################################################
 
 def alpha_str(string):
-    astr = re.sub(r'[^a-zA-Z ()]', '', string).strip()
+    astr = re.sub(r'[^a-zA-Z ()0-9]', '', string).strip()
     return re.sub(r'\s+', ' ', astr).strip()
 
 ###################################################################################
@@ -9585,15 +9585,19 @@ def escore_notes_to_text_description(escore_notes,
     if len(escore_times) > 0:
         if len(escore_times) == len(set(escore_times)):
             comp_type = 'monophonic melody'
+            ctype = 'melody'
         
         elif len(escore_times) >= len(set(escore_times)) and 1 in Counter(escore_times).values():
             comp_type = 'melody and accompaniment'
+            ctype = 'song'
         
         elif len(escore_times) >= len(set(escore_times)) and 1 not in Counter(escore_times).values():
             comp_type = 'accompaniment'
+            ctype = 'song'
     
     else:
-        comp_type = 'drums only'
+        comp_type = 'drum track'
+        ctype = 'drum track'
 
     #==============================================================================
 
@@ -9602,20 +9606,22 @@ def escore_notes_to_text_description(escore_notes,
     patches = ordered_set(all_patches)
     
     instruments = [alpha_str(Number2patch[p]) for p in patches if p < 128]
+    
+    if instruments:
 
-    nd_patches_counts = Counter([p for p in all_patches if p < 128]).most_common()
+        nd_patches_counts = Counter([p for p in all_patches if p < 128]).most_common()
 
-    dominant_instrument = alpha_str(Number2patch[nd_patches_counts[0][0]])
+        dominant_instrument = alpha_str(Number2patch[nd_patches_counts[0][0]])
 
     if 128 in patches:
         drums_present = True
 
+        drums_pitches = [e[4] for e in escore_notes if e[3] == 9]
+
+        most_common_drums = [alpha_str(Notenum2percussion[p[0]]) for p in Counter(drums_pitches).most_common(3) if p[0] in Notenum2percussion]
+
     else:
         drums_present = False
-
-    drums_pitches = [e[4] for e in escore_notes if e[3] == 9]
-
-    most_common_drums = [alpha_str(Notenum2percussion[p[0]]) for p in Counter(drums_pitches).most_common(3) if p[0] in Notenum2percussion]
 
     #==============================================================================
 
@@ -9681,7 +9687,7 @@ def escore_notes_to_text_description(escore_notes,
     description = ''
 
     if song_name != '':
-        description = 'Song "' + song_name + '"'
+        description = 'The song "' + song_name + '"'
     
     if artist_name != '':
         description += ' by ' + artist_name
@@ -9719,41 +9725,70 @@ def escore_notes_to_text_description(escore_notes,
     
     if pitches:
         
-        if mood == 'Major':
-            description += 'This ' + random.choice(['uplifting', 'happy']) + ' song has '
-            
-        else:
-            description += 'This ' + random.choice(['melancholic', 'sad']) + ' song has '
+        if comp_type not in ['monophonic melody', 'drum track']:
         
+            if mood == 'Major':
+                description += 'This uplifting song has '
+                
+            else:
+                description += 'This reflective song has '
+                
+        elif comp_type == 'monophonic melody':
+            
+            if mood == 'Major':
+                description += 'This uplifting melody has '
+                
+            else:
+                description += 'This reflective melody has '
+                
+        else:
+            description += 'TThis drum track has '
+            
         description += rythm + ' rythm, '
         description += tempo + ' tempo, '
         description += tone + ' tone and '
         description += dynamics + ' dynamics.'
 
         description += '\n'
+        
+        if instruments:
+            
+            if comp_type not in ['monophonic melody', 'drum track']:
+                description += 'The song '
+                
+            else:
+                description += 'The melody '
 
-        description += 'The song ' 
+            if len(instruments) == 1:
+                description += 'is played on a solo ' + instruments[0] + '.'
+                
+                description += '\n'
 
-        if len(instruments) == 1:
-            description += 'is played on a solo ' + instruments[0] + '.'
+            else:
+                description += 'features ' + NUMERALS[max(0, min(15, len(instruments)-1))] + ' instruments: '
+                description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+                
+                description += '\n'
+                
+                if instruments[0] != dominant_instrument:
+                    description += 'The song opens with ' + instruments[0]
 
-        else:
-            description += 'features ' + NUMERALS[max(0, min(15, len(instruments)-1))] + ' instruments: '
-            description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+                    description += ' and performed on ' + dominant_instrument + '.'
 
-        description += '\n'
-
-        description += 'The song starts with ' + instruments[0] + '.'
-
-        description += '\n'
-
-        description += 'The song main instrument is ' + dominant_instrument + '.'
-
-        description += '\n'
+                    description += '\n'
+                    
+                else:
+                    description += 'The song opens with and performed on ' + instruments[0] + '.'
 
     if drums_present and most_common_drums:
-        description += 'The drum track has predominant '
-        description += ', '.join(most_common_drums[:-1]) + ' and ' + most_common_drums[-1] + '.'
+        
+        if len(most_common_drums) > 1:
+            description += 'The drum track has predominant '
+            description += ', '.join(most_common_drums[:-1]) + ' and ' + most_common_drums[-1] + '.'
+            
+        else:
+            description += 'The drum track is a solo '
+            description += most_common_drums[0] + '.'
 
         description += '\n'
         
