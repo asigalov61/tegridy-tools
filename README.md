@@ -105,7 +105,7 @@ import random
     title       = {tegridy-tools: Symbolic Music NLP Artificial Intelligence Toolkit},
     author      = {Aleksandr Lev},
     booktitle   = {GitHub},
-    year        = {2024},
+    year        = {2025},
 }
 ```
 ***
