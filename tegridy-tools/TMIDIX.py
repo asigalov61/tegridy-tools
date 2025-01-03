@@ -9441,7 +9441,7 @@ def clean_string(original_string,
         cstr1 = cstr1.title()
 
     if remove_duplicate_spaces:
-        return re.sub(r'\s+', ' ', cstr1).strip()
+        return re.sub(r'[ ]+', ' ', cstr1).strip()
 
     else:
         return cstr1
