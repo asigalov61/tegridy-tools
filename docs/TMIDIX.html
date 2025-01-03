@@ -1075,6 +1075,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.ALL_PITCHES_CHORDS_FILTERED">ALL_PITCHES_CHORDS_FILTERED</a></li>
     <li class="mono"><a href="#TMIDIX.ALL_PITCHES_CHORDS_SORTED">ALL_PITCHES_CHORDS_SORTED</a></li>
     <li class="mono"><a href="#TMIDIX.All_events">All_events</a></li>
+    <li class="mono"><a href="#TMIDIX.BASE_INSTRUMENTS">BASE_INSTRUMENTS</a></li>
     <li class="mono"><a href="#TMIDIX.BASIC_CHORDS_MAP">BASIC_CHORDS_MAP</a></li>
     <li class="mono"><a href="#TMIDIX.BASIC_SCALES">BASIC_SCALES</a></li>
     <li class="mono"><a href="#TMIDIX.BLACK_NOTES">BLACK_NOTES</a></li>
@@ -1086,6 +1087,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.Event2channelindex">Event2channelindex</a></li>
     <li class="mono"><a href="#TMIDIX.HAPPY_MAJOR">HAPPY_MAJOR</a></li>
     <li class="mono"><a href="#TMIDIX.INSTRUMENTS_CLASSES">INSTRUMENTS_CLASSES</a></li>
+    <li class="mono"><a href="#TMIDIX.LEAD_INSTRUMENTS">LEAD_INSTRUMENTS</a></li>
     <li class="mono"><a href="#TMIDIX.MAJOR_SCALE_CHORDS_COUNTS">MAJOR_SCALE_CHORDS_COUNTS</a></li>
     <li class="mono"><a href="#TMIDIX.MELANCHOLIC_MAJOR">MELANCHOLIC_MAJOR</a></li>
     <li class="mono"><a href="#TMIDIX.MELANCHOLIC_MINOR">MELANCHOLIC_MINOR</a></li>
@@ -1225,6 +1227,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_notes_monoponic_melodies">escore_notes_monoponic_melodies</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_patch_lrno_patterns">escore_notes_patch_lrno_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_patches">escore_notes_patches</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_pitches_range">escore_notes_pitches_range</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_scale">escore_notes_scale</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_times_tones">escore_notes_times_tones</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_to_binary_matrix">escore_notes_to_binary_matrix</a></li>
@@ -11092,14 +11095,39 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">:</span>
             <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;treble&#39;</span>
         
-        <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">80</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">64</span><span class="p">:</span>
             <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;quiet&#39;</span>
         
-        <span class="k">elif</span> <span class="mi">80</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="mi">64</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">96</span><span class="p">:</span>
             <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
         
-        <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">96</span><span class="p">:</span>
             <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;loud&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+            
+    <span class="n">mono_melodies</span> <span class="o">=</span> <span class="n">escore_notes_monoponic_melodies</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">88</span><span class="p">])</span>
+ 
+    <span class="n">lead_melodies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">base_melodies</span> <span class="o">=</span> <span class="p">[]</span>
+ 
+    <span class="k">if</span> <span class="n">mono_melodies</span><span class="p">:</span>
+            
+        <span class="k">for</span> <span class="n">mel</span> <span class="ow">in</span> <span class="n">mono_melodies</span><span class="p">:</span>
+            
+            <span class="n">escore_avgs</span> <span class="o">=</span> <span class="n">escore_notes_pitches_range</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">range_patch</span> <span class="o">=</span> <span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">LEAD_INSTRUMENTS</span> <span class="ow">and</span> <span class="n">escore_avgs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">lead_melodies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">mel</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="k">elif</span> <span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">BASE_INSTRUMENTS</span> <span class="ow">and</span> <span class="n">escore_avgs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">base_melodies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">mel</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+    
+        <span class="k">if</span> <span class="n">lead_melodies</span><span class="p">:</span>
+            <span class="n">lead_melodies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">base_melodies</span><span class="p">:</span>
+            <span class="n">base_melodies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#==============================================================================</span>
         
@@ -11185,12 +11213,96 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 <span class="k">if</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dominant_instrument</span><span class="p">:</span>
                     <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song opens with &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; and performed on &#39;</span> <span class="o">+</span> <span class="n">dominant_instrument</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
-
-                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; and primarily performed on &#39;</span> <span class="o">+</span> <span class="n">dominant_instrument</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
                     
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song opens with and performed on &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    
+    <span class="k">if</span> <span class="n">lead_melodies</span> <span class="ow">or</span> <span class="n">base_melodies</span><span class="p">:</span>
+        
+        <span class="n">tm_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">tm_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">lead_melodies</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has one distinct lead melody played on &#39;</span> <span class="o">+</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has one distinct base melody played on &#39;</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+            
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">lead_melodies</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">base_melodies</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+            
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct lead &#39;</span> <span class="o">+</span> <span class="n">mword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            
+            <span class="k">elif</span> <span class="n">base_melodies</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lead_melodies</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+        
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct base &#39;</span> <span class="o">+</span> <span class="n">mword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">base_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>        
+
+            <span class="k">elif</span> <span class="n">lead_melodies</span> <span class="ow">and</span> <span class="n">base_melodies</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">lmword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lmword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+        
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct lead &#39;</span> <span class="o">+</span> <span class="n">lmword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">bmword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bmword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+        
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; And &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct base &#39;</span> <span class="o">+</span> <span class="n">bmword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">base_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
     <span class="k">if</span> <span class="n">drums_present</span> <span class="ow">and</span> <span class="n">most_common_drums</span><span class="p">:</span>
         
@@ -12349,6 +12461,55 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                         <span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="n">LEAD_INSTRUMENTS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="c1"># Piano</span>
+                    <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="c1"># Chromatic Percussion</span>
+                    <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="c1"># Organ</span>
+                    <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="c1"># Guitar</span>
+                    <span class="mi">40</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="c1"># Strings</span>
+                    <span class="mi">52</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="c1"># Ensemble</span>
+                    <span class="mi">56</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="c1"># Brass</span>
+                    <span class="mi">64</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="c1"># Reed</span>
+                    <span class="mi">72</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="c1"># Pipe</span>
+                    <span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">87</span> <span class="c1"># Synth Lead</span>
+                   <span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="n">BASE_INSTRUMENTS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="c1"># Bass</span>
+                    <span class="mi">42</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="c1"># Strings</span>
+                    <span class="mi">58</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="c1"># Brass</span>
+                    <span class="mi">87</span> <span class="c1"># Synth Lead</span>
+                   <span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_pitches_range</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                               <span class="n">range_patch</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">pitches_idx</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                               <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
+                               <span class="p">):</span>
+
+    <span class="n">pitches</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">range_patch</span> <span class="o">&lt;</span> <span class="mi">129</span><span class="p">:</span>
+        <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">range_patch</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">pitches</span><span class="p">:</span>
+        <span class="n">min_pitch</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+        <span class="n">avg_pitch</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+        <span class="n">mode_pitch</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+        <span class="n">max_pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">max_pitch</span><span class="o">-</span><span class="n">min_pitch</span><span class="p">,</span> <span class="n">min_pitch</span><span class="p">,</span> <span class="n">max_pitch</span><span class="p">,</span> <span class="n">avg_pitch</span><span class="p">,</span> <span class="n">mode_pitch</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -12490,6 +12651,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       </div>
       <div class="item">
+      <p id="TMIDIX.BASE_INSTRUMENTS" class="name">var <span class="ident">BASE_INSTRUMENTS</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
       <p id="TMIDIX.BASIC_CHORDS_MAP" class="name">var <span class="ident">BASIC_CHORDS_MAP</span></p>
       
   
@@ -12571,6 +12740,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.INSTRUMENTS_CLASSES" class="name">var <span class="ident">INSTRUMENTS_CLASSES</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.LEAD_INSTRUMENTS" class="name">var <span class="ident">LEAD_INSTRUMENTS</span></p>
       
   
   <div class="source_cont">
@@ -19555,6 +19732,49 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_pitches_range">
+    <p>def <span class="ident">escore_notes_pitches_range</span>(</p><p>escore_notes, range_patch=-1, pitches_idx=4, patches_idx=6)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_pitches_range', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_pitches_range" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_pitches_range</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
+                               <span class="n">range_patch</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">pitches_idx</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                               <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
+                               <span class="p">):</span>
+
+    <span class="n">pitches</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">range_patch</span> <span class="o">&lt;</span> <span class="mi">129</span><span class="p">:</span>
+        <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">patches_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">range_patch</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">pitches_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">pitches</span><span class="p">:</span>
+        <span class="n">min_pitch</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+        <span class="n">avg_pitch</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+        <span class="n">mode_pitch</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+        <span class="n">max_pitch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">max_pitch</span><span class="o">-</span><span class="n">min_pitch</span><span class="p">,</span> <span class="n">min_pitch</span><span class="p">,</span> <span class="n">max_pitch</span><span class="p">,</span> <span class="n">avg_pitch</span><span class="p">,</span> <span class="n">mode_pitch</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_scale">
     <p>def <span class="ident">escore_notes_scale</span>(</p><p>escore_notes, score_mult_factor=3, start_note=0, num_notes=-1, return_scale_indexes=False)</p>
     </div>
@@ -20178,14 +20398,39 @@ Tegridy Code 2024</p></div>
         <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">:</span>
             <span class="n">tone</span> <span class="o">=</span> <span class="s1">&#39;treble&#39;</span>
         
-        <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">80</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">64</span><span class="p">:</span>
             <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;quiet&#39;</span>
         
-        <span class="k">elif</span> <span class="mi">80</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="mi">64</span> <span class="o">&lt;=</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">96</span><span class="p">:</span>
             <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;average&#39;</span>
         
-        <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">escore_averages</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">96</span><span class="p">:</span>
             <span class="n">dynamics</span> <span class="o">=</span> <span class="s1">&#39;loud&#39;</span>
+
+    <span class="c1">#==============================================================================</span>
+            
+    <span class="n">mono_melodies</span> <span class="o">=</span> <span class="n">escore_notes_monoponic_melodies</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">88</span><span class="p">])</span>
+ 
+    <span class="n">lead_melodies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">base_melodies</span> <span class="o">=</span> <span class="p">[]</span>
+ 
+    <span class="k">if</span> <span class="n">mono_melodies</span><span class="p">:</span>
+            
+        <span class="k">for</span> <span class="n">mel</span> <span class="ow">in</span> <span class="n">mono_melodies</span><span class="p">:</span>
+            
+            <span class="n">escore_avgs</span> <span class="o">=</span> <span class="n">escore_notes_pitches_range</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">range_patch</span> <span class="o">=</span> <span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">LEAD_INSTRUMENTS</span> <span class="ow">and</span> <span class="n">escore_avgs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">lead_melodies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">mel</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="k">elif</span> <span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">BASE_INSTRUMENTS</span> <span class="ow">and</span> <span class="n">escore_avgs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">base_melodies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">mel</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">mel</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+    
+        <span class="k">if</span> <span class="n">lead_melodies</span><span class="p">:</span>
+            <span class="n">lead_melodies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">base_melodies</span><span class="p">:</span>
+            <span class="n">base_melodies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#==============================================================================</span>
         
@@ -20271,12 +20516,96 @@ Tegridy Code 2024</p></div>
                 <span class="k">if</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dominant_instrument</span><span class="p">:</span>
                     <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song opens with &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; and performed on &#39;</span> <span class="o">+</span> <span class="n">dominant_instrument</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
-
-                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; and primarily performed on &#39;</span> <span class="o">+</span> <span class="n">dominant_instrument</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
                     
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song opens with and performed on &#39;</span> <span class="o">+</span> <span class="n">instruments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    
+    <span class="k">if</span> <span class="n">lead_melodies</span> <span class="ow">or</span> <span class="n">base_melodies</span><span class="p">:</span>
+        
+        <span class="n">tm_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">tm_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">lead_melodies</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has one distinct lead melody played on &#39;</span> <span class="o">+</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has one distinct base melody played on &#39;</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+            
+            <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">lead_melodies</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">base_melodies</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+            
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct lead &#39;</span> <span class="o">+</span> <span class="n">mword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            
+            <span class="k">elif</span> <span class="n">base_melodies</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lead_melodies</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+        
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct base &#39;</span> <span class="o">+</span> <span class="n">mword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">base_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>        
+
+            <span class="k">elif</span> <span class="n">lead_melodies</span> <span class="ow">and</span> <span class="n">base_melodies</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">lmword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lmword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+        
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;The song has &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct lead &#39;</span> <span class="o">+</span> <span class="n">lmword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lead_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">lead_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">bmword</span> <span class="o">=</span> <span class="s1">&#39;melody&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bmword</span> <span class="o">=</span> <span class="s1">&#39;melodies&#39;</span>
+        
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39; And &#39;</span> <span class="o">+</span> <span class="n">NUMERALS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; distinct base &#39;</span> <span class="o">+</span> <span class="n">bmword</span> <span class="o">+</span> <span class="s1">&#39; played on &#39;</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>               
+                    <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_melodies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="n">base_melodies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">+=</span> <span class="n">base_melodies</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+                
+                <span class="n">description</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
     <span class="k">if</span> <span class="n">drums_present</span> <span class="ow">and</span> <span class="n">most_common_drums</span><span class="p">:</span>
         
