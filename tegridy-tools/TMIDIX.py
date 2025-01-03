@@ -9677,14 +9677,39 @@ def escore_notes_to_text_description(escore_notes,
         elif escore_averages[2] > 70:
             tone = 'treble'
         
-        if escore_averages[3] < 80:
+        if escore_averages[3] < 64:
             dynamics = 'quiet'
         
-        elif 80 <= escore_averages[3] <= 100:
+        elif 64 <= escore_averages[3] <= 96:
             dynamics = 'average'
         
-        elif escore_averages[3] > 100:
+        elif escore_averages[3] > 96:
             dynamics = 'loud'
+
+    #==============================================================================
+            
+    mono_melodies = escore_notes_monoponic_melodies([e for e in escore_notes if e[6] < 88])
+ 
+    lead_melodies = []
+    base_melodies = []
+ 
+    if mono_melodies:
+            
+        for mel in mono_melodies:
+            
+            escore_avgs = escore_notes_pitches_range(escore_notes, range_patch = mel[0])
+            
+            if mel[0] in LEAD_INSTRUMENTS and escore_avgs[3] > 60:
+                lead_melodies.append([Number2patch[mel[0]], mel[1]])
+
+            elif mel[0] in BASE_INSTRUMENTS and escore_avgs[3] <= 60:
+                base_melodies.append([Number2patch[mel[0]], mel[1]])
+    
+        if lead_melodies:
+            lead_melodies.sort(key=lambda x: x[1], reverse=True)
+            
+        if base_melodies:
+            base_melodies.sort(key=lambda x: x[1], reverse=True)
 
     #==============================================================================
         
@@ -9770,12 +9795,96 @@ def escore_notes_to_text_description(escore_notes,
                 if instruments[0] != dominant_instrument:
                     description += 'The song opens with ' + instruments[0]
 
-                    description += ' and performed on ' + dominant_instrument + '.'
-
-                    description += '\n'
+                    description += ' and primarily performed on ' + dominant_instrument + '.'
                     
                 else:
                     description += 'The song opens with and performed on ' + instruments[0] + '.'
+                    
+                description += '\n'
+                    
+    if lead_melodies or base_melodies:
+        
+        tm_count = len(lead_melodies + base_melodies)
+        
+        if tm_count == 1:
+            
+            if lead_melodies:
+                description += 'The song has one distinct lead melody played on ' + lead_melodies[0][0] + '.'
+                
+            else:
+                description += 'The song has one distinct base melody played on ' + base_melodies[0][0] + '.'
+            
+            description += '\n'
+            
+        else:
+            
+            if lead_melodies and not base_melodies:
+                
+                if len(lead_melodies) == 1:
+                    mword = 'melody'
+                    
+                else:
+                    mword = 'melodies'
+            
+                description += 'The song has ' + NUMERALS[len(lead_melodies)-1] + ' distinct lead ' + mword + ' played on '
+                
+                if len(lead_melodies) > 1:               
+                    description += ', '.join(lead_melodies[:-1][0]) + ' and ' + lead_melodies[-1][0] + '.'
+                    
+                else:
+                    description += lead_melodies[0][0] + '.'
+                    
+                description += '\n'
+            
+            elif base_melodies and not lead_melodies:
+                
+                if len(base_melodies) == 1:
+                    mword = 'melody'
+                    
+                else:
+                    mword = 'melodies'
+        
+                description += 'The song has ' + NUMERALS[len(base_melodies)-1] + ' distinct base ' + mword + ' played on '
+                
+                if len(base_melodies) > 1:               
+                    description += ', '.join(base_melodies[:-1][0]) + ' and ' + base_melodies[-1][0] + '.'
+                    
+                else:
+                    description += base_melodies[0][0] + '.'
+                
+                description += '\n'        
+
+            elif lead_melodies and base_melodies:
+                
+                if len(lead_melodies) == 1:
+                    lmword = 'melody'
+                    
+                else:
+                    lmword = 'melodies'
+        
+                description += 'The song has ' + NUMERALS[len(lead_melodies)-1] + ' distinct lead ' + lmword + ' played on '
+                
+                if len(lead_melodies) > 1:               
+                    description += ', '.join(lead_melodies[:-1][0]) + ' and ' + lead_melodies[-1][0] + '.'
+                    
+                else:
+                    description += lead_melodies[0][0] + '.'
+                    
+                if len(base_melodies) == 1:
+                    bmword = 'melody'
+                    
+                else:
+                    bmword = 'melodies'
+        
+                description += ' And ' + NUMERALS[len(base_melodies)-1] + ' distinct base ' + bmword + ' played on '
+                
+                if len(base_melodies) > 1:               
+                    description += ', '.join(base_melodies[:-1][0]) + ' and ' + base_melodies[-1][0] + '.'
+                    
+                else:
+                    description += base_melodies[0][0] + '.'
+                
+                description += '\n'
 
     if drums_present and most_common_drums:
         
@@ -10932,6 +11041,61 @@ ALL_MOOD_TYPES_LABELS = ['Happy Major',
                          'Sad Major',
                          'Sad Minor'
                         ]
+
+###################################################################################
+
+LEAD_INSTRUMENTS = [0, 1, 2, 3, 4, 5, 6, 7, # Piano
+                    8, 9, 10, 11, 12, 13, 14, 15, # Chromatic Percussion
+                    16, 17, 18, 19, 20, 21, 22, 23, # Organ
+                    24, 25, 26, 27, 28, 29, 30, 31, # Guitar
+                    40, 41, # Strings
+                    52, 53, 54, # Ensemble
+                    56, 57, 59, 60, # Brass
+                    64, 65, 66, 67, 68, 69, 70, 71, # Reed
+                    72, 73, 74, 75, 76, 77, 78, 79, # Pipe
+                    80, 81, 87 # Synth Lead
+                   ]
+
+###################################################################################
+
+BASE_INSTRUMENTS = [32, 33, 34, 35, 36, 37, 38, 39, # Bass
+                    42, 43, # Strings
+                    58, 61, 62, 63, # Brass
+                    87 # Synth Lead
+                   ]
+
+###################################################################################
+
+def escore_notes_pitches_range(escore_notes,
+                               range_patch=-1,
+                               pitches_idx=4,
+                               patches_idx=6
+                               ):
+
+    pitches = []
+    
+    if -1 < range_patch < 129:
+        pitches = [e[pitches_idx] for e in escore_notes if e[patches_idx] == range_patch]
+
+    else:
+        pitches = [e[pitches_idx] for e in escore_notes]
+
+    if pitches:
+        min_pitch = min(pitches)
+        avg_pitch = sum(pitches) / len(pitches)
+        mode_pitch = statistics.mode(pitches)
+        max_pitch = max(pitches)
+
+        return [max_pitch-min_pitch, min_pitch, max_pitch, avg_pitch, mode_pitch]
+
+    else:
+        return [ -1] * 6
+
+###################################################################################
+
+###################################################################################
+
+###################################################################################
 
 ###################################################################################
 #  
