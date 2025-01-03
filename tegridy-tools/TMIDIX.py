@@ -9784,7 +9784,7 @@ def escore_notes_to_text_description(escore_notes,
                     description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
                     
                 else:
-                    description += 'features one instrument: ' + instrument[0] + '.'
+                    description += 'features one instrument: ' + instruments[0] + '.'
                     
                 
                 description += '\n'
@@ -9826,7 +9826,7 @@ def escore_notes_to_text_description(escore_notes,
                 description += 'The song has ' + NUMERALS[len(lead_melodies)-1] + ' distinct lead ' + mword + ' played on '
                 
                 if len(lead_melodies) > 1:               
-                    description += ', '.join(lead_melodies[:-1][0]) + ' and ' + lead_melodies[-1][0] + '.'
+                    description += ', '.join([l[0] for l in lead_melodies[:-1]]) + ' and ' + lead_melodies[-1][0] + '.'
                     
                 else:
                     description += lead_melodies[0][0] + '.'
@@ -9844,7 +9844,7 @@ def escore_notes_to_text_description(escore_notes,
                 description += 'The song has ' + NUMERALS[len(base_melodies)-1] + ' distinct base ' + mword + ' played on '
                 
                 if len(base_melodies) > 1:               
-                    description += ', '.join(base_melodies[:-1][0]) + ' and ' + base_melodies[-1][0] + '.'
+                    description += ', '.join([b[0] for b in base_melodies[:-1]]) + ' and ' + base_melodies[-1][0] + '.'
                     
                 else:
                     description += base_melodies[0][0] + '.'
@@ -9862,7 +9862,7 @@ def escore_notes_to_text_description(escore_notes,
                 description += 'The song has ' + NUMERALS[len(lead_melodies)-1] + ' distinct lead ' + lmword + ' played on '
                 
                 if len(lead_melodies) > 1:               
-                    description += ', '.join(lead_melodies[:-1][0]) + ' and ' + lead_melodies[-1][0] + '.'
+                    description += ', '.join([l[0] for l in lead_melodies[:-1]]) + ' and ' + lead_melodies[-1][0] + '.'
                     
                 else:
                     description += lead_melodies[0][0] + '.'
@@ -9876,7 +9876,7 @@ def escore_notes_to_text_description(escore_notes,
                 description += ' And ' + NUMERALS[len(base_melodies)-1] + ' distinct base ' + bmword + ' played on '
                 
                 if len(base_melodies) > 1:               
-                    description += ', '.join(base_melodies[:-1][0]) + ' and ' + base_melodies[-1][0] + '.'
+                    description += ', '.join([b[0] for b in base_melodies[:-1]]) + ' and ' + base_melodies[-1][0] + '.'
                     
                 else:
                     description += base_melodies[0][0] + '.'
