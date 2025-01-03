@@ -9762,7 +9762,6 @@ def escore_notes_to_text_description(escore_notes,
             
             description += 'This ' + mood + ' melody has '
             
-                
         else:
             description += 'TThis drum track has '
             
@@ -9776,19 +9775,17 @@ def escore_notes_to_text_description(escore_notes,
         if instruments:
             
             if comp_type not in ['monophonic melody', 'drum track']:
+                
                 description += 'The song '
                 
-            else:
-                description += 'The melody '
-
-            if len(instruments) == 1:
-                description += 'is played on a solo ' + instruments[0] + '.'
+                if len(instruments) > 1:
                 
-                description += '\n'
-
-            else:
-                description += 'features ' + NUMERALS[max(0, min(15, len(instruments)-1))] + ' instruments: '
-                description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+                    description += 'features ' + NUMERALS[max(0, min(15, len(instruments)-1))] + ' instruments: '
+                    description += ', '.join(instruments[:-1]) + ' and ' + instruments[-1] + '.'
+                    
+                else:
+                    description += 'features one instrument: ' + instrument[0] + '.'
+                    
                 
                 description += '\n'
                 
