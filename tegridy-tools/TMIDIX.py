@@ -11045,7 +11045,7 @@ LEAD_INSTRUMENTS = [0, 1, 2, 3, 4, 5, 6, 7, # Piano
                     8, 9, 10, 11, 12, 13, 14, 15, # Chromatic Percussion
                     16, 17, 18, 19, 20, 21, 22, 23, # Organ
                     24, 25, 26, 27, 28, 29, 30, 31, # Guitar
-                    40, 41, # Strings
+                    40, 41, 46, # Strings
                     52, 53, 54, # Ensemble
                     56, 57, 59, 60, # Brass
                     64, 65, 66, 67, 68, 69, 70, 71, # Reed
