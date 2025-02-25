@@ -1216,6 +1216,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.escore_matrix_to_merged_escore_notes">escore_matrix_to_merged_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.escore_matrix_to_original_escore_notes">escore_matrix_to_original_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_averages">escore_notes_averages</a></li>
+    <li class="mono"><a href="#TMIDIX.escore_notes_core">escore_notes_core</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_delta_times">escore_notes_delta_times</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_durations">escore_notes_durations</a></li>
     <li class="mono"><a href="#TMIDIX.escore_notes_durations_counter">escore_notes_durations_counter</a></li>
@@ -1292,6 +1293,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.minkowski_distance">minkowski_distance</a></li>
     <li class="mono"><a href="#TMIDIX.monophonic_check">monophonic_check</a></li>
     <li class="mono"><a href="#TMIDIX.morph_tones_chord">morph_tones_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.multiprocessing_wrapper">multiprocessing_wrapper</a></li>
     <li class="mono"><a href="#TMIDIX.needleman_wunsch_aligner">needleman_wunsch_aligner</a></li>
     <li class="mono"><a href="#TMIDIX.norm">norm</a></li>
     <li class="mono"><a href="#TMIDIX.normalize_chord_durations">normalize_chord_durations</a></li>
@@ -1314,6 +1316,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.replace_bad_tones_chord">replace_bad_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.resize_matrix">resize_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.reverse_enhanced_score_notes">reverse_enhanced_score_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.rle_decode_ones">rle_decode_ones</a></li>
+    <li class="mono"><a href="#TMIDIX.rle_encode_ones">rle_encode_ones</a></li>
     <li class="mono"><a href="#TMIDIX.score2midi">score2midi</a></li>
     <li class="mono"><a href="#TMIDIX.score2opus">score2opus</a></li>
     <li class="mono"><a href="#TMIDIX.score2stats">score2stats</a></li>
@@ -2888,6 +2892,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">import</span> <span class="nn">csv</span>
 
 <span class="kn">import</span> <span class="nn">tqdm</span>
+
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
@@ -12507,6 +12513,97 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">return</span> <span class="p">[</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">escore_notes_core</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">core_len</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">chords_idxs</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cscore</span><span class="p">):</span>
+        
+        <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">pitches</span><span class="p">:</span>
+            <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_SORTED</span><span class="p">:</span>
+                <span class="n">tones_chord</span> <span class="o">=</span> <span class="n">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+            <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ALL_CHORDS_SORTED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))</span>
+            <span class="n">chords_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">mid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords_idxs</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">clen</span> <span class="o">=</span> <span class="n">core_len</span> <span class="o">//</span> <span class="mi">2</span>
+    
+    <span class="n">sidx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">mid</span><span class="o">-</span><span class="n">clen</span><span class="p">]</span>
+    <span class="n">eidx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">mid</span><span class="o">+</span><span class="n">clen</span><span class="p">]</span>
+
+    <span class="n">core_chords</span> <span class="o">=</span> <span class="n">chords</span><span class="p">[</span><span class="n">mid</span><span class="o">-</span><span class="n">clen</span><span class="p">:</span><span class="n">mid</span><span class="o">+</span><span class="n">clen</span><span class="p">]</span>
+    <span class="n">core_score</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">sidx</span><span class="p">:</span><span class="n">eidx</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">core_score</span><span class="p">,</span> <span class="n">core_chords</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">multiprocessing_wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
+    
+    <span class="k">with</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">imap_unordered</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">data_list</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            
+    <span class="k">return</span> <span class="n">results</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">rle_encode_ones</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">div_mod</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    
+    <span class="n">flat_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span>
+    
+    <span class="n">encoding</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_list</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">flat_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">flat_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="k">if</span> <span class="n">div_mod</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">encoding</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start_index</span> <span class="o">//</span> <span class="n">div_mod</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">%</span> <span class="n">div_mod</span><span class="p">))</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">encoding</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+    <span class="k">return</span> <span class="n">encoding</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">rle_decode_ones</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)):</span>
+    
+    <span class="n">flat_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">start_index</span> <span class="ow">in</span> <span class="n">encoding</span><span class="p">:</span>
+        <span class="n">flat_list</span><span class="p">[</span><span class="n">start_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        
+    <span class="n">matrix</span> <span class="o">=</span> <span class="p">[</span><span class="n">flat_list</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]:(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    
+    <span class="k">return</span> <span class="n">matrix</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1">#  </span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
 <span class="c1">#</span>
@@ -19259,6 +19356,55 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.escore_notes_core">
+    <p>def <span class="ident">escore_notes_core</span>(</p><p>escore_notes, core_len=128)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.escore_notes_core', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.escore_notes_core" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">escore_notes_core</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span> <span class="n">core_len</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+
+    <span class="n">cscore</span> <span class="o">=</span> <span class="n">chordify_score</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="n">escore_notes</span><span class="p">])</span>
+
+    <span class="n">chords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">chords_idxs</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cscore</span><span class="p">):</span>
+        
+        <span class="n">pitches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">pitches</span><span class="p">:</span>
+            <span class="n">tones_chord</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="o">%</span> <span class="mi">12</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitches</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">tones_chord</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_CHORDS_SORTED</span><span class="p">:</span>
+                <span class="n">tones_chord</span> <span class="o">=</span> <span class="n">check_and_fix_tones_chord</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">)</span>
+
+            <span class="n">chords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ALL_CHORDS_SORTED</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tones_chord</span><span class="p">))</span>
+            <span class="n">chords_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">mid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords_idxs</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">clen</span> <span class="o">=</span> <span class="n">core_len</span> <span class="o">//</span> <span class="mi">2</span>
+    
+    <span class="n">sidx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">mid</span><span class="o">-</span><span class="n">clen</span><span class="p">]</span>
+    <span class="n">eidx</span> <span class="o">=</span> <span class="n">chords_idxs</span><span class="p">[</span><span class="n">mid</span><span class="o">+</span><span class="n">clen</span><span class="p">]</span>
+
+    <span class="n">core_chords</span> <span class="o">=</span> <span class="n">chords</span><span class="p">[</span><span class="n">mid</span><span class="o">-</span><span class="n">clen</span><span class="p">:</span><span class="n">mid</span><span class="o">+</span><span class="n">clen</span><span class="p">]</span>
+    <span class="n">core_score</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">cscore</span><span class="p">[</span><span class="n">sidx</span><span class="p">:</span><span class="n">eidx</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">core_score</span><span class="p">,</span> <span class="n">core_chords</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.escore_notes_delta_times">
     <p>def <span class="ident">escore_notes_delta_times</span>(</p><p>escore_notes, timings_index=1, channels_index=3, omit_zeros=False, omit_drums=False)</p>
     </div>
@@ -22833,6 +22979,35 @@ tick per millisecond</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.multiprocessing_wrapper">
+    <p>def <span class="ident">multiprocessing_wrapper</span>(</p><p>function, data_list)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.multiprocessing_wrapper', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.multiprocessing_wrapper" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">multiprocessing_wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
+    
+    <span class="k">with</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">imap_unordered</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">data_list</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            
+    <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.needleman_wunsch_aligner">
     <p>def <span class="ident">needleman_wunsch_aligner</span>(</p><p>seq1, seq2, align_idx, gap_penalty=-1, match_score=2, mismatch_penalty=-1)</p>
     </div>
@@ -23789,6 +23964,83 @@ see opus2midi() and score2opus().</p></div>
   <span class="n">reversed_score</span> <span class="o">=</span> <span class="n">recalculate_score_timings</span><span class="p">(</span><span class="n">e_score</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">reversed_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.rle_decode_ones">
+    <p>def <span class="ident">rle_decode_ones</span>(</p><p>encoding, size=(128, 128))</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.rle_decode_ones', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.rle_decode_ones" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">rle_decode_ones</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)):</span>
+    
+    <span class="n">flat_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">start_index</span> <span class="ow">in</span> <span class="n">encoding</span><span class="p">:</span>
+        <span class="n">flat_list</span><span class="p">[</span><span class="n">start_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        
+    <span class="n">matrix</span> <span class="o">=</span> <span class="p">[</span><span class="n">flat_list</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]:(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    
+    <span class="k">return</span> <span class="n">matrix</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.rle_encode_ones">
+    <p>def <span class="ident">rle_encode_ones</span>(</p><p>matrix, div_mod=-1)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.rle_encode_ones', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.rle_encode_ones" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">rle_encode_ones</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">div_mod</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    
+    <span class="n">flat_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span>
+    
+    <span class="n">encoding</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_list</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">flat_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">flat_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="k">if</span> <span class="n">div_mod</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">encoding</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start_index</span> <span class="o">//</span> <span class="n">div_mod</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">%</span> <span class="n">div_mod</span><span class="p">))</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">encoding</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+    <span class="k">return</span> <span class="n">encoding</span>
 </pre></div>
 
   </div>
