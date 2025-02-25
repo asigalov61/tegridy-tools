@@ -1471,6 +1471,8 @@ import csv
 
 import tqdm
 
+import multiprocessing
+
 from itertools import zip_longest
 from itertools import groupby
 from collections import Counter
@@ -11087,6 +11089,97 @@ def escore_notes_pitches_range(escore_notes,
 
     else:
         return [ -1] * 6
+
+###################################################################################
+
+def escore_notes_core(escore_notes, core_len=128):
+
+    cscore = chordify_score([1000, escore_notes])
+
+    chords = []
+    chords_idxs = []
+    
+    for i, c in enumerate(cscore):
+        
+        pitches = [e[4] for e in c if e[3] != 9]
+
+        if pitches:
+            tones_chord = sorted(set([p % 12 for p in pitches]))
+
+            if tones_chord not in ALL_CHORDS_SORTED:
+                tones_chord = check_and_fix_tones_chord(tones_chord)
+
+            chords.append(ALL_CHORDS_SORTED.index(tones_chord))
+            chords_idxs.append(i)
+
+    mid = len(chords_idxs) // 2
+    clen = core_len // 2
+    
+    sidx = chords_idxs[mid-clen]
+    eidx = chords_idxs[mid+clen]
+
+    core_chords = chords[mid-clen:mid+clen]
+    core_score = flatten(cscore[sidx:eidx])
+    
+    return core_score, core_chords
+
+###################################################################################
+
+def multiprocessing_wrapper(function, data_list):
+    
+    with multiprocessing.Pool() as pool:
+        
+        results = []
+        
+        for result in tqdm.tqdm(pool.imap_unordered(function, data_list), total=len(data_list)):
+            results.append(result)
+            
+    return results
+
+###################################################################################
+
+def rle_encode_ones(matrix, div_mod=-1):
+    
+    flat_list = [val for row in matrix for val in row]
+    
+    encoding = []
+    i = 0
+    
+    while i < len(flat_list):
+        
+        if flat_list[i] == 1:
+            
+            start_index = i
+            count = 1
+            i += 1
+            
+            while i < len(flat_list) and flat_list[i] == 1:
+                count += 1
+                i += 1
+            
+            if div_mod > 0:
+                encoding.append((start_index // div_mod, start_index % div_mod))
+                
+            else:
+                encoding.append(start_index)
+            
+        else:
+            i += 1
+            
+    return encoding
+
+###################################################################################
+
+def rle_decode_ones(encoding, size=(128, 128)):
+    
+    flat_list = [0] * (size[0] * size[1])
+    
+    for start_index in encoding:
+        flat_list[start_index] = 1
+        
+    matrix = [flat_list[i * size[1]:(i + 1) * size[1]] for i in range(size[0])]
+    
+    return matrix
 
 ###################################################################################
 #  
