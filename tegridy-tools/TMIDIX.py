@@ -5591,7 +5591,7 @@ def split_melody(enhanced_melody_score_notes,
   for e in enhanced_melody_score_notes:
     dtime = max(0, min(max_score_time, e[1]-pe[1]))
 
-    if dtime > max(durs):
+    if dtime > stime:
       if chu:
         mel_chunks.append(chu)
       chu = []
