@@ -7013,7 +7013,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_melody_score_notes</span><span class="p">:</span>
     <span class="n">dtime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_score_time</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
-    <span class="k">if</span> <span class="n">dtime</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">durs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">dtime</span> <span class="o">&gt;</span> <span class="n">stime</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">chu</span><span class="p">:</span>
         <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
       <span class="n">chu</span> <span class="o">=</span> <span class="p">[]</span>
@@ -11027,7 +11027,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     <span class="n">all_patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
 
-    <span class="n">patches</span> <span class="o">=</span> <span class="n">ordered_set</span><span class="p">(</span><span class="n">all_patches</span><span class="p">)</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">ordered_set</span><span class="p">(</span><span class="n">all_patches</span><span class="p">)[:</span><span class="mi">16</span><span class="p">]</span>
     
     <span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">]</span>
     
@@ -20467,7 +20467,7 @@ Tegridy Code 2024</p></div>
 
     <span class="n">all_patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span><span class="p">]</span>
 
-    <span class="n">patches</span> <span class="o">=</span> <span class="n">ordered_set</span><span class="p">(</span><span class="n">all_patches</span><span class="p">)</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">ordered_set</span><span class="p">(</span><span class="n">all_patches</span><span class="p">)[:</span><span class="mi">16</span><span class="p">]</span>
     
     <span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha_str</span><span class="p">(</span><span class="n">Number2patch</span><span class="p">[</span><span class="n">p</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mi">128</span><span class="p">]</span>
     
@@ -24583,7 +24583,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">enhanced_melody_score_notes</span><span class="p">:</span>
     <span class="n">dtime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_score_time</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pe</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
-    <span class="k">if</span> <span class="n">dtime</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">durs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">dtime</span> <span class="o">&gt;</span> <span class="n">stime</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">chu</span><span class="p">:</span>
         <span class="n">mel_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chu</span><span class="p">)</span>
       <span class="n">chu</span> <span class="o">=</span> <span class="p">[]</span>
