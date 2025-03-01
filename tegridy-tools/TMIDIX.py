@@ -9605,7 +9605,7 @@ def escore_notes_to_text_description(escore_notes,
 
     all_patches = [e[6] for e in escore_notes]
 
-    patches = ordered_set(all_patches)
+    patches = ordered_set(all_patches)[:16]
     
     instruments = [alpha_str(Number2patch[p]) for p in patches if p < 128]
     
