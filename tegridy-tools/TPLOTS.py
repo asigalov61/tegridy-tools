@@ -1470,5 +1470,53 @@ plt.show()
 '''
 
 ################################################################################
+
+def plot_tree_horizontal(data):
+    
+    """
+    Given data as a list of levels (each level is a tuple or list of 
+    displacements for each branch), this function computes the cumulative 
+    value per branch (starting from 0) and plots each branch
+    with the tree level mapped to the x-axis and the cumulative value mapped 
+    to the y-axis. This gives a left-to-right tree with branches spanning up 
+    (positive) and down (negative).
+    
+    Parameters:
+        data (list of tuple/list): Each element represents a tree level.
+                                   It is assumed every level has the same length.
+    """
+    
+    # Convert data to a NumPy array with shape (n_levels, n_branches)
+    data = np.array(data)
+    n_levels, n_branches = data.shape
+
+    # Compute cumulative sums along each branch.
+    # Each branch starts at 0 at level 0.
+    cum = np.zeros((n_levels + 1, n_branches))
+    for i in range(n_levels):
+        cum[i + 1, :] = cum[i, :] + data[i, :]
+    
+    plt.figure(figsize=(12, 8))
+    
+    # Plot each branch as a line. For branch j:
+    #   - x coordinates are the tree levels (0 to n_levels)
+    #   - y coordinates are the corresponding cumulative values.
+    for j in range(n_branches):
+        x = np.arange(n_levels + 1)
+        y = cum[:, j]
+        plt.plot(x, y, marker='o', label=f'Branch {j}')
+    
+    plt.title("Horizontal Tree Visualization: Branches Spanning Up and Down", fontsize=14)
+    plt.xlabel("Tree Level (Left = Root)")
+    plt.ylabel("Cumulative Value (Up = Positive, Down = Negative)")
+    
+    # Add a horizontal line at y=0 to emphasize the center.
+    plt.axhline(0, color="gray", linestyle="--")
+    
+    #plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.show()
+    
+################################################################################
 # This is the end of TPLOTS Python modules
 ################################################################################
