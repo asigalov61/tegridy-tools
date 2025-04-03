@@ -1201,6 +1201,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.count_patterns">count_patterns</a></li>
     <li class="mono"><a href="#TMIDIX.covariance">covariance</a></li>
     <li class="mono"><a href="#TMIDIX.create_enhanced_monophonic_melody">create_enhanced_monophonic_melody</a></li>
+    <li class="mono"><a href="#TMIDIX.create_files_list">create_files_list</a></li>
     <li class="mono"><a href="#TMIDIX.create_similarity_matrix">create_similarity_matrix</a></li>
     <li class="mono"><a href="#TMIDIX.cubic_kernel">cubic_kernel</a></li>
     <li class="mono"><a href="#TMIDIX.decode_from_ord">decode_from_ord</a></li>
@@ -1272,11 +1273,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.hamming_distance">hamming_distance</a></li>
     <li class="mono"><a href="#TMIDIX.harmonize_enhanced_melody_score_notes">harmonize_enhanced_melody_score_notes</a></li>
     <li class="mono"><a href="#TMIDIX.harmonize_enhanced_melody_score_notes_to_ms_SONG">harmonize_enhanced_melody_score_notes_to_ms_SONG</a></li>
+    <li class="mono"><a href="#TMIDIX.has_consecutive_trend">has_consecutive_trend</a></li>
     <li class="mono"><a href="#TMIDIX.horizontal_ordered_list_search">horizontal_ordered_list_search</a></li>
     <li class="mono"><a href="#TMIDIX.hsv_to_rgb">hsv_to_rgb</a></li>
     <li class="mono"><a href="#TMIDIX.image_matrix_to_original_escore_notes">image_matrix_to_original_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_bits">int_to_bits</a></li>
     <li class="mono"><a href="#TMIDIX.int_to_pitches_chord">int_to_pitches_chord</a></li>
+    <li class="mono"><a href="#TMIDIX.is_mostly_wide_peaks_and_valleys">is_mostly_wide_peaks_and_valleys</a></li>
     <li class="mono"><a href="#TMIDIX.is_valid_md5_hash">is_valid_md5_hash</a></li>
     <li class="mono"><a href="#TMIDIX.jaccard_similarity">jaccard_similarity</a></li>
     <li class="mono"><a href="#TMIDIX.lists_differences">lists_differences</a></li>
@@ -1324,6 +1327,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.score_chord_to_tones_chord">score_chord_to_tones_chord</a></li>
     <li class="mono"><a href="#TMIDIX.shift_bits">shift_bits</a></li>
     <li class="mono"><a href="#TMIDIX.smooth_escore_notes">smooth_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.smooth_values">smooth_values</a></li>
     <li class="mono"><a href="#TMIDIX.solo_piano_escore_notes">solo_piano_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.sort_list_by_other">sort_list_by_other</a></li>
     <li class="mono"><a href="#TMIDIX.split_escore_notes_by_time">split_escore_notes_by_time</a></li>
@@ -1334,6 +1338,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.strip_drums_from_escore_notes">strip_drums_from_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.summarize_escore_notes">summarize_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.system_memory_utilization">system_memory_utilization</a></li>
     <li class="mono"><a href="#TMIDIX.t_to_n">t_to_n</a></li>
     <li class="mono"><a href="#TMIDIX.to_millisecs">to_millisecs</a></li>
     <li class="mono"><a href="#TMIDIX.tone_type">tone_type</a></li>
@@ -1353,6 +1358,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.validate_pitches">validate_pitches</a></li>
     <li class="mono"><a href="#TMIDIX.validate_pitches_chord">validate_pitches_chord</a></li>
     <li class="mono"><a href="#TMIDIX.variance">variance</a></li>
+    <li class="mono"><a href="#TMIDIX.vertical_list_search">vertical_list_search</a></li>
   </ul>
 
     </li>
@@ -1376,7 +1382,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="tegridy-midi-x-module-tmidi-x-tee-midi-eks">Tegridy MIDI X Module (TMIDI X / tee-midi eks)</h1>
 <h1 id="version-10">Version 1.0</h1>
 <h1 id="_5"></h1>
-<h1 id="note-tmidi-x-module-starts-after-the-partial-midipy-module-line-1342">NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1342</h1>
+<h1 id="note-tmidi-x-module-starts-after-the-partial-midipy-module-line-1438">NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1438</h1>
 <h1 id="_6"></h1>
 <h1 id="based-upon-midipy-module-v67-by-peter-billam-pjbcomau">Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au</h1>
 <h1 id="_7"></h1>
@@ -1430,7 +1436,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#	Tegridy MIDI X Module (TMIDI X / tee-midi eks)</span>
 <span class="sd">#	Version 1.0</span>
 <span class="sd">#</span>
-<span class="sd">#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1342</span>
+<span class="sd">#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1438</span>
 <span class="sd">#</span>
 <span class="sd">#	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au</span>
 <span class="sd">#</span>
@@ -1443,19 +1449,19 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#</span>
 <span class="sd">###################################################################################</span>
 <span class="sd">###################################################################################</span>
-<span class="sd">#       Copyright 2025 Project Los Angeles / Tegridy Code</span>
+<span class="sd">#   Copyright 2025 Project Los Angeles / Tegridy Code</span>
 <span class="sd">#</span>
-<span class="sd">#       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
-<span class="sd">#       you may not use this file except in compliance with the License.</span>
-<span class="sd">#       You may obtain a copy of the License at</span>
+<span class="sd">#   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="sd">#   you may not use this file except in compliance with the License.</span>
+<span class="sd">#   You may obtain a copy of the License at</span>
 <span class="sd">#</span>
-<span class="sd">#           http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="sd">#       http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="sd">#</span>
-<span class="sd">#       Unless required by applicable law or agreed to in writing, software</span>
-<span class="sd">#       distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
-<span class="sd">#       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span class="sd">#       See the License for the specific language governing permissions and</span>
-<span class="sd">#       limitations under the License.</span>
+<span class="sd">#   Unless required by applicable law or agreed to in writing, software</span>
+<span class="sd">#   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="sd">#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="sd">#   See the License for the specific language governing permissions and</span>
+<span class="sd">#   limitations under the License.</span>
 <span class="sd">###################################################################################</span>
 <span class="sd">###################################################################################</span>
 <span class="sd">#</span>
@@ -1483,7 +1489,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">#------------------------------- Encoding stuff --------------------------</span>
 
 <span class="k">def</span> <span class="nf">opus2midi</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[],</span> <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of midi-events, and each event is itself a list; see above.</span>
 <span class="sd">opus2midi() returns a bytestring of the MIDI, which can then be</span>
@@ -1522,7 +1528,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 
 <span class="k">def</span> <span class="nf">score2opus</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of score-events, and each event is itself a list.  A score-event</span>
@@ -1591,7 +1597,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">opus_tracks</span>
 
 <span class="k">def</span> <span class="nf">score2midi</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates a &quot;score&quot; into MIDI, using score2opus() then opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2midi</span><span class="p">(</span><span class="n">score2opus</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">text_encoding</span><span class="p">),</span> <span class="n">text_encoding</span><span class="p">)</span>
@@ -1599,7 +1605,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">#--------------------------- Decoding stuff ------------------------</span>
 
 <span class="k">def</span> <span class="nf">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
 <span class="sd">&quot;opus&quot; format, see opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="n">my_midi</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">midi</span><span class="p">)</span>
@@ -1641,7 +1647,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">my_opus</span>
 
 <span class="k">def</span> <span class="nf">opus2score</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
 <span class="sd">see opus2midi() and score2opus().</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opus</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -1692,13 +1698,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">score</span>
 
 <span class="k">def</span> <span class="nf">midi2score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot;, using midi2opus() then opus2score()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2score</span><span class="p">(</span><span class="n">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">midi2ms_score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot; with one beat per second and one</span>
 <span class="sd">tick per millisecond, using midi2opus() then to_millisecs()</span>
 <span class="sd">then opus2score()</span>
@@ -1711,7 +1717,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                 <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
                                 <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span>
                                 <span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a single track &quot;score&quot; with 16 instruments and one beat per second and one</span>
 <span class="sd">tick per millisecond</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -1786,7 +1792,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">#------------------------ Other Transformations ---------------------</span>
 
 <span class="k">def</span> <span class="nf">to_millisecs</span><span class="p">(</span><span class="n">old_opus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">desired_time_in_ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pass_old_timings_events</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
 <span class="sd">per second and one tick per millisecond.  This makes it</span>
 <span class="sd">hard to retrieve any information about beats or barlines,</span>
 <span class="sd">but it does make it easy to mix different scores together.</span>
@@ -1865,14 +1871,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">new_opus</span>
 
 <span class="k">def</span> <span class="nf">event2alsaseq</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   <span class="c1"># 5.5</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
 <span class="sd">http://pp.com.mx/python/alsaseq</span>
 <span class="sd">The type of track (opus or score) is autodetected.</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">pass</span>
 
 <span class="k">def</span> <span class="nf">grep</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,[],]</span>
@@ -1896,7 +1902,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">new_score</span>
 
 <span class="k">def</span> <span class="nf">score2stats</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
 <span class="sd">bank_select (list of tuples (msb,lsb)),</span>
 <span class="sd">channels_by_track (list of lists), channels_total (set),</span>
 <span class="sd">general_midi_mode (list),</span>
@@ -2234,23 +2240,23 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1"># do with the actual encoding and decoding of binary MIDI data.</span>
 
 <span class="k">def</span> <span class="nf">_twobytes2int</span><span class="p">(</span><span class="n">byte_a</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 16 bit quantity from two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 16 bit quantity from two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">|</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">_int2twobytes</span><span class="p">(</span><span class="n">int_16bit</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 16 bit quantity into two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 16 bit quantity into two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="nb">bytes</span><span class="p">([(</span><span class="n">int_16bit</span><span class="o">&gt;&gt;</span><span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="n">int_16bit</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">])</span>
 
 <span class="k">def</span> <span class="nf">_read_14_bit</span><span class="p">(</span><span class="n">byte_a</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 14 bit quantity from two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 14 bit quantity from two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">|</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">_write_14_bit</span><span class="p">(</span><span class="n">int_14bit</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 14 bit quantity into two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 14 bit quantity into two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">int_14bit</span> <span class="o">&amp;</span> <span class="mh">0x7F</span><span class="p">,</span> <span class="p">(</span><span class="n">int_14bit</span><span class="o">&gt;&gt;</span><span class="mi">7</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7F</span><span class="p">])</span>
 
 <span class="k">def</span> <span class="nf">_ber_compressed_int</span><span class="p">(</span><span class="n">integer</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;BER compressed integer (not an ASN.1 BER, see perlpacktut for</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;BER compressed integer (not an ASN.1 BER, see perlpacktut for</span>
 <span class="sd">details).  Its bytes represent an unsigned integer in base 128,</span>
 <span class="sd">most significant digit first, with as few digits as possible.</span>
 <span class="sd">Bit eight (the high bit) is set on each byte except the last.</span>
@@ -2266,7 +2272,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">ber</span>
 
 <span class="k">def</span> <span class="nf">_unshift_ber_int</span><span class="p">(</span><span class="n">ba</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Given a bytearray, returns a tuple of (the ber-integer at the</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Given a bytearray, returns a tuple of (the ber-integer at the</span>
 <span class="sd">start, and the remainder of the bytearray).</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">ba</span><span class="p">):</span>  <span class="c1"># 6.7</span>
@@ -2353,7 +2359,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###########################################################################</span>
 <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="n">trackdata</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">event_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclusive_event_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_eot_magic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Decodes MIDI track data into an opus-style list of events.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Decodes MIDI track data into an opus-style list of events.</span>
 <span class="sd">The options:</span>
 <span class="sd">  &#39;exclude&#39; is a list of event types which will be ignored SHOULD BE A SET</span>
 <span class="sd">  &#39;include&#39; (and no exclude), makes exclude a list</span>
@@ -2598,7 +2604,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             <span class="c1"># fe -- Active sense.  no data.</span>
             <span class="c1"># f4 f5 f9 fd -- unallocated</span>
 
-<span class="w">            </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+            <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        elif (first_byte &gt; 0xF0) { # Some unknown kinda F-series event ####</span>
 <span class="sd">            # Here we only produce a one-byte piece of raw data.</span>
 <span class="sd">            # But the encoder for &#39;raw_data&#39; accepts any length of it.</span>
@@ -2868,8 +2874,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">#	pjb.com.au</span>
 <span class="c1">#</span>
 <span class="c1">#	Project Los Angeles</span>
-<span class="c1">#	Tegridy Code 2021</span>
-<span class="c1"># https://github.com/Tegridy-Code/Project-Los-Angeles</span>
+<span class="c1">#	Tegridy Code 2025</span>
+<span class="c1">#</span>
+<span class="c1">#   https://github.com/Tegridy-Code/Project-Los-Angeles</span>
 <span class="c1">#</span>
 <span class="c1">###################################################################################</span>
 <span class="c1">###################################################################################</span>
@@ -2912,6 +2919,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
+<span class="kn">import</span> <span class="nn">psutil</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
 <span class="c1">###################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># Original TMIDI Tegridy helper functions</span>
@@ -2920,7 +2931,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_TXT_to_INT_Converter</span><span class="p">(</span><span class="n">input_TXT_string</span><span class="p">,</span> <span class="n">line_by_line_INT_string</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_INT</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy TXT to Intergers Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy TXT to Intergers Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input TXT string in the TMIDI-TXT format</span>
 
@@ -2969,7 +2980,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_INT_to_TXT_Converter</span><span class="p">(</span><span class="n">input_INT_list</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Intergers to TXT Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Intergers to TXT Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: List of intergers in TMIDI-TXT-INT format</span>
 <span class="sd">    Output: Decoded TXT string in TMIDI-TXT format</span>
@@ -2987,7 +2998,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_INT_String_to_TXT_Converter</span><span class="p">(</span><span class="n">input_INT_String</span><span class="p">,</span> <span class="n">line_by_line_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Intergers String to TXT Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Intergers String to TXT Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: List of intergers in TMIDI-TXT-INT-String format</span>
 <span class="sd">    Output: Decoded TXT string in TMIDI-TXT format</span>
@@ -3025,7 +3036,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                   <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">,</span>
                                   <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy SONG to MIDI Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy SONG to MIDI Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input SONG in TMIDI SONG/MIDI.py Score format</span>
 <span class="sd">           Output MIDI Track 0 name / MIDI Signature</span>
@@ -3091,7 +3102,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                       <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
                                       <span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy milisecond SONG to MIDI Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy milisecond SONG to MIDI Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input ms SONG in TMIDI ms SONG/MIDI.py ms Score format</span>
 <span class="sd">           Output MIDI Track 0 name / MIDI Signature</span>
@@ -3193,7 +3204,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
 
   <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ms_song</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]</span>
 
@@ -3272,7 +3283,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                         <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">,</span>
                                         <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy SONG to Full MIDI Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy SONG to Full MIDI Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input SONG in Full TMIDI SONG/MIDI.py Score format</span>
 <span class="sd">           Output MIDI Track 0 name / MIDI Signature</span>
@@ -3314,7 +3325,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_File_Time_Stamp</span><span class="p">(</span><span class="n">input_file_name</span><span class="o">=</span><span class="s1">&#39;File_Created_on_&#39;</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy File Time Stamp</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy File Time Stamp</span>
 <span class="sd">     </span>
 <span class="sd">  Input: Full path and file name without extention</span>
 <span class="sd">         File extension</span>
@@ -3340,7 +3351,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Any_Pickle_File_Writer</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="n">input_file_name</span><span class="o">=</span><span class="s1">&#39;TMIDI_Pickle_File&#39;</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy Pickle File Writer</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy Pickle File Writer</span>
 <span class="sd">     </span>
 <span class="sd">  Input: Data to write (I.e. a list)</span>
 <span class="sd">         Full path and file name without extention</span>
@@ -3371,7 +3382,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Any_Pickle_File_Reader</span><span class="p">(</span><span class="n">input_file_name</span><span class="o">=</span><span class="s1">&#39;TMIDI_Pickle_File&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;.pickle&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy Pickle File Loader</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy Pickle File Loader</span>
 <span class="sd">     </span>
 <span class="sd">  Input: Full path and file name with or without extention</span>
 <span class="sd">         File extension if different from default .pickle</span>
@@ -3429,7 +3440,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">reset_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
+    <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
   
 <span class="c1">###########</span>
@@ -3853,7 +3864,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                     <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                     <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
+    <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2020&#39;&#39;&#39;</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tegridy Optimus TXT to Notes Converter&#39;</span><span class="p">)</span>
@@ -4035,7 +4046,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">output_MIDI_channels</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Input: data as a flat chords list of flat chords lists</span>
+  <span class="sd">&#39;&#39;&#39;Input: data as a flat chords list of flat chords lists</span>
 
 <span class="sd">  Output: TXT string</span>
 <span class="sd">          INTs</span>
@@ -4119,7 +4130,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Optimus_Squash</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">simulate_velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mono_compression</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Input: Flat chords list</span>
+  <span class="sd">&#39;&#39;&#39;Input: Flat chords list</span>
 <span class="sd">            Simulate velocity or not</span>
 <span class="sd">            Mono-compression enabled or disabled</span>
 <span class="sd">            </span>
@@ -4178,7 +4189,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">calculate_full_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Optimus Signature</span>
+    <span class="sd">&#39;&#39;&#39;Optimus Signature</span>
 
 <span class="sd">    ---In the name of the search for a perfect score slice signature---</span>
 <span class="sd">     </span>
@@ -4242,7 +4253,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_FastSearch</span><span class="p">(</span><span class="n">needle</span><span class="p">,</span> <span class="n">haystack</span><span class="p">,</span> <span class="n">randomize</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="sd">  Input: Needle iterable</span>
 <span class="sd">         Haystack iterable</span>
@@ -4274,7 +4285,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Chord_Match</span><span class="p">(</span><span class="n">chord1</span><span class="p">,</span> <span class="n">chord2</span><span class="p">,</span> <span class="n">match_type</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Chord Match</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Chord Match</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Two chords to evaluate</span>
 <span class="sd">           Match type: 2 = duration, channel, pitch, velocity</span>
@@ -4330,7 +4341,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Last_Chord_Finder</span><span class="p">(</span><span class="n">chords_list</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Last Chord Finder</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Last Chord Finder</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 
@@ -4386,7 +4397,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Chords_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">remove_single_notes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Shuffle pairs (recommended)</span>
@@ -4465,7 +4476,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Chords_List_Music_Features</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">st_dur_div</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pitch_div</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">vel_div</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Chords List Music Features</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Chords List Music Features</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 
@@ -4554,7 +4565,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Transform</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">to_pitch</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">to_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Transform</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Transform</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Desired average pitch (-1 == no change)</span>
@@ -4591,7 +4602,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">match_type</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list / SONG</span>
 <span class="sd">           Match type according to &#39;note&#39; event of MIDI.py</span>
@@ -4628,7 +4639,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Score_Chords_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">remove_single_notes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Shuffle pairs (recommended)</span>
@@ -4683,7 +4694,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Sliced_Score_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Sliced Score Pairs Generator</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Sliced Score Pairs Generator</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Number of miliseconds per slice</span>
@@ -4736,7 +4747,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">start_time_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                               <span class="n">durations_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Timings Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Timings Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Max delta time allowed between notes</span>
@@ -4799,7 +4810,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_Score_Slicer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">overlap_notes</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">overlap_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Score Slicer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Slicer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Number of miliseconds per slice</span>
@@ -4862,7 +4873,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_TXT_Tokenizer</span><span class="p">(</span><span class="n">input_TXT_string</span><span class="p">,</span> <span class="n">line_by_line_TXT_string</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: TXT String</span>
 
@@ -4898,7 +4909,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_TXT_DeTokenizer</span><span class="p">(</span><span class="n">input_Tokenized_TXT_string</span><span class="p">,</span> <span class="n">RDIC</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Tokenized TXT String</span>
 <span class="sd">           </span>
@@ -4929,7 +4940,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">Tegridy_List_Slicer</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="n">slices_length_in_notes</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Input: List to slice</span>
+  <span class="sd">&#39;&#39;&#39;Input: List to slice</span>
 <span class="sd">            Desired slices length in notes</span>
 <span class="sd">     </span>
 <span class="sd">     Output: Sliced list of lists</span>
@@ -5575,7 +5586,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">return_text_and_lyric_events</span><span class="o">=</span><span class="kc">False</span>
                             <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;TMIDIX Advanced Score Processor&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;TMIDIX Advanced Score Processor&#39;&#39;&#39;</span>
 
   <span class="c1"># Score data types detection</span>
 
@@ -12604,9 +12615,184 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">matrix</span>
 
 <span class="c1">###################################################################################</span>
-<span class="c1">#  </span>
+
+<span class="k">def</span> <span class="nf">vertical_list_search</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+
+    <span class="n">src_list</span> <span class="o">=</span> <span class="n">list_of_lists</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src_list</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">trg_list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    
+    <span class="n">num_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trg_list</span><span class="p">)</span>
+    
+    <span class="n">row_sets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">src_list</span><span class="p">]</span>
+    
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rows</span> <span class="o">-</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trg_list</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">row_sets</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]:</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+                
+        <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">k</span><span class="p">)))</span>
+            
+    <span class="k">return</span> <span class="n">results</span>
+    
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">smooth_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+
+    <span class="n">smoothed</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">window_size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="n">window_size</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">window</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        
+        <span class="n">smoothed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">)))</span>
+        
+    <span class="k">return</span> <span class="n">smoothed</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">is_mostly_wide_peaks_and_valleys</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> 
+                                     <span class="n">min_range</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> 
+                                     <span class="n">threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> 
+                                     <span class="n">smoothing_window</span><span class="o">=</span><span class="mi">5</span>
+                                    <span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">smoothed_values</span> <span class="o">=</span> <span class="n">smooth_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">smoothing_window</span><span class="p">)</span>
+
+    <span class="n">value_range</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothed_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">smoothed_values</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value_range</span> <span class="o">&lt;</span> <span class="n">min_range</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">smoothed_values</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">trend_types</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">smoothed_values</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">trend_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">trend_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trend_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">trend_count</span> <span class="o">=</span> <span class="n">trend_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">trend_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">proportion</span> <span class="o">=</span> <span class="n">trend_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trend_types</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">proportion</span> <span class="o">&gt;=</span> <span class="n">threshold</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">system_memory_utilization</span><span class="p">(</span><span class="n">return_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RAM memory </span><span class="si">% u</span><span class="s1">sed:&#39;</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RAM Used (GB):&#39;</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">create_files_list</span><span class="p">(</span><span class="n">datasets_paths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;./&#39;</span><span class="p">],</span>
+                      <span class="n">files_exts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;.mid&#39;</span><span class="p">,</span> <span class="s1">&#39;.midi&#39;</span><span class="p">,</span> <span class="s1">&#39;.kar&#39;</span><span class="p">,</span> <span class="s1">&#39;.MID&#39;</span><span class="p">,</span> <span class="s1">&#39;.MIDI&#39;</span><span class="p">,</span> <span class="s1">&#39;.KAR&#39;</span><span class="p">],</span>
+                      <span class="n">randomize_files_list</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                     <span class="p">):</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Searching for files...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This may take a while on a large dataset in particular...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+    <span class="n">filez_set</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">files_exts</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">files_exts</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">dataset_addr</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">datasets_paths</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dataset_addr</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filez_set</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">files_exts</span><span class="p">):</span>
+                    <span class="n">filez_set</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="n">filez</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filez_set</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">filez</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">randomize_files_list</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Randomizing file list...&#39;</span><span class="p">)</span>
+                
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">filez</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+                
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">filez</span><span class="p">),</span> <span class="s1">&#39;files.&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+ 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find any files...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Please check dataset dirs and files extensions...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">filez</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">has_consecutive_trend</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="n">increasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">decreasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">increasing_streak</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">decreasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+            
+        <span class="k">elif</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">decreasing_streak</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">increasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">increasing_streak</span> <span class="o">=</span> <span class="n">decreasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">increasing_streak</span> <span class="o">==</span> <span class="n">count</span> <span class="ow">or</span> <span class="n">decreasing_streak</span> <span class="o">==</span> <span class="n">count</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="kc">False</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1"># This is the end of the TMIDI X Python module</span>
-<span class="c1">#</span>
 <span class="c1">###################################################################################</span>
 </pre></div>
 
@@ -13092,7 +13278,7 @@ Tegridy Code 2021</p></div>
                               <span class="n">output_MIDI_channels</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Input: data as a flat chords list of flat chords lists</span>
+  <span class="sd">&#39;&#39;&#39;Input: data as a flat chords list of flat chords lists</span>
 
 <span class="sd">  Output: TXT string</span>
 <span class="sd">          INTs</span>
@@ -13216,7 +13402,7 @@ Tegridy Code 2021</p></div>
                               <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">reset_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
+    <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2021&#39;&#39;&#39;</span>
   
 <span class="c1">###########</span>
@@ -13654,7 +13840,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Optimus_Signature" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Optimus_Signature</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">calculate_full_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Optimus Signature</span>
+    <span class="sd">&#39;&#39;&#39;Optimus Signature</span>
 
 <span class="sd">    ---In the name of the search for a perfect score slice signature---</span>
 <span class="sd">     </span>
@@ -13740,7 +13926,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Optimus_Squash" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Optimus_Squash</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">simulate_velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mono_compression</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Input: Flat chords list</span>
+  <span class="sd">&#39;&#39;&#39;Input: Flat chords list</span>
 <span class="sd">            Simulate velocity or not</span>
 <span class="sd">            Mono-compression enabled or disabled</span>
 <span class="sd">            </span>
@@ -13826,7 +14012,7 @@ Tegridy Code 2020</p></div>
                                     <span class="n">karaoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                     <span class="n">zero_token</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
+    <span class="sd">&#39;&#39;&#39;Project Los Angeles</span>
 <span class="sd">       Tegridy Code 2020&#39;&#39;&#39;</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tegridy Optimus TXT to Notes Converter&#39;</span><span class="p">)</span>
@@ -14023,7 +14209,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Any_Pickle_File_Reader" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Any_Pickle_File_Reader</span><span class="p">(</span><span class="n">input_file_name</span><span class="o">=</span><span class="s1">&#39;TMIDI_Pickle_File&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;.pickle&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy Pickle File Loader</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy Pickle File Loader</span>
 <span class="sd">     </span>
 <span class="sd">  Input: Full path and file name with or without extention</span>
 <span class="sd">         File extension if different from default .pickle</span>
@@ -14077,7 +14263,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Any_Pickle_File_Writer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Any_Pickle_File_Writer</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="n">input_file_name</span><span class="o">=</span><span class="s1">&#39;TMIDI_Pickle_File&#39;</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy Pickle File Writer</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy Pickle File Writer</span>
 <span class="sd">     </span>
 <span class="sd">  Input: Data to write (I.e. a list)</span>
 <span class="sd">         Full path and file name without extention</span>
@@ -14135,7 +14321,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Chord_Match" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Chord_Match</span><span class="p">(</span><span class="n">chord1</span><span class="p">,</span> <span class="n">chord2</span><span class="p">,</span> <span class="n">match_type</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Chord Match</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Chord Match</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Two chords to evaluate</span>
 <span class="sd">           Match type: 2 = duration, channel, pitch, velocity</span>
@@ -14222,7 +14408,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Chords_Generator" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Chords_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">remove_single_notes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Shuffle pairs (recommended)</span>
@@ -14322,7 +14508,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Chords_List_Music_Features" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Chords_List_Music_Features</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">st_dur_div</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pitch_div</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">vel_div</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Chords List Music Features</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Chords List Music Features</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 
@@ -14434,7 +14620,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_FastSearch" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_FastSearch</span><span class="p">(</span><span class="n">needle</span><span class="p">,</span> <span class="n">haystack</span><span class="p">,</span> <span class="n">randomize</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="sd">  Input: Needle iterable</span>
 <span class="sd">         Haystack iterable</span>
@@ -14488,7 +14674,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_File_Time_Stamp" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_File_Time_Stamp</span><span class="p">(</span><span class="n">input_file_name</span><span class="o">=</span><span class="s1">&#39;File_Created_on_&#39;</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy File Time Stamp</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy File Time Stamp</span>
 <span class="sd">     </span>
 <span class="sd">  Input: Full path and file name without extention</span>
 <span class="sd">         File extension</span>
@@ -14535,7 +14721,7 @@ Tegridy Code 2020</p></div>
   <div id="source-TMIDIX.Tegridy_INT_String_to_TXT_Converter" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_INT_String_to_TXT_Converter</span><span class="p">(</span><span class="n">input_INT_String</span><span class="p">,</span> <span class="n">line_by_line_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Intergers String to TXT Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Intergers String to TXT Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: List of intergers in TMIDI-TXT-INT-String format</span>
 <span class="sd">    Output: Decoded TXT string in TMIDI-TXT format</span>
@@ -14587,7 +14773,7 @@ Tegridy Code 2020</p></div>
   <div id="source-TMIDIX.Tegridy_INT_to_TXT_Converter" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_INT_to_TXT_Converter</span><span class="p">(</span><span class="n">input_INT_list</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Intergers to TXT Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Intergers to TXT Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: List of intergers in TMIDI-TXT-INT format</span>
 <span class="sd">    Output: Decoded TXT string in TMIDI-TXT format</span>
@@ -14628,7 +14814,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Last_Chord_Finder" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Last_Chord_Finder</span><span class="p">(</span><span class="n">chords_list</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Last Chord Finder</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Last Chord Finder</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 
@@ -14705,7 +14891,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_List_Slicer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_List_Slicer</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="n">slices_length_in_notes</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Input: List to slice</span>
+  <span class="sd">&#39;&#39;&#39;Input: List to slice</span>
 <span class="sd">            Desired slices length in notes</span>
 <span class="sd">     </span>
 <span class="sd">     Output: Sliced list of lists</span>
@@ -14744,7 +14930,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_MIDI_Zip_Notes_Summarizer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_MIDI_Zip_Notes_Summarizer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">match_type</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy MIDI Zip Notes Summarizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list / SONG</span>
 <span class="sd">           Match type according to &#39;note&#39; event of MIDI.py</span>
@@ -14814,7 +15000,7 @@ Tegridy Code 2023</p></div>
                                         <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">,</span>
                                         <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy SONG to Full MIDI Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy SONG to Full MIDI Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input SONG in Full TMIDI SONG/MIDI.py Score format</span>
 <span class="sd">           Output MIDI Track 0 name / MIDI Signature</span>
@@ -14891,7 +15077,7 @@ Tegridy Code 2020</p></div>
                                   <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">,</span>
                                   <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy SONG to MIDI Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy SONG to MIDI Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input SONG in TMIDI SONG/MIDI.py Score format</span>
 <span class="sd">           Output MIDI Track 0 name / MIDI Signature</span>
@@ -14973,7 +15159,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Score_Chords_Pairs_Generator" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Score_Chords_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">remove_single_notes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Chords Pairs Generator</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Shuffle pairs (recommended)</span>
@@ -15051,7 +15237,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Score_Slicer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Score_Slicer</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">overlap_notes</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">overlap_chords</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Score Slicer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Score Slicer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Number of miliseconds per slice</span>
@@ -15137,7 +15323,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Sliced_Score_Pairs_Generator" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Sliced_Score_Pairs_Generator</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">number_of_miliseconds_per_slice</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">shuffle_pairs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Sliced Score Pairs Generator</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Sliced Score Pairs Generator</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Number of miliseconds per slice</span>
@@ -15244,7 +15430,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_TXT_DeTokenizer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_TXT_DeTokenizer</span><span class="p">(</span><span class="n">input_Tokenized_TXT_string</span><span class="p">,</span> <span class="n">RDIC</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Tokenized TXT String</span>
 <span class="sd">           </span>
@@ -15296,7 +15482,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_TXT_Tokenizer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_TXT_Tokenizer</span><span class="p">(</span><span class="n">input_TXT_string</span><span class="p">,</span> <span class="n">line_by_line_TXT_string</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy TXT Tokenizer</span>
 <span class="sd">     </span>
 <span class="sd">    Input: TXT String</span>
 
@@ -15361,7 +15547,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_TXT_to_INT_Converter" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_TXT_to_INT_Converter</span><span class="p">(</span><span class="n">input_TXT_string</span><span class="p">,</span> <span class="n">line_by_line_INT_string</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_INT</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy TXT to Intergers Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy TXT to Intergers Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input TXT string in the TMIDI-TXT format</span>
 
@@ -15438,7 +15624,7 @@ Tegridy Code 2021</p></div>
                               <span class="n">start_time_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                               <span class="n">durations_multiplier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Timings Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Timings Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Max delta time allowed between notes</span>
@@ -15524,7 +15710,7 @@ Tegridy Code 2021</p></div>
   <div id="source-TMIDIX.Tegridy_Transform" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Tegridy_Transform</span><span class="p">(</span><span class="n">chords_list</span><span class="p">,</span> <span class="n">to_pitch</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">to_velocity</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy Transform</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy Transform</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Flat chords list</span>
 <span class="sd">           Desired average pitch (-1 == no change)</span>
@@ -15598,7 +15784,7 @@ Tegridy Code 2024</p></div>
                                       <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
                                       <span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Tegridy milisecond SONG to MIDI Converter</span>
+    <span class="sd">&#39;&#39;&#39;Tegridy milisecond SONG to MIDI Converter</span>
 <span class="sd">     </span>
 <span class="sd">    Input: Input ms SONG in TMIDI ms SONG/MIDI.py ms Score format</span>
 <span class="sd">           Output MIDI Track 0 name / MIDI Signature</span>
@@ -16571,7 +16757,7 @@ Tegridy Code 2024</p></div>
                               <span class="n">return_text_and_lyric_events</span><span class="o">=</span><span class="kc">False</span>
                             <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;TMIDIX Advanced Score Processor&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;TMIDIX Advanced Score Processor&#39;&#39;&#39;</span>
 
   <span class="c1"># Score data types detection</span>
 
@@ -18738,6 +18924,75 @@ Tegridy Code 2024</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.create_files_list">
+    <p>def <span class="ident">create_files_list</span>(</p><p>datasets_paths=[&#39;./&#39;], files_exts=[&#39;.mid&#39;, &#39;.midi&#39;, &#39;.kar&#39;, &#39;.MID&#39;, &#39;.MIDI&#39;, &#39;.KAR&#39;], randomize_files_list=True, verbose=True)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.create_files_list', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.create_files_list" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">create_files_list</span><span class="p">(</span><span class="n">datasets_paths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;./&#39;</span><span class="p">],</span>
+                      <span class="n">files_exts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;.mid&#39;</span><span class="p">,</span> <span class="s1">&#39;.midi&#39;</span><span class="p">,</span> <span class="s1">&#39;.kar&#39;</span><span class="p">,</span> <span class="s1">&#39;.MID&#39;</span><span class="p">,</span> <span class="s1">&#39;.MIDI&#39;</span><span class="p">,</span> <span class="s1">&#39;.KAR&#39;</span><span class="p">],</span>
+                      <span class="n">randomize_files_list</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+                     <span class="p">):</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Searching for files...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This may take a while on a large dataset in particular...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+    <span class="n">filez_set</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">files_exts</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">files_exts</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">dataset_addr</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">datasets_paths</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dataset_addr</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filez_set</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">files_exts</span><span class="p">):</span>
+                    <span class="n">filez_set</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="n">filez</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filez_set</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">filez</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">randomize_files_list</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Randomizing file list...&#39;</span><span class="p">)</span>
+                
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">filez</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+                
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">filez</span><span class="p">),</span> <span class="s1">&#39;files.&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+ 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find any files...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Please check dataset dirs and files extensions...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">filez</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.create_similarity_matrix">
     <p>def <span class="ident">create_similarity_matrix</span>(</p><p>list_of_values, matrix_length=0)</p>
     </div>
@@ -20821,7 +21076,7 @@ The type of track (opus or score) is autodetected.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.event2alsaseq', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.event2alsaseq" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">event2alsaseq</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   <span class="c1"># 5.5</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
 <span class="sd">http://pp.com.mx/python/alsaseq</span>
 <span class="sd">The type of track (opus or score) is autodetected.</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -21903,7 +22158,7 @@ The type of track (opus or score) is autodetected.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.grep', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.grep" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">grep</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,[],]</span>
@@ -22129,6 +22384,49 @@ The type of track (opus or score) is autodetected.</p></div>
       <span class="n">harm_escore_notes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;note&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dur</span><span class="p">,</span> <span class="n">harmonized_tones_chords_channel</span><span class="p">,</span> <span class="n">ptc</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">harmonized_tones_chords_patch</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">harm_escore_notes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.has_consecutive_trend">
+    <p>def <span class="ident">has_consecutive_trend</span>(</p><p>nums, count)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.has_consecutive_trend', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.has_consecutive_trend" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">has_consecutive_trend</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="n">increasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">decreasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">increasing_streak</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">decreasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+            
+        <span class="k">elif</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">decreasing_streak</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">increasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">increasing_streak</span> <span class="o">=</span> <span class="n">decreasing_streak</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">increasing_streak</span> <span class="o">==</span> <span class="n">count</span> <span class="ow">or</span> <span class="n">decreasing_streak</span> <span class="o">==</span> <span class="n">count</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="kc">False</span>
 </pre></div>
 
   </div>
@@ -22379,6 +22677,61 @@ The type of track (opus or score) is autodetected.</p></div>
     
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="c1"># Bad integer code</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.is_mostly_wide_peaks_and_valleys">
+    <p>def <span class="ident">is_mostly_wide_peaks_and_valleys</span>(</p><p>values, min_range=32, threshold=0.7, smoothing_window=5)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.is_mostly_wide_peaks_and_valleys', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.is_mostly_wide_peaks_and_valleys" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">is_mostly_wide_peaks_and_valleys</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> 
+                                     <span class="n">min_range</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> 
+                                     <span class="n">threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> 
+                                     <span class="n">smoothing_window</span><span class="o">=</span><span class="mi">5</span>
+                                    <span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">smoothed_values</span> <span class="o">=</span> <span class="n">smooth_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">smoothing_window</span><span class="p">)</span>
+
+    <span class="n">value_range</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothed_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">smoothed_values</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value_range</span> <span class="o">&lt;</span> <span class="n">min_range</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">smoothed_values</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">trend_types</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">smoothed_values</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">trend_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">smoothed_values</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">trend_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trend_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">trend_count</span> <span class="o">=</span> <span class="n">trend_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">trend_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">proportion</span> <span class="o">=</span> <span class="n">trend_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trend_types</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">proportion</span> <span class="o">&gt;=</span> <span class="n">threshold</span>
 </pre></div>
 
   </div>
@@ -22677,7 +23030,7 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.midi2ms_score', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.midi2ms_score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2ms_score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot; with one beat per second and one</span>
 <span class="sd">tick per millisecond, using midi2opus() then to_millisecs()</span>
 <span class="sd">then opus2score()</span>
@@ -22705,7 +23058,7 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.midi2opus', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.midi2opus" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
 <span class="sd">&quot;opus&quot; format, see opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="n">my_midi</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">midi</span><span class="p">)</span>
@@ -22766,7 +23119,7 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.midi2score', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.midi2score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot;, using midi2opus() then opus2score()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2score</span><span class="p">(</span><span class="n">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="p">,</span> <span class="n">do_not_check_MIDI_signature</span><span class="p">))</span>
@@ -22797,7 +23150,7 @@ tick per millisecond</p></div>
                                 <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
                                 <span class="n">do_not_check_MIDI_signature</span><span class="o">=</span><span class="kc">False</span>
                                 <span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a single track &quot;score&quot; with 16 instruments and one beat per second and one</span>
 <span class="sd">tick per millisecond</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -23200,7 +23553,7 @@ sys.stdout.buffer.write(my_midi)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.opus2midi', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.opus2midi" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">opus2midi</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[],</span> <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of midi-events, and each event is itself a list; see above.</span>
 <span class="sd">opus2midi() returns a bytestring of the MIDI, which can then be</span>
@@ -23258,7 +23611,7 @@ see opus2midi() and score2opus().</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.opus2score', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.opus2score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">opus2score</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
 <span class="sd">see opus2midi() and score2opus().</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opus</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -23713,7 +24066,7 @@ see opus2midi() and score2opus().</p></div>
                   <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;Tegridy ms SONG plotter/vizualizer&#39;&#39;&#39;</span>
 
   <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ms_song</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]</span>
 
@@ -24062,7 +24415,7 @@ see opus2midi() and score2opus().</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.score2midi', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.score2midi" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score2midi</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates a &quot;score&quot; into MIDI, using score2opus() then opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2midi</span><span class="p">(</span><span class="n">score2opus</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">text_encoding</span><span class="p">),</span> <span class="n">text_encoding</span><span class="p">)</span>
@@ -24105,7 +24458,7 @@ my_opus = score2opus(my_score)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.score2opus', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.score2opus" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score2opus</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_encoding</span><span class="o">=</span><span class="s1">&#39;ISO-8859-1&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of score-events, and each event is itself a list.  A score-event</span>
@@ -24203,7 +24556,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.score2stats', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.score2stats" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score2stats</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
 <span class="sd">bank_select (list of tuples (msb,lsb)),</span>
 <span class="sd">channels_by_track (list of lists), channels_total (set),</span>
 <span class="sd">general_midi_mode (list),</span>
@@ -24408,6 +24761,39 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
     <span class="n">e</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">esn_octave</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span> <span class="o">+</span> <span class="n">smoothed</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
   <span class="k">return</span> <span class="n">smoothed_score</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.smooth_values">
+    <p>def <span class="ident">smooth_values</span>(</p><p>values, window_size=3)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.smooth_values', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.smooth_values" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">smooth_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+
+    <span class="n">smoothed</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">window_size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="n">window_size</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">window</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        
+        <span class="n">smoothed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">)))</span>
+        
+    <span class="k">return</span> <span class="n">smoothed</span>
 </pre></div>
 
   </div>
@@ -24849,6 +25235,33 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TMIDIX.system_memory_utilization">
+    <p>def <span class="ident">system_memory_utilization</span>(</p><p>return_dict=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.system_memory_utilization', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.system_memory_utilization" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">system_memory_utilization</span><span class="p">(</span><span class="n">return_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RAM memory </span><span class="si">% u</span><span class="s1">sed:&#39;</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RAM Used (GB):&#39;</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TMIDIX.t_to_n">
     <p>def <span class="ident">t_to_n</span>(</p><p>arr, si, t)</p>
     </div>
@@ -24893,7 +25306,7 @@ but it does make it easy to mix different scores together.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.to_millisecs', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.to_millisecs" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">to_millisecs</span><span class="p">(</span><span class="n">old_opus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">desired_time_in_ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pass_old_timings_events</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
 <span class="sd">per second and one tick per millisecond.  This makes it</span>
 <span class="sd">hard to retrieve any information about beats or barlines,</span>
 <span class="sd">but it does make it easy to mix different scores together.</span>
@@ -25528,6 +25941,52 @@ but it does make it easy to mix different scores together.</p></div>
   <div id="source-TMIDIX.variance" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">mean_value</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">element</span> <span class="o">-</span> <span class="n">mean_value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.vertical_list_search">
+    <p>def <span class="ident">vertical_list_search</span>(</p><p>list_of_lists, trg_list)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.vertical_list_search', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.vertical_list_search" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">vertical_list_search</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
+
+    <span class="n">src_list</span> <span class="o">=</span> <span class="n">list_of_lists</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src_list</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">trg_list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    
+    <span class="n">num_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">src_list</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trg_list</span><span class="p">)</span>
+    
+    <span class="n">row_sets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">src_list</span><span class="p">]</span>
+    
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rows</span> <span class="o">-</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trg_list</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">row_sets</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]:</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+                
+        <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">k</span><span class="p">)))</span>
+            
+    <span class="k">return</span> <span class="n">results</span>
 </pre></div>
 
   </div>

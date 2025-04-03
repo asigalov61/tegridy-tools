@@ -868,7 +868,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
 .codehilite .gd { color: #A00000 } /* Generic.Deleted */
 .codehilite .ge { font-style: italic } /* Generic.Emph */
-.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
 .codehilite .gr { color: #E40000 } /* Generic.Error */
 .codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
 .codehilite .gi { color: #008400 } /* Generic.Inserted */
@@ -1079,6 +1078,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.filter_and_replace_values">filter_and_replace_values</a></li>
     <li class="mono"><a href="#TPLOTS.find_closest_points">find_closest_points</a></li>
     <li class="mono"><a href="#TPLOTS.find_shortest_constellation_path">find_shortest_constellation_path</a></li>
+    <li class="mono"><a href="#TPLOTS.find_token_path">find_token_path</a></li>
     <li class="mono"><a href="#TPLOTS.generate_colors">generate_colors</a></li>
     <li class="mono"><a href="#TPLOTS.generate_labels">generate_labels</a></li>
     <li class="mono"><a href="#TPLOTS.get_tokens_embeddings">get_tokens_embeddings</a></li>
@@ -1095,6 +1095,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.plot_points_constellation">plot_points_constellation</a></li>
     <li class="mono"><a href="#TPLOTS.plot_points_with_mst_lines">plot_points_with_mst_lines</a></li>
     <li class="mono"><a href="#TPLOTS.plot_square_matrix_points">plot_square_matrix_points</a></li>
+    <li class="mono"><a href="#TPLOTS.plot_tokens_embeddings_constellation">plot_tokens_embeddings_constellation</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_2d_distance">reduce_dimensionality_2d_distance</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_pca">reduce_dimensionality_pca</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_simple">reduce_dimensionality_simple</a></li>
@@ -1134,7 +1135,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_5"></h1>
 <h1 id="project-los-angeles">Project Los Angeles</h1>
 <h1 id="_6"></h1>
-<h1 id="tegridy-code-2024">Tegridy Code 2024</h1>
+<h1 id="tegridy-code-2025">Tegridy Code 2025</h1>
 <h1 id="_7"></h1>
 <h1 id="httpsgithubcomasigalov61tegridy-tools">https://github.com/asigalov61/tegridy-tools</h1>
 <h1 id="_8"></h1>
@@ -1160,7 +1161,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_18"></h1>
 <h1 id="critical-dependencies">Critical dependencies</h1>
 <h1 id="_19"></h1>
-<h1 id="pip-install-numpy">!pip install numpy</h1>
+<h1 id="pip-install-numpy1244">!pip install numpy==1.24.4</h1>
 <h1 id="pip-install-scipy">!pip install scipy</h1>
 <h1 id="pip-install-matplotlib">!pip install matplotlib</h1>
 <h1 id="pip-install-networkx">!pip install networkx</h1>
@@ -1183,12 +1184,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">################################################################################</span>
 <span class="sd">#</span>
 <span class="sd">#</span>
-<span class="sd">#	      Tegridy Plots Python Module (TPLOTS)</span>
-<span class="sd">#	      Version 1.0</span>
+<span class="sd">#	    Tegridy Plots Python Module (TPLOTS)</span>
+<span class="sd">#	    Version 1.0</span>
 <span class="sd">#</span>
-<span class="sd">#	      Project Los Angeles</span>
+<span class="sd">#	    Project Los Angeles</span>
 <span class="sd">#</span>
-<span class="sd">#	      Tegridy Code 2024</span>
+<span class="sd">#	    Tegridy Code 2025</span>
 <span class="sd">#</span>
 <span class="sd">#       https://github.com/asigalov61/tegridy-tools</span>
 <span class="sd">#</span>
@@ -1212,20 +1213,20 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">################################################################################</span>
 <span class="sd">################################################################################</span>
 <span class="sd">#</span>
-<span class="sd"># Critical dependencies</span>
+<span class="sd">#       Critical dependencies</span>
 <span class="sd">#</span>
-<span class="sd"># !pip install numpy</span>
-<span class="sd"># !pip install scipy</span>
-<span class="sd"># !pip install matplotlib</span>
-<span class="sd"># !pip install networkx</span>
-<span class="sd"># !pip3 install scikit-learn</span>
+<span class="sd">#       !pip install numpy==1.24.4</span>
+<span class="sd">#       !pip install scipy</span>
+<span class="sd">#       !pip install matplotlib</span>
+<span class="sd">#       !pip install networkx</span>
+<span class="sd">#       !pip3 install scikit-learn</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
 <span class="sd">#</span>
-<span class="sd"># Future critical dependencies</span>
+<span class="sd">#       Future critical dependencies</span>
 <span class="sd">#</span>
-<span class="sd"># !pip install umap-learn</span>
-<span class="sd"># !pip install alphashape</span>
+<span class="sd">#       !pip install umap-learn</span>
+<span class="sd">#       !pip install alphashape</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -1299,7 +1300,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                      <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tones chord type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1345,7 +1346,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
               <span class="n">return_tone_type_index</span><span class="o">=</span><span class="kc">True</span>
               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tone type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1367,7 +1368,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">find_closest_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">return_points</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Find closest 2D points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1401,7 +1402,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
                               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using t-SNE.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1419,7 +1420,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">compute_mst_edges</span><span class="p">(</span><span class="n">similarity_scores_list</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Computes the Minimum Spanning Tree (MST) edges based on the similarity scores.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   
@@ -1446,7 +1447,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                          <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary binary matrix to a square binary matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1471,7 +1472,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">square_matrix_points_colors</span><span class="p">(</span><span class="n">square_matrix_points</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns colors for square matrix points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1606,7 +1607,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">reduce_dimensionality_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using PCA.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1621,8 +1622,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                  <span class="n">return_medians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                  <span class="n">return_vars</span><span class="o">=</span><span class="kc">False</span>
                                  <span class="p">):</span>
-<span class="w">  </span>
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces dimensionality of the values in a simple way</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -1653,7 +1654,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">reduce_dimensionality_2d_distance</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using 2d distance</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -1689,7 +1690,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">reduce_dimensionality_simple_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using simple PCA</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -1738,7 +1739,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                      <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the shortest path between two points of the points constellation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1797,7 +1798,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
 
   <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ms_song</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]</span>
 
@@ -1880,7 +1881,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
 
   <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
 
@@ -1929,7 +1930,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                              <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                             <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Cosine similarities plot</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1965,7 +1966,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                                <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points with labels and MST lines.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2002,7 +2003,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points constellation</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2123,7 +2124,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                         <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                         <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary image matrix to a square image matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2320,8 +2321,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                       <span class="n">labels_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
                       <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                       <span class="p">):</span>
-<span class="w">  </span>
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Plot parsons code string</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -2434,6 +2435,113 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
   
 <span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">plot_tokens_embeddings_constellation</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">,</span>
+                                         <span class="n">start_token</span><span class="p">,</span>
+                                         <span class="n">end_token</span><span class="p">,</span>
+                                         <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                                         <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                                         <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots token embeddings constellation using MST and graph layout</span>
+<span class="sd">    without dimensionality reduction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">[</span><span class="n">start_token</span><span class="p">:</span><span class="n">end_token</span><span class="p">],</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
+    
+    <span class="n">token_labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_token</span><span class="p">,</span> <span class="n">end_token</span><span class="p">)]</span>
+
+    <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    
+    <span class="n">n</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">distance_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+    
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">kamada_kawai_layout</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+    
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">token_labels</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                     <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span>
+                     <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                     <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                     <span class="n">fontsize</span><span class="o">=</span><span class="n">labels_size</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                         <span class="p">[</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                         <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Token Embeddings Constellation with MST&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">labels_size</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">show_grid</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save_plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plot</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_token_path</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">,</span> 
+                    <span class="n">start_token</span><span class="p">,</span> 
+                    <span class="n">end_token</span><span class="p">,</span> 
+                    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                   <span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the path of tokens between start_token and end_token using</span>
+<span class="sd">    the Minimum Spanning Tree (MST) derived from the distance matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
+    
+    <span class="n">token_labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">))]</span>
+    
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total number of tokens:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">))</span>
+    
+    <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    
+    <span class="n">n</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">distance_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="n">token_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">start_token</span><span class="p">))</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="n">token_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">end_token</span><span class="p">))</span>
+        
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start or end token not found in the provided token labels.&quot;</span><span class="p">)</span>
+    
+    <span class="n">path_indices</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">end_idx</span><span class="p">)</span>
+    
+    <span class="n">token_path</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">token_labels</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">path_indices</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">token_path</span>
+
+<span class="c1">################################################################################</span>
 <span class="c1"># [WIP] Future dev functions</span>
 <span class="c1">################################################################################</span>
 
@@ -2542,9 +2650,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1">################################################################################</span>
-<span class="c1">#</span>
 <span class="c1"># This is the end of TPLOTS Python modules</span>
-<span class="c1">#</span>
 <span class="c1">################################################################################</span>
 </pre></div>
 
@@ -2717,7 +2823,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.compute_mst_edges" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compute_mst_edges</span><span class="p">(</span><span class="n">similarity_scores_list</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Computes the Minimum Spanning Tree (MST) edges based on the similarity scores.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   
@@ -2821,7 +2927,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.find_closest_points" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_closest_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">return_points</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Find closest 2D points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2874,7 +2980,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                      <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the shortest path between two points of the points constellation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2912,6 +3018,68 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="k">return</span> <span class="n">path_length</span>
 
     <span class="k">return</span> <span class="n">path</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TPLOTS.find_token_path">
+    <p>def <span class="ident">find_token_path</span>(</p><p>tokens_embeddings, start_token, end_token, verbose=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Finds the path of tokens between start_token and end_token using
+the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.find_token_path', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.find_token_path" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_token_path</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">,</span> 
+                    <span class="n">start_token</span><span class="p">,</span> 
+                    <span class="n">end_token</span><span class="p">,</span> 
+                    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                   <span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the path of tokens between start_token and end_token using</span>
+<span class="sd">    the Minimum Spanning Tree (MST) derived from the distance matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
+    
+    <span class="n">token_labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">))]</span>
+    
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total number of tokens:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">))</span>
+    
+    <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    
+    <span class="n">n</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">distance_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="n">token_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">start_token</span><span class="p">))</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="n">token_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">end_token</span><span class="p">))</span>
+        
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start or end token not found in the provided token labels.&quot;</span><span class="p">)</span>
+    
+    <span class="n">path_indices</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">end_idx</span><span class="p">)</span>
+    
+    <span class="n">token_path</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">token_labels</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">path_indices</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">token_path</span>
 </pre></div>
 
   </div>
@@ -3297,7 +3465,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                              <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                             <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Cosine similarities plot</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3358,7 +3526,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
 
   <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ms_song</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]</span>
 
@@ -3454,8 +3622,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                       <span class="n">labels_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
                       <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                       <span class="p">):</span>
-<span class="w">  </span>
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Plot parsons code string</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -3595,7 +3763,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points constellation</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3663,7 +3831,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                                <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points with labels and MST lines.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3720,7 +3888,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
 
   <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
 
@@ -3770,6 +3938,87 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
       
   <div class="item">
+    <div class="name def" id="TPLOTS.plot_tokens_embeddings_constellation">
+    <p>def <span class="ident">plot_tokens_embeddings_constellation</span>(</p><p>tokens_embeddings, start_token, end_token, plot_size=(10, 10), labels_size=12, show_grid=False, save_plot=&#39;&#39;)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Plots token embeddings constellation using MST and graph layout
+without dimensionality reduction.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.plot_tokens_embeddings_constellation', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.plot_tokens_embeddings_constellation" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plot_tokens_embeddings_constellation</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">,</span>
+                                         <span class="n">start_token</span><span class="p">,</span>
+                                         <span class="n">end_token</span><span class="p">,</span>
+                                         <span class="n">plot_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                                         <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                                         <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots token embeddings constellation using MST and graph layout</span>
+<span class="sd">    without dimensionality reduction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span><span class="n">tokens_embeddings</span><span class="p">[</span><span class="n">start_token</span><span class="p">:</span><span class="n">end_token</span><span class="p">],</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
+    
+    <span class="n">token_labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_token</span><span class="p">,</span> <span class="n">end_token</span><span class="p">)]</span>
+
+    <span class="n">mst</span> <span class="o">=</span> <span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    
+    <span class="n">n</span> <span class="o">=</span> <span class="n">distance_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">distance_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+    
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">kamada_kawai_layout</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+    
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">token_labels</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                     <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span>
+                     <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                     <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                     <span class="n">fontsize</span><span class="o">=</span><span class="n">labels_size</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mst</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                         <span class="p">[</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                         <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Token Embeddings Constellation with MST&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">labels_size</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">show_grid</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save_plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plot</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TPLOTS.reduce_dimensionality_2d_distance">
     <p>def <span class="ident">reduce_dimensionality_2d_distance</span>(</p><p>list_of_values, p=5)</p>
     </div>
@@ -3783,7 +4032,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.reduce_dimensionality_2d_distance" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_2d_distance</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using 2d distance</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -3823,7 +4072,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.reduce_dimensionality_pca" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using PCA.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3857,8 +4106,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                  <span class="n">return_medians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                  <span class="n">return_vars</span><span class="o">=</span><span class="kc">False</span>
                                  <span class="p">):</span>
-<span class="w">  </span>
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces dimensionality of the values in a simple way</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -3906,7 +4155,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.reduce_dimensionality_simple_pca" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_simple_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
+  <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using simple PCA</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -3950,7 +4199,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
                               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using t-SNE.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4050,7 +4299,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                          <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary binary matrix to a square binary matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4097,7 +4346,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                         <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                         <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary image matrix to a square image matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4158,7 +4407,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.square_matrix_points_colors" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">square_matrix_points_colors</span><span class="p">(</span><span class="n">square_matrix_points</span><span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns colors for square matrix points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4239,7 +4488,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
               <span class="n">return_tone_type_index</span><span class="o">=</span><span class="kc">True</span>
               <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tone type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4280,7 +4529,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                      <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="p">):</span>
 
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tones chord type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
