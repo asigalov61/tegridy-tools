@@ -4,12 +4,12 @@ r'''############################################################################
 ################################################################################
 #
 #
-#	      Tegridy Plots Python Module (TPLOTS)
-#	      Version 1.0
+#	    Tegridy Plots Python Module (TPLOTS)
+#	    Version 1.0
 #
-#	      Project Los Angeles
+#	    Project Los Angeles
 #
-#	      Tegridy Code 2024
+#	    Tegridy Code 2025
 #
 #       https://github.com/asigalov61/tegridy-tools
 #
@@ -33,20 +33,20 @@ r'''############################################################################
 ################################################################################
 ################################################################################
 #
-# Critical dependencies
+#       Critical dependencies
 #
-# !pip install numpy
-# !pip install scipy
-# !pip install matplotlib
-# !pip install networkx
-# !pip3 install scikit-learn
+#       !pip install numpy==1.24.4
+#       !pip install scipy
+#       !pip install matplotlib
+#       !pip install networkx
+#       !pip3 install scikit-learn
 #
 ################################################################################
 #
-# Future critical dependencies
+#       Future critical dependencies
 #
-# !pip install umap-learn
-# !pip install alphashape
+#       !pip install umap-learn
+#       !pip install alphashape
 #
 ################################################################################
 '''
@@ -1255,6 +1255,113 @@ def plot_parsons_code(parsons_code,
   plt.close()
   
 ################################################################################
+
+def plot_tokens_embeddings_constellation(tokens_embeddings,
+                                         start_token,
+                                         end_token,
+                                         plot_size=(10, 10),
+                                         labels_size=12,
+                                         show_grid=False,
+                                         save_plot=''):
+    
+    """
+    Plots token embeddings constellation using MST and graph layout
+    without dimensionality reduction.
+    """
+
+    distance_matrix = metrics.pairwise_distances(tokens_embeddings[start_token:end_token], metric='cosine')
+    
+    token_labels = [str(i) for i in range(start_token, end_token)]
+
+    mst = minimum_spanning_tree(distance_matrix).toarray()
+    
+    n = distance_matrix.shape[0]
+    G = nx.Graph()
+    
+    for i in range(n):
+        for j in range(n):
+            if mst[i, j] > 0:
+                weight = 1 / (distance_matrix[i, j] + 1e-8)
+                G.add_edge(i, j, weight=weight)
+    
+    pos = nx.kamada_kawai_layout(G, weight='weight')
+    
+    points = np.array([pos[i] for i in range(n)])
+    
+    plt.figure(figsize=plot_size)
+    plt.scatter(points[:, 0], points[:, 1], color='blue')
+    
+    for i, label in enumerate(token_labels):
+        plt.annotate(label, (points[i, 0], points[i, 1]),
+                     textcoords="offset points",
+                     xytext=(0, 10),
+                     ha='center',
+                     fontsize=labels_size)
+    
+    for i in range(n):
+        for j in range(n):
+            if mst[i, j] > 0:
+                plt.plot([points[i, 0], points[j, 0]],
+                         [points[i, 1], points[j, 1]],
+                         'k--', alpha=0.5)
+    
+    plt.title('Token Embeddings Constellation with MST', fontsize=labels_size)
+    plt.grid(show_grid)
+    
+    if save_plot:
+        plt.savefig(save_plot, bbox_inches="tight")
+        plt.close()
+        
+    else:
+        plt.show()
+        
+    plt.close()
+    
+################################################################################
+
+def find_token_path(tokens_embeddings, 
+                    start_token, 
+                    end_token, 
+                    verbose=False
+                   ):
+    
+    """
+    Finds the path of tokens between start_token and end_token using
+    the Minimum Spanning Tree (MST) derived from the distance matrix.
+    """
+
+    distance_matrix = metrics.pairwise_distances(tokens_embeddings, metric='cosine')
+    
+    token_labels = [str(i) for i in range(len(distance_matrix))]
+    
+    if verbose:
+        print('Total number of tokens:', len(distance_matrix))
+    
+    mst = minimum_spanning_tree(distance_matrix).toarray()
+    
+    n = distance_matrix.shape[0]
+    G = nx.Graph()
+    
+    for i in range(n):
+        for j in range(n):
+            if mst[i, j] > 0:
+                weight = 1 / (distance_matrix[i, j] + 1e-8)
+                G.add_edge(i, j, weight=weight)
+    
+    try:
+        start_idx = token_labels.index(str(start_token))
+        end_idx = token_labels.index(str(end_token))
+        
+    except ValueError:
+        raise ValueError("Start or end token not found in the provided token labels.")
+    
+    path_indices = nx.shortest_path(G, source=start_idx, target=end_idx)
+    
+    token_path = [int(token_labels[idx]) for idx in path_indices]
+    
+    return token_path
+
+################################################################################
 # [WIP] Future dev functions
 ################################################################################
 
@@ -1363,7 +1470,5 @@ plt.show()
 '''
 
 ################################################################################
-#
 # This is the end of TPLOTS Python modules
-#
 ################################################################################
