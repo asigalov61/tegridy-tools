@@ -1096,6 +1096,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TPLOTS.plot_points_with_mst_lines">plot_points_with_mst_lines</a></li>
     <li class="mono"><a href="#TPLOTS.plot_square_matrix_points">plot_square_matrix_points</a></li>
     <li class="mono"><a href="#TPLOTS.plot_tokens_embeddings_constellation">plot_tokens_embeddings_constellation</a></li>
+    <li class="mono"><a href="#TPLOTS.plot_tree_horizontal">plot_tree_horizontal</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_2d_distance">reduce_dimensionality_2d_distance</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_pca">reduce_dimensionality_pca</a></li>
     <li class="mono"><a href="#TPLOTS.reduce_dimensionality_simple">reduce_dimensionality_simple</a></li>
@@ -1300,7 +1301,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                      <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tones chord type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1346,7 +1347,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
               <span class="n">return_tone_type_index</span><span class="o">=</span><span class="kc">True</span>
               <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tone type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1368,7 +1369,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">find_closest_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">return_points</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Find closest 2D points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1402,7 +1403,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
                               <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using t-SNE.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1420,7 +1421,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">compute_mst_edges</span><span class="p">(</span><span class="n">similarity_scores_list</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Computes the Minimum Spanning Tree (MST) edges based on the similarity scores.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   
@@ -1447,7 +1448,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                          <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary binary matrix to a square binary matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1472,7 +1473,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">square_matrix_points_colors</span><span class="p">(</span><span class="n">square_matrix_points</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns colors for square matrix points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1607,7 +1608,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">reduce_dimensionality_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using PCA.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1622,8 +1623,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                  <span class="n">return_medians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                  <span class="n">return_vars</span><span class="o">=</span><span class="kc">False</span>
                                  <span class="p">):</span>
-  
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces dimensionality of the values in a simple way</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -1654,7 +1655,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">reduce_dimensionality_2d_distance</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using 2d distance</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -1690,7 +1691,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">reduce_dimensionality_simple_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using simple PCA</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -1739,7 +1740,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                      <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the shortest path between two points of the points constellation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1798,7 +1799,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                   <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
 
   <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ms_song</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]</span>
 
@@ -1881,7 +1882,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                               <span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
 
   <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
 
@@ -1930,7 +1931,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                              <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                             <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Cosine similarities plot</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -1966,7 +1967,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                                <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points with labels and MST lines.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2003,7 +2004,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                               <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                               <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points constellation</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2124,7 +2125,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                         <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                         <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary image matrix to a square image matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2321,8 +2322,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                       <span class="n">labels_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
                       <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                       <span class="p">):</span>
-  
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Plot parsons code string</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -2443,8 +2444,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                          <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
                                          <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                          <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-    
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots token embeddings constellation using MST and graph layout</span>
 <span class="sd">    without dimensionality reduction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2504,8 +2505,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     <span class="n">end_token</span><span class="p">,</span> 
                     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
                    <span class="p">):</span>
-    
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the path of tokens between start_token and end_token using</span>
 <span class="sd">    the Minimum Spanning Tree (MST) derived from the distance matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2649,6 +2650,54 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">plt.show()</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
+<span class="c1">################################################################################</span>
+
+<span class="k">def</span> <span class="nf">plot_tree_horizontal</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given data as a list of levels (each level is a tuple or list of </span>
+<span class="sd">    displacements for each branch), this function computes the cumulative </span>
+<span class="sd">    value per branch (starting from 0) and plots each branch</span>
+<span class="sd">    with the tree level mapped to the x-axis and the cumulative value mapped </span>
+<span class="sd">    to the y-axis. This gives a left-to-right tree with branches spanning up </span>
+<span class="sd">    (positive) and down (negative).</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (list of tuple/list): Each element represents a tree level.</span>
+<span class="sd">                                   It is assumed every level has the same length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Convert data to a NumPy array with shape (n_levels, n_branches)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">n_levels</span><span class="p">,</span> <span class="n">n_branches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># Compute cumulative sums along each branch.</span>
+    <span class="c1"># Each branch starts at 0 at level 0.</span>
+    <span class="n">cum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_branches</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_levels</span><span class="p">):</span>
+        <span class="n">cum</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">cum</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    
+    <span class="c1"># Plot each branch as a line. For branch j:</span>
+    <span class="c1">#   - x coordinates are the tree levels (0 to n_levels)</span>
+    <span class="c1">#   - y coordinates are the corresponding cumulative values.</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_branches</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">cum</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Branch </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Horizontal Tree Visualization: Branches Spanning Up and Down&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Tree Level (Left = Root)&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Cumulative Value (Up = Positive, Down = Negative)&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Add a horizontal line at y=0 to emphasize the center.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    
+    <span class="c1">#plt.legend(bbox_to_anchor=(1.05, 1), loc=&#39;upper left&#39;)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
 <span class="c1">################################################################################</span>
 <span class="c1"># This is the end of TPLOTS Python modules</span>
 <span class="c1">################################################################################</span>
@@ -2823,7 +2872,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.compute_mst_edges" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compute_mst_edges</span><span class="p">(</span><span class="n">similarity_scores_list</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Computes the Minimum Spanning Tree (MST) edges based on the similarity scores.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   
@@ -2927,7 +2976,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="source-TPLOTS.find_closest_points" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_closest_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">return_points</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Find closest 2D points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -2980,7 +3029,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                      <span class="n">return_path_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                      <span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the shortest path between two points of the points constellation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -3044,8 +3093,8 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                     <span class="n">end_token</span><span class="p">,</span> 
                     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
                    <span class="p">):</span>
-    
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the path of tokens between start_token and end_token using</span>
 <span class="sd">    the Minimum Spanning Tree (MST) derived from the distance matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3465,7 +3514,7 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                              <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                             <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Cosine similarities plot</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3526,7 +3575,7 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                   <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                   <span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;ms SONG plot&#39;&#39;&#39;</span>
 
   <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ms_song</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;note&#39;</span><span class="p">]</span>
 
@@ -3622,8 +3671,8 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                       <span class="n">labels_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
                       <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                       <span class="p">):</span>
-  
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Plot parsons code string</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -3763,7 +3812,7 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                               <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                               <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points constellation</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3831,7 +3880,7 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                                <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                                <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Plots 2D points with labels and MST lines.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -3888,7 +3937,7 @@ the Minimum Spanning Tree (MST) derived from the distance matrix.</p></div>
                               <span class="n">save_transparent</span><span class="o">=</span><span class="kc">False</span>
                               <span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;Square matrix points plot&#39;&#39;&#39;</span>
 
   <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">plot_size</span><span class="p">)</span>
 
@@ -3957,8 +4006,8 @@ without dimensionality reduction.</p></div>
                                          <span class="n">labels_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
                                          <span class="n">show_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                          <span class="n">save_plot</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-    
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots token embeddings constellation using MST and graph layout</span>
 <span class="sd">    without dimensionality reduction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -4019,6 +4068,79 @@ without dimensionality reduction.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TPLOTS.plot_tree_horizontal">
+    <p>def <span class="ident">plot_tree_horizontal</span>(</p><p>data)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Given data as a list of levels (each level is a tuple or list of 
+displacements for each branch), this function computes the cumulative 
+value per branch (starting from 0) and plots each branch
+with the tree level mapped to the x-axis and the cumulative value mapped 
+to the y-axis. This gives a left-to-right tree with branches spanning up 
+(positive) and down (negative).</p>
+<p>Parameters:
+    data (list of tuple/list): Each element represents a tree level.
+                               It is assumed every level has the same length.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TPLOTS.plot_tree_horizontal', this);">Show source &equiv;</a></p>
+  <div id="source-TPLOTS.plot_tree_horizontal" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plot_tree_horizontal</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given data as a list of levels (each level is a tuple or list of </span>
+<span class="sd">    displacements for each branch), this function computes the cumulative </span>
+<span class="sd">    value per branch (starting from 0) and plots each branch</span>
+<span class="sd">    with the tree level mapped to the x-axis and the cumulative value mapped </span>
+<span class="sd">    to the y-axis. This gives a left-to-right tree with branches spanning up </span>
+<span class="sd">    (positive) and down (negative).</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (list of tuple/list): Each element represents a tree level.</span>
+<span class="sd">                                   It is assumed every level has the same length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Convert data to a NumPy array with shape (n_levels, n_branches)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">n_levels</span><span class="p">,</span> <span class="n">n_branches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># Compute cumulative sums along each branch.</span>
+    <span class="c1"># Each branch starts at 0 at level 0.</span>
+    <span class="n">cum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_branches</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_levels</span><span class="p">):</span>
+        <span class="n">cum</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">cum</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    
+    <span class="c1"># Plot each branch as a line. For branch j:</span>
+    <span class="c1">#   - x coordinates are the tree levels (0 to n_levels)</span>
+    <span class="c1">#   - y coordinates are the corresponding cumulative values.</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_branches</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">cum</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Branch </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Horizontal Tree Visualization: Branches Spanning Up and Down&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Tree Level (Left = Root)&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Cumulative Value (Up = Positive, Down = Negative)&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Add a horizontal line at y=0 to emphasize the center.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    
+    <span class="c1">#plt.legend(bbox_to_anchor=(1.05, 1), loc=&#39;upper left&#39;)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TPLOTS.reduce_dimensionality_2d_distance">
     <p>def <span class="ident">reduce_dimensionality_2d_distance</span>(</p><p>list_of_values, p=5)</p>
     </div>
@@ -4032,7 +4154,7 @@ without dimensionality reduction.</p></div>
   <div id="source-TPLOTS.reduce_dimensionality_2d_distance" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_2d_distance</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using 2d distance</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -4072,7 +4194,7 @@ without dimensionality reduction.</p></div>
   <div id="source-TPLOTS.reduce_dimensionality_pca" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using PCA.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4106,8 +4228,8 @@ without dimensionality reduction.</p></div>
                                  <span class="n">return_medians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                  <span class="n">return_vars</span><span class="o">=</span><span class="kc">False</span>
                                  <span class="p">):</span>
-  
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces dimensionality of the values in a simple way</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -4155,7 +4277,7 @@ without dimensionality reduction.</p></div>
   <div id="source-TPLOTS.reduce_dimensionality_simple_pca" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reduce_dimensionality_simple_pca</span><span class="p">(</span><span class="n">list_of_values</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 
-  <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">  Reduces the dimensionality of the values using simple PCA</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
@@ -4199,7 +4321,7 @@ without dimensionality reduction.</p></div>
                                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
                               <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces the dimensionality of the values using t-SNE.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4299,7 +4421,7 @@ without dimensionality reduction.</p></div>
                          <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary binary matrix to a square binary matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4346,7 +4468,7 @@ without dimensionality reduction.</p></div>
                         <span class="n">return_square_matrix_points</span><span class="o">=</span><span class="kc">False</span>
                         <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Reduces an arbitrary image matrix to a square image matrix</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4407,7 +4529,7 @@ without dimensionality reduction.</p></div>
   <div id="source-TPLOTS.square_matrix_points_colors" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">square_matrix_points_colors</span><span class="p">(</span><span class="n">square_matrix_points</span><span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns colors for square matrix points</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4488,7 +4610,7 @@ without dimensionality reduction.</p></div>
               <span class="n">return_tone_type_index</span><span class="o">=</span><span class="kc">True</span>
               <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tone type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
@@ -4529,7 +4651,7 @@ without dimensionality reduction.</p></div>
                      <span class="n">return_chord_type_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                      <span class="p">):</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Returns tones chord type</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
