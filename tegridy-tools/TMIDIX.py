@@ -1,6 +1,5 @@
 #! /usr/bin/python3
 
-
 r'''###############################################################################
 ###################################################################################
 #
@@ -8,7 +7,7 @@ r'''############################################################################
 #	Tegridy MIDI X Module (TMIDI X / tee-midi eks)
 #	Version 1.0
 #
-#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1438
+#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1437
 #
 #	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au
 #
@@ -1458,8 +1457,6 @@ import os
 
 import datetime
 
-import copy
-
 from datetime import datetime
 
 import secrets
@@ -1476,11 +1473,11 @@ import multiprocessing
 
 from itertools import zip_longest
 from itertools import groupby
+
 from collections import Counter
+from collections import defaultdict
 
 from operator import itemgetter
-
-import sys
 
 from abc import ABC, abstractmethod
 
@@ -1493,7 +1490,7 @@ import matplotlib.pyplot as plt
 
 import psutil
 
-from collections import defaultdict
+import json
 
 ###################################################################################
 #
@@ -11940,6 +11937,213 @@ def tokenize_features_to_int_winsorized(features, new_range=(0, 127), clip=1.5, 
     #=================================================================
 
     return values, tokens, norm_tokens
+
+###################################################################################
+
+def write_jsonl(records_dicts_list, 
+                file_name='data', 
+                file_ext='.jsonl', 
+                file_mode='w', 
+                line_sep='\n', 
+                verbose=True
+               ):
+
+    if verbose:
+        print('=' * 70)
+        print('Writing', len(records_dicts_list), 'records to jsonl file...')
+        print('=' * 70)
+
+    if not os.path.splitext(file_name)[1]:
+        file_name += file_ext
+
+    l_count = 0
+
+    with open(file_name, mode=file_mode) as f:
+        for record in tqdm.tqdm(records_dicts_list, disable=not verbose):
+            f.write(json.dumps(record) + line_sep)
+            l_count += 1
+
+    f.close()
+
+    if verbose:
+        print('=' * 70)
+        print('Written total of', l_count, 'jsonl records.')
+        print('=' * 70)
+        print('Done!')
+        print('=' * 70)
+
+###################################################################################
+        
+def read_jsonl(file_name='data', 
+               file_ext='.jsonl', 
+               verbose=True
+              ):
+
+    if verbose:
+        print('=' * 70)
+        print('Reading jsonl file...')
+        print('=' * 70)
+
+    if not os.path.splitext(file_name)[1]:
+        file_name += file_ext
+
+    with open(file_name, 'r') as f:
+
+        records = []
+        gl_count = 0
+        
+        for i, line in tqdm.tqdm(enumerate(f), disable=not verbose):
+            
+            try:
+                record = json.loads(line)
+                records.append(record)
+                gl_count += 1
+
+            except KeyboardInterrupt:
+                if verbose:
+                    print('=' * 70)
+                    print('Stoping...')
+                    print('=' * 70)
+                    
+                f.close()
+    
+                return records
+               
+            except json.JSONDecodeError:
+                if verbose:
+                    print('=' * 70)
+                    print('[ERROR] Line', i, 'is corrupted! Skipping it...')
+                    print('=' * 70)
+                    
+                continue
+                
+    f.close()
+    
+    if verbose:
+        print('=' * 70)
+        print('Loaded total of', gl_count, 'jsonl records.')
+        print('=' * 70)
+        print('Done!')
+        print('=' * 70)
+
+    return records
+
+###################################################################################
+
+def read_jsonl_lines(lines_indexes_list, 
+                     file_name='data', 
+                     file_ext='.jsonl', 
+                     verbose=True
+                    ):
+
+    if verbose:
+        print('=' * 70)
+        print('Reading jsonl file...')
+        print('=' * 70)
+
+    if not os.path.splitext(file_name)[1]:
+        file_name += file_ext
+
+    records = []
+    l_count = 0
+
+    lines_indexes_list.sort(reverse=True)
+
+    with open(file_name, 'r') as f:
+        for current_line_number, line in tqdm.tqdm(enumerate(f)):
+
+            try:
+                if current_line_number in lines_indexes_list:
+                    record = json.loads(line)
+                    records.append(record)
+                    lines_indexes_list = lines_indexes_list[:-1]
+                    l_count += 1
+
+                if not lines_indexes_list:
+                    break
+
+            except KeyboardInterrupt:
+                if verbose:
+                    print('=' * 70)
+                    print('Stoping...')
+                    print('=' * 70)
+                    
+                f.close()
+    
+                return records
+               
+            except json.JSONDecodeError:
+                if verbose:
+                    print('=' * 70)
+                    print('[ERROR] Line', current_line_number, 'is corrupted! Skipping it...')
+                    print('=' * 70)
+                    
+                continue
+
+    f.close()
+    
+    if verbose:
+        print('=' * 70)
+        print('Loaded total of', l_count, 'jsonl records.')
+        print('=' * 70)
+        print('Done!')
+        print('=' * 70)
+
+    return records
+
+###################################################################################
+
+def compute_base(x: int, n: int) -> int:
+
+    if x < 0:
+        raise ValueError("x must be non-negative.")
+    if x == 0:
+        return 2 
+        
+    b = max(2, int(x ** (1 / n)))
+    
+    if b ** n <= x:
+        b += 1
+        
+    return b
+
+###################################################################################
+
+def encode_int_auto(x: int, n: int) -> tuple[int, list[int]]:
+   
+    base = compute_base(x, n)
+    digits = [0] * n
+    
+    for i in range(n - 1, -1, -1):
+        digits[i] = x % base
+        x //= base
+        
+    return base, digits
+
+###################################################################################
+
+def decode_int_auto(base: int, digits: list[int]) -> int:
+   
+    x = 0
+    for digit in digits:
+        if digit < 0 or digit >= base:
+            raise ValueError(f"Each digit must be in the range 0 to {base - 1}. Invalid digit: {digit}")
+            
+        x = x * base + digit
+        
+    return x
+
+###################################################################################
+
+def encode_int_manual(x, base, n):
+
+    digits = [0] * n
+    
+    for i in range(n - 1, -1, -1):
+        digits[i] = x % base
+        x //= base
+
+    return digits
 
 ###################################################################################
 # This is the end of the TMIDI X Python module
