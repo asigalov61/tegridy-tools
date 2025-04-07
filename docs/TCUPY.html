@@ -1089,7 +1089,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TCUPY.find_numpy_array">find_numpy_array</a></li>
     <li class="mono"><a href="#TCUPY.generate_sequence_optimized">generate_sequence_optimized</a></li>
     <li class="mono"><a href="#TCUPY.learn_bpe_codes_gpu">learn_bpe_codes_gpu</a></li>
+    <li class="mono"><a href="#TCUPY.minkowski_distance_vector_to_matrix">minkowski_distance_vector_to_matrix</a></li>
     <li class="mono"><a href="#TCUPY.pack_sequences">pack_sequences</a></li>
+    <li class="mono"><a href="#TCUPY.pairwise_cosine_similarity">pairwise_cosine_similarity</a></li>
+    <li class="mono"><a href="#TCUPY.pairwise_minkowski_distance">pairwise_minkowski_distance</a></li>
     <li class="mono"><a href="#TCUPY.precompute_mapping_lookup">precompute_mapping_lookup</a></li>
     <li class="mono"><a href="#TCUPY.retokenize_train_data_fused_gpu">retokenize_train_data_fused_gpu</a></li>
     <li class="mono"><a href="#TCUPY.sliding_window_view_alternative">sliding_window_view_alternative</a></li>
@@ -1197,8 +1200,36 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">################################################################################</span>
 
-<span class="kn">import</span> <span class="nn">cupy</span> <span class="k">as</span> <span class="nn">cp</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading module...&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Please wait...&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cupy</span> <span class="k">as</span> <span class="nn">cp</span>
+    <span class="kn">import</span> <span class="nn">cupy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CuPy is found!&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Will use CuPy and GPU for processing!&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Could not import CuPy. Details: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Handle the error, such as providing a fallback or exiting the program</span>
+    <span class="c1"># For example:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please make sure CuPy is installed.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;CuPy could not be loaded!&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+<span class="c1">################################################################################</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">deque</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span>
@@ -1218,7 +1249,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">find_numpy_array</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds 1D numpy array in 2D numpy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1229,8 +1260,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">vertical_list_search</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
-    
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For each vertical window of consecutive rows of height len(trg_list) in src_list,</span>
 <span class="sd">    this function checks whether for every offset j (0 &lt;= j &lt; len(trg_list)) the row</span>
 <span class="sd">    at index (window_start + j) contains trg_list[j].</span>
@@ -1294,7 +1325,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">pack_sequences</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Packs a list of variable-length token sequences into a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    This version computes lengths and builds the padded array and mask entirely on GPU.</span>
@@ -1322,7 +1353,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">count_best_pair_gpu</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given the entire GPU-resident packed data, compute the most frequent</span>
 <span class="sd">    adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1394,7 +1425,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">learn_bpe_codes_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">vocab_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">max_merges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Learn BPE merge rules completely on GPU.</span>
 <span class="sd">    </span>
 <span class="sd">    The training data is packed once (using the vectorized pack_sequences).</span>
@@ -1524,7 +1555,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">retokenize_train_data_fused_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retokenize training data using the fully fused GPU kernel.</span>
 <span class="sd">    </span>
 <span class="sd">    The entire training dataset is first packed into GPU memory (using pack_sequences).</span>
@@ -1561,7 +1592,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">bpe_encode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iteratively encodes a sequence using BPE merge rules provided in a dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -1606,7 +1637,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">bpe_decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decodes a sequence encoded with BPE merge rules defined in a codes dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -1642,7 +1673,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">ensure_triplet</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensure the given parameter is returned as a triplet.</span>
 <span class="sd">    If provided as a scalar, promote it to a triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1662,7 +1693,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">sliding_window_view_alternative</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">window_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a sliding-window view (without copying) of an array.</span>
 <span class="sd">    Expected input shape: (n, L, d) and returns: (n, L - window_length + 1, window_length, d)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1674,7 +1705,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">build_ngram_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build an n-gram mapping from a context (a sequence of triplets) to candidate triplets with frequencies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
@@ -1705,7 +1736,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">precompute_mapping_lookup</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the mapping into a lookup table: context -&gt; (tuple(candidates), frequencies_array).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping_lookup</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1718,7 +1749,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">build_training_sequences_set</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a set of training sequences (each as a tuple of triplets) for uniqueness checking.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">seq</span><span class="p">))</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">data</span><span class="p">}</span>
@@ -1730,7 +1761,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                 <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                                 <span class="n">sequence_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
                                 <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Autoregressively generate a new, unique sequence using the precomputed mapping lookup.</span>
 <span class="sd">    The invariant maintained is: the second element of one triplet is never greater than the first element</span>
 <span class="sd">    of the following triplet.</span>
@@ -1852,7 +1883,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">analyze_generated_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">mapping_lookup</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the generated sequence and return several useful statistics</span>
 <span class="sd">    as both a dictionary and as a nicely formatted string report.</span>
 <span class="sd">    </span>
@@ -2105,6 +2136,116 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">return</span> <span class="n">current_seq</span>
 
 <span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the Minkowski distance between a 1D CuPy array &#39;x&#39; and each row of a 2D CuPy array &#39;X&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.</span>
+<span class="sd">        X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.</span>
+<span class="sd">        p (float): The order of the Minkowski distance.</span>
+<span class="sd">                   For instance:</span>
+<span class="sd">                     - p=1 yields the Manhattan distance,</span>
+<span class="sd">                     - p=2 yields the Euclidean distance,</span>
+<span class="sd">                     - p=3 yields the Minkowski distance and will use the cube-root implementation,</span>
+<span class="sd">                     - p=∞ (or cp.inf) gives the Chebyshev distance.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between &#39;x&#39; </span>
+<span class="sd">                    and the corresponding row in &#39;X&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Compute the element-wise absolute differences between x and every row in X.</span>
+    <span class="c1"># Broadcasting x over the rows of X results in an array of shape (n_samples, n_features).</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="o">==</span> <span class="n">cp</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+        <span class="c1"># For the Chebyshev distance, use the maximum absolute difference along the feature axis.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># Instead of using the generic power operation (sum(diff**3) ** (1/3)),</span>
+        <span class="c1"># we use cp.cbrt for cube-root calculation when p is exactly 3.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">cbrt</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For general Minkowski distance with finite p,</span>
+        <span class="c1"># compute the p-th power of differences, sum them, then take the p-th root.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="n">p</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">distances</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes pairwise Minkowski distances for a 2D CuPy array.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.</span>
+<span class="sd">        p (float): The order of the Minkowski distance.</span>
+<span class="sd">                   For example:</span>
+<span class="sd">                     - p=1 is the Manhattan distance,</span>
+<span class="sd">                     - p=2 is the Euclidean distance,</span>
+<span class="sd">                     - p=∞ (e.g., float(&#39;inf&#39;) or cp.inf) is the Chebyshev distance.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Use broadcasting to compute the absolute difference between every pair of vectors.</span>
+    <span class="c1"># The result of X[:, None, :] - X[None, :, :] will have shape (n_samples, n_samples, n_features).</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="o">==</span> <span class="n">cp</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+        <span class="c1"># For the Chebyshev distance, take the maximum absolute difference along the feature axis.</span>
+        <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Raise the absolute differences to the power p.</span>
+        <span class="n">diff_powered</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="n">p</span>
+        <span class="c1"># Sum over the features for each pair (i, j) and then take the p-th root.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff_powered</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">distances</span>
+    
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the pairwise cosine similarity for a 2D CuPy array.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.</span>
+<span class="sd">        eps (float): A small constant added to the denominator to prevent division by zero.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Compute the dot product between every pair of rows.</span>
+    <span class="c1"># This results in a matrix where element (i, j) is the dot product of X[i] and X[j].</span>
+    <span class="n">dot_product</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the L2 norm (Euclidean norm) for each row vector.</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the outer product of the norms to form the denominator.</span>
+    <span class="c1"># The element (i, j) in this matrix is norms[i] * norms[j].</span>
+    <span class="n">norm_matrix</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">norms</span><span class="p">,</span> <span class="n">norms</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the cosine similarity matrix.</span>
+    <span class="c1"># Adding a small epsilon (eps) to the denominator prevents division by zero.</span>
+    <span class="n">cosine_similarity</span> <span class="o">=</span> <span class="n">dot_product</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm_matrix</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">cosine_similarity</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Module is loaded!&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Enjoy! :)&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+<span class="c1">###################################################################################</span>
 <span class="c1"># This is the end of the TCUPY Python module</span>
 <span class="c1">###################################################################################</span>
 </pre></div>
@@ -2250,7 +2391,7 @@ as both a dictionary and as a nicely formatted string report.</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.analyze_generated_sequence', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.analyze_generated_sequence" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">analyze_generated_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">mapping_lookup</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the generated sequence and return several useful statistics</span>
 <span class="sd">    as both a dictionary and as a nicely formatted string report.</span>
 <span class="sd">    </span>
@@ -2545,7 +2686,7 @@ its constituent pair. Each token in the sequence is then recursively expanded.</
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.bpe_decode', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.bpe_decode" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">bpe_decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decodes a sequence encoded with BPE merge rules defined in a codes dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -2608,7 +2749,7 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.bpe_encode', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.bpe_encode" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">bpe_encode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iteratively encodes a sequence using BPE merge rules provided in a dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -2659,7 +2800,7 @@ repeated until no more merges are possible.</p></div>
       
   <div class="item">
     <div class="name def" id="TCUPY.build_ngram_mapping">
-    <p>def <span class="ident">build_ngram_mapping</span>(</p><p>data: numpy.ndarray, memory_len: int)</p>
+    <p>def <span class="ident">build_ngram_mapping</span>(</p><p>data: cupy.ndarray, memory_len: int)</p>
     </div>
     
 
@@ -2670,7 +2811,7 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.build_ngram_mapping', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.build_ngram_mapping" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">build_ngram_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build an n-gram mapping from a context (a sequence of triplets) to candidate triplets with frequencies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
@@ -2707,7 +2848,7 @@ repeated until no more merges are possible.</p></div>
       
   <div class="item">
     <div class="name def" id="TCUPY.build_training_sequences_set">
-    <p>def <span class="ident">build_training_sequences_set</span>(</p><p>data: numpy.ndarray)</p>
+    <p>def <span class="ident">build_training_sequences_set</span>(</p><p>data: cupy.ndarray)</p>
     </div>
     
 
@@ -2718,7 +2859,7 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.build_training_sequences_set', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.build_training_sequences_set" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">build_training_sequences_set</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a set of training sequences (each as a tuple of triplets) for uniqueness checking.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">seq</span><span class="p">))</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">data</span><span class="p">}</span>
@@ -2744,7 +2885,7 @@ adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.count_best_pair_gpu', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.count_best_pair_gpu" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_best_pair_gpu</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given the entire GPU-resident packed data, compute the most frequent</span>
 <span class="sd">    adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2797,7 +2938,7 @@ If provided as a scalar, promote it to a triplet.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.ensure_triplet', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.ensure_triplet" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ensure_triplet</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensure the given parameter is returned as a triplet.</span>
 <span class="sd">    If provided as a scalar, promote it to a triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2829,7 +2970,7 @@ If provided as a scalar, promote it to a triplet.</p></div>
   <div id="source-TCUPY.find_numpy_array" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_numpy_array</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds 1D numpy array in 2D numpy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2846,7 +2987,7 @@ If provided as a scalar, promote it to a triplet.</p></div>
       
   <div class="item">
     <div class="name def" id="TCUPY.generate_sequence_optimized">
-    <p>def <span class="ident">generate_sequence_optimized</span>(</p><p>mapping_lookup: Dict[Any, Tuple[Tuple[Any, ...], numpy.ndarray]], training_set: set, memory_len: int, sequence_length: int = 24, max_attempts: int = 1000)</p>
+    <p>def <span class="ident">generate_sequence_optimized</span>(</p><p>mapping_lookup: Dict[Any, Tuple[Tuple[Any, ...], cupy.ndarray]], training_set: set, memory_len: int, sequence_length: int = 24, max_attempts: int = 1000)</p>
     </div>
     
 
@@ -2889,7 +3030,7 @@ A numerical stable softmax is then applied over these scores to determine the pr
                                 <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                                 <span class="n">sequence_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
                                 <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Autoregressively generate a new, unique sequence using the precomputed mapping lookup.</span>
 <span class="sd">    The invariant maintained is: the second element of one triplet is never greater than the first element</span>
 <span class="sd">    of the following triplet.</span>
@@ -3034,7 +3175,7 @@ into a new token via a custom merge kernel (with double-buffering).</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.learn_bpe_codes_gpu', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.learn_bpe_codes_gpu" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">learn_bpe_codes_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">vocab_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">max_merges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Learn BPE merge rules completely on GPU.</span>
 <span class="sd">    </span>
 <span class="sd">    The training data is packed once (using the vectorized pack_sequences).</span>
@@ -3120,6 +3261,75 @@ into a new token via a custom merge kernel (with double-buffering).</p>
   
       
   <div class="item">
+    <div class="name def" id="TCUPY.minkowski_distance_vector_to_matrix">
+    <p>def <span class="ident">minkowski_distance_vector_to_matrix</span>(</p><p>x: cupy.ndarray, X: cupy.ndarray, p: float = 3)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Computes the Minkowski distance between a 1D CuPy array 'x' and each row of a 2D CuPy array 'X'.</p>
+<p>Parameters:
+    x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.
+    X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.
+    p (float): The order of the Minkowski distance.
+               For instance:
+                 - p=1 yields the Manhattan distance,
+                 - p=2 yields the Euclidean distance,
+                 - p=3 yields the Minkowski distance and will use the cube-root implementation,
+                 - p=∞ (or cp.inf) gives the Chebyshev distance.</p>
+<p>Returns:
+    cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between 'x' 
+                and the corresponding row in 'X'.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.minkowski_distance_vector_to_matrix', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.minkowski_distance_vector_to_matrix" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the Minkowski distance between a 1D CuPy array &#39;x&#39; and each row of a 2D CuPy array &#39;X&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.</span>
+<span class="sd">        X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.</span>
+<span class="sd">        p (float): The order of the Minkowski distance.</span>
+<span class="sd">                   For instance:</span>
+<span class="sd">                     - p=1 yields the Manhattan distance,</span>
+<span class="sd">                     - p=2 yields the Euclidean distance,</span>
+<span class="sd">                     - p=3 yields the Minkowski distance and will use the cube-root implementation,</span>
+<span class="sd">                     - p=∞ (or cp.inf) gives the Chebyshev distance.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between &#39;x&#39; </span>
+<span class="sd">                    and the corresponding row in &#39;X&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Compute the element-wise absolute differences between x and every row in X.</span>
+    <span class="c1"># Broadcasting x over the rows of X results in an array of shape (n_samples, n_features).</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="o">==</span> <span class="n">cp</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+        <span class="c1"># For the Chebyshev distance, use the maximum absolute difference along the feature axis.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># Instead of using the generic power operation (sum(diff**3) ** (1/3)),</span>
+        <span class="c1"># we use cp.cbrt for cube-root calculation when p is exactly 3.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">cbrt</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For general Minkowski distance with finite p,</span>
+        <span class="c1"># compute the p-th power of differences, sum them, then take the p-th root.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="n">p</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">distances</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TCUPY.pack_sequences">
     <p>def <span class="ident">pack_sequences</span>(</p><p>train_data, pad_val=-1)</p>
     </div>
@@ -3137,7 +3347,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pack_sequences', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.pack_sequences" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pack_sequences</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Packs a list of variable-length token sequences into a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    This version computes lengths and builds the padded array and mask entirely on GPU.</span>
@@ -3170,6 +3380,118 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   
       
   <div class="item">
+    <div class="name def" id="TCUPY.pairwise_cosine_similarity">
+    <p>def <span class="ident">pairwise_cosine_similarity</span>(</p><p>X: cupy.ndarray, eps: float = 1e-10)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Computes the pairwise cosine similarity for a 2D CuPy array.</p>
+<p>Parameters:
+    X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.
+    eps (float): A small constant added to the denominator to prevent division by zero.</p>
+<p>Returns:
+    cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pairwise_cosine_similarity', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.pairwise_cosine_similarity" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the pairwise cosine similarity for a 2D CuPy array.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.</span>
+<span class="sd">        eps (float): A small constant added to the denominator to prevent division by zero.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Compute the dot product between every pair of rows.</span>
+    <span class="c1"># This results in a matrix where element (i, j) is the dot product of X[i] and X[j].</span>
+    <span class="n">dot_product</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the L2 norm (Euclidean norm) for each row vector.</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the outer product of the norms to form the denominator.</span>
+    <span class="c1"># The element (i, j) in this matrix is norms[i] * norms[j].</span>
+    <span class="n">norm_matrix</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">norms</span><span class="p">,</span> <span class="n">norms</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the cosine similarity matrix.</span>
+    <span class="c1"># Adding a small epsilon (eps) to the denominator prevents division by zero.</span>
+    <span class="n">cosine_similarity</span> <span class="o">=</span> <span class="n">dot_product</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm_matrix</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">cosine_similarity</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TCUPY.pairwise_minkowski_distance">
+    <p>def <span class="ident">pairwise_minkowski_distance</span>(</p><p>X: cupy.ndarray, p: float = 2)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Computes pairwise Minkowski distances for a 2D CuPy array.</p>
+<p>Parameters:
+    X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.
+    p (float): The order of the Minkowski distance.
+               For example:
+                 - p=1 is the Manhattan distance,
+                 - p=2 is the Euclidean distance,
+                 - p=∞ (e.g., float('inf') or cp.inf) is the Chebyshev distance.</p>
+<p>Returns:
+    cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pairwise_minkowski_distance', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.pairwise_minkowski_distance" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes pairwise Minkowski distances for a 2D CuPy array.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.</span>
+<span class="sd">        p (float): The order of the Minkowski distance.</span>
+<span class="sd">                   For example:</span>
+<span class="sd">                     - p=1 is the Manhattan distance,</span>
+<span class="sd">                     - p=2 is the Euclidean distance,</span>
+<span class="sd">                     - p=∞ (e.g., float(&#39;inf&#39;) or cp.inf) is the Chebyshev distance.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Use broadcasting to compute the absolute difference between every pair of vectors.</span>
+    <span class="c1"># The result of X[:, None, :] - X[None, :, :] will have shape (n_samples, n_samples, n_features).</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="o">==</span> <span class="n">cp</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+        <span class="c1"># For the Chebyshev distance, take the maximum absolute difference along the feature axis.</span>
+        <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Raise the absolute differences to the power p.</span>
+        <span class="n">diff_powered</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="n">p</span>
+        <span class="c1"># Sum over the features for each pair (i, j) and then take the p-th root.</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff_powered</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">distances</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TCUPY.precompute_mapping_lookup">
     <p>def <span class="ident">precompute_mapping_lookup</span>(</p><p>mapping: Dict[Any, Dict[Any, int]])</p>
     </div>
@@ -3182,7 +3504,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.precompute_mapping_lookup', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.precompute_mapping_lookup" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">precompute_mapping_lookup</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the mapping into a lookup table: context -&gt; (tuple(candidates), frequencies_array).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping_lookup</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3217,7 +3539,7 @@ Each GPU thread processes one sequence by applying all merge rules sequentially.
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.retokenize_train_data_fused_gpu', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.retokenize_train_data_fused_gpu" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">retokenize_train_data_fused_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retokenize training data using the fully fused GPU kernel.</span>
 <span class="sd">    </span>
 <span class="sd">    The entire training dataset is first packed into GPU memory (using pack_sequences).</span>
@@ -3260,7 +3582,7 @@ Each GPU thread processes one sequence by applying all merge rules sequentially.
       
   <div class="item">
     <div class="name def" id="TCUPY.sliding_window_view_alternative">
-    <p>def <span class="ident">sliding_window_view_alternative</span>(</p><p>a: numpy.ndarray, window_length: int)</p>
+    <p>def <span class="ident">sliding_window_view_alternative</span>(</p><p>a: cupy.ndarray, window_length: int)</p>
     </div>
     
 
@@ -3272,7 +3594,7 @@ Expected input shape: (n, L, d) and returns: (n, L - window_length + 1, window_l
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.sliding_window_view_alternative', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.sliding_window_view_alternative" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sliding_window_view_alternative</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">window_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a sliding-window view (without copying) of an array.</span>
 <span class="sd">    Expected input shape: (n, L, d) and returns: (n, L - window_length + 1, window_length, d)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3304,8 +3626,8 @@ at index (window_start + j) contains trg_list[j].</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.vertical_list_search', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.vertical_list_search" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">vertical_list_search</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
-    
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For each vertical window of consecutive rows of height len(trg_list) in src_list,</span>
 <span class="sd">    this function checks whether for every offset j (0 &lt;= j &lt; len(trg_list)) the row</span>
 <span class="sd">    at index (window_start + j) contains trg_list[j].</span>
