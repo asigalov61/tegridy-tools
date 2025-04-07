@@ -4181,6 +4181,17 @@ def advanced_score_processor(raw_score,
               basic_single_track_score.append(ev)
             num_tracks += 1
 
+      for e in basic_single_track_score:
+
+          if e[0] == 'note':
+              e[3] = e[3] % 16
+              e[4] = e[4] % 128
+              e[5] = e[5] % 128
+
+          if e[0] == 'patch_change':
+              e[2] = e[2] % 16
+              e[3] = e[3] % 128
+
       basic_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
       basic_single_track_score.sort(key=lambda x: x[1])
 
@@ -4195,7 +4206,7 @@ def advanced_score_processor(raw_score,
               enhanced_single_track_score.append(event)
               num_patch_changes += 1
 
-        if event[0] == 'note':
+        if event[0] == 'note':            
             if event[3] != 9:
               event.extend([patches[event[3]]])
               all_score_patches.extend([patches[event[3]]])
@@ -12144,6 +12155,76 @@ def encode_int_manual(x, base, n):
         x //= base
 
     return digits
+
+###################################################################################
+
+def escore_notes_pitches_chords_signature(escore_notes, 
+                                          max_patch=128, 
+                                          sort_by_counts=False, 
+                                          use_full_chords=False
+                                         ):
+
+    escore_notes = [e for e in escore_notes if e[6] <= max_patch % 129]
+
+    if escore_notes:
+
+        cscore = chordify_score([1000, escore_notes])
+        
+        sig = []
+        dsig = []
+        
+        drums_offset = 321 + 128
+        
+        bad_chords_counter = 0
+        
+        for c in cscore:
+            
+            all_pitches = [e[4] if e[3] != 9 else e[4]+128 for e in c]
+            chord = sorted(set(all_pitches))
+        
+            pitches = sorted([p for p in chord if p < 128], reverse=True)
+            drums = [(d+drums_offset)-128 for d in chord if d > 127]
+        
+            if pitches:
+              if len(pitches) > 1:
+                tones_chord = sorted(set([p % 12 for p in pitches]))
+                     
+                try:
+                    sig_token = ALL_CHORDS_SORTED.index(tones_chord) + 128
+                except:
+                    checked_tones_chord = check_and_fix_tones_chord(tones_chord, use_full_chords=use_full_chords)
+                    sig_token = ALL_CHORDS_SORTED.index(checked_tones_chord) + 128
+                    bad_chords_counter += 1
+                    
+              elif len(pitches) == 1:
+                sig_token = pitches[0]
+        
+              sig.append(sig_token)
+        
+            if drums:
+              dsig.extend(drums)
+        
+        sig_p = {}
+        
+        for item in sig+dsig:
+            
+            if item in sig_p:
+                sig_p[item] += 1
+        
+            else:
+                sig_p[item] = 1
+        
+        sig_p[-1] = bad_chords_counter
+        
+        fsig = [list(v) for v in sig_p.items()]
+    
+        if sort_by_counts:
+            fsig.sort(key=lambda x: x[1], reverse=True)
+    
+        return fsig
+
+    else:
+        return []
 
 ###################################################################################
 # This is the end of the TMIDI X Python module
