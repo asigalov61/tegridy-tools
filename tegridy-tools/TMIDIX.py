@@ -11297,7 +11297,7 @@ def create_files_list(datasets_paths=['./'],
 
     files_exts = tuple(files_exts)
     
-    for dataset_addr in tqdm.tqdm(datasets_paths):
+    for dataset_addr in tqdm.tqdm(datasets_paths, disable=not verbose):
         for dirpath, dirnames, filenames in os.walk(dataset_addr):
             for file in filenames:
                 if file not in filez_set and file.endswith(files_exts):
@@ -11833,7 +11833,7 @@ def escore_notes_primary_features(escore_notes):
 
 ###################################################################################
 
-def winsorized_normalize(data, new_range=(0, 127), clip=1.5):
+def winsorized_normalize(data, new_range=(0, 255), clip=1.5):
 
     #=================================================================
 
@@ -11893,7 +11893,7 @@ def winsorized_normalize(data, new_range=(0, 127), clip=1.5):
 
 ###################################################################################
 
-def tokenize_features_to_int_winsorized(features, new_range=(0, 127), clip=1.5, none_token=-1):
+def tokenize_features_to_ints_winsorized(features, new_range=(0, 255), clip=1.5, none_token=-1):
 
     values = []    
     tokens = []
