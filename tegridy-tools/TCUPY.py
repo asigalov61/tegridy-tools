@@ -43,8 +43,36 @@ r'''############################################################################
 
 ################################################################################
 
-import cupy as cp
-import numpy as np
+print('=' * 70)
+print('Loading module...')
+print('Please wait...')
+print('=' * 70)
+
+################################################################################
+
+import sys
+import os
+
+################################################################################
+
+try:
+    import cupy as cp
+    import cupy as np
+    print('=' * 70)
+    print('CuPy is found!')
+    print('Will use CuPy and GPU for processing!')
+    print('=' * 70)
+
+except ImportError as e:
+    print(f"Error: Could not import CuPy. Details: {e}")
+    # Handle the error, such as providing a fallback or exiting the program
+    # For example:
+    print("Please make sure CuPy is installed.")
+    print('=' * 70)
+    
+    raise RuntimeError("CuPy could not be loaded!") from e
+
+################################################################################
 
 from collections import defaultdict, deque
 from typing import Optional, Tuple, Dict, Any, List
@@ -949,6 +977,116 @@ def autoregressive_generate(start_seq, mel_tones, trg_array, trg_matches_array, 
             print('Gen seq len', len(current_seq))
 
     return current_seq
+
+###################################################################################
+
+def minkowski_distance_vector_to_matrix(x: cp.ndarray, X: cp.ndarray, p: float = 3) -> cp.ndarray:
+    
+    """
+    Computes the Minkowski distance between a 1D CuPy array 'x' and each row of a 2D CuPy array 'X'.
+    
+    Parameters:
+        x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.
+        X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.
+        p (float): The order of the Minkowski distance.
+                   For instance:
+                     - p=1 yields the Manhattan distance,
+                     - p=2 yields the Euclidean distance,
+                     - p=3 yields the Minkowski distance and will use the cube-root implementation,
+                     - p=∞ (or cp.inf) gives the Chebyshev distance.
+    
+    Returns:
+        cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between 'x' 
+                    and the corresponding row in 'X'.
+    """
+
+    # Compute the element-wise absolute differences between x and every row in X.
+    # Broadcasting x over the rows of X results in an array of shape (n_samples, n_features).
+    diff = cp.abs(X - x)
+    
+    if p == float('inf') or p == cp.inf:
+        # For the Chebyshev distance, use the maximum absolute difference along the feature axis.
+        distances = cp.max(diff, axis=1)
+    elif p == 3:
+        # Instead of using the generic power operation (sum(diff**3) ** (1/3)),
+        # we use cp.cbrt for cube-root calculation when p is exactly 3.
+        distances = cp.cbrt(cp.sum(diff ** 3, axis=1))
+    else:
+        # For general Minkowski distance with finite p,
+        # compute the p-th power of differences, sum them, then take the p-th root.
+        distances = cp.sum(diff ** p, axis=1) ** (1.0 / p)
+        
+    return distances
+
+###################################################################################
+
+def pairwise_minkowski_distance(X: cp.ndarray, p: float = 2) -> cp.ndarray:
+    
+    """
+    Computes pairwise Minkowski distances for a 2D CuPy array.
+    
+    Parameters:
+        X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.
+        p (float): The order of the Minkowski distance.
+                   For example:
+                     - p=1 is the Manhattan distance,
+                     - p=2 is the Euclidean distance,
+                     - p=∞ (e.g., float('inf') or cp.inf) is the Chebyshev distance.
+    
+    Returns:
+        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.
+    """
+    
+    # Use broadcasting to compute the absolute difference between every pair of vectors.
+    # The result of X[:, None, :] - X[None, :, :] will have shape (n_samples, n_samples, n_features).
+    if p == float('inf') or p == cp.inf:
+        # For the Chebyshev distance, take the maximum absolute difference along the feature axis.
+        return cp.max(cp.abs(X[:, None, :] - X[None, :, :]), axis=-1)
+    else:
+        # Raise the absolute differences to the power p.
+        diff_powered = cp.abs(X[:, None, :] - X[None, :, :]) ** p
+        # Sum over the features for each pair (i, j) and then take the p-th root.
+        distances = cp.sum(diff_powered, axis=-1) ** (1.0 / p)
+        
+        return distances
+    
+###################################################################################
+
+def pairwise_cosine_similarity(X: cp.ndarray, eps: float = 1e-10) -> cp.ndarray:
+    
+    """
+    Computes the pairwise cosine similarity for a 2D CuPy array.
+    
+    Parameters:
+        X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.
+        eps (float): A small constant added to the denominator to prevent division by zero.
+    
+    Returns:
+        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.
+    """
+    
+    # Compute the dot product between every pair of rows.
+    # This results in a matrix where element (i, j) is the dot product of X[i] and X[j].
+    dot_product = cp.dot(X, X.T)
+    
+    # Compute the L2 norm (Euclidean norm) for each row vector.
+    norms = cp.linalg.norm(X, axis=1)
+    
+    # Compute the outer product of the norms to form the denominator.
+    # The element (i, j) in this matrix is norms[i] * norms[j].
+    norm_matrix = cp.outer(norms, norms)
+    
+    # Compute the cosine similarity matrix.
+    # Adding a small epsilon (eps) to the denominator prevents division by zero.
+    cosine_similarity = dot_product / (norm_matrix + eps)
+    
+    return cosine_similarity
+
+###################################################################################
+
+print('Module is loaded!')
+print('Enjoy! :)')
+print('=' * 70)
 
 ###################################################################################
 # This is the end of the TCUPY Python module
