@@ -4144,15 +4144,16 @@ def tones_chord_to_pitches(tones_chord, base_pitch=60):
 ###################################################################################
 
 def advanced_score_processor(raw_score, 
-                              patches_to_analyze=list(range(129)), 
-                              return_score_analysis=False,
-                              return_enhanced_score=False,
-                              return_enhanced_score_notes=False,
-                              return_enhanced_monophonic_melody=False,
-                              return_chordified_enhanced_score=False,
-                              return_chordified_enhanced_score_with_lyrics=False,
-                              return_score_tones_chords=False,
-                              return_text_and_lyric_events=False
+                             patches_to_analyze=list(range(129)), 
+                             return_score_analysis=False,
+                             return_enhanced_score=False,
+                             return_enhanced_score_notes=False,
+                             return_enhanced_monophonic_melody=False,
+                             return_chordified_enhanced_score=False,
+                             return_chordified_enhanced_score_with_lyrics=False,
+                             return_score_tones_chords=False,
+                             return_text_and_lyric_events=False,
+                             apply_sustain=False  
                             ):
 
   '''TMIDIX Advanced Score Processor'''
@@ -4192,6 +4193,9 @@ def advanced_score_processor(raw_score,
               e[2] = e[2] % 16
               e[3] = e[3] % 128
 
+      if apply_sustain:
+          apply_sustain_to_ms_score([1000, basic_single_track_score])
+          
       basic_single_track_score.sort(key=lambda x: x[4] if x[0] == 'note' else 128, reverse=True)
       basic_single_track_score.sort(key=lambda x: x[1])
 
@@ -12226,6 +12230,94 @@ def escore_notes_pitches_chords_signature(escore_notes,
     else:
         return []
 
+###################################################################################
+
+def compute_sustain_intervals(events):
+
+    intervals = []
+    pedal_on = False
+    current_start = None
+    
+    for t, cc in events:
+        if not pedal_on and cc >= 64:
+
+            pedal_on = True
+            current_start = t
+        elif pedal_on and cc < 64:
+
+            pedal_on = False
+            intervals.append((current_start, t))
+            current_start = None
+
+    if pedal_on:
+        intervals.append((current_start, float('inf')))
+
+    merged = []
+    
+    for interval in intervals:
+        if merged and interval[0] <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], interval[1]))
+        else:
+            merged.append(interval)
+    return merged
+
+###################################################################################
+
+def apply_sustain_to_ms_score(score):
+
+    sustain_by_channel = {}
+    
+    for track in score[1:]:
+        for event in track:
+            if event[0] == 'control_change' and event[3] == 64:
+                channel = event[2]
+                sustain_by_channel.setdefault(channel, []).append((event[1], event[4]))
+    
+    sustain_intervals_by_channel = {}
+    
+    for channel, events in sustain_by_channel.items():
+        events.sort(key=lambda x: x[0])
+        sustain_intervals_by_channel[channel] = compute_sustain_intervals(events)
+    
+    global_max_off = 0
+    
+    for track in score[1:]:
+        for event in track:
+            if event[0] == 'note':
+                global_max_off = max(global_max_off, event[1] + event[2])
+                
+    for channel, intervals in sustain_intervals_by_channel.items():
+        updated_intervals = []
+        for start, end in intervals:
+            if end == float('inf'):
+                end = global_max_off
+            updated_intervals.append((start, end))
+        sustain_intervals_by_channel[channel] = updated_intervals
+        
+    if sustain_intervals_by_channel:
+        
+        for track in score[1:]:
+            for event in track:
+                if event[0] == 'note':
+                    start = event[1]
+                    nominal_dur = event[2]
+                    nominal_off = start + nominal_dur
+                    channel = event[3]
+                    
+                    intervals = sustain_intervals_by_channel.get(channel, [])
+                    effective_off = nominal_off
+        
+                    for intv_start, intv_end in intervals:
+                        if intv_start < nominal_off < intv_end:
+                            effective_off = intv_end
+                            break
+                    
+                    effective_dur = effective_off - start
+                    
+                    event[2] = effective_dur
+
+    return score
+    
 ###################################################################################
 # This is the end of the TMIDI X Python module
 ###################################################################################
