@@ -50,7 +50,8 @@ from midi_to_colab_audio import midi_to_colab_audio
 def Render_MIDI(input_midi, 
                 render_type, 
                 soundfont_bank, 
-                render_sample_rate, 
+                render_sample_rate,
+                render_with_sustains,
                 custom_render_patch,
                 render_align,
                 render_transpose_value,
@@ -82,12 +83,16 @@ def Render_MIDI(input_midi,
     print('Render type:', render_type)
     print('Soudnfont bank', soundfont_bank)
     print('Audio render sample rate', render_sample_rate)
-    print('Custom MIDI render patch', custom_render_patch)
-    print('Align to bars:', render_align)
-    print('Transpose value:', render_transpose_value)
-    print('Transpose to C4', render_transpose_to_C4)
-    print('Output as Solo Piano', render_output_as_solo_piano)
-    print('Remove drums:', render_remove_drums)
+
+    if render_type != 'Render as-is':
+        print('Render with sustains:', render_with_sustains)
+        print('Custom MIDI render patch', custom_render_patch)
+        print('Align to bars:', render_align)
+        print('Transpose value:', render_transpose_value)
+        print('Transpose to C4', render_transpose_to_C4)
+        print('Output as Solo Piano', render_output_as_solo_piano)
+        print('Remove drums:', render_remove_drums)
+
     print('=' * 70)
     print('Processing MIDI...Please wait...')
     
@@ -96,7 +101,10 @@ def Render_MIDI(input_midi,
 
     raw_score = TMIDIX.midi2single_track_ms_score(fdata)
     
-    escore = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
+    escore = TMIDIX.advanced_score_processor(raw_score, 
+                                             return_enhanced_score_notes=True, 
+                                             apply_sustain=render_with_sustains
+                                            )[0]
     
     escore = TMIDIX.augment_enhanced_score_notes(escore, timings_divider=1)
 
@@ -387,6 +395,7 @@ if __name__ == "__main__":
 
         gr.Markdown("## Select custom render options")
 
+        render_with_sustains = gr.Checkbox(label="Render with sustains (if present)", value=False)
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
         
         render_align = gr.Radio(["Do not align", 
@@ -420,7 +429,8 @@ if __name__ == "__main__":
         run_event = submit.click(Render_MIDI, [input_midi, 
                                                render_type, 
                                                soundfont_bank, 
-                                               render_sample_rate, 
+                                               render_sample_rate,
+                                               render_with_sustains,
                                                custom_render_patch,
                                                render_align,
                                                render_transpose_value,
