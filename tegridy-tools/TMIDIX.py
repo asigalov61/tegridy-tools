@@ -4715,8 +4715,7 @@ def augment_enhanced_score_notes(enhanced_score_notes,
                                   ceil_timings=False,
                                   round_timings=False,
                                   legacy_timings=True,
-                                  sort_drums_last=False,
-                                  even_timings=False
+                                  sort_drums_last=False
                                 ):
 
     esn = copy.deepcopy(enhanced_score_notes)
@@ -4759,16 +4758,6 @@ def augment_enhanced_score_notes(enhanced_score_notes,
       e[4] = max(1, min(127, e[4] + pitch_shift))
 
       pe = enhanced_score_notes[i]
-      
-      
-    if even_timings:
-        
-      for e in esn:
-          if e[1] % 2 != 0:
-              e[1] += 1
-          
-          if e[2] % 2 != 0:
-              e[2] += 1
 
     if full_sorting:
 
@@ -6709,23 +6698,12 @@ def find_next_bar(escore_notes, bar_time, start_note_idx, cur_bar):
 def align_escore_notes_to_bars(escore_notes,
                                bar_time=4000,
                                trim_durations=False,
-                               split_durations=False,
-                               even_timings=False
+                               split_durations=False
                                ):
 
   #=============================================================================
-    
-  escore = copy.deepcopy(escore_notes)
-  
-  if even_timings:
-      for e in escore:
-          if e[1] % 2 != 0:
-              e[1] += 1
-          
-          if e[2] % 2 != 0:
-              e[2] += 1
 
-  aligned_escore_notes = copy.deepcopy(escore)
+  aligned_escore_notes = copy.deepcopy(escore_notes)
 
   abs_time = 0
   nidx = 0
@@ -6737,13 +6715,13 @@ def align_escore_notes_to_bars(escore_notes,
 
   while next_bar:
 
-    next_bar = find_next_bar(escore, bar_time, nidx, bcount)
+    next_bar = find_next_bar(escore_notes, bar_time, nidx, bcount)
 
     if next_bar:
-      gescore_notes = escore[nidx:next_bar[1]]
-    
+
+      gescore_notes = escore_notes[nidx:next_bar[1]]
     else:
-      gescore_notes = escore[nidx:]
+      gescore_notes = escore_notes[nidx:]
 
     original_timings = [delta] + [(b[1]-a[1]) for a, b in zip(gescore_notes[:-1], gescore_notes[1:])]
     adj_timings = adjust_numbers_to_sum(original_timings, bar_time)
@@ -6758,8 +6736,7 @@ def align_escore_notes_to_bars(escore_notes,
       nidx += 1
 
     if next_bar:
-      delta = escore[next_bar[1]][1]-escore[next_bar[1]-1][1]
-      
+      delta = escore_notes[next_bar[1]][1]-escore_notes[next_bar[1]-1][1]
     bcount += 1
 
   #=============================================================================
@@ -12381,85 +12358,6 @@ def copy_file(src_file: str, trg_dir: str, add_subdir: bool = False, verbose: bo
         print('File copied!')
 
     return None
-
-###################################################################################
-
-def escore_notes_even_timings(escore_notes, in_place=True):
-
-    if in_place:
-        for e in escore_notes:
-            if e[1] % 2 != 0:
-                e[1] += 1
-    
-            if e[2] % 2 != 0:
-                e[2] += 1
-
-        return []
-
-    else:
-        escore = copy.deepcopy(escore_notes)
-        
-        for e in escore:
-            if e[1] % 2 != 0:
-                e[1] += 1
-    
-            if e[2] % 2 != 0:
-                e[2] += 1
-
-        return escore
-
-###################################################################################
-
-def merge_escore_notes(escore_notes, merge_threshold=2, sort_drums_last=False):
-
-    merged_chords = []
-    mcho = []
-
-    pe = escore_notes[0]
-    
-    for e in escore_notes:
-
-        if e[1]-pe[1] <= merge_threshold:
-            mcho.append(e)
-
-        else:
-            if mcho:
-                merged_chords.append(mcho)
-
-            mcho = [e]
-
-        pe = e
-
-    if mcho:
-        merged_chords.append(mcho)
-
-    for c in merged_chords:
-
-        if len(c) > 1:
-            for cc in c[1:]:
-                cc[1] = c[0][1]
-
-    final_chords = []
-
-    for c in merged_chords:
-
-        seen = []
-        cho = []
-        
-        for cc in c:
-            if tuple([cc[4], cc[6]]) not in seen:
-                cho.append(cc)
-                seen.append(tuple([cc[4], cc[6]]))
-                
-        if sort_drums_last:
-            cho.sort(key=lambda x: (x[4], x[6]) if x[6] != 128 else (x[6], -x[4]))
-
-        else:
-            cho.sort(key=lambda x: (x[4], x[6]))
-
-        final_chords.append(cho)
-
-    return flatten(final_chords)
 
 ###################################################################################
 # This is the end of the TMIDI X Python module
