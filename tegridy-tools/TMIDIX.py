@@ -7,7 +7,7 @@ r'''############################################################################
 #	Tegridy MIDI X Module (TMIDI X / tee-midi eks)
 #	Version 1.0
 #
-#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1437
+#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1438
 #
 #	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au
 #
@@ -50,6 +50,7 @@ r'''############################################################################
 ###################################################################################'''
 
 import sys, struct, copy
+
 Version = '6.7'
 VersionDate = '20201120'
 
@@ -1491,6 +1492,10 @@ import matplotlib.pyplot as plt
 import psutil
 
 import json
+
+from pathlib import Path
+
+import shutil
 
 ###################################################################################
 #
@@ -12318,6 +12323,42 @@ def apply_sustain_to_ms_score(score):
 
     return score
     
+###################################################################################
+
+def copy_file(src_file: str, trg_dir: str, add_subdir: bool = False, verbose: bool = False):
+   
+    src_path = Path(src_file)
+    target_directory = Path(trg_dir)
+
+    if not src_path.is_file():
+        if verbose:
+            print("Source file does not exist or is not a file.")
+        
+        return None
+
+    target_directory.mkdir(parents=True, exist_ok=True)
+    
+    if add_subdir:
+        first_letter = src_path.name[0]
+        target_directory = target_directory / first_letter
+        target_directory.mkdir(parents=True, exist_ok=True)
+
+    destination = target_directory / src_path.name
+
+    try:
+        shutil.copy2(src_path, destination)
+
+    except:
+        if verbose:
+            print('File could not be copied!')
+            
+        return None
+    
+    if verbose:
+        print('File copied!')
+
+    return None
+
 ###################################################################################
 # This is the end of the TMIDI X Python module
 ###################################################################################
