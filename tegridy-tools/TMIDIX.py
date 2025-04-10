@@ -12461,5 +12461,80 @@ def merge_escore_notes(escore_notes, merge_threshold=2, sort_drums_last=False):
     return flatten(merged_chords)
 
 ###################################################################################
+
+def solo_piano_escore_notes_tokenized(escore_notes,
+                                      compress_start_times=True,
+                                      encode_velocities=False,
+                                      verbose=False
+                                      ):
+
+    if verbose:
+        print('=' * 70)
+        print('Encoding MIDI...')
+    
+    sp_escore_notes = solo_piano_escore_notes(escore_notes)
+    zscore = recalculate_score_timings(sp_escore_notes)
+    dscore = delta_score_notes(zscore, timings_clip_value=127)
+    
+    score = []
+    
+    notes_counter = 0
+    chords_counter = 1
+    
+    for i, e in enumerate(dscore):
+        
+        dtime = e[1]
+        dur = e[2]
+        ptc = e[4]
+        vel = e[5]
+
+        if compress_start_times:
+            
+            if i == 0:
+                score.extend([0, dur+128, ptc+256])
+                
+                if encode_velocities:
+                    score.append(vel+384)
+                    
+            else:
+                if dtime == 0:
+                    score.extend([dur+128, ptc+256])
+
+                else:
+                    score.extend([dtime, dur+128, ptc+256])
+                    
+                if encode_velocities:
+                    score.append(vel+384)
+                    
+            if dtime != 0:
+                chords_counter += 1
+
+        else:
+            score.extend([dtime, dur+128, ptc+256])
+
+            if encode_velocities:
+                score.append(vel+384)
+
+            if dtime != 0:
+                chords_counter += 1
+                
+        notes_counter += 1
+
+    if verbose:
+        print('Done!')
+        print('=' * 70)
+        
+        print('Source MIDI composition has', len(zscore), 'notes')
+        print('Source MIDI composition has', len([d[1] for d in dscore if d[1] !=0 ])+1, 'chords')
+        print('-' * 70)
+        print('Encoded sequence has', notes_counter, 'pitches')
+        print('Encoded sequence has', chords_counter, 'chords')
+        print('-' * 70)
+        print('Final encoded sequence has', len(score), 'tokens')
+        print('=' * 70)
+        
+    return score
+
+###################################################################################
 # This is the end of the TMIDI X Python module
 ###################################################################################
