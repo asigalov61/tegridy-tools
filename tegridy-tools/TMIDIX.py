@@ -12412,7 +12412,10 @@ def escore_notes_even_timings(escore_notes, in_place=True):
 
 def both_chords(chord1, chord2, merge_threshold=2):
     
-    if len(chord1) > 1 and len(chord2) > 1 and chord2[0][1]-chord1[0][1] <= merge_threshold:
+    if len(chord1) > 1 and len(chord2) > 0 and chord2[0][1]-chord1[0][1] <= merge_threshold:
+        return True
+    
+    elif len(chord1) > 0 and len(chord2) > 1 and chord2[0][1]-chord1[0][1] <= merge_threshold:
         return True
 
     else:
@@ -12638,6 +12641,71 @@ def compress_tokens_sequence(seq,
     seq_grouped = [[[k]] + [vv[1:] for vv in v] for k, v in groupby(seq_split, key=lambda x: x[0])]
 
     return flatten(flatten(sorted(seq_grouped, key=lambda x: -x[1][0])))
+
+###################################################################################
+
+def merge_adjacent_pairs(values_counts):
+   
+    merged = []
+    i = 0
+    
+    while i < len(values_counts):
+
+        if i < len(values_counts) - 1:
+            value1, count1 = values_counts[i]
+            value2, count2 = values_counts[i + 1]
+            
+            if value2 - value1 == 1:
+                if count2 > count1:
+                    merged_value = value2
+                    
+                else:
+                    merged_value = value1
+
+                merged_count = count1 + count2
+                merged.append((merged_value, merged_count))
+
+                i += 2
+                
+                continue
+
+        merged.append(values_counts[i])
+        
+        i += 1
+        
+    return merged
+
+###################################################################################
+
+def merge_escore_notes_start_times(escore_notes, num_merges=1):
+
+    new_dscore = delta_score_notes(escore_notes)
+
+    times = [e[1] for e in new_dscore if e[1] != 0]
+    times_counts = sorted(Counter(times).most_common())
+
+    prev_counts = []
+    new_times_counts = times_counts
+    
+    mcount = 0
+    
+    while prev_counts != new_times_counts:
+        prev_counts = new_times_counts
+        new_times_counts = merge_adjacent_pairs(new_times_counts)
+        
+        mcount += 1
+
+        if mcount == num_merges:
+            break
+
+    gtimes = [r[0] for r in new_times_counts]
+
+    for e in new_dscore:
+        if e[1] > 0:
+            e[1] = find_closest_value(gtimes, e[1])[0]
+            e[2] -= num_merges
+
+    return delta_score_to_abs_score(new_dscore)
 
 ###################################################################################
 # This is the end of the TMIDI X Python module
