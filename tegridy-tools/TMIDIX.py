@@ -12195,8 +12195,10 @@ def escore_notes_pitches_chords_signature(escore_notes,
                                           sort_by_counts=False, 
                                           use_full_chords=False
                                          ):
+    
+    max_patch = max(0, min(128, max_patch))
 
-    escore_notes = [e for e in escore_notes if e[6] <= max_patch % 129]
+    escore_notes = [e for e in escore_notes if e[6] <= max_patch]
 
     if escore_notes:
 
@@ -12706,6 +12708,50 @@ def merge_escore_notes_start_times(escore_notes, num_merges=1):
             e[2] -= num_merges
 
     return delta_score_to_abs_score(new_dscore)
+
+###################################################################################
+
+def multi_instrumental_escore_notes_tokenized(escore_notes, compress_seq=False):
+
+    melody_chords = []
+
+    pe = escore_notes[0]
+    
+    for i, e in enumerate(escore_notes):
+    
+        dtime = max(0, min(255, e[1]-pe[1]))
+        
+        dur = max(0, min(255, e[2]))
+        
+        cha = max(0, min(15, e[3]))
+    
+        if cha == 9:
+          pat = 128
+        
+        else:
+          pat = max(0, min(127, e[6]))
+        
+        ptc = max(0, min(127, e[4]))
+        
+        vel = max(8, min(127, e[5]))
+        velocity = round(vel / 15)-1
+        
+        dur_vel = (8 * dur) + velocity
+        pat_ptc = (129 * pat) + ptc
+
+        if compress_seq:
+            if dtime != 0 or i == 0:
+                melody_chords.extend([dtime, dur_vel+256, pat_ptc+2304])
+
+            else:
+                melody_chords.extend([dur_vel+256, pat_ptc+2304])
+
+        else:
+            melody_chords.extend([dtime, dur_vel+256, pat_ptc+2304])
+        
+        pe = e
+
+    return melody_chords
 
 ###################################################################################
 # This is the end of the TMIDI X Python module
