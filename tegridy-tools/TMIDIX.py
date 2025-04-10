@@ -12536,5 +12536,109 @@ def solo_piano_escore_notes_tokenized(escore_notes,
     return score
 
 ###################################################################################
+
+def equalize_closest_elements_dynamic(seq,
+                                      min_val=128,
+                                      max_val=256,
+                                      splitting_factor=1.5,
+                                      tightness_threshold=0.15
+                                      ):
+
+    candidates = [(i, x) for i, x in enumerate(seq) if min_val <= x <= max_val]
+    
+    if len(candidates) < 2:
+        return seq.copy()
+
+    sorted_candidates = sorted(candidates, key=lambda pair: pair[1])
+    candidate_values = [val for _, val in sorted_candidates]
+    
+    differences = [candidate_values[i+1] - candidate_values[i] for i in range(len(candidate_values)-1)]
+    
+    def median(lst):
+        
+        n = len(lst)
+        sorted_lst = sorted(lst)
+        mid = n // 2
+        
+        if n % 2 == 0:
+            return (sorted_lst[mid - 1] + sorted_lst[mid]) / 2.0
+            
+        else:
+            return sorted_lst[mid]
+    
+    med_diff = median(differences)
+
+    split_indices = [i for i, diff in enumerate(differences) if diff > splitting_factor * med_diff]
+    
+    clusters = []
+    
+    if split_indices:
+        start = 0
+        for split_index in split_indices:
+            clusters.append(sorted_candidates[start:split_index+1])
+            start = split_index + 1
+        clusters.append(sorted_candidates[start:])
+        
+    else:
+        clusters = [sorted_candidates]
+    
+
+    valid_clusters = [cluster for cluster in clusters if len(cluster) >= 2]
+    if not valid_clusters:
+        return seq.copy()
+
+    def cluster_spread(cluster):
+        values = [val for (_, val) in cluster]
+        return max(values) - min(values)
+    
+    valid_clusters.sort(key=lambda cluster: (len(cluster), -cluster_spread(cluster)), reverse=True)
+    selected_cluster = valid_clusters[0]
+
+    allowed_range_width = max_val - min_val
+    spread = cluster_spread(selected_cluster)
+    ratio = spread / allowed_range_width
+    
+    if ratio > tightness_threshold:
+        return seq.copy()
+
+    cluster_values = [val for (_, val) in selected_cluster]
+    equal_value = sum(cluster_values) // len(cluster_values)
+    
+
+    result = list(seq)
+    for idx, _ in selected_cluster:
+        result[idx] = equal_value
+    
+    return result
+
+###################################################################################
+
+def chunk_list(lst, chunk_size):
+    return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
+
+###################################################################################
+
+def compress_tokens_sequence(seq, 
+                             min_val=128, 
+                             max_val=256, 
+                             group_size=2, 
+                             splitting_factor=1.5, 
+                             tightness_threshold=0.15
+                            ):
+    
+    comp_seq = equalize_closest_elements_dynamic(seq, 
+                                                 min_val, 
+                                                 max_val, 
+                                                 splitting_factor=splitting_factor, 
+                                                 tightness_threshold=tightness_threshold
+                                                 )
+
+    seq_split = sorted(chunk_list(comp_seq, group_size), key=lambda x: (-x[0], -x[1]))
+
+    seq_grouped = [[[k]] + [vv[1:] for vv in v] for k, v in groupby(seq_split, key=lambda x: x[0])]
+
+    return flatten(flatten(sorted(seq_grouped, key=lambda x: -x[1][0])))
+
+###################################################################################
 # This is the end of the TMIDI X Python module
 ###################################################################################
