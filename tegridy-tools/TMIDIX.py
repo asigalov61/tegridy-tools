@@ -12501,10 +12501,10 @@ def merge_chords(chord1, chord2, sort_drums_last=False):
         e[1] = mchord[0][1]
     
     if sort_drums_last:
-        mchord.sort(key=lambda x: (x[4], x[6]) if x[6] != 128 else (x[6], -x[4]))
+        mchord.sort(key=lambda x: (-x[4], x[6]) if x[6] != 128 else (x[6], -x[4]))
 
     else:
-        mchord.sort(key=lambda x: (x[4], x[6]))
+        mchord.sort(key=lambda x: (-x[4], x[6]))
 
     return mchord
     
