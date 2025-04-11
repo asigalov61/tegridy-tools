@@ -5,9 +5,8 @@ r'''############################################################################
 #
 #
 #	Tegridy MIDI X Module (TMIDI X / tee-midi eks)
-#	Version 1.0
 #
-#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1438
+#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1450
 #
 #	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au
 #
@@ -26,7 +25,7 @@ r'''############################################################################
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,7 +46,20 @@ r'''############################################################################
 #	Copyright 2020 Peter Billam
 #
 ###################################################################################
-###################################################################################'''
+###################################################################################
+'''
+
+###################################################################################
+
+__version__ = "25.4.11"
+
+print('=' * 70)
+print('TMIDIX Python module')
+print('Version:', __version__)
+print('=' * 70)
+print('Loading module...')
+
+###################################################################################
 
 import sys, struct, copy
 
@@ -1440,7 +1452,6 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 ###################################################################################
 #
 #	Tegridy MIDI X Module (TMIDI X / tee-midi eks)
-#	Version 1.0
 #
 #	Based upon and includes the amazing MIDI.py module v.6.7. by Peter Billam
 #	pjb.com.au
@@ -1496,6 +1507,8 @@ import json
 from pathlib import Path
 
 import shutil
+
+import hashlib
 
 ###################################################################################
 #
@@ -11327,21 +11340,26 @@ def system_memory_utilization(return_dict=False):
 
 def create_files_list(datasets_paths=['./'],
                       files_exts=['.mid', '.midi', '.kar', '.MID', '.MIDI', '.KAR'],
+                      use_md5_hashes=False,
                       max_num_files_per_dir=-1,
                       randomize_dir_files=False,
+                      max_total_files=-1,
                       randomize_files_list=True,
+                      return_dupes=False,
                       verbose=True
                      ):
+    
     if verbose:
         print('=' * 70)
         print('Searching for files...')
         print('This may take a while on a large dataset in particular...')
         print('=' * 70)
 
-    filez_set = defaultdict(None)
-
     files_exts = tuple(files_exts)
     
+    filez_set = defaultdict(None)
+    dupes_list = []
+ 
     for dataset_addr in tqdm.tqdm(datasets_paths, disable=not verbose):
         for dirpath, dirnames, filenames in os.walk(dataset_addr):
             
@@ -11355,9 +11373,23 @@ def create_files_list(datasets_paths=['./'],
                 max_num_files = len(filenames)
                 
             for file in filenames[:max_num_files]:
-                if file not in filez_set and file.endswith(files_exts):
-                    filez_set[file] = os.path.join(dirpath, file)
-    
+                if file.endswith(files_exts):
+                    if use_md5_hashes:
+                        md5_hash = hashlib.md5(open(os.path.join(dirpath, file), 'rb').read()).hexdigest()
+                        
+                        if md5_hash not in filez_set:
+                            filez_set[md5_hash] = os.path.join(dirpath, file)
+                        
+                        else:
+                            dupes_list.append(os.path.join(dirpath, file))
+                            
+                    else:
+                        if file not in filez_set:
+                            filez_set[file] = os.path.join(dirpath, file)
+                        
+                        else:
+                            dupes_list.append(os.path.join(dirpath, file))                           
+                        
     filez = list(filez_set.values())
 
     if verbose:
@@ -11378,6 +11410,7 @@ def create_files_list(datasets_paths=['./'],
                 
         if verbose:
             print('Found', len(filez), 'files.')
+            print('Skipped', len(dupes_list), 'duplicate files.')
             print('=' * 70)
  
     else:
@@ -11385,8 +11418,20 @@ def create_files_list(datasets_paths=['./'],
             print('Could not find any files...')
             print('Please check dataset dirs and files extensions...')
             print('=' * 70)
+    
+    if max_total_files > 0:     
+        if return_dupes:
+            return filez[:max_total_files], dupes_list
         
-    return filez
+        else:
+            return filez[:max_total_files]
+    
+    else:
+        if return_dupes:
+            return filez, dupes_list
+        
+        else:
+            return filez
 
 ###################################################################################
 
@@ -12208,6 +12253,12 @@ def escore_notes_pitches_chords_signature(escore_notes,
                                           use_full_chords=False
                                          ):
     
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+        
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+    
     max_patch = max(0, min(128, max_patch))
 
     escore_notes = [e for e in escore_notes if e[6] <= max_patch]
@@ -12219,7 +12270,7 @@ def escore_notes_pitches_chords_signature(escore_notes,
         sig = []
         dsig = []
         
-        drums_offset = 321 + 128
+        drums_offset = len(CHORDS) + 128
         
         bad_chords_counter = 0
         
@@ -12236,10 +12287,10 @@ def escore_notes_pitches_chords_signature(escore_notes,
                 tones_chord = sorted(set([p % 12 for p in pitches]))
                      
                 try:
-                    sig_token = ALL_CHORDS_SORTED.index(tones_chord) + 128
+                    sig_token = CHORDS.index(tones_chord) + 128
                 except:
                     checked_tones_chord = check_and_fix_tones_chord(tones_chord, use_full_chords=use_full_chords)
-                    sig_token = ALL_CHORDS_SORTED.index(checked_tones_chord) + 128
+                    sig_token = CHORDS.index(checked_tones_chord) + 128
                     bad_chords_counter += 1
                     
               elif len(pitches) == 1:
@@ -12764,6 +12815,13 @@ def multi_instrumental_escore_notes_tokenized(escore_notes, compress_seq=False):
         pe = e
 
     return melody_chords
+
+###################################################################################
+
+print('Module loaded!')
+print('=' * 70)
+print('Enjoy! :)')
+print('=' * 70)
 
 ###################################################################################
 # This is the end of the TMIDI X Python module
