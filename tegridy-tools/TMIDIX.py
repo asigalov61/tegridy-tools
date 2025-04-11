@@ -12818,6 +12818,53 @@ def multi_instrumental_escore_notes_tokenized(escore_notes, compress_seq=False):
 
 ###################################################################################
 
+def merge_counts(data, return_lists=True):
+    
+    merged = defaultdict(int)
+    
+    for value, count in data:
+        merged[value] += count
+
+    if return_lists:
+        return [[k, v] for k, v in merged.items()]
+
+    else:
+        return list(merged.items())
+    
+###################################################################################
+
+def convert_escore_notes_pitches_chords_signature(signature, convert_to_full_chords=True):
+
+    if convert_to_full_chords:
+        SRC_CHORDS = ALL_CHORDS_SORTED
+        TRG_CHORDS = ALL_CHORDS_FULL
+
+    else:
+        SRC_CHORDS = ALL_CHORDS_FULL
+        TRG_CHORDS = ALL_CHORDS_SORTED
+
+    cdiff = len(TRG_CHORDS) - len(SRC_CHORDS)
+
+    pitches_counts = [c for c in signature if -1 < c[0] < 128]
+    chords_counts = [c for c in signature if 127 < c[0] < len(SRC_CHORDS)+128]
+    drums_counts = [[c[0]-cdiff, c[1]] for c in signature if len(SRC_CHORDS)+127 < c[0] < len(SRC_CHORDS)+256]
+    bad_chords_count = [c for c in signature if c[0] == -1]
+
+    new_chords_counts = []
+    
+    for c in chords_counts:
+        tones_chord = SRC_CHORDS[c[0]-128]
+
+        if tones_chord not in TRG_CHORDS:
+            tones_chord = check_and_fix_tones_chord(tones_chord, use_full_chords=convert_to_full_chords)
+            bad_chords_count[0][1] += 1
+            
+        new_chords_counts.append([TRG_CHORDS.index(tones_chord)+128, c[1]])
+
+    return pitches_counts + merge_counts(new_chords_counts) + drums_counts + bad_chords_count
+
+###################################################################################
+
 print('Module loaded!')
 print('=' * 70)
 print('Enjoy! :)')
