@@ -11327,6 +11327,8 @@ def system_memory_utilization(return_dict=False):
 
 def create_files_list(datasets_paths=['./'],
                       files_exts=['.mid', '.midi', '.kar', '.MID', '.MIDI', '.KAR'],
+                      max_num_files_per_dir=-1,
+                      randomize_dir_files=False,
                       randomize_files_list=True,
                       verbose=True
                      ):
@@ -11342,11 +11344,21 @@ def create_files_list(datasets_paths=['./'],
     
     for dataset_addr in tqdm.tqdm(datasets_paths, disable=not verbose):
         for dirpath, dirnames, filenames in os.walk(dataset_addr):
-            for file in filenames:
+            
+            if randomize_dir_files:
+                random.shuffle(filenames)
+                
+            if max_num_files_per_dir > 0:
+                max_num_files = max_num_files_per_dir
+                
+            else:
+                max_num_files = len(filenames)
+                
+            for file in filenames[:max_num_files]:
                 if file not in filez_set and file.endswith(files_exts):
-                    filez_set[os.path.join(dirpath, file)] = None
+                    filez_set[file] = os.path.join(dirpath, file)
     
-    filez = list(filez_set.keys())
+    filez = list(filez_set.values())
 
     if verbose:
         print('Done!')
