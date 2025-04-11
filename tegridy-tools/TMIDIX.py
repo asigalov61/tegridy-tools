@@ -11340,11 +11340,12 @@ def system_memory_utilization(return_dict=False):
 
 def create_files_list(datasets_paths=['./'],
                       files_exts=['.mid', '.midi', '.kar', '.MID', '.MIDI', '.KAR'],
-                      use_md5_hashes=False,
                       max_num_files_per_dir=-1,
                       randomize_dir_files=False,
                       max_total_files=-1,
                       randomize_files_list=True,
+                      check_for_dupes=False,
+                      use_md5_hashes=False,
                       return_dupes=False,
                       verbose=True
                      ):
@@ -11360,8 +11361,13 @@ def create_files_list(datasets_paths=['./'],
     filez_set = defaultdict(None)
     dupes_list = []
  
-    for dataset_addr in tqdm.tqdm(datasets_paths, disable=not verbose):
-        for dirpath, dirnames, filenames in os.walk(dataset_addr):
+    for dataset_addr in datasets_paths:
+        
+        print('=' * 70)
+        print('Processing', dataset_addr)
+        print('=' * 70)
+        
+    for dirpath, dirnames, filenames in tqdm.tqdm(os.walk(dataset_addr), disable=not verbose):
             
             if randomize_dir_files:
                 random.shuffle(filenames)
@@ -11374,22 +11380,26 @@ def create_files_list(datasets_paths=['./'],
                 
             for file in filenames[:max_num_files]:
                 if file.endswith(files_exts):
-                    if use_md5_hashes:
-                        md5_hash = hashlib.md5(open(os.path.join(dirpath, file), 'rb').read()).hexdigest()
-                        
-                        if md5_hash not in filez_set:
-                            filez_set[md5_hash] = os.path.join(dirpath, file)
-                        
-                        else:
-                            dupes_list.append(os.path.join(dirpath, file))
+                    if check_for_dupes:
+                    
+                        if use_md5_hashes:
+                            md5_hash = hashlib.md5(open(os.path.join(dirpath, file), 'rb').read()).hexdigest()
                             
-                    else:
-                        if file not in filez_set:
-                            filez_set[file] = os.path.join(dirpath, file)
-                        
+                            if md5_hash not in filez_set:
+                                filez_set[md5_hash] = os.path.join(dirpath, file)
+                            
+                            else:
+                                dupes_list.append(os.path.join(dirpath, file))
+                                
                         else:
-                            dupes_list.append(os.path.join(dirpath, file))                           
-                        
+                            if file not in filez_set:
+                                filez_set[file] = os.path.join(dirpath, file)
+                            
+                            else:
+                                dupes_list.append(os.path.join(dirpath, file))
+                    else:            
+                        filez_set[file] = os.path.join(dirpath, file)                              
+
     filez = list(filez_set.values())
 
     if verbose:
