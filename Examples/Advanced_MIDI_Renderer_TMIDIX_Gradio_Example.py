@@ -52,6 +52,7 @@ def Render_MIDI(input_midi,
                 soundfont_bank, 
                 render_sample_rate,
                 render_with_sustains,
+                merge_misaligned_notes,
                 custom_render_patch,
                 render_align,
                 render_transpose_value,
@@ -86,6 +87,7 @@ def Render_MIDI(input_midi,
 
     if render_type != 'Render as-is':
         print('Render with sustains:', render_with_sustains)
+        print('Merge misaligned notes:', merge_misaligned_notes)
         print('Custom MIDI render patch', custom_render_patch)
         print('Align to bars:', render_align)
         print('Transpose value:', render_transpose_value)
@@ -105,7 +107,10 @@ def Render_MIDI(input_midi,
                                              return_enhanced_score_notes=True, 
                                              apply_sustain=render_with_sustains
                                             )[0]
-    
+
+    if merge_misaligned_notes:
+        escore = TMIDIX.merge_escore_notes(escore, merge_threshold=64)
+
     escore = TMIDIX.augment_enhanced_score_notes(escore, timings_divider=1)
 
     first_note_index = [e[0] for e in raw_score[1]].index('note')
@@ -396,6 +401,7 @@ if __name__ == "__main__":
         gr.Markdown("## Select custom render options")
 
         render_with_sustains = gr.Checkbox(label="Render with sustains (if present)", value=False)
+        merge_misaligned_notes = gr.Checkbox(label="Merge misaligned notes", value=False)
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
         
         render_align = gr.Radio(["Do not align", 
@@ -431,6 +437,7 @@ if __name__ == "__main__":
                                                soundfont_bank, 
                                                render_sample_rate,
                                                render_with_sustains,
+                                               merge_misaligned_notes,
                                                custom_render_patch,
                                                render_align,
                                                render_transpose_value,
