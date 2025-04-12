@@ -11397,8 +11397,9 @@ def create_files_list(datasets_paths=['./'],
                             
                             else:
                                 dupes_list.append(os.path.join(dirpath, file))
-                    else:            
-                        filez_set[file] = os.path.join(dirpath, file)                              
+                    else:
+                        fpath = os.path.join(dirpath, file)
+                        filez_set[fpath] = fpath                              
 
     filez = list(filez_set.values())
 
