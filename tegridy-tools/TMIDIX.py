@@ -3874,7 +3874,7 @@ def fix_monophonic_score_durations(monophonic_score):
         nmt = monophonic_score[i+1][1]
 
         if note[1]+note[2] >= nmt:
-          note_dur = nmt-note[1]-1
+          note_dur = max(1, nmt-note[1]-1)
         else:
           note_dur = note[2]
 
@@ -3892,7 +3892,7 @@ def fix_monophonic_score_durations(monophonic_score):
         nmt = monophonic_score[i+1][0]
 
         if note[0]+note[1] >= nmt:
-          note_dur = nmt-note[0]-1
+          note_dur = max(1, nmt-note[0]-1)
         else:
           note_dur = note[1]
 
