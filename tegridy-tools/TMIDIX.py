@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.4.11"
+__version__ = "25.4.28"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -11338,6 +11338,19 @@ def system_memory_utilization(return_dict=False):
 
 ###################################################################################
 
+def system_cpus_utilization(return_dict=False):
+
+    if return_dict:
+        return {'num_cpus': psutil.cpu_count(),
+                'cpus_util': psutil.cpu_percent()
+                }
+
+    else:
+        print('Number of CPUs:', psutil.cpu_count())
+        print('CPUs utilization:', psutil.cpu_percent())
+
+###################################################################################
+
 def create_files_list(datasets_paths=['./'],
                       files_exts=['.mid', '.midi', '.kar', '.MID', '.MIDI', '.KAR'],
                       max_num_files_per_dir=-1,
@@ -12858,7 +12871,7 @@ def convert_escore_notes_pitches_chords_signature(signature, convert_to_full_cho
 
     pitches_counts = [c for c in signature if -1 < c[0] < 128]
     chords_counts = [c for c in signature if 127 < c[0] < len(SRC_CHORDS)+128]
-    drums_counts = [[c[0]-cdiff, c[1]] for c in signature if len(SRC_CHORDS)+127 < c[0] < len(SRC_CHORDS)+256]
+    drums_counts = [[c[0]+cdiff, c[1]] for c in signature if len(SRC_CHORDS)+127 < c[0] < len(SRC_CHORDS)+256]
     bad_chords_count = [c for c in signature if c[0] == -1]
 
     new_chords_counts = []
@@ -12873,6 +12886,24 @@ def convert_escore_notes_pitches_chords_signature(signature, convert_to_full_cho
         new_chords_counts.append([TRG_CHORDS.index(tones_chord)+128, c[1]])
 
     return pitches_counts + merge_counts(new_chords_counts) + drums_counts + bad_chords_count
+
+###################################################################################
+
+def convert_bytes_in_nested_list(lst, encoding='utf-8', errors='ignore'):
+    
+    new_list = []
+    
+    for item in lst:
+        if isinstance(item, list):
+            new_list.append(convert_bytes_in_nested_list(item))
+            
+        elif isinstance(item, bytes):
+            new_list.append(item.decode(encoding, errors=errors))
+            
+        else:
+            new_list.append(item)
+            
+    return new_list
 
 ###################################################################################
 
