@@ -1,4 +1,6 @@
+#=====================================================
 # https://huggingface.co/spaces/asigalov61/MIDI-Melody
+#=====================================================
 
 import os.path
 
@@ -16,11 +18,9 @@ import TMIDIX
 
 import matplotlib.pyplot as plt
 
-in_space = os.getenv("SYSTEM") == "spaces"
-         
 # =================================================================================================
                        
-def AddMelody(input_midi, input_channel, input_patch, input_start_chord):
+def AddMelody(input_midi, input_mel_type, input_channel, input_patch, input_start_chord):
     print('=' * 70)
     print('Req start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     start_time = reqtime.time()
@@ -32,6 +32,7 @@ def AddMelody(input_midi, input_channel, input_patch, input_start_chord):
 
     print('-' * 70)
     print('Input file name:', fn)
+    print('Req mel type:', input_mel_type)
     print('Req channel:', input_channel)
     print('Req patch:', input_patch)
     print('Req start chord:', input_start_chord)
@@ -59,14 +60,23 @@ def AddMelody(input_midi, input_channel, input_patch, input_start_chord):
         # Recalculate timings
         
         escore_notes = TMIDIX.recalculate_score_timings(escore_notes)
+        
         #===============================================================================
         # Add melody
-        
-        output = TMIDIX.add_melody_to_enhanced_score_notes(escore_notes, 
-                                                           melody_channel=input_channel, 
-                                                           melody_patch=input_patch, 
-                                                           melody_start_chord=input_start_chord
-                                                          )
+
+        if input_mel_type == "Original":
+            output = TMIDIX.add_melody_to_enhanced_score_notes(escore_notes, 
+                                                               melody_channel=input_channel, 
+                                                               melody_patch=input_patch, 
+                                                               melody_start_chord=input_start_chord
+                                                              )
+
+        else:
+            output = TMIDIX.add_expressive_melody_to_enhanced_score_notes(escore_notes, 
+                                                                          melody_channel=input_channel, 
+                                                                          melody_patch=input_patch, 
+                                                                          melody_start_chord=input_start_chord
+                                                                         )
         
         print('=' * 70)
         print('Done!')
@@ -152,8 +162,10 @@ if __name__ == "__main__":
             "Check out [tegridy-tools](https://github.com/asigalov61/tegridy-tools) on GitHub!\n\n"
         )
         gr.Markdown("## Upload your MIDI or select a sample example MIDI")
-        
+
         input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
+        
+        input_mel_type = gr.Dropdown(['Expressive', 'Original'], value="Expressive", label="Melody type")
         input_channel = gr.Slider(0, 15, value=3, step=1, label="Melody MIDI channel")
         input_patch = gr.Slider(0, 127, value=40, step=1, label="Melody MIDI patch")
         input_start_chord = gr.Slider(0, 128, value=0, step=1, label="Melody start chord")
@@ -169,14 +181,14 @@ if __name__ == "__main__":
         output_midi = gr.File(label="Output MIDI file", file_types=[".mid"])
 
 
-        run_event = run_btn.click(AddMelody, [input_midi, input_channel, input_patch, input_start_chord],
+        run_event = run_btn.click(AddMelody, [input_midi, input_mel_type, input_channel, input_patch, input_start_chord],
                                   [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
 
         gr.Examples(
-            [["Sharing The Night Together.kar", 3, 40, 0], 
-             ["Deep Relaxation Melody #6.mid", 3, 40, 0],
+            [["Sharing The Night Together.kar", "Expressive", 3, 40, 0], 
+             ["Deep Relaxation Melody #6.mid", "Expressive", 3, 40, 0],
             ],
-            [input_midi, input_channel, input_patch, input_start_chord],
+            [input_midi, input_mel_type, input_channel, input_patch, input_start_chord],
             [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot],
             AddMelody,
             cache_examples=True,
