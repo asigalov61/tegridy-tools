@@ -20,7 +20,14 @@ import matplotlib.pyplot as plt
 
 # =================================================================================================
                        
-def AddMelody(input_midi, input_mel_type, input_channel, input_patch, input_start_chord):
+def AddMelody(input_midi, 
+              input_mel_type, 
+              input_channel, 
+              input_patch, 
+              input_start_chord, 
+              input_apply_sustains
+             ):
+    
     print('=' * 70)
     print('Req start time: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now(PDT)))
     start_time = reqtime.time()
@@ -36,6 +43,7 @@ def AddMelody(input_midi, input_mel_type, input_channel, input_patch, input_star
     print('Req channel:', input_channel)
     print('Req patch:', input_patch)
     print('Req start chord:', input_start_chord)
+    print('Req apply sustains:', input_apply_sustains)
     print('-' * 70)
 
     #===============================================================================
@@ -44,7 +52,10 @@ def AddMelody(input_midi, input_mel_type, input_channel, input_patch, input_star
     #===============================================================================
     # Enhanced score notes
     
-    escore_notes = TMIDIX.advanced_score_processor(raw_score, return_enhanced_score_notes=True)[0]
+    escore_notes = TMIDIX.advanced_score_processor(raw_score, 
+                                                   return_enhanced_score_notes=True,
+                                                   apply_sustain=input_apply_sustains
+                                                  )[0]
     
     if len(escore_notes) > 0:
     
@@ -169,6 +180,7 @@ if __name__ == "__main__":
         input_channel = gr.Slider(0, 15, value=3, step=1, label="Melody MIDI channel")
         input_patch = gr.Slider(0, 127, value=40, step=1, label="Melody MIDI patch")
         input_start_chord = gr.Slider(0, 128, value=0, step=1, label="Melody start chord")
+        input_apply_sustains = gr.Checkbox(value=False, label="Apply sustains (if present)")
         
         run_btn = gr.Button("add melody", variant="primary")
 
@@ -181,17 +193,38 @@ if __name__ == "__main__":
         output_midi = gr.File(label="Output MIDI file", file_types=[".mid"])
 
 
-        run_event = run_btn.click(AddMelody, [input_midi, input_mel_type, input_channel, input_patch, input_start_chord],
-                                  [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot])
+        run_event = run_btn.click(AddMelody, [input_midi, 
+                                              input_mel_type, 
+                                              input_channel, 
+                                              input_patch, 
+                                              input_start_chord,
+                                              input_apply_sustains
+                                             ],
+                                              [output_midi_title, 
+                                               output_midi_summary, 
+                                               output_midi, 
+                                               output_audio, 
+                                               output_plot
+                                              ])
 
-        gr.Examples(
-            [["Sharing The Night Together.kar", "Expressive", 3, 40, 0], 
-             ["Deep Relaxation Melody #6.mid", "Expressive", 3, 40, 0],
-            ],
-            [input_midi, input_mel_type, input_channel, input_patch, input_start_chord],
-            [output_midi_title, output_midi_summary, output_midi, output_audio, output_plot],
-            AddMelody,
-            cache_examples=True,
-        )
+        gr.Examples([["Sharing The Night Together.kar", "Expressive", 3, 40, 0, False], 
+                     ["Deep Relaxation Melody #6.mid", "Expressive", 3, 40, 0, False],
+                    ],
+                    [input_midi, 
+                     input_mel_type, 
+                     input_channel, 
+                     input_patch, 
+                     input_start_chord, 
+                     input_apply_sustains
+                    ],
+                    [output_midi_title, 
+                     output_midi_summary, 
+                     output_midi, 
+                     output_audio, 
+                     output_plot
+                    ],
+                    AddMelody,
+                    cache_examples=True,
+                )
         
         app.queue().launch()
