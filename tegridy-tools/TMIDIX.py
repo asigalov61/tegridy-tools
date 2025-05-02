@@ -12976,9 +12976,10 @@ def merge_melody_notes(escore_notes, pitches_idx=4, max_dur=255):
 
 def add_expressive_melody_to_enhanced_score_notes(escore_notes,
                                                   melody_start_chord=0,
-                                                  melody_notes_max_duration=255,
                                                   melody_channel=3,
                                                   melody_patch=40,
+                                                  melody_notes_max_duration=255,
+                                                  medley_max_min_durs=[],
                                                   melody_max_velocity=120,
                                                   acc_max_velocity=90,
                                                   return_melody=False
@@ -13025,6 +13026,11 @@ def add_expressive_melody_to_enhanced_score_notes(escore_notes,
         song_f.extend(c)
 
     song_f.extend(cscore[-1])
+    
+    if medley_max_min_durs:
+        for e in mel_f:
+            if e[2] >= medley_max_min_durs[0]:
+                e[2] = medley_max_min_durs[1]
 
     adjust_score_velocities(mel_f, melody_max_velocity)
     
