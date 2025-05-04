@@ -141,7 +141,10 @@ def Render_MIDI(input_midi,
         
     elif render_type == "Reverse":
         output_score = TMIDIX.reverse_enhanced_score_notes(escore)
-        
+
+    elif render_type == 'Repair Durations':
+        output_score = TMIDIX.merge_escore_notes_durations(escore)
+    
     elif render_type == 'Repair Chords':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
         output_score = TMIDIX.flatten(fixed_cscore)
@@ -387,7 +390,8 @@ if __name__ == "__main__":
                                 "Custom render", 
                                 "Extract melody", 
                                 "Flip", 
-                                "Reverse", 
+                                "Reverse",
+                                "Repair Durations",
                                 "Repair Chords",
                                 "Longest Repeating Phrase",
                                 "Multi-Instrumental Summary",
