@@ -108,8 +108,8 @@ def Render_MIDI(input_midi,
                                              apply_sustain=render_with_sustains
                                             )[0]
 
-    if merge_misaligned_notes:
-        escore = TMIDIX.merge_escore_notes(escore, merge_threshold=64)
+    if merge_misaligned_notes > 0:
+        escore = TMIDIX.merge_escore_notes(escore, merge_threshold=merge_misaligned_notes)
 
     escore = TMIDIX.augment_enhanced_score_notes(escore, timings_divider=1)
 
@@ -405,7 +405,7 @@ if __name__ == "__main__":
         gr.Markdown("## Select custom render options")
 
         render_with_sustains = gr.Checkbox(label="Render with sustains (if present)", value=False)
-        merge_misaligned_notes = gr.Checkbox(label="Merge misaligned notes", value=False)
+        merge_misaligned_notes = gr.Slider(-1, 127, value=-1, label="Merge misaligned notes")
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
         
         render_align = gr.Radio(["Do not align", 
