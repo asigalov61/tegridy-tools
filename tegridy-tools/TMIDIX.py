@@ -3866,7 +3866,7 @@ def chordify_score(score,
       return None
 
 def fix_monophonic_score_durations(monophonic_score,
-                                   notes_min_gap=1,
+                                   min_notes_gap=1,
                                    min_notes_dur=1
                                    ):
   
@@ -3880,7 +3880,7 @@ def fix_monophonic_score_durations(monophonic_score,
         nmt = monophonic_score[i+1][1]
 
         if note[1]+note[2] >= nmt:
-          note_dur = max(1, nmt-note[1]-notes_min_gap)
+          note_dur = max(1, nmt-note[1]-min_notes_gap)
         else:
           note_dur = note[2]
 
@@ -3900,7 +3900,7 @@ def fix_monophonic_score_durations(monophonic_score,
         nmt = monophonic_score[i+1][0]
 
         if note[0]+note[1] >= nmt:
-          note_dur = max(1, nmt-note[0]-notes_min_gap)
+          note_dur = max(1, nmt-note[0]-min_notes_gap)
         else:
           note_dur = note[1]
           
@@ -13095,23 +13095,23 @@ def add_expressive_melody_to_enhanced_score_notes(escore_notes,
 
 ###################################################################################
     
-def int_list_md5_hash(int_list):
+def list_md5_hash(ints_list):
     
-    arr = array('H', int_list)
+    arr = array('H', ints_list)
     binary_data = arr.tobytes()
     
     return hashlib.md5(binary_data).hexdigest()
 
 ###################################################################################
 
-def merge_escore_notes_durations(escore_notes,
-                                 notes_min_gap=1,
-                                 min_notes_dur=2,
-                                 times_idx=1,
-                                 durs_idx=2,
-                                 channels_idx = 3, 
-                                 pitches_idx=4
-                                ):
+def fix_escore_notes_durations(escore_notes,
+                               min_notes_gap=1,
+                               min_notes_dur=1,
+                               times_idx=1,
+                               durs_idx=2,
+                               channels_idx = 3, 
+                               pitches_idx=4
+                              ):
 
     notes = [e for e in escore_notes if e[channels_idx] != 9]
     drums = [e for e in escore_notes if e[channels_idx] == 9]
@@ -13123,7 +13123,7 @@ def merge_escore_notes_durations(escore_notes,
     for k, g in escore_groups:
         if len(g) > 2:
             fg = fix_monophonic_score_durations(g, 
-                                                notes_min_gap=notes_min_gap, 
+                                                min_notes_gap=min_notes_gap, 
                                                 min_notes_dur=min_notes_dur
                                                )
             merged_score.extend(fg)
