@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.5.4"
+__version__ = "25.5.6"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -11193,13 +11193,17 @@ def escore_notes_core(escore_notes, core_len=128):
 
 ###################################################################################
 
-def multiprocessing_wrapper(function, data_list):
+def multiprocessing_wrapper(function, data_list, verbose=True):
     
     with multiprocessing.Pool() as pool:
         
         results = []
         
-        for result in tqdm.tqdm(pool.imap_unordered(function, data_list), total=len(data_list)):
+        for result in tqdm.tqdm(pool.imap_unordered(function, data_list),
+                                total=len(data_list),
+                                disable=not verbose
+                                ):
+            
             results.append(result)
             
     return results
@@ -12973,7 +12977,7 @@ def ordered_groups(data, key_index):
 
 ###################################################################################
 
-def merge_melody_notes(escore_notes, pitches_idx=4, max_dur=255):
+def merge_melody_notes(escore_notes, pitches_idx=4, max_dur=255, last_dur=128):
 
     groups = ordered_groups_unsorted(escore_notes, pitches_idx)
 
@@ -12994,7 +12998,16 @@ def merge_melody_notes(escore_notes, pitches_idx=4, max_dur=255):
                                         g[0][4],
                                         g[0][5],
                                         g[0][6]
-                                        ])
+                                       ])
+ 
+    merged_melody_notes.append(['note',
+                                groups[-1][1][0][1],
+                                last_dur,
+                                groups[-1][1][0][3],
+                                groups[-1][1][0][4],
+                                groups[-1][1][0][5],
+                                groups[-1][1][0][6]
+                               ])
             
     return merged_melody_notes
 
@@ -13002,10 +13015,13 @@ def merge_melody_notes(escore_notes, pitches_idx=4, max_dur=255):
 
 def add_expressive_melody_to_enhanced_score_notes(escore_notes,
                                                   melody_start_chord=0,
+                                                  melody_prime_pitch=60,
+                                                  melody_step=1,
                                                   melody_channel=3,
                                                   melody_patch=40,
                                                   melody_notes_max_duration=255,
-                                                  medley_max_min_durs=[],
+                                                  melody_last_note_dur=128,
+                                                  melody_clip_max_min_durs=[],
                                                   melody_max_velocity=120,
                                                   acc_max_velocity=90,
                                                   return_melody=False
@@ -13018,26 +13034,28 @@ def add_expressive_melody_to_enhanced_score_notes(escore_notes,
 
     cscore = chordify_score([1000, score])
 
-    melody_pitches = [72]
+    melody_pitches = [melody_prime_pitch]
     
     for i, c in enumerate(cscore[melody_start_chord:]):
         
-        pitches = [e[4] for e in c if e[3] != 9]
-    
-        if pitches:
-            cptc = find_closest_value(mult_pitches(pitches), melody_pitches[-1])[0]
-            melody_pitches.append(cptc)
+        if i % melody_step == 0:
+        
+            pitches = [e[4] for e in c if e[3] != 9]
+        
+            if pitches:
+                cptc = find_closest_value(mult_pitches(pitches), melody_pitches[-1])[0]
+                melody_pitches.append(cptc)
     
     song_f = []
     mel_f = []
     
     idx = 1
     
-    for i, c in enumerate(cscore[:-1]):
+    for i, c in enumerate(cscore[:-melody_step]):
         pitches = [e[4] for e in c if e[3] != 9]
     
-        if pitches and i >= melody_start_chord:
-            dur = min(cscore[i+1][0][1] - c[0][1], melody_notes_max_duration)
+        if pitches and i >= melody_start_chord and i % melody_step == 0:
+            dur = min(cscore[i+melody_step][0][1] - c[0][1], melody_notes_max_duration)
             
             mel_f.append(['note', 
                           c[0][1], 
@@ -13050,19 +13068,24 @@ def add_expressive_melody_to_enhanced_score_notes(escore_notes,
             idx += 1
             
         song_f.extend(c)
-
-    song_f.extend(cscore[-1])
+        
+    song_f.extend(flatten(cscore[-melody_step:]))
     
-    if medley_max_min_durs:
+    if len(melody_clip_max_min_durs) == 2:
         for e in mel_f:
-            if e[2] >= medley_max_min_durs[0]:
-                e[2] = medley_max_min_durs[1]
+            if e[2] >= melody_clip_max_min_durs[0]:
+                e[2] = melody_clip_max_min_durs[1]
 
     adjust_score_velocities(mel_f, melody_max_velocity)
     
-    song_f = sorted(merge_melody_notes(mel_f, max_dur=melody_notes_max_duration) + song_f,
+    merged_melody_notes = merge_melody_notes(mel_f,
+                                             max_dur=melody_notes_max_duration,
+                                             last_dur=melody_last_note_dur
+                                             )
+
+    song_f = sorted(merged_melody_notes + song_f,
                     key=lambda x: x[1]
-                    )
+                   )
 
     if return_melody:
         return mel_f
