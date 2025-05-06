@@ -143,7 +143,7 @@ def Render_MIDI(input_midi,
         output_score = TMIDIX.reverse_enhanced_score_notes(escore)
 
     elif render_type == 'Repair Durations':
-        output_score = TMIDIX.merge_escore_notes_durations(escore)
+        output_score = TMIDIX.fix_escore_notes_durations(escore)
     
     elif render_type == 'Repair Chords':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
