@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.5.6"
+__version__ = "25.6.25"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -12961,12 +12961,12 @@ def ordered_groups_unsorted(data, key_index):
 
 ###################################################################################
 
-def ordered_groups(data, key_index):
+def ordered_groups(data, ptc_idx, pat_idx):
     
     groups = OrderedDict()
     
     for sublist in data:
-        key = sublist[key_index]
+        key = tuple([sublist[ptc_idx], sublist[pat_idx]])
         
         if key not in groups:
             groups[key] = []
@@ -13110,13 +13110,14 @@ def fix_escore_notes_durations(escore_notes,
                                times_idx=1,
                                durs_idx=2,
                                channels_idx = 3, 
-                               pitches_idx=4
+                               pitches_idx=4,
+                               patches_idx=6
                               ):
 
     notes = [e for e in escore_notes if e[channels_idx] != 9]
     drums = [e for e in escore_notes if e[channels_idx] == 9]
     
-    escore_groups = ordered_groups(notes, pitches_idx)
+    escore_groups = ordered_groups(notes, pitches_idx, patches_idx)
 
     merged_score = []
 
@@ -13139,6 +13140,69 @@ def fix_escore_notes_durations(escore_notes,
             merged_score.extend(g)
 
     return sorted(merged_score + drums, key=lambda x: x[times_idx])
+
+###################################################################################
+
+def create_nested_chords_tree(chords_list):
+    
+    tree = {}
+    
+    for chord in chords_list:
+        
+        node = tree
+        
+        for semitone in chord:
+            if semitone not in node:
+                node[semitone] = {}
+                
+            node = node[semitone]
+            
+        node.setdefault(-1, []).append(chord)
+        
+    return tree
+
+###################################################################################
+
+def get_chords_with_prefix(nested_chords_tree, prefix):
+   
+    node = nested_chords_tree
+    
+    for semitone in prefix:
+        if semitone in node:
+            node = node[semitone]
+            
+        else:
+            return []
+
+    collected_chords = []
+    
+    def recursive_collect(subnode):
+        if -1 in subnode:
+            collected_chords.extend(subnode[-1])
+            
+        for key, child in subnode.items():
+            if key != -1:
+                recursive_collect(child)
+                
+    recursive_collect(node)
+    
+    return collected_chords
+
+###################################################################################
+
+def get_chords_by_semitones(chords_list, chord_semitones):
+
+    query_set = set(chord_semitones)
+    results = []
+
+    for chord in chords_list:
+        
+        chord_set = set(chord)
+        
+        if query_set.issubset(chord_set):
+            results.append(sorted(set(chord)))
+            
+    return results
 
 ###################################################################################
 
