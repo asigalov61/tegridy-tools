@@ -143,13 +143,16 @@ def Render_MIDI(input_midi,
         output_score = TMIDIX.reverse_enhanced_score_notes(escore)
 
     elif render_type == 'Repair Durations':
-        output_score = TMIDIX.fix_escore_notes_durations(escore)
+        output_score = TMIDIX.fix_escore_notes_durations(escore, min_notes_gap=0)
     
     elif render_type == 'Repair Chords':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
         output_score = TMIDIX.flatten(fixed_cscore)
 
-    elif render_type == "Add Drums Track":
+    elif render_type == 'Remove Duplicate Pitches':
+        output_score = TMIDIX.remove_duplicate_pitches_from_escore_notes(escore)
+    
+    elif render_type == "Add Drum Track":
         nd_escore = [e for e in escore if e[3] != 9]
         nd_escore = TMIDIX.augment_enhanced_score_notes(nd_escore)
         output_score = TMIDIX.advanced_add_drums_to_escore_notes(nd_escore)
@@ -393,10 +396,11 @@ if __name__ == "__main__":
                                 "Reverse",
                                 "Repair Durations",
                                 "Repair Chords",
+                                "Remove Duplicate Pitches",
                                 "Longest Repeating Phrase",
                                 "Multi-Instrumental Summary",
                                 "Solo Piano Summary",
-                                "Add Drums Track"
+                                "Add Drum Track"
                                ], 
                                label="Render type", 
                                value="Render as-is"
@@ -404,7 +408,7 @@ if __name__ == "__main__":
 
         gr.Markdown("## Select custom render options")
 
-        render_with_sustains = gr.Checkbox(label="Render with sustains (if present)", value=False)
+        render_with_sustains = gr.Checkbox(label="Render with sustains (if present)", value=True)
         merge_misaligned_notes = gr.Slider(-1, 127, value=-1, label="Merge misaligned notes")
         custom_render_patch = gr.Slider(-1, 127, value=-1, label="Custom render MIDI patch")
         
