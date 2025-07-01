@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.6.25"
+__version__ = "25.6.30"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -13203,6 +13203,41 @@ def get_chords_by_semitones(chords_list, chord_semitones):
             results.append(sorted(set(chord)))
             
     return results
+
+###################################################################################
+
+def remove_duplicate_pitches_from_escore_notes(escore_notes, 
+                                               pitches_idx=4, 
+                                               patches_idx=6, 
+                                               return_dupes_count=False
+                                              ):
+    
+    cscore = chordify_score([1000, escore_notes])
+
+    new_escore = []
+
+    bp_count = 0
+
+    for c in cscore:
+        
+        cho = []
+        seen = []
+
+        for cc in c:
+            if [cc[pitches_idx], cc[patches_idx]] not in seen:
+                cho.append(cc)
+                seen.append([cc[pitches_idx], cc[patches_idx]])
+
+            else:
+                bp_count += 1
+
+        new_escore.extend(cho)
+        
+    if return_dupes_count:
+        return bp_count
+        
+    else:
+        return new_escore
 
 ###################################################################################
 
