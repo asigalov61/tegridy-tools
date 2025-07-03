@@ -13,18 +13,21 @@ MAX_NOTES_PER_TRACK = 50000
 MIN_NOTES_PER_TRACK = 5
 
 
-def get_instrument_type(track: Track) -> str:
+def get_instrument_type(track) -> str:
     """
-    Determines MIDI instrument class of a track
+    Determines MIDI instrument class of a track.
 
-    :param track: MIDI track to identify instrument of
+    :param track: A pretty_midi.Instrument object
     :return: name of instrument class
     """
     if track.is_drum:
         return "Drums"
 
-    return INSTRUMENT_CLASSES[CLASS_OF_INST[0]]["name"]
-
+    program_number = track.program  # MIDI program number (0–127)
+    instrument_class_index = CLASS_OF_INST[program_number]
+    instrument_class_name = INSTRUMENT_CLASSES[instrument_class_index]["name"]
+    
+    return instrument_class_name
 
 def create_loop_dict(endpoint_data: Tuple[int, int, float, float], track_idx: int, instrument_type: str) -> Dict[str,Any]:
     """
