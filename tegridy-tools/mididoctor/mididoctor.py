@@ -34,7 +34,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.5"
+__version__ = "25.7.6"
 
 print('=' * 70)
 print('MIDI Doctor')
@@ -554,10 +554,15 @@ def heal_midi(midi_file,
     
         for n, o in tracks:
             dd_tracks.append([remove_duplicate_notes(n), o])
+
+        cd_tracks = []
+
+        for n, o in tracks:
+            cd_tracks.append([repair_chords(n), o])
     
         fd_tracks = []
     
-        for n, o in dd_tracks:
+        for n, o in cd_tracks:
             fd_tracks.append([fix_notes_durations(n, max_notes_dur=ticks*8), o])
 
         va_tracks = []
