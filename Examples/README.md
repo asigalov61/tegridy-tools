@@ -2,7 +2,7 @@
 
 ***
 
-## Main example application: [Advanced MIDI Renderer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Advanced_MIDI_Renderer_TMIDIX_Gradio_Example.py)
+## Main example applications: [Advanced MIDI Renderer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Advanced_MIDI_Renderer_TMIDIX_Gradio_Example.py) and [MIDI Melody](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/MIDI_Melody_Gradio_App_Example.py)
 
 ***
 
