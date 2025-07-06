@@ -34,7 +34,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.7"
+__version__ = "25.7.13"
 
 print('=' * 70)
 print('MIDI Doctor')
@@ -46,7 +46,7 @@ print('Loading module...')
 
 import os
 
-import MIDI
+from . import MIDI
 
 import copy
 
@@ -180,7 +180,9 @@ def read_midi(midi_file,
 
 ###################################################################################
 
-def chordify_notes(notes, timings_divider=1):
+def chordify_notes(notes, 
+                   timings_divider=1
+                  ):
 
     pe = notes[0]
 
@@ -224,14 +226,14 @@ def remove_duplicate_notes(notes,
                            return_dupes_count=False
                           ):
 
+    bp_count = 0
+
     if notes:
 
         cnotes = chordify_notes(notes, timings_divider=timings_divider)
     
         new_notes = []
-    
-        bp_count = 0
-    
+
         for c in cnotes:
             
             cho = []
@@ -248,27 +250,31 @@ def remove_duplicate_notes(notes,
             new_notes.extend(cho)
             
         if return_dupes_count:
-            return bp_count
+            return new_notes, bp_count
             
         else:
             return new_notes
 
     else:
-        return notes
+        if return_dupes_count:
+            return notes, bp_count
+
+        else:
+            return notes
 
 ###################################################################################
     
-def repair_chords(notes,
-                  timings_divider=1,
+def repair_chords(notes, 
+                  timings_divider=1, 
                   return_bad_chords_count=False
-                  ):
+                 ):
+
+    bcount = 0
 
     if notes:
 
         chords = chordify_notes(notes, timings_divider=timings_divider)
-    
-        bcount = 0
-    
+
         fixed_chords = []
     
         for c in chords:
@@ -309,7 +315,11 @@ def repair_chords(notes,
             return fixed_chords
             
     else:
-        return notes
+        if return_bad_chords_count:
+            return notes, bcount
+
+        else:
+            return notes
     
 ###################################################################################
     
@@ -331,44 +341,52 @@ def ordered_groups(data):
 
 def fix_monophonic_notes_durations(mono_notes,
                                    min_notes_gap=0,
-                                   min_notes_dur=25,
-                                   max_notes_dur=500
+                                   min_notes_dur=20,
+                                   max_notes_dur=500,
+                                   return_bad_durs_count=False
                                    ):
-    if mono_notes:
-        
-        monophonic_score = copy.deepcopy(mono_notes)
 
-        for n in monophonic_score:
-            if n[2] > max_notes_dur:
-                n[2] = max_notes_dur
+    monophonic_score = copy.deepcopy(mono_notes)
 
-            elif n[2] < min_notes_dur:
-                n[2] = min_notes_dur
-      
-        fixed_score = []
+    for n in monophonic_score:
+        if n[2] > max_notes_dur:
+            n[2] = max_notes_dur
 
-        for i in range(len(monophonic_score)-1):
-            note = monophonic_score[i]
-        
-            nmt = monophonic_score[i+1][1]
-        
-            if note[1]+note[2] >= nmt:
-              note_dur = max(1, nmt-note[1]-min_notes_gap)
-            else:
-              note_dur = note[2]
-        
-            new_note = [note[0], note[1], note_dur] + note[3:]
+        elif n[2] < min_notes_dur:
+            n[2] = min_notes_dur
+  
+    fixed_score = []
+
+    bd_count = 0
+
+    for i in range(len(monophonic_score)-1):
+        note = monophonic_score[i]
+    
+        nmt = monophonic_score[i+1][1]
+    
+        if note[1]+note[2] >= nmt:
+          note_dur = max(1, nmt-note[1]-min_notes_gap)
+          bd_count += 1
             
-            if new_note[2] >= min_notes_dur:
-                fixed_score.append(new_note)
-          
+        else:
+          note_dur = note[2]
+    
+        new_note = [note[0], note[1], note_dur] + note[3:]
+        
+        if new_note[2] >= min_notes_dur:
+            fixed_score.append(new_note)
 
-        fixed_score.append(monophonic_score[-1])
+        else:
+            bd_count += 1
+      
 
-        return fixed_score
+    fixed_score.append(monophonic_score[-1])
+
+    if return_bad_durs_count:
+        return fixed_score, bd_count
 
     else:
-        return mono_notes
+        return fixed_score
 
 ###################################################################################
 
@@ -376,9 +394,13 @@ def fix_notes_durations(notes,
                         min_notes_gap=0,
                         min_notes_dur=1,
                         max_notes_dur=500,
+                        return_bad_durs_count=False
                        ):
-
+    
+    bd_count = 0
+    
     if notes:
+        
         non_drums = [e for e in notes if e[3] != 9]
         drums = [e for e in notes if e[3] == 9]
         
@@ -388,56 +410,92 @@ def fix_notes_durations(notes,
     
         for k, g in notes_groups:
             if len(g) > 2:
-                fg = fix_monophonic_notes_durations(g, 
-                                                    min_notes_gap=min_notes_gap, 
-                                                    min_notes_dur=min_notes_dur,
-                                                    max_notes_dur=max_notes_dur
-                                                   )
+                fg, bc = fix_monophonic_notes_durations(g, 
+                                                        min_notes_gap=min_notes_gap, 
+                                                        min_notes_dur=min_notes_dur,
+                                                        max_notes_dur=max_notes_dur,
+                                                        return_bad_durs_count=True
+                                                       )
                 merged_score.extend(fg)
+                bd_count += bc
     
             elif len(g) == 2:
+                bd1 = False
+                bd2 = False
+                
                 if g[0][2] > max_notes_dur:
                     g[0][2] = max_notes_dur
+                    bd1 = True
 
                 if g[1][2] > max_notes_dur:
                     g[1][2] = max_notes_dur
+                    bd2 = True
 
                 if g[0][2] > min_notes_dur:
                     g[0][2] = min_notes_dur
+                    bd1 = True
 
                 if g[1][2] < min_notes_dur:
                     g[1][2] = min_notes_dur
+                    bd2 = True
     
                 if g[0][1]+g[0][2] >= g[1][1]:
-                    g[0][2] = max(1, g[1][1] - g[0][1] - 1)
+                    g[0][2] = max(1, g[1][1] - g[0][1] - min_notes_gap)
+                    bd1 = True
                     
                 merged_score.extend(g)
+                bd_count += sum([bd1, bd2])
     
-            else:
+            elif len(g) == 1:
+                bd1 = 0
+                
                 if g[0][2] > max_notes_dur:
                     g[0][2] = max_notes_dur
+                    bd1 = 1
 
                 if g[0][2] > min_notes_dur:
                     g[0][2] = min_notes_dur
+                    bd1 = 1
                     
                 merged_score.extend(g)
+                bd_count += bd1
     
         for d in drums:
+            bd1 = 0
+            
             if d[2] < min_notes_dur:
                 d[2] = min_notes_dur
+                bd1 = 1
     
             if d[2] > max_notes_dur:
-                d[2] = max_notes_dur           
-    
-        return sorted(merged_score + drums, key=lambda x: x[1])
+                d[2] = max_notes_dur
+                bd1 = 1
+
+            bd_count += bd1
+
+        if return_bad_durs_count:
+            return sorted(merged_score + drums, key=lambda x: (x[1], -x[4])), bd_count
+
+        else:
+            return sorted(merged_score + drums, key=lambda x: (x[1], -x[4]))    
     
     else:
-        return notes
+        if return_bad_durs_count:
+            return notes, bd_count
+
+        else:
+            return notes
 
 ###################################################################################
     
-def adjust_notes_velocities(notes, max_velocity=120, adjustment_threshold_velocity=60):
+def adjust_notes_velocities(notes, 
+                            max_velocity=124, 
+                            adjustment_threshold_velocity=56, 
+                            return_adj_vels_count=False
+                           ):
 
+    av_count = 0
+    
     if notes:
 
         vels = [e[5] for e in notes]
@@ -452,29 +510,46 @@ def adjust_notes_velocities(notes, max_velocity=120, adjustment_threshold_veloci
             min_velocity_ratio = min_velocity / max_velocity_all_channels
         
             max_channel_velocity = max([c[5] for c in score])
+            
             if max_channel_velocity < min_velocity:
                 factor = max_velocity / min_velocity
             else:
                 factor = max_velocity / max_channel_velocity
+                
             for i in range(len(score)):
                 score[i][5] = int(score[i][5] * factor)
-    
-            return score
+                av_count += 1
+
+            if return_adj_vels_count:
+                return score, av_count
+
+            else:
+                return score
+
+        if return_adj_vels_count:
+            return notes, av_count
 
         else:
             return notes
-    
+
     else:
-        return notes
+        if return_adj_vels_count:
+            return notes, av_count
+
+        else:
+            return notes
 
 ###################################################################################
 
 def convert_bytes_in_nested_list(lst, 
                                  encoding='utf-8', 
-                                 errors='ignore'
+                                 errors='ignore',
+                                 return_changed_events_count=False
                                 ):
     
     new_list = []
+
+    ce_count = 0
     
     for item in lst:
         if isinstance(item, list):
@@ -482,27 +557,39 @@ def convert_bytes_in_nested_list(lst,
             
         elif isinstance(item, bytes):
             new_list.append(item.decode(encoding, errors=errors))
+            ce_count += 1
             
         else:
             new_list.append(item)
             
-    return new_list
+    if return_changed_events_count:       
+        return new_list, ce_count
+
+    else:
+        return new_list
 
 ###################################################################################
 
-def unbyte_text_events(events, encoding='utf-8'):
+def unbyte_text_events(events, encoding='utf-8', return_unbyte_count=False):
 
     fixed_events = []
+
+    uc_count = 0
     
     for e in events:
         if e[0] in text_events:
-            ne = convert_bytes_in_nested_list(e, encoding=encoding)
+            ne, cc = convert_bytes_in_nested_list(e, encoding=encoding, return_changed_events_count=True)
             fixed_events.append(ne)
+            uc_count += cc
 
         else:
             fixed_events.append(e)
+    
+    if return_unbyte_count:
+        return fixed_events, uc_count
 
-    return fixed_events
+    else:
+        return fixed_events
 
 ###################################################################################
 
@@ -510,8 +597,11 @@ def write_midi(ticks,
                tracks, 
                file_name='healed.mid',
                sort_notes=True,
+               write_midi=True,
+               return_midi_data=False,
+               return_score=False,
                return_stats=False,
-               return_midi_data=False
+               return_md5_hash=False
               ):
 
     score = [ticks]
@@ -521,78 +611,233 @@ def write_midi(ticks,
             n.sort(key=lambda x: (x[3] == 9, -x[4]))
         score.append(sorted(o+n, key=lambda x: x[1]))
 
-    midi_data = MIDI.score2midi(score)
+    if write_midi:
+        midi_data = MIDI.score2midi(score)
+        with open(file_name, 'wb') as fi:
+            fi.write(midi_data)
+            fi.close
+
+    out_data = {}
+
+    if return_midi_data or return_md5_hash:
+        midi_data = MIDI.score2midi(score)
 
     if return_midi_data:
-        return midi_data
+        out_data.update({'midi_data': midi_data})
         
-    with open(file_name, 'wb') as fi:
-        fi.write(midi_data)
-        fi.close
-
     if return_stats:
-        return MIDI.score2stats(score)
+        out_data.update({'midi_stats': MIDI.score2stats(score)})
+
+    if return_score:
+        out_data.update({'midi_score': score})
+
+    if return_md5_hash:
+        out_data.update({'midi_md5_hash': hashlib.md5(mdata).hexdigest()})
+
+    return out_data
 
 ###################################################################################
     
 def heal_midi(midi_file, 
               output_dir='./healed_midis/',
-              return_hashes=False
+              timings_divider=1,
+              write_midi_to_file=True,
+              return_midi_data=False,
+              return_midi_score=False,
+              return_midi_hashes=False,
+              return_original_midi_stats=False,
+              return_healed_midi_stats=False,
+              return_repair_stats=False
              ):
 
     if os.path.exists(midi_file):
+
+        #===================================================================================
 
         with open(midi_file, 'rb') as fi:
             fdata = fi.read()
             fi.close()
 
-        orig_md5 = hashlib.md5(fdata).hexdigest()
-    
         ticks, tracks = read_midi(midi_file)
+
+        if return_original_midi_stats:
+            oscore = [ticks]
+
+            for n, o in tracks:
+                oscore.extend([sorted(o+n, key=lambda x: x[1])])
+            ostats = MIDI.score2stats(oscore)
+
+        #===================================================================================
+
+        notes_and_other_events_counts = {}
+
+        for i, (n, o) in enumerate(tracks):
+            notes_and_other_events_counts[i] = {'num_notes': len(n),
+                                                'num_other': len(o)
+                                               }
+            
+
+        #===================================================================================
     
         dd_tracks = []
+        dd_counts = {}
     
-        for n, o in tracks:
-            dd_tracks.append([remove_duplicate_notes(n), o])
+        for i, (n, o) in enumerate(tracks):
+            out, dd_count = remove_duplicate_notes(n, 
+                                                   timings_divider=timings_divider, 
+                                                   return_dupes_count=True
+                                                  )
+            dd_tracks.append([out, o])
+            dd_counts[i] = {'duplicate': dd_count, 
+                            'total':len(n)
+                           }
+
+        #===================================================================================
 
         cd_tracks = []
+        cd_counts = {}
 
-        for n, o in dd_tracks:
-            cd_tracks.append([repair_chords(n), o])
+        for i, (n, o) in enumerate(dd_tracks):
+            out, cd_count = repair_chords(n, 
+                                          timings_divider=timings_divider, 
+                                          return_bad_chords_count=True
+                                         ) 
+            cd_tracks.append([out, o])
+            cd_counts[i] = {'bad': cd_count, 
+                            'total': len(n)
+                           }
+
+        #===================================================================================
     
         fd_tracks = []
+        fd_counts = {}
     
-        for n, o in cd_tracks:
-            fd_tracks.append([fix_notes_durations(n, max_notes_dur=ticks*8), o])
+        for i, (n, o) in enumerate(cd_tracks):
+            out, fd_count = fix_notes_durations(n, 
+                                                max_notes_dur=ticks*8,
+                                                return_bad_durs_count=True
+                                               )
+            fd_tracks.append([out, o])
+            fd_counts[i] = {'adjusted': fd_count, 
+                            'total': len(n)
+                           }
+
+        #===================================================================================
 
         va_tracks = []
+        va_counts = {}
 
-        for n, o in fd_tracks:
-            va_tracks.append([adjust_notes_velocities(n), o])
+        for i, (n, o) in enumerate(fd_tracks):
+            out, va_count = adjust_notes_velocities(n, 
+                                                    return_adj_vels_count=True
+                                                   )
+            va_tracks.append([out, o])
+            va_counts[i] = {'adjusted':va_count, 
+                            'total': len(n)
+                           }
+
+        #===================================================================================
     
         ut_tracks = []
+        ut_counts = {}
     
-        for n, o in va_tracks:
-            ut_tracks.append([n, unbyte_text_events(o)])
+        for i, (n, o) in enumerate(va_tracks):
+            out, ut_count = unbyte_text_events(o, 
+                                               return_unbyte_count=True
+                                              )
+            ut_tracks.append([n, out])
+            ut_counts[i] = {'adjusted': ut_count, 
+                            'total': len(o)
+                           }
+            
+        #===================================================================================
+
+        repair_counts_dict = {}
+
+        repair_counts_dict['duplicate_pitches_counts_per_track'] = dd_counts
+        repair_counts_dict['bad_chords_counts_per_track'] = cd_counts
+        repair_counts_dict['adjusted_durations_counts_per_track'] = fd_counts
+        repair_counts_dict['adjusted_velocities_counts_per_track'] = va_counts
+        repair_counts_dict['adjusted_text_events_counts_per_track'] = ut_counts
+
+        #===================================================================================
+
+        if write_midi or return_midi_data or return_midi_hashes or return_midi_stats:
+            midi_dict = write_midi(ticks, 
+                                   ut_tracks, 
+                                   write_midi=False, 
+                                   return_midi_data=True, 
+                                   return_stats=True, 
+                                   return_score=True
+                                  )
+
+            mdata = midi_dict['midi_data']
+            mscore = midi_dict['midi_score']
+            hstats = midi_dict['midi_stats']
+
+        #===================================================================================
+
+        out_data = {'original_midi_file_name': os.path.basename(midi_file)}
+
+        #===================================================================================
+
+        if write_midi:
     
-        fn = os.path.basename(midi_file)
-        os.makedirs(output_dir, exist_ok=True)
-        fpath = os.path.join(output_dir, fn)
-    
-        mdata = write_midi(ticks, ut_tracks, return_midi_data=True)
+            fn = os.path.basename(midi_file)
+            os.makedirs(output_dir, exist_ok=True)
+            fpath = os.path.join(output_dir, fn)
 
-        new_md5 = hashlib.md5(mdata).hexdigest()
+            with open(fpath, 'wb') as fi:
+                fi.write(mdata)
+                fi.close()
 
-        with open(fpath, 'wb') as fi:
-            fi.write(mdata)
-            fi.close()
+        #===================================================================================
 
-        if return_hashes:
-            return [orig_md5, new_md5]
+        if return_midi_data:
+            out_data['raw_midi_data'] = mdata
+
+        #===================================================================================
+
+        if return_midi_score:
+           out_data['healed_midi_score'] = mscore
+
+        #===================================================================================
+
+        if return_midi_hashes:
+            orig_md5 = hashlib.md5(fdata).hexdigest()
+            new_md5 = hashlib.md5(mdata).hexdigest()
+            out_data.update({'original_md5_hash': orig_md5, 'healed_md5_hash': new_md5})
+
+        #===================================================================================
+
+        if return_original_midi_stats:
+            out_data.update({'original_midi_stats': ostats})
+
+        #===================================================================================
+
+        if return_healed_midi_stats:
+            out_data.update({'healed_midi_stats': hstats})
+
+        #===================================================================================
+
+        if return_repair_stats:
+            repair_stats_dict = {}
+
+            repair_stats_dict['file_name'] = os.path.basename(midi_file)
+            repair_stats_dict['num_ticks'] = ticks
+            repair_stats_dict['num_tracks'] = len(tracks)
+            repair_stats_dict['num_notes_and_other_events_per_track'] = notes_and_other_events_counts
+            repair_stats_dict['repair_stats'] = repair_counts_dict
+
+            out_data.update(repair_stats_dict)
+
+        return out_data
+
+    #=======================================================================================
 
     else:
-        return []
-
+        return {}
+    
 ###################################################################################
 
 print('Module loaded!')
