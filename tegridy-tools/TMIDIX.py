@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.5"
+__version__ = "25.7.6"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -13414,6 +13414,107 @@ def find_deepest_midi_dirs(roots,
             print(f"  {d} -> {len(fl)} files")
 
     return final_dict
+
+###################################################################################
+
+PERCUSSION_GROUPS = {
+    
+    1: {  # Bass Drums
+        35: 'Acoustic Bass Drum',
+        36: 'Bass Drum 1',
+    },
+    2: {  # Stick
+        37: 'Side Stick',
+    },
+    3: {  # Snares
+        38: 'Acoustic Snare',
+        40: 'Electric Snare',
+    },
+    4: {  # Claps
+        39: 'Hand Clap',
+    },
+    5: {  # Floor Toms
+        41: 'Low Floor Tom',
+        43: 'High Floor Tom',
+    },
+    6: {  # Hi-Hats
+        42: 'Closed Hi-Hat',
+        44: 'Pedal Hi-Hat',
+        46: 'Open Hi-Hat',
+    },
+    7: {  # Toms
+        45: 'Low Tom',
+        47: 'Low-Mid Tom',
+        48: 'Hi-Mid Tom',
+        50: 'High Tom',
+    },
+    8: {  # Cymbals
+        49: 'Crash Cymbal 1',
+        51: 'Ride Cymbal 1',
+        52: 'Chinese Cymbal',
+        55: 'Splash Cymbal',
+        57: 'Crash Cymbal 2',
+        59: 'Ride Cymbal 2',
+    },
+    9: {  # Bells
+        53: 'Ride Bell',
+    },
+    10: {  # Tambourine
+        54: 'Tambourine',
+    },
+    11: {  # Cowbell
+        56: 'Cowbell',
+    },
+    12: {  # Vibraslap
+        58: 'Vibraslap',
+    },
+    13: {  # Bongos
+        60: 'Hi Bongo',
+        61: 'Low Bongo',
+    },
+    14: {  # Congas
+        62: 'Mute Hi Conga',
+        63: 'Open Hi Conga',
+        64: 'Low Conga',
+    },
+    15: {  # Timbales
+        65: 'High Timbale',
+        66: 'Low Timbale',
+    },
+    16: {  # Agogô
+        67: 'High Agogo',
+        68: 'Low Agogo',
+    },
+    17: {  # Cabasa
+        69: 'Cabasa',
+    },
+    18: {  # Maracas
+        70: 'Maracas',
+    },
+    19: {  # Whistles
+        71: 'Short Whistle',
+        72: 'Long Whistle',
+    },
+    20: {  # Guiros
+        73: 'Short Guiro',
+        74: 'Long Guiro',
+    },
+    21: {  # Claves
+        75: 'Claves',
+    },
+    22: {  # Wood Blocks
+        76: 'Hi Wood Block',
+        77: 'Low Wood Block',
+    },
+    23: {  # Cuica
+        78: 'Mute Cuica',
+        79: 'Open Cuica',
+    },
+    24: {  # Triangles
+        80: 'Mute Triangle',
+        81: 'Open Triangle',
+    },
+}
 
 ###################################################################################
 
