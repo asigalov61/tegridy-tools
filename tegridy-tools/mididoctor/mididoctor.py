@@ -34,7 +34,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.13"
+__version__ = "25.7.16"
 
 print('=' * 70)
 print('MIDI Doctor')
@@ -46,15 +46,15 @@ print('Loading module...')
 
 import os
 
-from . import MIDI
-
 import copy
 
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 
 from itertools import groupby, combinations
 
 import hashlib
+
+from . import MIDI
 
 ###################################################################################
 
@@ -431,7 +431,7 @@ def fix_notes_durations(notes,
                     g[1][2] = max_notes_dur
                     bd2 = True
 
-                if g[0][2] > min_notes_dur:
+                if g[0][2] < min_notes_dur:
                     g[0][2] = min_notes_dur
                     bd1 = True
 
@@ -453,7 +453,7 @@ def fix_notes_durations(notes,
                     g[0][2] = max_notes_dur
                     bd1 = 1
 
-                if g[0][2] > min_notes_dur:
+                if g[0][2] < min_notes_dur:
                     g[0][2] = min_notes_dur
                     bd1 = 1
                     
@@ -485,7 +485,7 @@ def fix_notes_durations(notes,
 
         else:
             return notes
-
+        
 ###################################################################################
     
 def adjust_notes_velocities(notes, 
@@ -539,6 +539,57 @@ def adjust_notes_velocities(notes,
         else:
             return notes
 
+###################################################################################
+        
+def repair_flat_dynamics(notes, 
+                         adjustment_threshold=0.95, 
+                         return_adj_vels_count=False
+                        ):
+
+    notes.sort(key=lambda x: x[3])
+    chan_groups = groupby(notes, key=lambda x: x[3])
+
+    new_notes = []
+    av_count = 0
+
+    for chan, chan_group in chan_groups:
+
+        chan_group = copy.deepcopy(list(chan_group))
+
+        chan_ptcs = [e[4] for e in chan_group]
+
+        chan_vels = [e[5] for e in chan_group]
+
+        chan_vels_counts = Counter(chan_vels).most_common()
+
+        if chan_vels_counts[0][1] / len(chan_vels) > adjustment_threshold:
+            avg_chan_ptc = round(sum(chan_ptcs) / len(chan_ptcs))
+
+            vel_shift = avg_chan_ptc // 4
+
+            if chan == 9:
+                vel_shift = 70
+
+            else:
+                if avg_chan_ptc < 48:
+                    vel_shift = 48
+
+            for e in chan_group:
+                e[5] = max(36, min(124, e[4] + vel_shift))
+                new_notes.append(e)
+                av_count += 1
+
+        else:
+            new_notes.extend(chan_group)
+
+    new_notes = sorted(new_notes, key=lambda x: (x[1], -x[4]))
+    
+    if return_adj_vels_count:
+        return new_notes, av_count
+
+    else:
+        return new_notes
+    
 ###################################################################################
 
 def convert_bytes_in_nested_list(lst, 
@@ -641,6 +692,10 @@ def write_midi(ticks,
 def heal_midi(midi_file, 
               output_dir='./healed_midis/',
               timings_divider=1,
+              max_notes_dur=-1,
+              text_events_encoding='utf-8',
+              quiet_vels_adj_threshold=56,
+              flat_vels_adj_threshold=0.95,
               write_midi_to_file=True,
               return_midi_data=False,
               return_midi_score=False,
@@ -711,10 +766,16 @@ def heal_midi(midi_file,
     
         fd_tracks = []
         fd_counts = {}
-    
+
+        if max_notes_dur < 1:
+            mndur = ticks*8
+
+        else:
+            mndur = max_notes_dur
+
         for i, (n, o) in enumerate(cd_tracks):
             out, fd_count = fix_notes_durations(n, 
-                                                max_notes_dur=ticks*8,
+                                                max_notes_dur=mndur,
                                                 return_bad_durs_count=True
                                                )
             fd_tracks.append([out, o])
@@ -728,22 +789,39 @@ def heal_midi(midi_file,
         va_counts = {}
 
         for i, (n, o) in enumerate(fd_tracks):
-            out, va_count = adjust_notes_velocities(n, 
+            out, va_count = adjust_notes_velocities(n,
+                                                    adjustment_threshold_velocity=quiet_vels_adj_threshold,
                                                     return_adj_vels_count=True
                                                    )
             va_tracks.append([out, o])
-            va_counts[i] = {'adjusted':va_count, 
+            va_counts[i] = {'adjusted': va_count, 
                             'total': len(n)
                            }
 
+        #===================================================================================
+
+        fv_tracks = []
+        fv_counts = {}
+
+        for i, (n, o) in enumerate(va_tracks):
+            out, fv_count = repair_flat_dynamics(n,
+                                                 adjustment_threshold=flat_vels_adj_threshold,
+                                                 return_adj_vels_count=True
+                                                )
+            fv_tracks.append([out, o])
+            fv_counts[i] = {'adjusted': fv_count, 
+                            'total': len(n)
+                           }
+        
         #===================================================================================
     
         ut_tracks = []
         ut_counts = {}
     
-        for i, (n, o) in enumerate(va_tracks):
+        for i, (n, o) in enumerate(fv_tracks):
             out, ut_count = unbyte_text_events(o, 
-                                               return_unbyte_count=True
+                                               return_unbyte_count=True,
+                                               encoding=text_events_encoding
                                               )
             ut_tracks.append([n, out])
             ut_counts[i] = {'adjusted': ut_count, 
@@ -757,7 +835,8 @@ def heal_midi(midi_file,
         repair_counts_dict['duplicate_pitches_counts_per_track'] = dd_counts
         repair_counts_dict['bad_chords_counts_per_track'] = cd_counts
         repair_counts_dict['adjusted_durations_counts_per_track'] = fd_counts
-        repair_counts_dict['adjusted_velocities_counts_per_track'] = va_counts
+        repair_counts_dict['adjusted_quiet_velocities_counts_per_track'] = va_counts
+        repair_counts_dict['adjusted_flat_velocities_counts_per_track'] = fv_counts
         repair_counts_dict['adjusted_text_events_counts_per_track'] = ut_counts
 
         #===================================================================================
