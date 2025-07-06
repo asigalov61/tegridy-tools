@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.6.30"
+__version__ = "25.7.5"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1512,6 +1512,9 @@ import shutil
 import hashlib
 
 from array import array
+
+from pathlib import Path
+from fnmatch import fnmatch
 
 ###################################################################################
 #
@@ -13132,7 +13135,7 @@ def fix_escore_notes_durations(escore_notes,
         elif len(g) == 2:
 
             if g[0][times_idx]+g[0][durs_idx] >= g[1][times_idx]:
-                g[0][durs_idx] = max(1, g[1][times_idx] - g[0][times_idx] - 1)
+                g[0][durs_idx] = max(1, g[1][times_idx] - g[0][times_idx] - min_notes_gap)
                 
             merged_score.extend(g)
 
@@ -13238,6 +13241,179 @@ def remove_duplicate_pitches_from_escore_notes(escore_notes,
         
     else:
         return new_escore
+
+###################################################################################
+    
+def chunks_shuffle(lst,
+                   min_len=1,
+                   max_len=3,
+                   seed=None
+                   ):
+    
+    rnd = random.Random(seed)
+    chunks = []
+    i, n = 0, len(lst)
+
+    while i < n:
+        size = rnd.randint(min_len, max_len)
+        size = min(size, n - i)
+        chunks.append(lst[i : i + size])
+        i += size
+
+    rnd.shuffle(chunks)
+
+    flattened = []
+    for chunk in chunks:
+        flattened.extend(chunk)
+
+    return flattened
+
+###################################################################################
+
+def convert_bytes_in_nested_list(lst, 
+                                 encoding='utf-8', 
+                                 errors='ignore',
+                                 return_changed_events_count=False
+                                ):
+    
+    new_list = []
+
+    ce_count = 0
+    
+    for item in lst:
+        if isinstance(item, list):
+            new_list.append(convert_bytes_in_nested_list(item))
+            
+        elif isinstance(item, bytes):
+            new_list.append(item.decode(encoding, errors=errors))
+            ce_count += 1
+            
+        else:
+            new_list.append(item)
+            
+    if return_changed_events_count:       
+        return new_list, ce_count
+
+    else:
+        return new_list
+    
+###################################################################################
+    
+def find_deepest_midi_dirs(roots,
+                           marker_file="midi_score.mid",
+                           suffixes=None,
+                           randomize=False,
+                           seed=None,
+                           verbose=False
+                          ):
+    
+    try:
+        iter(roots)
+        if isinstance(roots, (str, Path)):
+            root_list = [roots]
+        else:
+            root_list = list(roots)
+            
+    except TypeError:
+        root_list = [roots]
+
+    if isinstance(marker_file, (list, tuple)):
+        patterns = [p.lower() for p in marker_file if p]
+        
+    else:
+        patterns = [marker_file.lower()] if marker_file else []
+
+    allowed = {s.lower() for s in (suffixes or ['.mid', '.midi', '.kar'])}
+
+    if verbose:
+        print("Settings:")
+        print("  Roots:", [str(r) for r in root_list])
+        print("  Marker patterns:", patterns or "<no marker filter>")
+        print("  Allowed suffixes:", allowed)
+        print(f"  Randomize={randomize}, Seed={seed}")
+
+    results = defaultdict(list)
+    rng = random.Random(seed)
+
+    for root in root_list:
+
+        root_path = Path(root)
+        
+        if not root_path.is_dir():
+            print(f"Warning: '{root_path}' is not a valid directory, skipping.")
+            continue
+
+        if verbose:
+            print(f"\nScanning root: {str(root_path)}")
+
+        all_dirs = list(root_path.rglob("*"))
+        dirs_iter = tqdm.tqdm(all_dirs, desc=f"Dirs in {root_path.name}", disable=not verbose)
+
+        for dirpath in dirs_iter:
+            if not dirpath.is_dir():
+                continue
+
+            children = list(dirpath.iterdir())
+            if any(child.is_dir() for child in children):
+                if verbose:
+                    print(f"Skipping non-leaf: {str(dirpath)}")
+                continue
+
+            files = [f for f in children if f.is_file()]
+            names = [f.name.lower() for f in files]
+
+            if patterns:
+                matched = any(fnmatch(name, pat) for name in names for pat in patterns)
+                if not matched:
+                    if verbose:
+                        print(f"No marker in: {str(dirpath)}")
+                    continue
+                    
+                if verbose:
+                    print(f"Marker found in: {str(dirpath)}")
+                    
+            else:
+                if verbose:
+                    print(f"Including leaf (no marker): {str(dirpath)}")
+
+            for f in files:
+                if f.suffix.lower() in allowed:
+                    results[str(dirpath)].append(str(f))
+                    
+                    if verbose:
+                        print(f"  Collected: {f.name}")
+
+    all_leaves = list(results.keys())
+    if randomize:
+        if verbose:
+            print("\nShuffling leaf directories")
+            
+        rng.shuffle(all_leaves)
+        
+    else:
+        all_leaves.sort()
+
+    final_dict = {}
+    
+    for leaf in all_leaves:
+        file_list = results[leaf][:]
+        if randomize:
+            if verbose:
+                print(f"Shuffling files in: {leaf}")
+                
+            rng.shuffle(file_list)
+            
+        else:
+            file_list.sort()
+            
+        final_dict[leaf] = file_list
+
+    if verbose:
+        print("\nScan complete. Found directories:")
+        for d, fl in final_dict.items():
+            print(f"  {d} -> {len(fl)} files")
+
+    return final_dict
 
 ###################################################################################
 
