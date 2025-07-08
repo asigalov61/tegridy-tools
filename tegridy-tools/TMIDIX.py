@@ -5062,7 +5062,8 @@ def patch_list_from_enhanced_score_notes(enhanced_score_notes,
 
 ###################################################################################
 
-def patch_enhanced_score_notes(escore_notes, 
+def patch_enhanced_score_notes(escore_notes,
+                               default_patch=0,
                                reserved_patch=-1,
                                reserved_patch_channel=-1,
                                drums_patch=9,
