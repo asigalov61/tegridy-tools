@@ -3768,7 +3768,8 @@ def adjust_score_velocities(score,
                 new_vel = int(evt[5] * factor)
                 evt[5] = max(1, min(127, new_vel))
 
-    return buf
+    if not adj_in_place:
+        return buf
 
 def chordify_score(score,
                   return_choridfied_score=True,
