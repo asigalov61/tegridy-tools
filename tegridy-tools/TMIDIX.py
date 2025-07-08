@@ -5110,8 +5110,6 @@ def patch_enhanced_score_notes(escore_notes,
 
         enhanced_score_notes_with_patch_changes.append(e)
 
-    print(patches)
-
     #===========================================================================
 
     overflow_patches = []
