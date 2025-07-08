@@ -5062,54 +5062,102 @@ def patch_list_from_enhanced_score_notes(enhanced_score_notes,
 
 ###################################################################################
 
-def patch_enhanced_score_notes(enhanced_score_notes, 
-                                default_patch=0, 
-                                drums_patch=9,
-                                verbose=False
-                                ):
+def patch_enhanced_score_notes(escore_notes, 
+                               reserved_patch=-1,
+                               reserved_patch_channel=-1,
+                               drums_patch=9,
+                               verbose=False
+                              ):
   
-    #===========================================================================    
+    #===========================================================================
+
+    enhanced_score_notes = copy.deepcopy(escore_notes)
+
+    #===========================================================================
   
     enhanced_score_notes_with_patch_changes = []
 
     patches = [-1] * 16
 
+    if -1 < reserved_patch < 128 and -1 < reserved_patch_channel < 128:
+        patches[reserved_patch_channel] = reserved_patch
+
     overflow_idx = -1
 
     for idx, e in enumerate(enhanced_score_notes):
-      if e[0] == 'note':
-        if e[3] != 9:
-            if patches[e[3]] == -1:
-                patches[e[3]] = e[6]
-            else:
-                if patches[e[3]] != e[6]:
-                  if e[6] in patches:
-                    e[3] = patches.index(e[6])
-                  else:
-                    if -1 in patches:
-                        patches[patches.index(-1)] = e[6]
-                    else:
-                        overflow_idx = idx
-                        break
+        if e[0] == 'note':
+            if e[3] != 9:
+                if -1 < reserved_patch < 128 and -1 < reserved_patch_channel < 128:
+                    if e[6] == reserved_patch:
+                        e[3] = reserved_patch_channel
+                    
+                if patches[e[3]] == -1:
+                    patches[e[3]] = e[6]
+                
+                else:
+                    if patches[e[3]] != e[6]:
+                        if e[6] in patches:
+                            e[3] = patches.index(e[6])
+                        
+                        else:
+                            if -1 in patches:
+                                patches[patches.index(-1)] = e[6]
+                            
+                            else:
+                                overflow_idx = idx
+                                break
 
-      enhanced_score_notes_with_patch_changes.append(e)
+        enhanced_score_notes_with_patch_changes.append(e)
+
+    print(patches)
 
     #===========================================================================
 
     overflow_patches = []
+    overflow_channels = [-1] * 16
+    overflow_channels[9] = drums_patch
+
+    if -1 < reserved_patch < 128 and -1 < reserved_patch_channel < 128:
+        overflow_channels[reserved_patch_channel] = reserved_patch
 
     if overflow_idx != -1:
-      for idx, e in enumerate(enhanced_score_notes[overflow_idx:]):
-        if e[0] == 'note':
-          if e[3] != 9:
-            if e[6] not in patches:
-              if e[6] not in overflow_patches:
-                overflow_patches.append(e[6])
-                enhanced_score_notes_with_patch_changes.append(['patch_change', e[1], e[3], e[6]])
-            else:
-              e[3] = patches.index(e[6])
+        for idx, e in enumerate(enhanced_score_notes[overflow_idx:]):
+            if e[0] == 'note':
+                if e[3] != 9:
+                    if e[6] not in overflow_channels:
+                        
+                        if -1 in overflow_channels:
+                            free_chan = overflow_channels.index(-1)
+                            overflow_channels[free_chan] = e[6]
+                            e[3] = free_chan
 
-        enhanced_score_notes_with_patch_changes.append(e)
+                            enhanced_score_notes_with_patch_changes.append(['patch_change', e[1], e[3], e[6]])
+                            
+                            overflow_patches.append(e[6])
+                
+                        else:
+                            overflow_channels = [-1] * 16
+                            overflow_channels[9] = drums_patch
+                            
+                            if -1 < reserved_patch < 128 and -1 < reserved_patch_channel < 128:
+                                overflow_channels[reserved_patch_channel] = reserved_patch
+                                e[3] = reserved_patch_channel
+
+                            if e[6] != reserved_patch:
+
+                                free_chan = overflow_channels.index(-1)
+                                e[3] = free_chan
+                                    
+                            overflow_channels[e[3]] = e[6]                            
+
+                            enhanced_score_notes_with_patch_changes.append(['patch_change', e[1], e[3], e[6]])
+                            
+                            overflow_patches.append(e[6])
+
+                    else:
+                        e[3] = overflow_channels.index(e[6])
+
+            enhanced_score_notes_with_patch_changes.append(e)
 
     #===========================================================================
 
@@ -5119,9 +5167,13 @@ def patch_enhanced_score_notes(enhanced_score_notes,
 
     #===========================================================================
 
+    overflow_patches = ordered_set(overflow_patches)
+
+    #===========================================================================
+
     if verbose:
       print('=' * 70)
-      print('Composition patches')
+      print('Main composition patches')
       print('=' * 70)
       for c, p in enumerate(patches):
         print('Cha', str(c).zfill(2), '---', str(p).zfill(3), Number2patch[p])
@@ -5133,6 +5185,8 @@ def patch_enhanced_score_notes(enhanced_score_notes,
         for c, p in enumerate(overflow_patches):
           print(str(p).zfill(3), Number2patch[p])
         print('=' * 70)
+
+    #===========================================================================
 
     return enhanced_score_notes_with_patch_changes, patches, overflow_patches
 
