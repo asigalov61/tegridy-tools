@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.7"
+__version__ = "25.7.8"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -3724,19 +3724,51 @@ def validate_pitches(chord, channel_to_check = 0, return_sorted = True):
       chord.sort(key = lambda x: x[4], reverse=True)
       return chord
 
-def adjust_score_velocities(score, max_velocity):
-
-    min_velocity = min([c[5] for c in score])
-    max_velocity_all_channels = max([c[5] for c in score])
-    min_velocity_ratio = min_velocity / max_velocity_all_channels
-
-    max_channel_velocity = max([c[5] for c in score])
-    if max_channel_velocity < min_velocity:
-        factor = max_velocity / min_velocity
+def adjust_score_velocities(score,
+                            max_velocity,
+                            adj_per_channel=False,
+                            adj_in_place=True
+                           ):
+  
+    if adj_in_place:
+        buf = score
+        
     else:
-        factor = max_velocity / max_channel_velocity
-    for i in range(len(score)):
-        score[i][5] = int(score[i][5] * factor)
+        buf = copy.deepcopy(score)
+
+    notes = [evt for evt in buf if evt[0] == 'note']
+    
+    if not notes:
+        return buf
+
+    if adj_per_channel:
+        channel_max = {}
+        
+        for _, _, _, ch, _, vel, _ in notes:
+            channel_max[ch] = max(channel_max.get(ch, 0), vel)
+
+        channel_factor = {
+            ch: (max_velocity / vmax if vmax > 0 else 1.0)
+            for ch, vmax in channel_max.items()
+        }
+
+        for evt in buf:
+            if evt[0] == 'note':
+                ch = evt[3]
+                factor = channel_factor.get(ch, 1.0)
+                new_vel = int(evt[5] * factor)
+                evt[5] = max(1, min(127, new_vel))
+
+    else:
+        global_max = max(vel for _, _, _, _, _, vel, _ in notes)
+        factor = max_velocity / global_max if global_max > 0 else 1.0
+
+        for evt in buf:
+            if evt[0] == 'note':
+                new_vel = int(evt[5] * factor)
+                evt[5] = max(1, min(127, new_vel))
+
+    return buf
 
 def chordify_score(score,
                   return_choridfied_score=True,
