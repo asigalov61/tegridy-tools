@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.6"
+__version__ = "25.7.7"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -5076,7 +5076,7 @@ def patch_enhanced_score_notes(enhanced_score_notes,
             else:
               e[3] = patches.index(e[6])
 
-          enhanced_score_notes_with_patch_changes.append(e)
+        enhanced_score_notes_with_patch_changes.append(e)
 
     #===========================================================================
 
