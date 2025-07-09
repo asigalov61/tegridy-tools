@@ -34,7 +34,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.16"
+__version__ = "25.7.20"
 
 print('=' * 70)
 print('MIDI Doctor')
@@ -132,6 +132,25 @@ text_events = ['text_event',
                'text_event_0e',
                'text_event_0f'
               ]
+
+###################################################################################
+
+_TEXT_ENCODINGS = [
+    'iso-8859-1',   # Western Europe
+    'windows-1251', # Cyrillic (Russian)
+    'koi8-r',       # Cyrillic (Russian)
+    'iso-8859-5',   # Cyrillic
+    'cp866',        # DOS Cyrillic
+
+    'shift_jis',    # Japanese
+    'euc_jp',       # Japanese
+    'gb18030',      # Simplified Chinese
+    'big5',         # Traditional Chinese
+    'euc_kr',       # Korean
+
+    'utf-8',        # Universal fallback
+    'utf-16',       # Wide-char fallback
+]
 
 ###################################################################################
 
@@ -592,36 +611,75 @@ def repair_flat_dynamics(notes,
     
 ###################################################################################
 
-def convert_bytes_in_nested_list(lst, 
-                                 encoding='utf-8', 
+def convert_bytes_in_nested_list(lst,
+                                 encoding=None,
                                  errors='ignore',
                                  return_changed_events_count=False
                                 ):
-    
-    new_list = []
 
+    new_list = []
     ce_count = 0
-    
+
     for item in lst:
         if isinstance(item, list):
-            new_list.append(convert_bytes_in_nested_list(item))
-            
+            sub, sub_count = convert_bytes_in_nested_list(item, 
+                                                          encoding, 
+                                                          errors, 
+                                                          True
+                                                         )
+            new_list.append(sub)
+            ce_count += sub_count
+
         elif isinstance(item, bytes):
-            new_list.append(item.decode(encoding, errors=errors))
+            b = item
+
+            if encoding is None:
+                chosen = None
+                fallback = None
+
+                for enc in _TEXT_ENCODINGS:
+                    try:
+                        s = b.decode(enc)
+                        
+                    except (UnicodeDecodeError, LookupError):
+                        continue
+
+                    if s.encode(enc, errors=errors) == b:
+                        chosen = s
+                        break
+
+                    if fallback is None:
+                        fallback = s
+
+                if chosen is not None:
+                    decoded = chosen
+                    
+                elif fallback is not None:
+                    decoded = fallback
+                    
+                else:
+                    decoded = b.decode('iso-8859-1', errors)
+
+            else:
+                decoded = b.decode(encoding, errors)
+
+            new_list.append(decoded)
             ce_count += 1
-            
+
         else:
             new_list.append(item)
-            
-    if return_changed_events_count:       
-        return new_list, ce_count
 
-    else:
-        return new_list
+    if return_changed_events_count:
+        return new_list, ce_count
+        
+    return new_list
 
 ###################################################################################
 
-def unbyte_text_events(events, encoding='utf-8', return_unbyte_count=False):
+def unbyte_text_events(events,
+                       encoding=None,
+                       return_unbyte_count=False
+                      ):
 
     fixed_events = []
 
@@ -629,7 +687,10 @@ def unbyte_text_events(events, encoding='utf-8', return_unbyte_count=False):
     
     for e in events:
         if e[0] in text_events:
-            ne, cc = convert_bytes_in_nested_list(e, encoding=encoding, return_changed_events_count=True)
+            ne, cc = convert_bytes_in_nested_list(e, 
+                                                  encoding=encoding,
+                                                  return_changed_events_count=True
+                                                 )
             fixed_events.append(ne)
             uc_count += cc
 
@@ -652,7 +713,8 @@ def write_midi(ticks,
                return_midi_data=False,
                return_score=False,
                return_stats=False,
-               return_md5_hash=False
+               return_md5_hash=False,
+               force_utf8=False
               ):
 
     score = [ticks]
@@ -663,7 +725,10 @@ def write_midi(ticks,
         score.append(sorted(o+n, key=lambda x: x[1]))
 
     if write_midi:
-        midi_data = MIDI.score2midi(score)
+        midi_data = MIDI.score2midi(score, 
+                                    force_utf8=force_utf8
+                                   )
+        
         with open(file_name, 'wb') as fi:
             fi.write(midi_data)
             fi.close
@@ -671,7 +736,7 @@ def write_midi(ticks,
     out_data = {}
 
     if return_midi_data or return_md5_hash:
-        midi_data = MIDI.score2midi(score)
+        midi_data = MIDI.score2midi(score, force_utf8=force_utf8)
 
     if return_midi_data:
         out_data.update({'midi_data': midi_data})
@@ -693,7 +758,8 @@ def heal_midi(midi_file,
               output_dir='./healed_midis/',
               timings_divider=1,
               max_notes_dur=-1,
-              text_events_encoding='utf-8',
+              text_events_encoding=None,
+              force_utf8=False,
               quiet_vels_adj_threshold=56,
               flat_vels_adj_threshold=0.95,
               write_midi_to_file=True,
@@ -847,7 +913,8 @@ def heal_midi(midi_file,
                                    write_midi=False, 
                                    return_midi_data=True, 
                                    return_stats=True, 
-                                   return_score=True
+                                   return_score=True,
+                                   force_utf8=force_utf8
                                   )
 
             mdata = midi_dict['midi_data']

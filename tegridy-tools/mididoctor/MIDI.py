@@ -183,7 +183,7 @@ _previous_warning = ''  # 5.4
 _previous_times = 0     # 5.4
 #------------------------------- Encoding stuff --------------------------
 
-def opus2midi(opus=[]):
+def opus2midi(opus=[], force_utf8=False):
     r'''The argument is a list: the first item in the list is the "ticks"
 parameter, the others are the tracks. Each track is a list
 of midi-events, and each event is itself a list; see above.
@@ -216,7 +216,7 @@ sys.stdout.buffer.write(my_midi)
 
     my_midi = b"MThd\x00\x00\x00\x06"+struct.pack('>HHH',format,ntracks,ticks)
     for track in tracks:
-        events = _encode(track)
+        events = _encode(track, force_utf8=force_utf8)
         my_midi += b'MTrk' + struct.pack('>I',len(events)) + events
     _clean_up_warnings()
     return my_midi
@@ -291,11 +291,11 @@ my_opus = score2opus(my_score)
     _clean_up_warnings()
     return opus_tracks
 
-def score2midi(score=None):
+def score2midi(score=None, force_utf8=False):
     r'''
 Translates a "score" into MIDI, using score2opus() then opus2midi()
 '''
-    return opus2midi(score2opus(score))
+    return opus2midi(score2opus(score), force_utf8=force_utf8)
 
 #--------------------------- Decoding stuff ------------------------
 
@@ -1215,12 +1215,92 @@ def _warn(s=''):
             sys.stderr.write(str(s)+"\n")
             _previous_warning = s
 
-def _some_text_event(which_kind=0x01, text=b'some_text'):
-    if str(type(text)).find("'str'") >= 0:   # 6.4 test for back-compatibility
-        data = bytes(text, encoding='ISO-8859-1')
+# Preferred encodings list: ISO-8859-1 first, then Cyrillic, Asian, Unicode
+_TEXT_ENCODINGS = [
+    'iso-8859-1',   # Western Europe
+    'windows-1251', # Cyrillic (Russian)
+    'koi8-r',       # Cyrillic (Russian)
+    'iso-8859-5',   # Cyrillic
+    'cp866',        # DOS Cyrillic
+
+    'shift_jis',    # Japanese
+    'euc_jp',       # Japanese
+    'gb18030',      # Simplified Chinese
+    'big5',         # Traditional Chinese
+    'euc_kr',       # Korean
+
+    'utf-8',        # Universal fallback
+    'utf-16',       # Wide-char fallback
+]
+
+def _some_text_event(which_kind=0x01,
+                     text=b'some_text',
+                     force_utf8=False
+                     ):
+    """
+    Build a MIDI text/meta event.
+
+    If text is str:
+      1. Try each encoding in _TEXT_ENCODINGS to find a perfect encode→decode round-trip.
+      2. If none match perfectly, fall back to the first successful or UTF-8 with replacement.
+      3. If force_utf8 is True, re-decode the chosen bytes using the detected encoding
+         and then re-encode as UTF-8.
+
+    If text is bytes, use it verbatim.
+
+    Returns: b'\xFF' + <which_kind> + <length VLQ> + <data>
+    """
+    # 1) Determine best encoding for Python strings
+    if isinstance(text, str):
+        chosen_enc = None
+        chosen_bytes = None
+        fallback_bytes = []
+
+        for enc in _TEXT_ENCODINGS:
+            try:
+                candidate = text.encode(enc)
+            except UnicodeEncodeError:
+                continue
+
+            # perfect round-trip?
+            try:
+                if candidate.decode(enc) == text:
+                    chosen_enc = enc
+                    chosen_bytes = candidate
+                    break
+            except Exception:
+                pass
+
+            # record any partial success
+            fallback_bytes.append((enc, candidate))
+
+        # no perfect match found
+        if chosen_bytes is None:
+            if fallback_bytes:
+                chosen_enc, chosen_bytes = fallback_bytes[0]
+            else:
+                chosen_enc = 'utf-8'
+                chosen_bytes = text.encode('utf-8', errors='replace')
+
+        data = chosen_bytes
+
+        # 2) Optionally convert to UTF-8 after detection
+        if force_utf8:
+            # decode with the detected encoding, then encode as UTF-8
+            decoded = data.decode(chosen_enc, errors='replace')
+            data = decoded.encode('utf-8')
+
+    # bytes input → use directly
     else:
         data = bytes(text)
-    return b'\xFF'+bytes((which_kind,))+_ber_compressed_int(len(data))+data
+
+    # 3) Assemble and return the MIDI meta-event
+    return (
+        b'\xFF'
+        + bytes((which_kind,))            # meta-event type
+        + _ber_compressed_int(len(data))  # length VLQ
+        + data                            # text payload
+    )
 
 def _consistentise_ticks(scores):  # 3.6
     # used by mix_scores, merge_scores, concatenate_scores
@@ -1539,7 +1619,7 @@ The options:
 
 ###########################################################################
 def _encode(events_lol, unknown_callback=None, never_add_eot=False,
-  no_eot_magic=False, no_running_status=False):
+  no_eot_magic=False, no_running_status=False, force_utf8=False):
     # encode an event structure, presumably for writing to a file
     # Calling format:
     #   $data_r = MIDI::Event::encode( \@event_lol, { options } );
@@ -1651,42 +1731,42 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
             last_status = -1
 
             if event == 'raw_meta_event':
-                event_data = _some_text_event(int(E[0]), E[1])
+                event_data = _some_text_event(int(E[0]), E[1], force_utf8=force_utf8)
             elif (event == 'set_sequence_number'):  # 3.9
                 event_data = b'\xFF\x00\x02'+_int2twobytes(E[0])
 
             # Text meta-events...
             # a case for a dict, I think (pjb) ...
             elif (event == 'text_event'):
-                event_data = _some_text_event(0x01, E[0])
+                event_data = _some_text_event(0x01, E[0], force_utf8=force_utf8)
             elif (event == 'copyright_text_event'):
-                event_data = _some_text_event(0x02, E[0])
+                event_data = _some_text_event(0x02, E[0], force_utf8=force_utf8)
             elif (event == 'track_name'):
-                event_data = _some_text_event(0x03, E[0])
+                event_data = _some_text_event(0x03, E[0], force_utf8=force_utf8)
             elif (event == 'instrument_name'):
-                event_data = _some_text_event(0x04, E[0])
+                event_data = _some_text_event(0x04, E[0], force_utf8=force_utf8)
             elif (event == 'lyric'):
-                event_data = _some_text_event(0x05, E[0])
+                event_data = _some_text_event(0x05, E[0], force_utf8=force_utf8)
             elif (event == 'marker'):
-                event_data = _some_text_event(0x06, E[0])
+                event_data = _some_text_event(0x06, E[0], force_utf8=force_utf8)
             elif (event == 'cue_point'):
-                event_data = _some_text_event(0x07, E[0])
+                event_data = _some_text_event(0x07, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_08'):
-                event_data = _some_text_event(0x08, E[0])
+                event_data = _some_text_event(0x08, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_09'):
-                event_data = _some_text_event(0x09, E[0])
+                event_data = _some_text_event(0x09, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_0a'):
-                event_data = _some_text_event(0x0A, E[0])
+                event_data = _some_text_event(0x0A, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_0b'):
-                event_data = _some_text_event(0x0B, E[0])
+                event_data = _some_text_event(0x0B, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_0c'):
-                event_data = _some_text_event(0x0C, E[0])
+                event_data = _some_text_event(0x0C, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_0d'):
-                event_data = _some_text_event(0x0D, E[0])
+                event_data = _some_text_event(0x0D, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_0e'):
-                event_data = _some_text_event(0x0E, E[0])
+                event_data = _some_text_event(0x0E, E[0], force_utf8=force_utf8)
             elif (event == 'text_event_0f'):
-                event_data = _some_text_event(0x0F, E[0])
+                event_data = _some_text_event(0x0F, E[0], force_utf8=force_utf8)
             # End of text meta-events
 
             elif (event == 'end_track'):
@@ -1706,7 +1786,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
                 event_data = struct.pack(">BBBbB", 0xFF, 0x59, 0x02, E[0],E[1])
             elif (event == 'sequencer_specific'):
                 # event_data = struct.pack(">BBwa*", 0xFF,0x7F, len(E[0]), E[0])
-                event_data = _some_text_event(0x7F, E[0])
+                event_data = _some_text_event(0x7F, E[0], force_utf8=force_utf8)
             # End of Meta-events
 
             # Other Things...
