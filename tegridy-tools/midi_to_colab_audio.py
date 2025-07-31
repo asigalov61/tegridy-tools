@@ -5,14 +5,14 @@ r'''#===========================================================================
 # Converts any MIDI file to raw audio which is compatible 
 # with Google Colab or HUgging Face Gradio
 #
-# Version 1.0
+# Version 2.0
 #
-# Includes full source code of MIDI, pyfluidsynth, and midi_synthesizer Python modules
+# Includes full source code of MIDI and pyfluidsynth
 # 
-# Original source code for all modules was retrieved on 10/23/2023
+# Original source code for all modules was retrieved on 07/31/2025
 #
 # Project Los Angeles
-# Tegridy Code 2023
+# Tegridy Code 2025
 #
 #===================================================================================================================
 #
@@ -1773,7 +1773,7 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 
     Python bindings for FluidSynth
 
-    Copyright 2008, Nathan Whitehead <nwhitehe@gmail.com>
+    Copyright 2008--2024, Nathan Whitehead <nwhitehe@gmail.com> and others.
 
 
     Released under the LGPL
@@ -1790,26 +1790,66 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 ================================================================================
 """
 
-from ctypes import *
-from ctypes.util import find_library
 import os
-
-# A short circuited or expression to find the FluidSynth library
-# (mostly needed for Windows distributions of libfluidsynth supplied with QSynth)
+from ctypes import (
+    CDLL,
+    CFUNCTYPE,
+    POINTER,
+    Structure,
+    byref,
+    c_char,
+    c_char_p,
+    c_double,
+    c_float,
+    c_int,
+    c_short,
+    c_uint,
+    c_void_p,
+    create_string_buffer,
+)
+from ctypes.util import find_library
 
 # DLL search method changed in Python 3.8
 # https://docs.python.org/3/library/os.html#os.add_dll_directory
-if hasattr(os, 'add_dll_directory'):
+if hasattr(os, 'add_dll_directory'):  # Python 3.8+ on Windows only
     os.add_dll_directory(os.getcwd())
+    os.add_dll_directory('C:\\tools\\fluidsynth\\bin')
+    # Workaround bug in find_library, it doesn't recognize add_dll_directory
+    os.environ['PATH'] += ';C:\\tools\\fluidsynth\\bin'
 
-lib = find_library('fluidsynth') or \
-    find_library('libfluidsynth') or \
-    find_library('libfluidsynth-3') or \
-    find_library('libfluidsynth-2') or \
-    find_library('libfluidsynth-1')
+# A function to find the FluidSynth library
+# (mostly needed for Windows distributions of libfluidsynth supplied with QSynth)
+def find_libfluidsynth(debug_print: bool = False) -> str:
+    r"""
+    macOS X64:
+    * 'fluidsynth' was found at /usr/local/opt/fluid-synth/lib/libfluidsynth.dylib.
+    macOS ARM64:
+    * 'fluidsynth' was found at /opt/homebrew/opt/fluid-synth/lib/libfluidsynth.dylib.
+    Ubuntu X86:
+    * 'fluidsynth' was found at libfluidsynth.so.3.
+    Windows X86:
+    * 'libfluidsynth-3' was found at C:\tools\fluidsynth\bin\libfluidsynth-3.dll. --or--
+    * 'fluidsynth-3' was found as C:\tools\fluidsynth\bin\fluidsynth-3.dll. >= v2.4.5
+        * https://github.com/FluidSynth/fluidsynth/issues/1543
+    """
+    libs = "fluidsynth fluidsynth-3 libfluidsynth libfluidsynth-3 libfluidsynth-2 libfluidsynth-1"
+    for lib_name in libs.split():
+        lib = find_library(lib_name)
+        if lib:
+            if debug_print:
+                print(f"'{lib_name}' was found at {lib}.")
+            return lib
 
-if lib is None:
+    # On macOS on Apple silicon, non-Homebrew Python distributions fail to locate
+    # homebrew-installed instances of FluidSynth. This workaround addresses this.
+    if homebrew_prefix := os.getenv("HOMEBREW_PREFIX"):
+        lib = os.path.join(homebrew_prefix, "lib", "libfluidsynth.dylib")
+        if os.path.exists(lib):
+            return lib
+
     raise ImportError("Couldn't find the FluidSynth library.")
+
+lib = find_libfluidsynth()
 
 # Dynamically link the FluidSynth library
 # Architecture (32-/64-bit) must match your Python version
@@ -1829,7 +1869,7 @@ def cfunc(name, result, *args):
         return None
 
 # Bump this up when changing the interface for users
-api_version = '1.3.1'
+api_version = '1.3.5'
 
 # Function prototypes for C versions of functions
 
@@ -1843,10 +1883,7 @@ fluid_version = cfunc('fluid_version', c_void_p,
 
 majver = c_int()
 fluid_version(majver, c_int(), c_int())
-if majver.value > 1:
-    FLUIDSETTING_EXISTS = FLUID_OK
-else:
-    FLUIDSETTING_EXISTS = 1
+FLUIDSETTING_EXISTS = FLUID_OK if majver.value > 1 else 1
 
 # fluid settings
 new_fluid_settings = cfunc('new_fluid_settings', c_void_p)
@@ -2086,9 +2123,18 @@ fluid_synth_set_chorus_level = cfunc('fluid_synth_set_chorus_level', c_int,
                                     ('synth', c_void_p, 1),
                                     ('level', c_double, 1))
 
+fluid_synth_set_chorus_speed = cfunc('fluid_synth_set_chorus_speed', c_int,
+                                    ('synth', c_void_p, 1),
+                                    ('speed', c_double, 1))
+
+fluid_synth_set_chorus_depth = cfunc('fluid_synth_set_chorus_depth', c_int,
+                                    ('synth', c_void_p, 1),
+                                    ('depth_ms', c_double, 1))
+
 fluid_synth_set_chorus_type = cfunc('fluid_synth_set_chorus_type', c_int,
                                     ('synth', c_void_p, 1),
                                     ('type', c_int, 1))
+
 fluid_synth_get_reverb_roomsize = cfunc('fluid_synth_get_reverb_roomsize', c_double,
                                     ('synth', c_void_p, 1))
 
@@ -2220,6 +2266,77 @@ fluid_midi_event_get_value = cfunc('fluid_midi_event_get_value', c_int,
 fluid_midi_event_get_velocity = cfunc('fluid_midi_event_get_velocity', c_int,
                                   ('evt', c_void_p, 1))
 
+# fluid modulator
+new_fluid_mod = cfunc("new_fluid_mod", c_void_p)
+
+delete_fluid_mod = cfunc("delete_fluid_mod", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_clone = cfunc(
+    "fluid_mod_clone", c_void_p, ("mod", c_void_p, 1), ("src", c_void_p, 1),
+)
+
+fluid_mod_get_amount = cfunc("fluid_mod_get_amount", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_get_dest = cfunc("fluid_mod_get_dest", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_get_flags1 = cfunc("fluid_mod_get_flags1", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_get_flags2 = cfunc("fluid_mod_get_flags2", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_get_source1 = cfunc("fluid_mod_get_source1", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_get_source2 = cfunc("fluid_mod_get_source2", c_void_p, ("mod", c_void_p, 1))
+
+fluid_mod_get_transform = cfunc(
+    "fluid_mod_get_transform", c_void_p, ("mod", c_void_p, 1),
+)
+
+fluid_mod_has_dest = cfunc(
+    "fluid_mod_has_dest", c_void_p, ("mod", c_void_p, 1), ("gen", c_uint, 1),
+)
+
+fluid_mod_has_source = cfunc(
+    "fluid_mod_has_dest",
+    c_void_p,
+    ("mod", c_void_p, 1),
+    ("cc", c_uint, 1),
+    ("ctrl", c_uint, 1),
+)
+
+fluid_mod_set_amount = cfunc(
+    "fluid_mod_set_amount", c_void_p, ("mod", c_void_p, 1), ("amount", c_double, 1),
+)
+
+fluid_mod_set_dest = cfunc(
+    "fluid_mod_set_dest", c_void_p, ("mod", c_void_p, 1), ("dst", c_int, 1),
+)
+
+fluid_mod_set_source1 = cfunc(
+    "fluid_mod_set_source1",
+    c_void_p,
+    ("mod", c_void_p, 1),
+    ("src", c_int, 1),
+    ("flags", c_int, 1),
+)
+
+fluid_mod_set_source2 = cfunc(
+    "fluid_mod_set_source2",
+    c_void_p,
+    ("mod", c_void_p, 1),
+    ("src", c_int, 1),
+    ("flags", c_int, 1),
+)
+
+fluid_mod_set_transform = cfunc(
+    "fluid_mod_set_transform", c_void_p, ("mod", c_void_p, 1), ("type", c_int, 1),
+)
+
+fluid_mod_sizeof = cfunc("fluid_mod_sizeof", c_void_p)
+
+fluid_mod_test_identity = cfunc(
+    "fluid_mod_test_identity", c_void_p, ("mod1", c_void_p, 1), ("mod2", c_void_p, 1),
+)
+
 # fluid_player_status returned by fluid_player_get_status()
 FLUID_PLAYER_READY = 0
 FLUID_PLAYER_PLAYING = 1
@@ -2281,6 +2398,9 @@ new_fluid_midi_driver = cfunc('new_fluid_midi_driver', c_void_p,
                                ('handler', CFUNCTYPE(c_int, c_void_p, c_void_p), 1),
                                ('event_handler_data', c_void_p, 1))
 
+delete_fluid_midi_driver = cfunc('delete_fluid_midi_driver', None,
+                           ('driver', c_void_p, 1))
+
 
 # fluid midi router rule
 class fluid_midi_router_t(Structure):
@@ -2341,6 +2461,16 @@ fluid_midi_router_add_rule = cfunc('fluid_midi_router_add_rule', c_int,
                                     ('router', POINTER(fluid_midi_router_t), 1),
                                     ('rule', c_void_p, 1),
                                     ('type', c_int, 1))
+
+# fluid file renderer
+new_fluid_file_renderer = cfunc('new_fluid_file_renderer', c_void_p,
+                                ('synth', c_void_p, 1))
+
+delete_fluid_file_renderer = cfunc('delete_fluid_file_renderer', None,
+                                   ('renderer', c_void_p, 1))
+
+fluid_file_renderer_process_block = cfunc('fluid_file_renderer_process_block', c_int,
+                                          ('render', c_void_p, 1))
 
 # fluidsynth 2.x
 new_fluid_cmd_handler=cfunc('new_fluid_cmd_handler', c_void_p,
@@ -2416,6 +2546,7 @@ class Synth:
         self.audio_driver = None
         self.midi_driver = None
         self.router = None
+        self.custom_router_callback = None
     def setting(self, opt, val):
         """change an arbitrary synth setting, type-smart"""
         if isinstance(val, (str, bytes)):
@@ -2451,11 +2582,11 @@ class Synth:
         see http://www.fluidsynth.org/api/fluidsettings.xml for allowed values and defaults by platform
         """
         driver = driver or self.get_setting('audio.driver')
-        device = device or self.get_setting('audio.%s.device' % driver)
+        device = device or self.get_setting(f'audio.{driver}.device')
         midi_driver = midi_driver or self.get_setting('midi.driver')
 
         self.setting('audio.driver', driver)
-        self.setting('audio.%s.device' % driver, device)
+        self.setting(f'audio.{driver}.device', device)
         self.audio_driver = new_fluid_audio_driver(self.settings, self.synth)
         self.setting('midi.driver', midi_driver)
         self.router = new_fluid_midi_router(self.settings, fluid_synth_handle_midi_event, self.synth)
@@ -2463,7 +2594,7 @@ class Synth:
             new_fluid_cmd_handler(self.synth, self.router)
         else:
             fluid_synth_set_midi_router(self.synth, self.router)
-        if midi_router == None: ## Use fluidsynth to create a MIDI event handler
+        if midi_router is None: ## Use fluidsynth to create a MIDI event handler
             self.midi_driver = new_fluid_midi_driver(self.settings, fluid_midi_router_handle_midi_event, self.router)
             self.custom_router_callback = None
         else:                   ## Supply an external MIDI event handler
@@ -2474,6 +2605,8 @@ class Synth:
     def delete(self):
         if self.audio_driver:
             delete_fluid_audio_driver(self.audio_driver)
+        if self.midi_driver:
+            delete_fluid_midi_driver(self.midi_driver)
         delete_fluid_synth(self.synth)
         delete_fluid_settings(self.settings)
     def sfload(self, filename, update_midi_preset=0):
@@ -2518,8 +2651,7 @@ class Synth:
                 return None
             return fluid_preset_get_name(preset).decode('ascii')
         else:
-            (sfontid, banknum, presetnum, presetname) = self.channel_info(chan)
-            return presetname
+            return None
     def router_clear(self):
         if self.router is not None:
             fluid_midi_router_clear_rules(self.router)
@@ -2570,16 +2702,16 @@ class Synth:
         if fluid_synth_set_reverb is not None:
             return fluid_synth_set_reverb(self.synth, roomsize, damping, width, level)
         else:
-            set=0
+            flags=0
             if roomsize>=0:
-                set+=0b0001
+                flags+=0b0001
             if damping>=0:
-                set+=0b0010
+                flags+=0b0010
             if width>=0:
-                set+=0b0100
+                flags+=0b0100
             if level>=0:
-                set+=0b1000
-            return fluid_synth_set_reverb_full(self.synth, set, roomsize, damping, width, level)
+                flags+=0b1000
+            return fluid_synth_set_reverb_full(self.synth, flags, roomsize, damping, width, level)
     def set_chorus(self, nr=-1, level=-1.0, speed=-1.0, depth=-1.0, type=-1):
         """
         nr Chorus voice count (0-99, CPU time consumption proportional to this value)
@@ -2632,17 +2764,17 @@ class Synth:
         if fluid_synth_set_chorus_level is not None:
             return fluid_synth_set_chorus_level(self.synth, level)
         else:
-            return self.set_chorus(leve=level)
+            return self.set_chorus(level=level)
     def set_chorus_speed(self, speed):
         if fluid_synth_set_chorus_speed is not None:
             return fluid_synth_set_chorus_speed(self.synth, speed)
         else:
             return self.set_chorus(speed=speed)
-    def set_chorus_depth(self, depth):
+    def set_chorus_depth(self, depth_ms):
         if fluid_synth_set_chorus_depth is not None:
-            return fluid_synth_set_chorus_depth(self.synth, depth)
+            return fluid_synth_set_chorus_depth(self.synth, depth_ms)
         else:
-            return self.set_chorus(depth=depth)
+            return self.set_chorus(depth=depth_ms)
     def set_chorus_type(self, type):
         if fluid_synth_set_chorus_type is not None:
             return fluid_synth_set_chorus_type(self.synth, type)
@@ -2694,10 +2826,10 @@ class Synth:
         A pitch bend value of 0 is no pitch change from default.
         A value of -2048 is 1 semitone down.
         A value of 2048 is 1 semitone up.
-        Maximum values are -8192 to +8192 (transposing by 4 semitones).
+        Maximum values are -8192 to +8191 (transposing by 4 semitones).
 
         """
-        return fluid_synth_pitch_bend(self.synth, chan, val + 8192)
+        return fluid_synth_pitch_bend(self.synth, chan, max(0, min(val + 8192, 16383)))
     def cc(self, chan, ctrl, val):
         """Send control change value
 
@@ -2747,8 +2879,15 @@ class Synth:
 
         """
         return fluid_synth_write_s16_stereo(self.synth, len)
-    def tuning_dump(self, bank, prog, pitch):
-        return fluid_synth_tuning_dump(self.synth, bank, prog, name.encode(), length(name), pitch)
+    def tuning_dump(self, bank, prog):
+        """Get tuning information for given bank and preset
+
+        Return value is an array of length 128 with tuning factors for each MIDI note.
+        Tuning factor of 0.0 in each position is standard tuning. Measured in cents.
+        """
+        pitch = (c_double * 128)()
+        fluid_synth_tuning_dump(self.synth, bank, prog, None, 0, pitch)
+        return pitch[:]
 
     def midi_event_get_type(self, event):
         return fluid_midi_event_get_type(event)
@@ -2767,17 +2906,20 @@ class Synth:
 
     def play_midi_file(self, filename):
         self.player = new_fluid_player(self.synth)
-        if self.player == None: return FLUID_FAILED
-        if self.custom_router_callback != None:
+        if self.player is None:
+            return FLUID_FAILED
+        if self.custom_router_callback is not None:
             fluid_player_set_playback_callback(self.player, self.custom_router_callback, self.synth)
         status = fluid_player_add(self.player, filename.encode())
-        if status == FLUID_FAILED: return status
+        if status == FLUID_FAILED:
+            return status
         status = fluid_player_play(self.player)
         return status
 
     def play_midi_stop(self):
         status = fluid_player_stop(self.player)
-        if status == FLUID_FAILED: return status
+        if status == FLUID_FAILED:
+            return status
         status = fluid_player_seek(self.player, 0)
         delete_fluid_player(self.player)
         return status
@@ -2785,7 +2927,151 @@ class Synth:
     def player_set_tempo(self, tempo_type, tempo):
         return fluid_player_set_tempo(self.player, tempo_type, tempo)
 
+    def midi2audio(self, midifile, audiofile = "output.wav"):
+        """Convert a midi file to an audio file"""
+        self.setting("audio.file.name", audiofile)
+        player = new_fluid_player(self.synth)
+        fluid_player_add(player, midifile.encode())
+        fluid_player_play(player)
+        renderer = new_fluid_file_renderer(self.synth)
+        while fluid_player_get_status(player) == FLUID_PLAYER_PLAYING:
+            if fluid_file_renderer_process_block(renderer) != FLUID_OK:
+                break
+        delete_fluid_file_renderer(renderer)
+        delete_fluid_player(player)
 
+# flag values
+FLUID_MOD_POSITIVE = 0
+FLUID_MOD_NEGATIVE = 1
+FLUID_MOD_UNIPOLAR = 0
+FLUID_MOD_BIPOLAR = 2
+FLUID_MOD_LINEAR = 0
+FLUID_MOD_CONCAVE = 4
+FLUID_MOD_CONVEX = 8
+FLUID_MOD_SWITCH = 12
+FLUID_MOD_GC = 0
+FLUID_MOD_CC = 16
+FLUID_MOD_SIN = 0x80
+
+# src values
+FLUID_MOD_NONE = 0
+FLUID_MOD_VELOCITY = 2
+FLUID_MOD_KEY = 3
+FLUID_MOD_KEYPRESSURE = 10
+FLUID_MOD_CHANNELPRESSURE = 13
+FLUID_MOD_PITCHWHEEL = 14
+FLUID_MOD_PITCHWHEELSENS = 16
+
+# Transforms
+FLUID_MOD_TRANSFORM_LINEAR = 0
+FLUID_MOD_TRANSFORM_ABS = 2
+
+class Modulator:
+    def __init__(self):
+        """Create new modulator object"""
+        self.mod = new_fluid_mod()
+
+    def clone(self, src):
+        response = fluid_mod_clone(self.mod, src)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation clone failed")
+        return response
+
+    def get_amount(self):
+        response = fluid_mod_get_amount(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation amount get failed")
+        return response
+
+    def get_dest(self):
+        response = fluid_mod_get_dest(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation destination get failed")
+        return response
+
+    def get_flags1(self):
+        response = fluid_mod_get_flags1(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation flags1 get failed")
+        return response
+
+    def get_flags2(self):
+        response = fluid_mod_get_flags2(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation flags2 get failed")
+        return response
+
+    def get_source1(self):
+        response = fluid_mod_get_source1(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation source1 get failed")
+        return response
+
+    def get_source2(self):
+        response = fluid_mod_get_source2(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation source2 get failed")
+        return response
+
+    def get_transform(self):
+        response = fluid_mod_get_transform(self.mod)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation transform get failed")
+        return response
+
+    def has_dest(self, gen):
+        response = fluid_mod_has_dest(self.mod, gen)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation has destination check failed")
+        return response
+
+    def has_source(self, cc, ctrl):
+        response = fluid_mod_has_source(self.mod, cc, ctrl)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation has source check failed")
+        return response
+
+    def set_amount(self, amount):
+        response = fluid_mod_set_amount(self.mod, amount)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation set amount failed")
+        return response
+
+    def set_dest(self, dest):
+        response = fluid_mod_set_dest(self.mod, dest)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation set dest failed")
+        return response
+
+    def set_source1(self, src, flags):
+        response = fluid_mod_set_source1(self.mod, src, flags)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation set source 1 failed")
+        return response
+
+    def set_source2(self, src, flags):
+        response = fluid_mod_set_source2(self.mod, src, flags)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation set source 2 failed")
+        return response
+
+    def set_transform(self, type):
+        response = fluid_mod_set_transform(self.mod, type)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation set transform failed")
+        return response
+
+    def sizeof(self):
+        response = fluid_mod_sizeof()
+        if response == FLUID_FAILED:
+            raise Exception("Modulation sizeof failed")
+        return response
+
+    def test_identity(self, mod2):
+        response = fluid_mod_sizeof(self.mod, mod2)
+        if response == FLUID_FAILED:
+            raise Exception("Modulation identity check failed")
+        return response
 
 class Sequencer:
     def __init__(self, time_scale=1000, use_system_timer=True):
@@ -2802,14 +3088,14 @@ class Sequencer:
     def register_fluidsynth(self, synth):
         response = fluid_sequencer_register_fluidsynth(self.sequencer, synth.synth)
         if response == FLUID_FAILED:
-            raise Error("Registering fluid synth failed")
+            raise Exception("Registering fluid synth failed")
         return response
 
     def register_client(self, name, callback, data=None):
         c_callback = CFUNCTYPE(None, c_uint, c_void_p, c_void_p, c_void_p)(callback)
         response = fluid_sequencer_register_client(self.sequencer, name.encode(), c_callback, data)
         if response == FLUID_FAILED:
-            raise Error("Registering client failed")
+            raise Exception("Registering client failed")
 
         # store in a list to prevent garbage collection
         self.client_callbacks.append(c_callback)
@@ -2849,7 +3135,7 @@ class Sequencer:
     def _schedule_event(self, evt, time, absolute=True):
         response = fluid_sequencer_send_at(self.sequencer, evt, time, absolute)
         if response == FLUID_FAILED:
-            raise Error("Scheduling event failed")
+            raise Exception("Scheduling event failed")
 
     def get_tick(self):
         return fluid_sequencer_get_tick(self.sequencer)
@@ -2868,123 +3154,248 @@ def raw_audio_string(data):
 
     """
     import numpy
-    return (data.astype(numpy.int16)).tostring()
+    return (data.astype(numpy.int16)).tobytes()
 
 #===============================================================================
 
 import numpy as np
 import wave
 
+#===============================================================================
+
+def normalize_audio(audio: np.ndarray,
+                    method: str = 'peak',
+                    target_level_db: float = -1.0,
+                    per_channel: bool = False,
+                    eps: float = 1e-9
+                   ) -> np.ndarray:
+    
+    """
+    Normalize audio to a target dBFS level.
+
+    Parameters
+    ----------
+    audio : np.ndarray
+        Float-valued array in range [-1, 1] with shape (channels, samples)
+        or (samples,) for mono.
+    method : {'peak', 'rms'}
+        - 'peak': scale so that max(|audio|) = target_level_lin  
+        - 'rms' : scale so that RMS(audio) = target_level_lin
+    target_level_db : float
+        Desired output level, in dBFS (0 dBFS = max digital full scale).
+        e.g. -1.0 dBFS means ~0.8913 linear gain.
+    per_channel : bool
+        If True, normalize each channel independently. Otherwise, use a
+        global measure across all channels.
+    eps : float
+        Small constant to avoid division by zero.
+
+    Returns
+    -------
+    normalized : np.ndarray
+        Audio array of same shape, scaled so that levels meet the target.
+    """
+    
+    # Convert target dB to linear gain
+    target_lin = 10 ** (target_level_db / 20.0)
+
+    # Ensure audio is float
+    audio = audio.astype(np.float32)
+
+    # if mono, make it (1, N)
+    if audio.ndim == 1:
+        audio = audio[np.newaxis, :]
+
+    # Choose measurement axis
+    axis = 1 if per_channel else None
+
+    if method == 'peak':
+        # Compute peak per channel or global
+        peak = np.max(np.abs(audio), axis=axis, keepdims=True)
+        peak = np.maximum(peak, eps)
+        scales = target_lin / peak
+
+    elif method == 'rms':
+        # Compute RMS per channel or global
+        rms = np.sqrt(np.mean(audio ** 2, axis=axis, keepdims=True))
+        rms = np.maximum(rms, eps)
+        scales = target_lin / rms
+
+    else:
+        raise ValueError(f"Unsupported method '{method}'; choose 'peak' or 'rms'.")
+
+    # Broadcast scales back to audio shape
+    normalized = audio * scales
+
+    # Clip just in case of rounding
+    return np.clip(normalized, -1.0, 1.0)
+
+#===============================================================================
+
 def midi_opus_to_colab_audio(midi_opus, 
                               soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
                               sample_rate=16000, # 44100
-                              volume_scale=10,
+                              volume_level_db=-1,
                               trim_silence=True,
                               silence_threshold=0.1,
                               output_for_gradio=False,
                               write_audio_to_WAV=''
                               ):
 
-    def normalize_volume(matrix, factor=10):
-        norm = np.linalg.norm(matrix)
-        matrix = matrix/norm  # normalized matrix
-        mult_matrix = matrix * factor
-        final_matrix = np.clip(mult_matrix, -1.0, 1.0)
-        return final_matrix
-
     if midi_opus[1]:
 
-      ticks_per_beat = midi_opus[0]
-      event_list = []
-      for track_idx, track in enumerate(midi_opus[1:]):
-          abs_t = 0
-          for event in track:
-              abs_t += event[1]
-              event_new = [*event]
-              event_new[1] = abs_t
-              event_list.append(event_new)
-      event_list = sorted(event_list, key=lambda e: e[1])
-
-      tempo = int((60 / 120) * 10 ** 6)  # default 120 bpm
-      ss = np.empty((0, 2), dtype=np.int16)
-      fl = Synth(samplerate=float(sample_rate))
-      sfid = fl.sfload(soundfont_path)
-      last_t = 0
-      for c in range(16):
-          fl.program_select(c, sfid, 128 if c == 9 else 0, 0)
-      for event in event_list:
-          name = event[0]
-          sample_len = int(((event[1] / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-          sample_len -= int(((last_t / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-          last_t = event[1]
-          if sample_len > 0:
-              sample = fl.get_samples(sample_len).reshape(sample_len, 2)
-              ss = np.concatenate([ss, sample])
-          if name == "set_tempo":
-              tempo = event[2]
-          elif name == "patch_change":
-              c, p = event[2:4]
-              fl.program_select(c, sfid, 128 if c == 9 else 0, p)
-          elif name == "control_change":
-              c, cc, v = event[2:5]
-              fl.cc(c, cc, v)
-          elif name == "note_on" and event[3] > 0:
-              c, p, v = event[2:5]
-              fl.noteon(c, p, v)
-          elif name == "note_off" or (name == "note_on" and event[3] == 0):
-              c, p = event[2:4]
-              fl.noteoff(c, p)
-
-      fl.delete()
-      if ss.shape[0] > 0:
-          max_val = np.abs(ss).max()
-          if max_val != 0:
-              ss = (ss / max_val) * np.iinfo(np.int16).max
-      ss = ss.astype(np.int16)
-
-      if trim_silence:
-          threshold = np.std(np.abs(ss)) * silence_threshold
-          exceeded_thresh = np.abs(ss) > threshold
-          if np.any(exceeded_thresh): 
-              last_idx = np.where(exceeded_thresh)[0][-1]
-              ss = ss[:last_idx+1]
-
-      if output_for_gradio:
-        return ss
-      
-      ss = ss.swapaxes(1, 0)
-
-      raw_audio = normalize_volume(ss, volume_scale)
-      
-      if write_audio_to_WAV != '':
-
-        r_audio = raw_audio.T
-
-        r_audio = np.int16(r_audio / np.max(np.abs(r_audio)) * 32767)
-
-        with wave.open(write_audio_to_WAV, 'w') as wf:
-            wf.setframerate(sample_rate)
-            wf.setsampwidth(2)
-            wf.setnchannels(r_audio.shape[1])
-            wf.writeframes(r_audio)
-
-      return raw_audio
+        ticks_per_beat, *tracks = midi_opus
+        if not tracks:
+            return None
+    
+        # Flatten & convert delta-times to absolute-time
+        events = []
+        for track in tracks:
+            abs_t = 0
+            for name, dt, *data in track:
+                abs_t += dt
+                events.append([name, abs_t, *data])
+        events.sort(key=lambda e: e[1])
+    
+        # Setup FluidSynth
+        fl = Synth(samplerate=float(sample_rate))
+        sfid = fl.sfload(soundfont_path)
+        for chan in range(16):
+            # channel 9 = percussion GM bank 128
+            fl.program_select(chan, sfid, 128 if chan == 9 else 0, 0)
+    
+        # Playback vars
+        tempo = int((60 / 120) * 1e6)  # default 120bpm
+        last_t = 0
+        ss = np.empty((0, 2), dtype=np.int16)
+    
+        for name, cur_t, *data in events:
+            # compute how many samples have passed since the last event
+            delta_ticks = cur_t - last_t
+            last_t = cur_t
+            dt_seconds = (delta_ticks / ticks_per_beat) * (tempo / 1e6)
+            sample_len = int(dt_seconds * sample_rate)
+            if sample_len > 0:
+                buf = fl.get_samples(sample_len).reshape(-1, 2)
+                ss = np.concatenate([ss, buf], axis=0)
+    
+            # Dispatch every known event
+            if name == "note_on" and data[2] > 0:
+                chan, note, vel = data
+                fl.noteon(chan, note, vel)
+    
+            elif name == "note_off" or (name == "note_on" and data[2] == 0):
+                chan, note = data[:2]
+                fl.noteoff(chan, note)
+    
+            elif name == "patch_change":
+                chan, patch = data[:2]
+                bank = 128 if chan == 9 else 0
+                fl.program_select(chan, sfid, bank, patch)
+    
+            elif name == "control_change":
+                chan, ctrl, val = data[:3]
+                fl.cc(chan, ctrl, val)
+    
+            elif name == "key_after_touch":
+                chan, note, vel = data
+                fl.key_pressure(chan, note, vel)
+    
+            elif name == "channel_after_touch":
+                chan, vel = data
+                fl.channel_pressure(chan, vel)
+    
+            elif name == "pitch_wheel_change":
+                chan, wheel = data
+                fl.pitch_bend(chan, wheel)
+    
+            elif name == "song_position":
+                # song_pos = data[0];  # often not needed for playback
+                pass
+    
+            elif name == "song_select":
+                # song_number = data[0]
+                pass
+    
+            elif name == "tune_request":
+                # typically resets tuning; FS handles internally
+                pass
+    
+            elif name in ("sysex_f0", "sysex_f7"):
+                raw_bytes = data[0]
+                fl.sysex(raw_bytes)
+    
+            # Meta events & others—no direct audio effect, so we skip or log
+            elif name in (
+                "set_tempo",       # handled below
+                "end_track",
+                "text_event", "text_event_08", "text_event_09", "text_event_0a",
+                "text_event_0b", "text_event_0c", "text_event_0d", "text_event_0e", "text_event_0f",
+                "copyright_text_event", "track_name", "instrument_name",
+                "lyric", "marker", "cue_point",
+                "smpte_offset", "time_signature", "key_signature",
+                "sequencer_specific", "raw_meta_event"
+            ):
+                if name == "set_tempo":
+                    tempo = data[0]
+                # else: skip all other meta & text; you could hook in logging here
+                continue
+    
+            else:
+                # unknown event type
+                continue
+    
+        # Cleanup synth
+        fl.delete()
+    
+        if ss.size:
+            maxv = np.abs(ss).max()
+            if maxv:
+                ss = (ss / maxv) * np.iinfo(np.int16).max
+        ss = ss.astype(np.int16)
+    
+        # Optional trimming of trailing silence
+        if trim_silence and ss.size:
+            thresh = np.std(np.abs(ss)) * silence_threshold
+            idx = np.where(np.abs(ss) > thresh)[0]
+            if idx.size:
+                ss = ss[: idx[-1] + 1]
+    
+        # For Gradio you might want raw int16 PCM
+        if output_for_gradio:
+            return ss
+    
+        # Swap to (channels, samples) and normalize for playback
+        ss = ss.T
+        raw_audio = normalize_audio(ss, target_level_db=volume_level_db)
+    
+        # Optionally write WAV to disk
+        if write_audio_to_WAV:
+            wav_name = midi_file.rsplit('.', 1)[0] + '.wav'
+            pcm = np.int16(raw_audio.T / np.max(np.abs(raw_audio)) * 32767)
+            with wave.open(wav_name, 'wb') as wf:
+                wf.setframerate(sample_rate)
+                wf.setsampwidth(2)
+                wf.setnchannels(pcm.shape[1])
+                wf.writeframes(pcm.tobytes())
+    
+        return raw_audio
   
     else:
       return None
 
-def midi_to_colab_audio(midi_file, 
-                        soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
-                        sample_rate=16000, # 44100
-                        volume_scale=10,
+#===============================================================================
+
+def midi_to_colab_audio(midi_file,
+                        soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2',
+                        sample_rate=16000,
+                        volume_level_db=-1,
                         trim_silence=True,
                         silence_threshold=0.1,
                         output_for_gradio=False,
                         write_audio_to_WAV=False
-                        ):
-
-    '''
-    
+                       ):
+    """
     Returns raw audio to pass to IPython.disaply.Audio func
 
     Example usage:
@@ -2992,99 +3403,144 @@ def midi_to_colab_audio(midi_file,
     from IPython.display import Audio
 
     display(Audio(raw_audio, rate=16000, normalize=False))
-    
-    '''
+    """
 
-    def normalize_volume(matrix, factor=10):
-        norm = np.linalg.norm(matrix)
-        matrix = matrix/norm  # normalized matrix
-        mult_matrix = matrix * factor
-        final_matrix = np.clip(mult_matrix, -1.0, 1.0)
-        return final_matrix
+    # Read and decode MIDI → opus event list
+    ticks_per_beat, *tracks = midi2opus(open(midi_file, 'rb').read())
+    if not tracks:
+        return None
 
-    midi_opus = midi2opus(open(midi_file, 'rb').read())
+    # Flatten & convert delta-times to absolute-time
+    events = []
+    for track in tracks:
+        abs_t = 0
+        for name, dt, *data in track:
+            abs_t += dt
+            events.append([name, abs_t, *data])
+    events.sort(key=lambda e: e[1])
 
-    if midi_opus[1]:
+    # Setup FluidSynth
+    fl = Synth(samplerate=float(sample_rate))
+    sfid = fl.sfload(soundfont_path)
+    for chan in range(16):
+        # channel 9 = percussion GM bank 128
+        fl.program_select(chan, sfid, 128 if chan == 9 else 0, 0)
 
-      ticks_per_beat = midi_opus[0]
-      event_list = []
-      for track_idx, track in enumerate(midi_opus[1:]):
-          abs_t = 0
-          for event in track:
-              abs_t += event[1]
-              event_new = [*event]
-              event_new[1] = abs_t
-              event_list.append(event_new)
-      event_list = sorted(event_list, key=lambda e: e[1])
+    # Playback vars
+    tempo = int((60 / 120) * 1e6)  # default 120bpm
+    last_t = 0
+    ss = np.empty((0, 2), dtype=np.int16)
 
-      tempo = int((60 / 120) * 10 ** 6)  # default 120 bpm
-      ss = np.empty((0, 2), dtype=np.int16)
-      fl = Synth(samplerate=float(sample_rate))
-      sfid = fl.sfload(soundfont_path)
-      last_t = 0
-      for c in range(16):
-          fl.program_select(c, sfid, 128 if c == 9 else 0, 0)
-      for event in event_list:
-          name = event[0]
-          sample_len = int(((event[1] / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-          sample_len -= int(((last_t / ticks_per_beat) * tempo / (10 ** 6)) * sample_rate)
-          last_t = event[1]
-          if sample_len > 0:
-              sample = fl.get_samples(sample_len).reshape(sample_len, 2)
-              ss = np.concatenate([ss, sample])
-          if name == "set_tempo":
-              tempo = event[2]
-          elif name == "patch_change":
-              c, p = event[2:4]
-              fl.program_select(c, sfid, 128 if c == 9 else 0, p)
-          elif name == "control_change":
-              c, cc, v = event[2:5]
-              fl.cc(c, cc, v)
-          elif name == "note_on" and event[3] > 0:
-              c, p, v = event[2:5]
-              fl.noteon(c, p, v)
-          elif name == "note_off" or (name == "note_on" and event[3] == 0):
-              c, p = event[2:4]
-              fl.noteoff(c, p)
+    for name, cur_t, *data in events:
+        # compute how many samples have passed since the last event
+        delta_ticks = cur_t - last_t
+        last_t = cur_t
+        dt_seconds = (delta_ticks / ticks_per_beat) * (tempo / 1e6)
+        sample_len = int(dt_seconds * sample_rate)
+        if sample_len > 0:
+            buf = fl.get_samples(sample_len).reshape(-1, 2)
+            ss = np.concatenate([ss, buf], axis=0)
 
-      fl.delete()
-      if ss.shape[0] > 0:
-          max_val = np.abs(ss).max()
-          if max_val != 0:
-              ss = (ss / max_val) * np.iinfo(np.int16).max
-      ss = ss.astype(np.int16)
+        # Dispatch every known event
+        if name == "note_on" and data[2] > 0:
+            chan, note, vel = data
+            fl.noteon(chan, note, vel)
 
-      if trim_silence:
-          threshold = np.std(np.abs(ss)) * silence_threshold
-          exceeded_thresh = np.abs(ss) > threshold
-          if np.any(exceeded_thresh): 
-              last_idx = np.where(exceeded_thresh)[0][-1]
-              ss = ss[:last_idx+1]
+        elif name == "note_off" or (name == "note_on" and data[2] == 0):
+            chan, note = data[:2]
+            fl.noteoff(chan, note)
 
-      if output_for_gradio:
+        elif name == "patch_change":
+            chan, patch = data[:2]
+            bank = 128 if chan == 9 else 0
+            fl.program_select(chan, sfid, bank, patch)
+
+        elif name == "control_change":
+            chan, ctrl, val = data[:3]
+            fl.cc(chan, ctrl, val)
+
+        elif name == "key_after_touch":
+            chan, note, vel = data
+            fl.key_pressure(chan, note, vel)
+
+        elif name == "channel_after_touch":
+            chan, vel = data
+            fl.channel_pressure(chan, vel)
+
+        elif name == "pitch_wheel_change":
+            chan, wheel = data
+            fl.pitch_bend(chan, wheel)
+
+        elif name == "song_position":
+            # song_pos = data[0];  # often not needed for playback
+            pass
+
+        elif name == "song_select":
+            # song_number = data[0]
+            pass
+
+        elif name == "tune_request":
+            # typically resets tuning; FS handles internally
+            pass
+
+        elif name in ("sysex_f0", "sysex_f7"):
+            raw_bytes = data[0]
+            fl.sysex(raw_bytes)
+
+        # Meta events & others—no direct audio effect, so we skip or log
+        elif name in (
+            "set_tempo",       # handled below
+            "end_track",
+            "text_event", "text_event_08", "text_event_09", "text_event_0a",
+            "text_event_0b", "text_event_0c", "text_event_0d", "text_event_0e", "text_event_0f",
+            "copyright_text_event", "track_name", "instrument_name",
+            "lyric", "marker", "cue_point",
+            "smpte_offset", "time_signature", "key_signature",
+            "sequencer_specific", "raw_meta_event"
+        ):
+            if name == "set_tempo":
+                tempo = data[0]
+            # else: skip all other meta & text; you could hook in logging here
+            continue
+
+        else:
+            # unknown event type
+            continue
+
+    # Cleanup synth
+    fl.delete()
+
+    if ss.size:
+        maxv = np.abs(ss).max()
+        if maxv:
+            ss = (ss / maxv) * np.iinfo(np.int16).max
+    ss = ss.astype(np.int16)
+
+    # Optional trimming of trailing silence
+    if trim_silence and ss.size:
+        thresh = np.std(np.abs(ss)) * silence_threshold
+        idx = np.where(np.abs(ss) > thresh)[0]
+        if idx.size:
+            ss = ss[: idx[-1] + 1]
+
+    # For Gradio you might want raw int16 PCM
+    if output_for_gradio:
         return ss
 
-      ss = ss.swapaxes(1, 0)
+    # Swap to (channels, samples) and normalize for playback
+    ss = ss.T
+    raw_audio = normalize_audio(ss, target_level_db=volume_level_db)
 
-      raw_audio = normalize_volume(ss, volume_scale)
-
-      if write_audio_to_WAV:
-
-        filename = midi_file.split('.')[-2] + '.wav'
-
-        r_audio = raw_audio.T
-
-        r_audio = np.int16(r_audio / np.max(np.abs(r_audio)) * 32767)
-
-        with wave.open(filename, 'w') as wf:
+    # Optionally write WAV to disk
+    if write_audio_to_WAV:
+        wav_name = midi_file.rsplit('.', 1)[0] + '.wav'
+        pcm = np.int16(raw_audio.T / np.max(np.abs(raw_audio)) * 32767)
+        with wave.open(wav_name, 'wb') as wf:
             wf.setframerate(sample_rate)
             wf.setsampwidth(2)
-            wf.setnchannels(r_audio.shape[1])
-            wf.writeframes(r_audio)
+            wf.setnchannels(pcm.shape[1])
+            wf.writeframes(pcm.tobytes())
 
-      return raw_audio
-  
-    else:
-      return None
-    
+    return raw_audio
+
 #===================================================================================================================
