@@ -292,7 +292,6 @@ def Render_MIDI(input_midi,
     audio = midi_to_colab_audio(new_fn, 
                         soundfont_path=soundfonts[sf2bank],
                         sample_rate=srate,
-                        volume_scale=10,
                         output_for_gradio=True
                         )
 
