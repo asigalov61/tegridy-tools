@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.7.8"
+__version__ = "25.8.7"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -7128,7 +7128,8 @@ def escore_notes_to_binary_matrix(escore_notes,
                                   channel=0, 
                                   patch=0,
                                   flip_matrix=False,
-                                  reverse_matrix=False
+                                  reverse_matrix=False,
+                                  encode_velocities=False
                                   ):
 
   escore = [e for e in escore_notes if e[3] == channel and e[6] == patch]
@@ -7152,14 +7153,17 @@ def escore_notes_to_binary_matrix(escore_notes,
         duration = max(1, duration)
         chan = max(0, min(15, chan))
         pitch = max(0, min(127, pitch))
-        velocity = max(0, min(127, velocity))
+        velocity = max(1, min(127, velocity))
         pat = max(0, min(128, pat))
 
         if channel == chan and patch == pat:
 
           for t in range(time, min(time + duration, time_range)):
-
-            escore_matrix[t][pitch] = 1
+            if encode_velocities:
+                escore_matrix[t][pitch] = velocity
+                
+            else:
+                escore_matrix[t][pitch] = 1
 
     if flip_matrix:
 
@@ -7183,7 +7187,8 @@ def escore_notes_to_binary_matrix(escore_notes,
 def binary_matrix_to_original_escore_notes(binary_matrix, 
                                            channel=0, 
                                            patch=0, 
-                                           velocity=-1
+                                           velocity=-1,
+                                           decode_velocities=False
                                            ):
 
   result = []
@@ -7222,8 +7227,11 @@ def binary_matrix_to_original_escore_notes(binary_matrix,
 
   for r in result:
     
-    if velocity == -1:
-      vel = max(40, r[2])
+    if velocity == -1 and not decode_velocities:
+        vel = max(40, r[2])
+        
+    if decode_velocities:
+        vel = r[3]
 
     original_escore_notes.append(['note', r[0], r[1], channel, r[2], vel, patch])
 
@@ -13601,6 +13609,89 @@ PERCUSSION_GROUPS = {
         81: 'Open Triangle',
     },
 }
+
+###################################################################################
+
+def escore_notes_to_expanded_binary_matrix(escore_notes, 
+                                           channel=0, 
+                                           patch=0,
+                                           flip_matrix=False,
+                                           reverse_matrix=False,
+                                           encode_velocities=True
+                                          ):
+
+  escore = [e for e in escore_notes if e[3] == channel and e[6] == patch]
+
+  if escore:
+    last_time = escore[-1][1]
+    last_notes = [e for e in escore if e[1] == last_time]
+    max_last_dur = max([e[2] for e in last_notes])
+
+    time_range = last_time+max_last_dur
+
+    escore_matrix = []
+
+    escore_matrix = [[(0, 0)] * 128 for _ in range(time_range)]
+
+    for note in escore:
+
+        etype, time, duration, chan, pitch, velocity, pat = note
+
+        time = max(0, time)
+        duration = max(1, duration)
+        chan = max(0, min(15, chan))
+        pitch = max(0, min(127, pitch))
+        velocity = max(1, min(127, velocity))
+        pat = max(0, min(128, pat))
+
+        if channel == chan and patch == pat:
+
+          count = 0
+          
+          for t in range(time, min(time + duration, time_range)):
+            if encode_velocities:
+                escore_matrix[t][pitch] = velocity, count
+
+            else:
+                escore_matrix[t][pitch] = 1, count
+            count += 1
+
+    if flip_matrix:
+
+      temp_matrix = []
+
+      for m in escore_matrix:
+        temp_matrix.append(m[::-1])
+
+      escore_matrix = temp_matrix
+
+    if reverse_matrix:
+      escore_matrix = escore_matrix[::-1]
+
+    return escore_matrix
+
+  else:
+    return None
+
+###################################################################################
+
+def transpose_list(lst):
+    return [list(row) for row in zip(*lst)]
+
+###################################################################################
+
+def chunk_list(lst, size):
+    return [lst[i:i + size] for i in range(0, len(lst), size)]
+
+###################################################################################
+
+def flip_list_rows(lst):
+    return [row[::-1] for row in lst]
+
+###################################################################################
+
+def flip_list_columns(lst):
+    return lst[::-1]
 
 ###################################################################################
 
