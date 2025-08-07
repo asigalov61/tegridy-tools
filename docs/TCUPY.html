@@ -1084,7 +1084,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TCUPY.bpe_encode">bpe_encode</a></li>
     <li class="mono"><a href="#TCUPY.build_ngram_mapping">build_ngram_mapping</a></li>
     <li class="mono"><a href="#TCUPY.build_training_sequences_set">build_training_sequences_set</a></li>
+    <li class="mono"><a href="#TCUPY.cosine_similarities">cosine_similarities</a></li>
     <li class="mono"><a href="#TCUPY.count_best_pair_gpu">count_best_pair_gpu</a></li>
+    <li class="mono"><a href="#TCUPY.embeddings_topk_cosine_neighbors">embeddings_topk_cosine_neighbors</a></li>
     <li class="mono"><a href="#TCUPY.ensure_triplet">ensure_triplet</a></li>
     <li class="mono"><a href="#TCUPY.find_numpy_array">find_numpy_array</a></li>
     <li class="mono"><a href="#TCUPY.generate_sequence_optimized">generate_sequence_optimized</a></li>
@@ -2241,6 +2243,114 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">cosine_similarities</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes cosine similarities between 1D src array and 2D trg array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+   
+    <span class="n">src_norm</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+
+    <span class="n">trg_norms</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">trg_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">dot_products</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">trg_array</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span>
+
+    <span class="n">cosine_sims</span> <span class="o">=</span> <span class="n">dot_products</span> <span class="o">/</span> <span class="p">(</span><span class="n">src_norm</span> <span class="o">*</span> <span class="n">trg_norms</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">cosine_sims</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">embeddings_topk_cosine_neighbors</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span>
+                                     <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">row_batch</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
+                                     <span class="n">col_batch</span><span class="o">=</span><span class="mi">4096</span>
+                                    <span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For each embedding, find the indices and similarities of its top-k neighbors,</span>
+<span class="sd">    excluding itself, sorted by descending similarity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        embeddings (cp.ndarray): shape (N, D), float32 on GPU.</span>
+<span class="sd">        k (int): how many neighbors to return (must be &lt; N).</span>
+<span class="sd">        row_batch (int): number of rows to process at once.</span>
+<span class="sd">        col_batch (int): number of columns to process at once.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.</span>
+<span class="sd">        top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.</span>
+<span class="sd">                             Each row is sorted descending.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># normalize embeddings to unit length</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">embeddings</span> <span class="o">/=</span> <span class="n">norms</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;k must satisfy 1 ≤ k &lt; N; got N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">, k=</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># placeholders for top-k</span>
+    <span class="n">top_sim</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="o">-</span><span class="n">cp</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">top_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">row_batch</span><span class="p">)):</span>
+        <span class="n">i_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">row_batch</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span>           <span class="c1"># (rb, D)</span>
+        <span class="n">rb</span> <span class="o">=</span> <span class="n">i_end</span> <span class="o">-</span> <span class="n">i</span>
+
+        <span class="c1"># per-block buffers</span>
+        <span class="n">best_s</span> <span class="o">=</span> <span class="n">top_sim</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span>            <span class="c1"># (rb, k)</span>
+        <span class="n">best_i</span> <span class="o">=</span> <span class="n">top_idx</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span>            <span class="c1"># (rb, k)</span>
+        <span class="n">row_ids</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i_end</span><span class="p">)</span>        <span class="c1"># (rb,)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">col_batch</span><span class="p">):</span>
+            <span class="n">j_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">col_batch</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j_end</span><span class="p">]</span>       <span class="c1"># (cb, D)</span>
+            <span class="n">sims</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cols</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>          <span class="c1"># (rb, cb)</span>
+
+            <span class="c1"># mask out self-similarities</span>
+            <span class="c1"># find rows whose global index ∈ [j, j_end)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">row_ids</span> <span class="o">&gt;=</span> <span class="n">j</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">row_ids</span> <span class="o">&lt;</span> <span class="n">j_end</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="n">local_rows</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">local_cols</span> <span class="o">=</span> <span class="n">row_ids</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">j</span>
+                <span class="n">sims</span><span class="p">[</span><span class="n">local_rows</span><span class="p">,</span> <span class="n">local_cols</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cp</span><span class="o">.</span><span class="n">inf</span>
+
+            <span class="c1"># get top-k within this block</span>
+            <span class="c1"># argpartition to grab k largest in each row</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">sims</span><span class="p">,</span> <span class="o">-</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="o">-</span><span class="n">k</span><span class="p">:]</span>       <span class="c1"># (rb, k)</span>
+            <span class="n">blk_s</span> <span class="o">=</span> <span class="n">sims</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rb</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">part</span><span class="p">]</span>            <span class="c1"># (rb, k)</span>
+            <span class="n">blk_i</span> <span class="o">=</span> <span class="n">part</span> <span class="o">+</span> <span class="n">j</span>                                       <span class="c1"># (rb, k)</span>
+
+            <span class="c1"># merge with running best</span>
+            <span class="n">cat_s</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">best_s</span><span class="p">,</span> <span class="n">blk_s</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>       <span class="c1"># (rb, 2k)</span>
+            <span class="n">cat_i</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">best_i</span><span class="p">,</span> <span class="n">blk_i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># select new top-k from the 2k candidates</span>
+            <span class="n">part2</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">cat_s</span><span class="p">,</span> <span class="o">-</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="o">-</span><span class="n">k</span><span class="p">:]</span>
+            <span class="n">best_s</span> <span class="o">=</span> <span class="n">cat_s</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rb</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">part2</span><span class="p">]</span>
+            <span class="n">best_i</span> <span class="o">=</span> <span class="n">cat_i</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rb</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">part2</span><span class="p">]</span>
+
+        <span class="c1"># write back</span>
+        <span class="n">top_sim</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_s</span>
+        <span class="n">top_idx</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_i</span>
+
+    <span class="c1"># final sort per row so sims descend</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">top_sim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">top_sim</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">top_sim</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">top_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">top_idx</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># if k==1, squeeze dims</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">top_idx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">top_sim</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">top_idx</span><span class="p">,</span> <span class="n">top_sim</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Module is loaded!&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Enjoy! :)&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
@@ -2872,6 +2982,41 @@ repeated until no more merges are possible.</p></div>
   
       
   <div class="item">
+    <div class="name def" id="TCUPY.cosine_similarities">
+    <p>def <span class="ident">cosine_similarities</span>(</p><p>src_array, trg_array)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Computes cosine similarities between 1D src array and 2D trg array</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.cosine_similarities', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.cosine_similarities" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cosine_similarities</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes cosine similarities between 1D src array and 2D trg array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+   
+    <span class="n">src_norm</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+
+    <span class="n">trg_norms</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">trg_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">dot_products</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">trg_array</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span>
+
+    <span class="n">cosine_sims</span> <span class="o">=</span> <span class="n">dot_products</span> <span class="o">/</span> <span class="p">(</span><span class="n">src_norm</span> <span class="o">*</span> <span class="n">trg_norms</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">cosine_sims</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TCUPY.count_best_pair_gpu">
     <p>def <span class="ident">count_best_pair_gpu</span>(</p><p>batch, lengths, factor, pad_val=-1)</p>
     </div>
@@ -2916,6 +3061,123 @@ adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</p></div>
     <span class="n">first</span> <span class="o">=</span> <span class="n">best_pair_enc</span> <span class="o">//</span> <span class="n">factor</span>
     <span class="n">second</span> <span class="o">=</span> <span class="n">best_pair_enc</span> <span class="o">%</span> <span class="n">factor</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">best_freq</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TCUPY.embeddings_topk_cosine_neighbors">
+    <p>def <span class="ident">embeddings_topk_cosine_neighbors</span>(</p><p>embeddings, k=1, row_batch=4096, col_batch=4096)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>For each embedding, find the indices and similarities of its top-k neighbors,
+excluding itself, sorted by descending similarity.</p>
+<p>Args:
+    embeddings (cp.ndarray): shape (N, D), float32 on GPU.
+    k (int): how many neighbors to return (must be &lt; N).
+    row_batch (int): number of rows to process at once.
+    col_batch (int): number of columns to process at once.</p>
+<p>Returns:
+    top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.
+    top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.
+                         Each row is sorted descending.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.embeddings_topk_cosine_neighbors', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.embeddings_topk_cosine_neighbors" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">embeddings_topk_cosine_neighbors</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span>
+                                     <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">row_batch</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
+                                     <span class="n">col_batch</span><span class="o">=</span><span class="mi">4096</span>
+                                    <span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For each embedding, find the indices and similarities of its top-k neighbors,</span>
+<span class="sd">    excluding itself, sorted by descending similarity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        embeddings (cp.ndarray): shape (N, D), float32 on GPU.</span>
+<span class="sd">        k (int): how many neighbors to return (must be &lt; N).</span>
+<span class="sd">        row_batch (int): number of rows to process at once.</span>
+<span class="sd">        col_batch (int): number of columns to process at once.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.</span>
+<span class="sd">        top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.</span>
+<span class="sd">                             Each row is sorted descending.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># normalize embeddings to unit length</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">embeddings</span> <span class="o">/=</span> <span class="n">norms</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;k must satisfy 1 ≤ k &lt; N; got N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">, k=</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># placeholders for top-k</span>
+    <span class="n">top_sim</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="o">-</span><span class="n">cp</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">top_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">row_batch</span><span class="p">)):</span>
+        <span class="n">i_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">row_batch</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span>           <span class="c1"># (rb, D)</span>
+        <span class="n">rb</span> <span class="o">=</span> <span class="n">i_end</span> <span class="o">-</span> <span class="n">i</span>
+
+        <span class="c1"># per-block buffers</span>
+        <span class="n">best_s</span> <span class="o">=</span> <span class="n">top_sim</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span>            <span class="c1"># (rb, k)</span>
+        <span class="n">best_i</span> <span class="o">=</span> <span class="n">top_idx</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span>            <span class="c1"># (rb, k)</span>
+        <span class="n">row_ids</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i_end</span><span class="p">)</span>        <span class="c1"># (rb,)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">col_batch</span><span class="p">):</span>
+            <span class="n">j_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">col_batch</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j_end</span><span class="p">]</span>       <span class="c1"># (cb, D)</span>
+            <span class="n">sims</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cols</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>          <span class="c1"># (rb, cb)</span>
+
+            <span class="c1"># mask out self-similarities</span>
+            <span class="c1"># find rows whose global index ∈ [j, j_end)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">row_ids</span> <span class="o">&gt;=</span> <span class="n">j</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">row_ids</span> <span class="o">&lt;</span> <span class="n">j_end</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="n">local_rows</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">local_cols</span> <span class="o">=</span> <span class="n">row_ids</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">j</span>
+                <span class="n">sims</span><span class="p">[</span><span class="n">local_rows</span><span class="p">,</span> <span class="n">local_cols</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cp</span><span class="o">.</span><span class="n">inf</span>
+
+            <span class="c1"># get top-k within this block</span>
+            <span class="c1"># argpartition to grab k largest in each row</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">sims</span><span class="p">,</span> <span class="o">-</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="o">-</span><span class="n">k</span><span class="p">:]</span>       <span class="c1"># (rb, k)</span>
+            <span class="n">blk_s</span> <span class="o">=</span> <span class="n">sims</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rb</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">part</span><span class="p">]</span>            <span class="c1"># (rb, k)</span>
+            <span class="n">blk_i</span> <span class="o">=</span> <span class="n">part</span> <span class="o">+</span> <span class="n">j</span>                                       <span class="c1"># (rb, k)</span>
+
+            <span class="c1"># merge with running best</span>
+            <span class="n">cat_s</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">best_s</span><span class="p">,</span> <span class="n">blk_s</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>       <span class="c1"># (rb, 2k)</span>
+            <span class="n">cat_i</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">best_i</span><span class="p">,</span> <span class="n">blk_i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># select new top-k from the 2k candidates</span>
+            <span class="n">part2</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">cat_s</span><span class="p">,</span> <span class="o">-</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="o">-</span><span class="n">k</span><span class="p">:]</span>
+            <span class="n">best_s</span> <span class="o">=</span> <span class="n">cat_s</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rb</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">part2</span><span class="p">]</span>
+            <span class="n">best_i</span> <span class="o">=</span> <span class="n">cat_i</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rb</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">part2</span><span class="p">]</span>
+
+        <span class="c1"># write back</span>
+        <span class="n">top_sim</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_s</span>
+        <span class="n">top_idx</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i_end</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_i</span>
+
+    <span class="c1"># final sort per row so sims descend</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">top_sim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">top_sim</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">top_sim</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">top_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">top_idx</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># if k==1, squeeze dims</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">top_idx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">top_sim</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">top_idx</span><span class="p">,</span> <span class="n">top_sim</span>
 </pre></div>
 
   </div>
