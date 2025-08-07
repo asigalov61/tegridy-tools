@@ -1084,6 +1084,114 @@ def pairwise_cosine_similarity(X: cp.ndarray, eps: float = 1e-10) -> cp.ndarray:
 
 ###################################################################################
 
+def cosine_similarities(src_array, trg_array):
+    
+    """
+    Computes cosine similarities between 1D src array and 2D trg array
+    """
+   
+    src_norm = cp.linalg.norm(src_array)
+
+    trg_norms = cp.linalg.norm(trg_array, axis=1)
+
+    dot_products = cp.dot(trg_array, src_array)
+
+    cosine_sims = dot_products / (src_norm * trg_norms + 1e-10)
+    
+    return cosine_sims
+
+###################################################################################
+
+def embeddings_topk_cosine_neighbors(embeddings,
+                                     k=1,
+                                     row_batch=4096,
+                                     col_batch=4096
+                                    ):
+    
+    """
+    For each embedding, find the indices and similarities of its top-k neighbors,
+    excluding itself, sorted by descending similarity.
+
+    Args:
+        embeddings (cp.ndarray): shape (N, D), float32 on GPU.
+        k (int): how many neighbors to return (must be < N).
+        row_batch (int): number of rows to process at once.
+        col_batch (int): number of columns to process at once.
+
+    Returns:
+        top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.
+        top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.
+                             Each row is sorted descending.
+    """
+    
+    # normalize embeddings to unit length
+    norms = cp.linalg.norm(embeddings, axis=1, keepdims=True)
+    embeddings /= norms
+
+    N, D = embeddings.shape
+    if not (1 <= k < N):
+        raise ValueError(f"k must satisfy 1 ≤ k < N; got N={N}, k={k}")
+
+    # placeholders for top-k
+    top_sim = cp.full((N, k), -cp.inf, dtype=cp.float32)
+    top_idx = cp.full((N, k), -1, dtype=cp.int32)
+
+    for i in tqdm.tqdm(range(0, N, row_batch)):
+        i_end = min(i + row_batch, N)
+        rows = embeddings[i:i_end]           # (rb, D)
+        rb = i_end - i
+
+        # per-block buffers
+        best_s = top_sim[i:i_end]            # (rb, k)
+        best_i = top_idx[i:i_end]            # (rb, k)
+        row_ids = cp.arange(i, i_end)        # (rb,)
+
+        for j in range(0, N, col_batch):
+            j_end = min(j + col_batch, N)
+            cols = embeddings[j:j_end]       # (cb, D)
+            sims = rows.dot(cols.T)          # (rb, cb)
+
+            # mask out self-similarities
+            # find rows whose global index ∈ [j, j_end)
+            mask = (row_ids >= j) & (row_ids < j_end)
+            if mask.any():
+                local_rows = cp.where(mask)[0]
+                local_cols = row_ids[mask] - j
+                sims[local_rows, local_cols] = -cp.inf
+
+            # get top-k within this block
+            # argpartition to grab k largest in each row
+            part = cp.argpartition(sims, -k, axis=1)[:, -k:]       # (rb, k)
+            blk_s = sims[cp.arange(rb)[:, None], part]            # (rb, k)
+            blk_i = part + j                                       # (rb, k)
+
+            # merge with running best
+            cat_s = cp.concatenate([best_s, blk_s], axis=1)       # (rb, 2k)
+            cat_i = cp.concatenate([best_i, blk_i], axis=1)
+
+            # select new top-k from the 2k candidates
+            part2 = cp.argpartition(cat_s, -k, axis=1)[:, -k:]
+            best_s = cat_s[cp.arange(rb)[:, None], part2]
+            best_i = cat_i[cp.arange(rb)[:, None], part2]
+
+        # write back
+        top_sim[i:i_end] = best_s
+        top_idx[i:i_end] = best_i
+
+    # final sort per row so sims descend
+    if k > 1:
+        order = cp.argsort(-top_sim, axis=1)
+        top_sim = cp.take_along_axis(top_sim, order, axis=1)
+        top_idx = cp.take_along_axis(top_idx, order, axis=1)
+
+    # if k==1, squeeze dims
+    if k == 1:
+        return top_idx.ravel(), top_sim.ravel()
+    
+    return top_idx, top_sim
+
+###################################################################################
+
 print('Module is loaded!')
 print('Enjoy! :)')
 print('=' * 70)
