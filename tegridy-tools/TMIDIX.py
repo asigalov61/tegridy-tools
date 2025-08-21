@@ -13713,6 +13713,26 @@ def exists_ratio(sub, lst, ratio):
     
 ###################################################################################
 
+def top_k_list_value(lst, k, reverse=True):
+    return sorted(lst, reverse=reverse)[k]
+
+###################################################################################
+
+def top_k_list_values(lst, k, reverse=True):
+    return sorted(lst, reverse=reverse)[:k]
+
+###################################################################################
+
+def concat_rows(lst_A, lst_B):
+    return [a + b for a, b in zip(lst_A, lst_B)]
+
+###################################################################################
+
+def concat_cols(lst_A, lst_B):
+    return [[ra + rb for ra, rb in zip(a, b)] for a, b in zip(lst_A, lst_B)]
+
+###################################################################################
+
 def chunk_by_threshold_mode(nums, threshold=0, normalize=False):
 
     if not nums:
