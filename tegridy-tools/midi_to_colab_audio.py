@@ -3323,7 +3323,8 @@ def midi_opus_to_colab_audio(midi_opus,
     
             elif name in ("sysex_f0", "sysex_f7"):
                 raw_bytes = data[0]
-                fl.sysex(raw_bytes)
+                # fl.sysex(raw_bytes)
+                pass
     
             # Meta events & others—no direct audio effect, so we skip or log
             elif name in (
@@ -3485,7 +3486,8 @@ def midi_to_colab_audio(midi_file,
 
         elif name in ("sysex_f0", "sysex_f7"):
             raw_bytes = data[0]
-            fl.sysex(raw_bytes)
+            # fl.sysex(raw_bytes)
+            pass
 
         # Meta events & others—no direct audio effect, so we skip or log
         elif name in (
