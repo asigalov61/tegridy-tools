@@ -9728,7 +9728,14 @@ def escore_notes_to_text_description(escore_notes,
                                      song_name='', 
                                      artist_name='',
                                      timings_divider=16,
+                                     return_feat_dict=False,
+                                     return_feat_dict_vals=False
                                     ):
+    
+    #==============================================================================
+    
+    feat_dict = {}
+    feat_dict_vals = {}
 
     #==============================================================================
 
@@ -9742,6 +9749,9 @@ def escore_notes_to_text_description(escore_notes,
     
     elif song_time_min >= 2.5:
         song_length = 'long'
+        
+    feat_dict['song_len'] = song_length.capitalize()
+    feat_dict_vals['song_len'] = song_time_min
 
     #==============================================================================
 
@@ -9753,18 +9763,25 @@ def escore_notes_to_text_description(escore_notes,
         if len(escore_times) == len(set(escore_times)):
             comp_type = 'monophonic melody'
             ctype = 'melody'
+            ctv = 0
         
         elif len(escore_times) >= len(set(escore_times)) and 1 in Counter(escore_times).values():
             comp_type = 'melody and accompaniment'
             ctype = 'song'
+            ctv = 1
         
         elif len(escore_times) >= len(set(escore_times)) and 1 not in Counter(escore_times).values():
             comp_type = 'accompaniment'
             ctype = 'song'
+            ctv = 2
     
     else:
         comp_type = 'drum track'
         ctype = 'drum track'
+        ctv = 3
+        
+    feat_dict['song_type'] = comp_type.capitalize()
+    feat_dict_vals['song_type'] = ctv
 
     #==============================================================================
 
@@ -9779,6 +9796,13 @@ def escore_notes_to_text_description(escore_notes,
         nd_patches_counts = Counter([p for p in all_patches if p < 128]).most_common()
 
         dominant_instrument = alpha_str(Number2patch[nd_patches_counts[0][0]])
+        
+        feat_dict['most_com_instr'] = instruments
+        feat_dict_vals['most_com_instr'] = [p for p in patches if p < 128]
+        
+    else:
+        feat_dict['most_com_instr'] = None
+        feat_dict_vals['most_com_instr'] = []
 
     if 128 in patches:
         drums_present = True
@@ -9786,9 +9810,16 @@ def escore_notes_to_text_description(escore_notes,
         drums_pitches = [e[4] for e in escore_notes if e[3] == 9]
 
         most_common_drums = [alpha_str(Notenum2percussion[p[0]]) for p in Counter(drums_pitches).most_common(3) if p[0] in Notenum2percussion]
+        
+        feat_dict['most_com_drums'] = most_common_drums
+        feat_dict_vals['most_com_drums'] = [p[0] for p in Counter(drums_pitches).most_common(3)]
 
     else:
         drums_present = False
+        
+        feat_dict['most_com_drums'] = None
+        
+        feat_dict_vals['most_com_drums'] = []
 
     #==============================================================================
 
@@ -9798,11 +9829,23 @@ def escore_notes_to_text_description(escore_notes,
     
     if pitches:
         key = SEMITONES[statistics.mode(pitches) % 12]
+        
+        feat_dict['key'] = key.title()
+        feat_dict_vals['key'] = statistics.mode(pitches) % 12
+        
+    else:
+        feat_dict['key'] = None
+        feat_dict_vals['key'] = -1
 
     #==============================================================================
     
     scale = ''
     mood = ''
+    
+    feat_dict['scale'] = None
+    feat_dict['mood'] = None
+    feat_dict_vals['scale'] = -1
+    feat_dict_vals['mood'] = -1
     
     if pitches:
     
@@ -9810,48 +9853,87 @@ def escore_notes_to_text_description(escore_notes,
         
         scale = result[0]
         mood = result[1].split(' ')[0].lower()
+        
+        feat_dict['scale'] = scale.title()
+        feat_dict['mood'] = mood.title()
+        
+        res = escore_notes_scale(escore_notes, return_scale_indexes=True)
+        feat_dict_vals['scale'] = res[0]            
+        feat_dict_vals['mood'] = res[1]
 
     #==============================================================================
-    
+        
+    feat_dict['rythm'] = None
+    feat_dict['tempo'] = None
+    feat_dict['tone'] = None
+    feat_dict['dynamics'] = None
+
+    feat_dict_vals['rythm'] = -1
+    feat_dict_vals['tempo'] = -1
+    feat_dict_vals['tone'] = -1
+    feat_dict_vals['dynamics'] = -1
+
     if pitches:
     
         escore_averages = escore_notes_averages(escore_notes, return_ptcs_and_vels=True)
 
         if escore_averages[0] < (128 / timings_divider):
             rythm = 'fast'
+            ryv = 0
         
         elif (128 / timings_divider) <= escore_averages[0] <= (192 / timings_divider):
             rythm = 'average'
+            ryv = 1
         
         elif escore_averages[0] > (192 / timings_divider):
             rythm = 'slow'
+            ryv = 2
         
         if escore_averages[1] < (256 / timings_divider):
             tempo = 'fast'
+            tev = 0
         
         elif (256 / timings_divider) <= escore_averages[1] <= (384 / timings_divider):
             tempo = 'average'
+            tev = 1
         
         elif escore_averages[1] > (384 / timings_divider):
             tempo = 'slow'
+            tev = 2
         
         if escore_averages[2] < 50:
             tone = 'bass'
+            tov = 0
         
         elif 50 <= escore_averages[2] <= 70:
             tone = 'midrange'
+            tov = 1
         
         elif escore_averages[2] > 70:
             tone = 'treble'
+            tov = 2
         
         if escore_averages[3] < 64:
             dynamics = 'quiet'
+            dyn = 0
         
         elif 64 <= escore_averages[3] <= 96:
             dynamics = 'average'
+            dyn = 1
         
         elif escore_averages[3] > 96:
             dynamics = 'loud'
+            dyn = 2
+            
+        feat_dict['rythm'] = rythm.title()
+        feat_dict['tempo'] = tempo.title()
+        feat_dict['tone'] = tone.title()
+        feat_dict['dynamics'] = dynamics.title()
+        
+        feat_dict_vals['rythm'] = ryv
+        feat_dict_vals['tempo'] = tev
+        feat_dict_vals['tone'] = tov
+        feat_dict_vals['dynamics'] = dyn
 
     #==============================================================================
             
@@ -9859,6 +9941,12 @@ def escore_notes_to_text_description(escore_notes,
  
     lead_melodies = []
     base_melodies = []
+    
+    feat_dict['lead_mono_mels'] = None
+    feat_dict['base_mono_mels'] = None
+    
+    feat_dict_vals['lead_mono_mels'] = []
+    feat_dict_vals['base_mono_mels'] = []
  
     if mono_melodies:
             
@@ -9868,15 +9956,19 @@ def escore_notes_to_text_description(escore_notes,
             
             if mel[0] in LEAD_INSTRUMENTS and escore_avgs[3] > 60:
                 lead_melodies.append([Number2patch[mel[0]], mel[1]])
+                feat_dict_vals['lead_mono_mels'].append(mel[0])
 
             elif mel[0] in BASE_INSTRUMENTS and escore_avgs[3] <= 60:
                 base_melodies.append([Number2patch[mel[0]], mel[1]])
+                feat_dict_vals['base_mono_mels'].append(mel[0])
     
         if lead_melodies:
             lead_melodies.sort(key=lambda x: x[1], reverse=True)
+            feat_dict['lead_mono_mels'] = lead_melodies
             
         if base_melodies:
             base_melodies.sort(key=lambda x: x[1], reverse=True)
+            feat_dict['base_mono_mels'] = base_melodies
 
     #==============================================================================
         
@@ -10063,8 +10155,20 @@ def escore_notes_to_text_description(escore_notes,
         description += '\n'
         
     #==============================================================================
-
-    return description
+        
+    final_feat_dict = []
+        
+    if return_feat_dict:
+        final_feat_dict.append(feat_dict)
+    
+    if return_feat_dict_vals:
+        final_feat_dict.append(feat_dict_vals)
+        
+    if return_feat_dict or return_feat_dict_vals:
+        return final_feat_dict
+    
+    else:
+        return description
 
 ###################################################################################
 
