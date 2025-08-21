@@ -4877,7 +4877,8 @@ event, with a duration:
     
             <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sysex_f0&quot;</span><span class="p">,</span> <span class="s2">&quot;sysex_f7&quot;</span><span class="p">):</span>
                 <span class="n">raw_bytes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">fl</span><span class="o">.</span><span class="n">sysex</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
+                <span class="c1"># fl.sysex(raw_bytes)</span>
+                <span class="k">pass</span>
     
             <span class="c1"># Meta events &amp; others—no direct audio effect, so we skip or log</span>
             <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
@@ -5039,7 +5040,8 @@ event, with a duration:
 
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sysex_f0&quot;</span><span class="p">,</span> <span class="s2">&quot;sysex_f7&quot;</span><span class="p">):</span>
             <span class="n">raw_bytes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">sysex</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
+            <span class="c1"># fl.sysex(raw_bytes)</span>
+            <span class="k">pass</span>
 
         <span class="c1"># Meta events &amp; others—no direct audio effect, so we skip or log</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
@@ -7037,7 +7039,8 @@ then opus2score()</p></div>
     
             <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sysex_f0&quot;</span><span class="p">,</span> <span class="s2">&quot;sysex_f7&quot;</span><span class="p">):</span>
                 <span class="n">raw_bytes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">fl</span><span class="o">.</span><span class="n">sysex</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
+                <span class="c1"># fl.sysex(raw_bytes)</span>
+                <span class="k">pass</span>
     
             <span class="c1"># Meta events &amp; others—no direct audio effect, so we skip or log</span>
             <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
@@ -7219,7 +7222,8 @@ then opus2score()</p></div>
 
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sysex_f0&quot;</span><span class="p">,</span> <span class="s2">&quot;sysex_f7&quot;</span><span class="p">):</span>
             <span class="n">raw_bytes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">sysex</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span>
+            <span class="c1"># fl.sysex(raw_bytes)</span>
+            <span class="k">pass</span>
 
         <span class="c1"># Meta events &amp; others—no direct audio effect, so we skip or log</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
