@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.7"
+__version__ = "25.8.21"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -13692,6 +13692,105 @@ def flip_list_rows(lst):
 
 def flip_list_columns(lst):
     return lst[::-1]
+
+###################################################################################
+
+def exists(sub, lst):
+    sub_len = len(sub)
+    return any(lst[i:i + sub_len] == sub for i in range(len(lst) - sub_len + 1))
+
+###################################################################################
+
+def exists_noncontig(sub, lst):
+    it = iter(lst)
+    return all(x in it for x in sub)
+
+###################################################################################
+
+def exists_ratio(sub, lst, ratio):
+    matches = sum(x in set(lst) for x in sub)
+    return matches / len(sub) >= ratio
+    
+###################################################################################
+
+def chunk_by_threshold_mode(nums, threshold=0, normalize=False):
+
+    if not nums:
+        return []
+
+    chunks = []
+    chunk = []
+    freq = defaultdict(int)
+    max_freq = 0
+    mode_val = None
+
+    def try_add_and_validate(value):
+
+        nonlocal max_freq, mode_val
+
+        chunk.append(value)
+        freq[value] += 1
+        new_max_freq = max_freq
+        candidate_mode = mode_val
+
+        if freq[value] > new_max_freq:
+            new_max_freq = freq[value]
+            candidate_mode = value
+
+        mode = candidate_mode
+        valid = True
+
+        for v in chunk:
+            if abs(v - mode) > threshold:
+                valid = False
+                break
+
+        if not valid:
+            
+            chunk.pop()
+            freq[value] -= 1
+            if freq[value] == 0:
+                del freq[value]
+                
+            return False
+
+        max_freq = new_max_freq
+        mode_val = mode
+        return True
+
+    for num in nums:
+        if not chunk:
+            chunk.append(num)
+            freq[num] = 1
+            mode_val = num
+            max_freq = 1
+            
+        else:
+            if not try_add_and_validate(num):
+                if normalize:
+                    normalized_chunk = [mode_val] * len(chunk)
+                    chunks.append(normalized_chunk)
+                
+                else:
+                    chunks.append(chunk[:])
+
+                chunk.clear()
+                freq.clear()
+                
+                chunk.append(num)
+                freq[num] = 1
+                mode_val = num
+                max_freq = 1
+
+    if chunk:
+        if normalize:
+            normalized_chunk = [mode_val] * len(chunk)
+            chunks.append(normalized_chunk)
+            
+        else:
+            chunks.append(chunk)
+
+    return chunks
 
 ###################################################################################
 
