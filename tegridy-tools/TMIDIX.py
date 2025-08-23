@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.21"
+__version__ = "25.8.22"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -13915,6 +13915,145 @@ def chunk_by_threshold_mode(nums, threshold=0, normalize=False):
             chunks.append(chunk)
 
     return chunks
+
+###################################################################################
+
+def proportional_adjust(values, target_sum, threshold):
+
+    n = len(values)
+    locked_idx = [i for i, v in enumerate(values) if v < threshold]
+    adj_idx    = [i for i in range(n) if i not in locked_idx]
+
+    locked_sum     = sum(values[i] for i in locked_idx)
+    adj_original_sum = sum(values[i] for i in adj_idx)
+    adj_target_sum   = target_sum - locked_sum
+
+    if adj_target_sum < 0:
+        print("target_sum is smaller than the sum of locked values")
+        return None
+        
+    if not adj_idx:
+        if locked_sum == target_sum:
+            return values.copy()
+            
+        print("no entries >= threshold to adjust, but sums differ")
+        return None
+
+    if adj_original_sum == 0:
+        base      = adj_target_sum // len(adj_idx)
+        remainder = adj_target_sum - base * len(adj_idx)
+        new_vals = values.copy()
+
+        for j, i in enumerate(sorted(adj_idx)):
+            add = base + (1 if j >= len(adj_idx) - remainder else 0)
+            new_vals[i] = values[i] + add
+            
+        return new_vals
+
+    factor = adj_target_sum / adj_original_sum
+    scaled = {i: values[i] * factor for i in adj_idx}
+    floored = {i: math.floor(scaled[i]) for i in adj_idx}
+    floor_sum = sum(floored.values())
+
+    remainder = adj_target_sum - floor_sum
+    
+    fracs = sorted(
+        ((scaled[i] - floored[i], i) for i in adj_idx),
+        key=lambda x: (x[0], x[1]),
+        reverse=True
+    )
+
+    for frac, i in fracs[:remainder]:
+        floored[i] += 1
+
+    result = values.copy()
+
+    for i in adj_idx:
+        result[i] = floored[i]
+
+    return result
+
+###################################################################################
+
+def advanced_align_escore_notes_to_bars(escore_notes, 
+                                        bar_dtime=200,
+                                        dtimes_adj_thresh=4,
+                                        min_dur_gap=0
+                                       ):
+
+    #========================================================
+
+    escore_notes = recalculate_score_timings(escore_notes)
+
+    cscore = chordify_score([1000, escore_notes])
+
+    #========================================================
+
+    dtimes = [0] + [min(199, b[1]-a[1]) for a, b in zip(escore_notes[:-1], escore_notes[1:]) if b[1]-a[1] != 0]
+
+    score_times = sorted(set([e[1] for e in escore_notes]))
+
+    #========================================================
+
+    dtimes_chunks = []
+    
+    time = 0
+    dtime = []
+    
+    for i, dt in enumerate(dtimes):
+        time += dt
+        dtime.append(dt)
+
+        if time >= bar_dtime:
+            dtimes_chunks.append(dtime)
+            
+            time = 0
+            dtime = []
+    
+    dtimes_chunks.append(dtime)
+
+    #========================================================
+
+    fixed_times = []
+    
+    time = 0
+    
+    for i, dt in enumerate(dtimes_chunks):
+    
+        adj_dt = proportional_adjust(dt, 
+                                     bar_dtime, 
+                                     dtimes_adj_thresh
+                                    )
+    
+        for t in adj_dt:
+    
+            time += t
+    
+            fixed_times.append(time)
+
+    #========================================================
+
+    output_score = []
+    
+    for i, c in enumerate(cscore):
+        
+        cc = copy.deepcopy(c)
+        time = fixed_times[i]
+    
+        for e in cc:
+            e[1] = time
+    
+            output_score.append(e)
+
+    #========================================================
+
+    output_score = fix_escore_notes_durations(output_score, 
+                                              min_notes_gap=min_dur_gap
+                                             )
+
+    #========================================================
+
+    return output_score
 
 ###################################################################################
 
