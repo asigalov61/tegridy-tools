@@ -106,7 +106,7 @@ class SequenceDataset(Dataset):
 
 def make_dataloader(sequences, labels, vocab_size,
                     batch_size=64, shuffle=True, num_workers=4):
-    ds = MidiSequenceDataset(sequences, labels, vocab_size)
+    ds = SequenceDataset(sequences, labels, vocab_size)
     return DataLoader(
         ds, batch_size=batch_size, shuffle=shuffle,
         num_workers=num_workers, pin_memory=True
