@@ -8,7 +8,7 @@
 
 ***
 
-## [NEW] [TCUPY](https://asigalov61.github.io/tegridy-tools/b_classi.html)
+## [NEW] [B Classi](https://asigalov61.github.io/tegridy-tools/b_classi.html)
 ## [TCUPY](https://asigalov61.github.io/tegridy-tools/TCUPY.html)
 ## [TPLOTS](https://asigalov61.github.io/tegridy-tools/TPLOTS.html)
 ## [TMELODIES](https://asigalov61.github.io/tegridy-tools/TMELODIES.html)
