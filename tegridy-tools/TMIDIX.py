@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.22"
+__version__ = "25.8.25"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -11400,7 +11400,7 @@ def multiprocessing_wrapper(function, data_list, verbose=True):
         
         results = []
         
-        for result in tqdm.tqdm(pool.imap_unordered(function, data_list),
+        for result in tqdm.tqdm(pool.imap(function, data_list),
                                 total=len(data_list),
                                 disable=not verbose
                                 ):
@@ -14054,6 +14054,80 @@ def advanced_align_escore_notes_to_bars(escore_notes,
     #========================================================
 
     return output_score
+
+###################################################################################
+
+def check_monophonic_melody(escore_notes, 
+                            times_idx=1, 
+                            durs_idx=2
+                           ):
+
+    bcount = 0
+    
+    for i in range(len(escore_notes)-1):
+        if escore_notes[i][times_idx]+escore_notes[i][durs_idx] > escore_notes[i+1][times_idx]:
+            bcount += 1
+
+    return bcount / len(escore_notes)
+
+###################################################################################
+
+def longest_common_chunk(list1, list2):
+    
+    base, mod = 257, 10**9 + 7
+    max_len = min(len(list1), len(list2))
+    
+    def get_hashes(seq, size):
+
+        h, power = 0, 1
+        hashes = set()
+        
+        for i in range(size):
+            h = (h * base + seq[i]) % mod
+            power = (power * base) % mod
+            
+        hashes.add(h)
+        
+        for i in range(size, len(seq)):
+            h = (h * base - seq[i - size] * power + seq[i]) % mod
+            hashes.add(h)
+            
+        return hashes
+
+    def find_match(size):
+
+        hashes2 = get_hashes(list2, size)
+        h, power = 0, 1
+        
+        for i in range(size):
+            h = (h * base + list1[i]) % mod
+            power = (power * base) % mod
+            
+        if h in hashes2:
+            return list1[:size]
+            
+        for i in range(size, len(list1)):
+            h = (h * base - list1[i - size] * power + list1[i]) % mod
+            if h in hashes2:
+                return list1[i - size + 1:i + 1]
+                
+        return []
+
+    left, right = 0, max_len
+    result = []
+    
+    while left <= right:
+        mid = (left + right) // 2
+        chunk = find_match(mid)
+        
+        if chunk:
+            result = chunk
+            left = mid + 1
+        else:
+            
+            right = mid - 1
+            
+    return result
 
 ###################################################################################
 
