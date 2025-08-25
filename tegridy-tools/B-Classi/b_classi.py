@@ -311,6 +311,23 @@ def evaluate(model, loader, threshold=0.5):
     
 ################################################################################
 
+def predict(model, loader, threshold=0.5):
+    model.eval()
+    probs = []
+    with torch.no_grad():
+        for x_batch, y_batch in loader:
+            x_batch = x_batch.to(DEVICE)
+            with autocast('cuda', dtype=torch.float16):
+                logits = model(x_batch)
+            prob = torch.sigmoid(logits).cpu().numpy()
+            probs.extend(prob)
+
+    preds = [1 if p >= threshold else 0 for p in probs]
+
+    return preds, probs
+
+################################################################################
+
 print('Module is loaded!')
 print('Enjoy! :)')
 print('=' * 70)
