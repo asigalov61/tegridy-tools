@@ -8,7 +8,8 @@
 
 ***
 
-## [NEW] [TCUPY](https://asigalov61.github.io/tegridy-tools/TCUPY.html)
+## [NEW] [TCUPY](https://asigalov61.github.io/tegridy-tools/b_classi.html)
+## [TCUPY](https://asigalov61.github.io/tegridy-tools/TCUPY.html)
 ## [TPLOTS](https://asigalov61.github.io/tegridy-tools/TPLOTS.html)
 ## [TMELODIES](https://asigalov61.github.io/tegridy-tools/TMELODIES.html)
 ## [X Transformer 1-27-16](https://asigalov61.github.io/tegridy-tools/x_transformer_1_27_16.html)
