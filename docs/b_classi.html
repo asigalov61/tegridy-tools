@@ -1487,7 +1487,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
             <span class="c1"># Forward + backward in bfloat16 autocast</span>
-            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                 <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
                 <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y_batch</span><span class="p">)</span>
 
@@ -1513,7 +1513,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
 
                 <span class="c1"># Use autocast to speed up validation</span>
-                <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                     <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
                     <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y_batch</span><span class="p">)</span>
 
@@ -1549,7 +1549,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">x_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
             <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                 <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
             <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
             <span class="n">all_probs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
@@ -1573,7 +1573,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">x_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
             <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                 <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
             <span class="n">prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
             <span class="n">probs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
@@ -1627,7 +1627,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">x_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
             <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                 <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
             <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
             <span class="n">all_probs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
@@ -1693,7 +1693,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">x_batch</span><span class="p">,</span> <span class="n">y_batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
             <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                 <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
             <span class="n">prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
             <span class="n">probs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
@@ -1772,7 +1772,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
             <span class="c1"># Forward + backward in bfloat16 autocast</span>
-            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                 <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
                 <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y_batch</span><span class="p">)</span>
 
@@ -1798,7 +1798,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
 
                 <span class="c1"># Use autocast to speed up validation</span>
-                <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">autocast</span><span class="p">(</span><span class="n">DEVICE</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">):</span>
                     <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
                     <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y_batch</span><span class="p">)</span>
 
