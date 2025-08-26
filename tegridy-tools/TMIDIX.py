@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.25"
+__version__ = "25.8.26"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1489,6 +1489,7 @@ from itertools import groupby
 from collections import Counter
 from collections import defaultdict
 from collections import OrderedDict
+from collections import deque
 
 from operator import itemgetter
 
@@ -14128,6 +14129,173 @@ def longest_common_chunk(list1, list2):
             right = mid - 1
             
     return result
+
+###################################################################################
+
+def detect_plateaus(data, min_len=2, tol=0.0):
+
+    plateaus = []
+    n = len(data)
+    if n < min_len:
+        return plateaus
+
+    min_deque = deque()
+    max_deque = deque()
+
+    start = 0
+    idx = 0
+
+    while idx < n:
+        v = data[idx]
+
+        if not isinstance(v, (int, float)) or math.isnan(v):
+
+            if idx - start >= min_len:
+                plateaus.append(data[start:idx])
+
+            idx += 1
+            start = idx
+            min_deque.clear()
+            max_deque.clear()
+            
+            continue
+
+        while max_deque and data[max_deque[-1]] <= v:
+            max_deque.pop()
+            
+        max_deque.append(idx)
+
+        while min_deque and data[min_deque[-1]] >= v:
+            min_deque.pop()
+            
+        min_deque.append(idx)
+
+        if data[max_deque[0]] - data[min_deque[0]] > tol:
+
+            if idx - start >= min_len:
+                plateaus.append(data[start:idx])
+
+            start = idx
+            
+            min_deque.clear()
+            max_deque.clear()
+
+            max_deque.append(idx)
+            min_deque.append(idx)
+
+        idx += 1
+
+    if n - start >= min_len:
+        plateaus.append(data[start:n])
+
+    return plateaus
+
+###################################################################################
+
+def alpha_str_to_toks(s, shift=0, add_seos=False):
+
+    tokens = []
+
+    if add_seos:
+        tokens = [53+shift]
+    
+    for char in s:
+        if char == ' ':
+            tokens.append(52+shift)
+            
+        elif char.isalpha():
+            base = 0 if char.isupper() else 26
+            offset = ord(char.upper()) - ord('A')
+            token = (base + offset + shift) % 52  # wrap A–Z/a–z
+            tokens.append(token)
+            
+    if add_seos:       
+        tokens.append(53+shift)
+        
+    return tokens
+
+###################################################################################
+
+def toks_to_alpha_str(tokens, shift=0, sep=''):
+
+    chars = []
+    
+    for token in tokens:
+        if token == 53+shift:
+            continue
+            
+        elif token == 52+shift:
+            chars.append(' ')
+            
+        elif 0 <= token <= 25:
+            original = (token - shift) % 52
+            chars.append(chr(ord('A') + original))
+            
+        elif 26 <= token <= 51:
+            original = (token - shift) % 52
+            chars.append(chr(ord('a') + (original - 26)))
+
+    return sep.join(chars)
+
+###################################################################################
+
+def insert_caps_newlines(text):
+
+    if bool(re.search(r'\b[A-Z][a-z]+\b', text)):
+        pattern = re.compile(r'\s+(?=[A-Z])')
+
+        return pattern.sub('\n', text)
+
+###################################################################################
+
+def insert_newlines(text, every=4):
+
+    count = 0
+    result = []
+
+    for char in text:
+        result.append(char)
+        
+        if char == '\n':
+            count += 1
+            
+            if count % every == 0:
+                result.append('\n')
+
+    return ''.join(result)
+
+###################################################################################
+
+def symmetric_match_ratio(list_a, list_b, threshold=0):
+
+    a_sorted = sorted(list_a)
+    b_sorted = sorted(list_b)
+
+    i, j = 0, 0
+    matches = 0
+    
+    used_a = set()
+    used_b = set()
+
+    while i < len(a_sorted) and j < len(b_sorted):
+        diff = abs(a_sorted[i] - b_sorted[j])
+        
+        if diff <= threshold:
+            matches += 1
+            used_a.add(i)
+            used_b.add(j)
+            i += 1
+            j += 1
+            
+        elif a_sorted[i] < b_sorted[j]:
+            i += 1
+            
+        else:
+            j += 1
+
+    avg_len = (len(list_a) + len(list_b)) / 2
+    
+    return matches / avg_len if avg_len > 0 else 0.0
 
 ###################################################################################
 
