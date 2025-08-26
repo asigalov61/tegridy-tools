@@ -231,7 +231,7 @@ def train_model(model, train_loader, val_loader, epochs=20,
             optimizer.zero_grad()
 
             # Forward + backward in bfloat16 autocast
-            with autocast(DEVICE, dtype=torch.float16):
+            with autocast(DEVICE.type, dtype=torch.float16):
                 logits = model(x_batch)
                 loss = criterion(logits, y_batch)
 
@@ -257,7 +257,7 @@ def train_model(model, train_loader, val_loader, epochs=20,
                 y_batch = y_batch.to(DEVICE)
 
                 # Use autocast to speed up validation
-                with autocast(DEVICE, dtype=torch.float16):
+                with autocast(DEVICE.type, dtype=torch.float16):
                     logits = model(x_batch)
                     loss = criterion(logits, y_batch)
 
@@ -293,7 +293,7 @@ def evaluate(model, loader, threshold=0.5):
     with torch.no_grad():
         for x_batch, y_batch in loader:
             x_batch = x_batch.to(DEVICE)
-            with autocast(DEVICE, dtype=torch.float16):
+            with autocast(DEVICE.type, dtype=torch.float16):
                 logits = model(x_batch)
             probs = torch.sigmoid(logits).cpu().numpy()
             all_probs.extend(probs)
@@ -317,7 +317,7 @@ def predict(model, loader, threshold=0.5):
     with torch.no_grad():
         for x_batch, y_batch in loader:
             x_batch = x_batch.to(DEVICE)
-            with autocast(DEVICE, dtype=torch.float16):
+            with autocast(DEVICE.type, dtype=torch.float16):
                 logits = model(x_batch)
             prob = torch.sigmoid(logits).cpu().numpy()
             probs.extend(prob)
