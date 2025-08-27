@@ -1485,6 +1485,7 @@ import multiprocessing
 
 from itertools import zip_longest
 from itertools import groupby
+from itertools import cycle
 
 from collections import Counter
 from collections import defaultdict
@@ -14296,6 +14297,147 @@ def symmetric_match_ratio(list_a, list_b, threshold=0):
     avg_len = (len(list_a) + len(list_b)) / 2
     
     return matches / avg_len if avg_len > 0 else 0.0
+
+###################################################################################
+
+def escore_notes_to_chords(escore_notes, 
+                           use_full_chords=False,
+                           convert_pitches=True,
+                           shift_chords=False,
+                           return_tones_chords=False
+                          ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    nd_score = [e for e in escore_notes if e[3] != 9]
+
+    cscore = chordify_score([1000, nd_score])
+
+    chords = []
+
+    for c in cscore:
+        pitches = sorted(set([e[4] for e in c]))
+
+        tones_chord = sorted(set([p % 12 for p in pitches]))
+
+        if tones_chord not in CHORDS:
+            tones_chord = check_and_fix_tones_chord(tones_chord, 
+                                                           use_full_chords=use_full_chords
+                                                          )
+        if return_tones_chords:
+            if convert_pitches:
+                chords.append(tones_chord)
+
+            else:
+                if len(pitches) > 1:
+                    chords.append(tones_chord)
+
+                else:
+                    chords.append([-pitches[0]])
+                    
+        else:
+            cho_tok = CHORDS.index(tones_chord)
+            if convert_pitches:
+                if shift_chords:
+                    if len(pitches) > 1:
+                        chords.append(cho_tok+12)
+
+                    else:
+                        chords.append(pitches[0] % 12)
+                        
+                else:
+                    chords.append(cho_tok)
+
+            else:
+                if len(pitches) > 1:
+                    chords.append(cho_tok+128)
+
+                else:
+                    chords.append(pitches[0])
+
+    return chords
+
+###################################################################################
+
+def replace_chords_in_escore_notes(escore_notes,
+                                   chords_list=[-1],
+                                   use_full_chords=False,
+                                   use_shifted_chords=False
+                                  ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    if use_shifted_chords:
+        shift = 12
+
+    else:
+        shift = 0
+
+    if min(chords_list) >= 0 and max(chords_list) <= len(CHORDS)+shift:
+
+        chords_list_iter = cycle(chords_list)
+
+        d_score = [e for e in escore_notes if e[3] == 9]
+        nd_score = [e for e in escore_notes if e[3] != 9]
+    
+        cscore = chordify_score([1000, nd_score])
+    
+        new_score = []
+    
+        for i, c in enumerate(cscore):
+
+            cur_chord = next(chords_list_iter)
+
+            if cur_chord < 0 or cur_chord > len(CHORDS)+shift:
+    
+                cc = copy.deepcopy(c)
+        
+                if use_shifted_chords:
+                    if chords_list[i] < 12:
+                        sub_tones_chord = [cur_chord]
+        
+                    else:
+                        sub_tones_chord = CHORDS[cur_chord-12]
+                else:
+                    sub_tones_chord = CHORDS[cur_chord]
+        
+                pitches = sorted(set([e[4] for e in c]))
+        
+                tones_chord = sorted(set([p % 12 for p in pitches]))
+        
+                if tones_chord not in CHORDS:
+                    tones_chord = check_and_fix_tones_chord(tones_chord, 
+                                                                   use_full_chords=use_full_chords
+                                                                  )
+                    
+                stcho = cycle(sub_tones_chord)
+                pseen = []
+        
+                for j, e in enumerate(cc):
+                    st = next(stcho)
+                    new_pitch = ((e[4] // 12) * 12) + st
+    
+                    if new_pitch not in pseen:
+                        e[4] = new_pitch
+                        
+                        new_score.append(e)
+                        pseen.append(new_pitch)
+
+            else:
+                new_score.extend(c)
+    
+        return new_score
+
+    else:
+        return []
 
 ###################################################################################
 
