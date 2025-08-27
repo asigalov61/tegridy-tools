@@ -14385,7 +14385,6 @@ def replace_chords_in_escore_notes(escore_notes,
 
         chords_list_iter = cycle(chords_list)
 
-        d_score = [e for e in escore_notes if e[3] == 9]
         nd_score = [e for e in escore_notes if e[3] != 9]
     
         cscore = chordify_score([1000, nd_score])
@@ -14406,20 +14405,15 @@ def replace_chords_in_escore_notes(escore_notes,
                     sub_tones_chord = CHORDS[cur_chord-12]
             else:
                 sub_tones_chord = CHORDS[cur_chord]
-    
-            pitches = sorted(set([e[4] for e in c]))
-    
-            tones_chord = sorted(set([p % 12 for p in pitches]))
-    
-            if tones_chord not in CHORDS:
-                tones_chord = check_and_fix_tones_chord(tones_chord, 
-                                                               use_full_chords=use_full_chords
-                                                              )
                 
             stcho = cycle(sub_tones_chord)
+
+            if len(sub_tones_chord) > len(c):
+                cc = [copy.deepcopy(e) for e in cc for _ in range(len(sub_tones_chord))]
+                
             pseen = []
     
-            for j, e in enumerate(cc):
+            for e in cc:
                 st = next(stcho)
                 new_pitch = ((e[4] // 12) * 12) + st
 
@@ -14428,7 +14422,7 @@ def replace_chords_in_escore_notes(escore_notes,
                     
                     new_score.append(e)
                     pseen.append(new_pitch)
-    
+
         return new_score
 
     else:
