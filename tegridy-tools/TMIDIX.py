@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.26"
+__version__ = "25.8.27"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -14395,44 +14395,39 @@ def replace_chords_in_escore_notes(escore_notes,
         for i, c in enumerate(cscore):
 
             cur_chord = next(chords_list_iter)
-
-            if cur_chord < 0 or cur_chord > len(CHORDS)+shift:
     
-                cc = copy.deepcopy(c)
-        
-                if use_shifted_chords:
-                    if chords_list[i] < 12:
-                        sub_tones_chord = [cur_chord]
-        
-                    else:
-                        sub_tones_chord = CHORDS[cur_chord-12]
+            cc = copy.deepcopy(c)
+    
+            if use_shifted_chords:
+                if cur_chord < 12:
+                    sub_tones_chord = [cur_chord]
+    
                 else:
-                    sub_tones_chord = CHORDS[cur_chord]
-        
-                pitches = sorted(set([e[4] for e in c]))
-        
-                tones_chord = sorted(set([p % 12 for p in pitches]))
-        
-                if tones_chord not in CHORDS:
-                    tones_chord = check_and_fix_tones_chord(tones_chord, 
-                                                                   use_full_chords=use_full_chords
-                                                                  )
-                    
-                stcho = cycle(sub_tones_chord)
-                pseen = []
-        
-                for j, e in enumerate(cc):
-                    st = next(stcho)
-                    new_pitch = ((e[4] // 12) * 12) + st
-    
-                    if new_pitch not in pseen:
-                        e[4] = new_pitch
-                        
-                        new_score.append(e)
-                        pseen.append(new_pitch)
-
+                    sub_tones_chord = CHORDS[cur_chord-12]
             else:
-                new_score.extend(c)
+                sub_tones_chord = CHORDS[cur_chord]
+    
+            pitches = sorted(set([e[4] for e in c]))
+    
+            tones_chord = sorted(set([p % 12 for p in pitches]))
+    
+            if tones_chord not in CHORDS:
+                tones_chord = check_and_fix_tones_chord(tones_chord, 
+                                                               use_full_chords=use_full_chords
+                                                              )
+                
+            stcho = cycle(sub_tones_chord)
+            pseen = []
+    
+            for j, e in enumerate(cc):
+                st = next(stcho)
+                new_pitch = ((e[4] // 12) * 12) + st
+
+                if new_pitch not in pseen:
+                    e[4] = new_pitch
+                    
+                    new_score.append(e)
+                    pseen.append(new_pitch)
     
         return new_score
 
