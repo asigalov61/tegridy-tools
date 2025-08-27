@@ -8058,7 +8058,7 @@ def solo_piano_escore_notes(escore_notes,
                             keep_drums=False,
                             ):
 
-  cscore = chordify_score([1000, escore_notes])
+  cscore = chordify_score([1000, copy.deepcopy(escore_notes)])
 
   sp_escore_notes = []
 
@@ -14313,9 +14313,9 @@ def escore_notes_to_chords(escore_notes,
     else:
         CHORDS = ALL_CHORDS_SORTED
 
-    nd_score = [e for e in escore_notes if e[3] != 9]
+    sp_score = solo_piano_escore_notes(escore_notes)
 
-    cscore = chordify_score([1000, nd_score])
+    cscore = chordify_score([1000, sp_score])
 
     chords = []
 
@@ -14386,6 +14386,7 @@ def replace_chords_in_escore_notes(escore_notes,
         chords_list_iter = cycle(chords_list)
 
         nd_score = [e for e in escore_notes if e[3] != 9]
+        d_score = [e for e in escore_notes if e[3] == 9]
     
         cscore = chordify_score([1000, nd_score])
     
@@ -14417,13 +14418,15 @@ def replace_chords_in_escore_notes(escore_notes,
                 st = next(stcho)
                 new_pitch = ((e[4] // 12) * 12) + st
 
-                if new_pitch not in pseen:
+                if [new_pitch, e[6]] not in pseen:
                     e[4] = new_pitch
                     
                     new_score.append(e)
-                    pseen.append(new_pitch)
+                    pseen.append([new_pitch, e[6]])
+                    
+        final_score = sorted(new_score+d_score, key=lambda x: x[1])
 
-        return new_score
+        return final_score
 
     else:
         return []
