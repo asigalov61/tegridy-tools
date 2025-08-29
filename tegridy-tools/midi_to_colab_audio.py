@@ -3233,14 +3233,27 @@ def normalize_audio(audio: np.ndarray,
 #===============================================================================
 
 def midi_opus_to_colab_audio(midi_opus, 
-                              soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
-                              sample_rate=16000, # 44100
-                              volume_level_db=-1,
-                              trim_silence=True,
-                              silence_threshold=0.1,
-                              output_for_gradio=False,
-                              write_audio_to_WAV=''
-                              ):
+                             soundfont_path='/usr/share/sounds/sf2/FluidR3_GM.sf2', 
+                             sample_rate=16000, # 44100
+                             volume_level_db=-1,
+                             trim_silence=True,
+                             silence_threshold=0.1,
+                             enable_reverb=False,
+                             reverb_param_dic={'roomsize': 0,
+                                               'damping': 0,
+                                               'width': 0,
+                                               'level': 0
+                                              },
+                             enable_chorus=False,
+                             chorus_param_dic={'nr': 0,
+                                               'level': 0,
+                                               'speed': 0.1,
+                                               'depth': 0,
+                                               'type': 0},
+                             output_for_gradio=False,
+                             write_audio_to_WAV=False,
+                             output_WAV_name=''
+                            ):
 
     if midi_opus[1]:
 
@@ -3263,7 +3276,37 @@ def midi_opus_to_colab_audio(midi_opus,
         for chan in range(16):
             # channel 9 = percussion GM bank 128
             fl.program_select(chan, sfid, 128 if chan == 9 else 0, 0)
+            
+        if enable_reverb:
+            fl.set_reverb(roomsize=reverb_param_dic['roomsize'], 
+                          damping=reverb_param_dic['damping'], 
+                          width=reverb_param_dic['width'],
+                          level=reverb_param_dic['level']
+                         )
+            
+            """
+            roomsize Reverb room size value (0.0-1.0)
+            damping Reverb damping value (0.0-1.0)
+            width Reverb width value (0.0-100.0)
+            level Reverb level value (0.0-1.0)
+            """
     
+        if enable_chorus:
+            fl.set_chorus(nr=chorus_param_dic['nr'],
+                          level=chorus_param_dic['level'],
+                          speed=chorus_param_dic['speed'],
+                          depth=chorus_param_dic['depth'],
+                          type=chorus_param_dic['type']
+                         )
+        
+        """
+        nr Chorus voice count (0-99, CPU time consumption proportional to this value)
+        level Chorus level (0.0-10.0)
+        speed Chorus speed in Hz (0.29-5.0)
+        depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)
+        type Chorus waveform type (0=sine, 1=triangle)
+        """
+        
         # Playback vars
         tempo = int((60 / 120) * 1e6)  # default 120bpm
         last_t = 0
@@ -3299,11 +3342,11 @@ def midi_opus_to_colab_audio(midi_opus,
     
             elif name == "key_after_touch":
                 chan, note, vel = data
-                fl.key_pressure(chan, note, vel)
+                # fl.key_pressure(chan, note, vel)
     
             elif name == "channel_after_touch":
                 chan, vel = data
-                fl.channel_pressure(chan, vel)
+                # fl.channel_pressure(chan, vel)
     
             elif name == "pitch_wheel_change":
                 chan, wheel = data
@@ -3373,6 +3416,8 @@ def midi_opus_to_colab_audio(midi_opus,
         # Optionally write WAV to disk
         if write_audio_to_WAV:
             wav_name = midi_file.rsplit('.', 1)[0] + '.wav'
+            if output_WAV_name != '':
+                wav_name = output_WAV_name
             pcm = np.int16(raw_audio.T / np.max(np.abs(raw_audio)) * 32767)
             with wave.open(wav_name, 'wb') as wf:
                 wf.setframerate(sample_rate)
@@ -3393,8 +3438,21 @@ def midi_to_colab_audio(midi_file,
                         volume_level_db=-1,
                         trim_silence=True,
                         silence_threshold=0.1,
+                        enable_reverb=False,
+                        reverb_param_dic={'roomsize': 0,
+                                          'damping': 0,
+                                          'width': 0,
+                                          'level': 0
+                                         },
+                        enable_chorus=False,
+                        chorus_param_dic={'nr': 0,
+                                          'level': 0,
+                                          'speed': 0.1,
+                                          'depth': 0,
+                                          'type': 0},
                         output_for_gradio=False,
-                        write_audio_to_WAV=False
+                        write_audio_to_WAV=False,
+                        output_WAV_name=''
                        ):
     """
     Returns raw audio to pass to IPython.disaply.Audio func
@@ -3427,6 +3485,35 @@ def midi_to_colab_audio(midi_file,
         # channel 9 = percussion GM bank 128
         fl.program_select(chan, sfid, 128 if chan == 9 else 0, 0)
 
+    if enable_reverb:
+        fl.set_reverb(roomsize=reverb_param_dic['roomsize'], 
+                      damping=reverb_param_dic['damping'], 
+                      width=reverb_param_dic['width'],
+                      level=reverb_param_dic['level']
+                     )
+        
+        """
+        roomsize Reverb room size value (0.0-1.0)
+        damping Reverb damping value (0.0-1.0)
+        width Reverb width value (0.0-100.0)
+        level Reverb level value (0.0-1.0)
+        """
+
+    if enable_chorus:
+        fl.set_chorus(nr=chorus_param_dic['nr'],
+                      level=chorus_param_dic['level'],
+                      speed=chorus_param_dic['speed'],
+                      depth=chorus_param_dic['depth'],
+                      type=chorus_param_dic['type']
+                     )
+    
+    """
+    nr Chorus voice count (0-99, CPU time consumption proportional to this value)
+    level Chorus level (0.0-10.0)
+    speed Chorus speed in Hz (0.29-5.0)
+    depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)
+    type Chorus waveform type (0=sine, 1=triangle)
+    """
     # Playback vars
     tempo = int((60 / 120) * 1e6)  # default 120bpm
     last_t = 0
@@ -3462,11 +3549,11 @@ def midi_to_colab_audio(midi_file,
 
         elif name == "key_after_touch":
             chan, note, vel = data
-            fl.key_pressure(chan, note, vel)
+            # fl.key_pressure(chan, note, vel)
 
         elif name == "channel_after_touch":
             chan, vel = data
-            fl.channel_pressure(chan, vel)
+            # fl.channel_pressure(chan, vel)
 
         elif name == "pitch_wheel_change":
             chan, wheel = data
@@ -3536,6 +3623,8 @@ def midi_to_colab_audio(midi_file,
     # Optionally write WAV to disk
     if write_audio_to_WAV:
         wav_name = midi_file.rsplit('.', 1)[0] + '.wav'
+        if output_WAV_name != '':
+            wav_name = output_WAV_name
         pcm = np.int16(raw_audio.T / np.max(np.abs(raw_audio)) * 32767)
         with wave.open(wav_name, 'wb') as wf:
             wf.setframerate(sample_rate)
