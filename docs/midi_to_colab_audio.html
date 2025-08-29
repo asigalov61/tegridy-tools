@@ -1770,7 +1770,7 @@ event, with a duration:
 <span class="c1">#------------------------------- Encoding stuff --------------------------</span>
 
 <span class="k">def</span> <span class="nf">opus2midi</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of midi-events, and each event is itself a list; see above.</span>
 <span class="sd">opus2midi() returns a bytestring of the MIDI, which can then be</span>
@@ -1809,7 +1809,7 @@ event, with a duration:
 
 
 <span class="k">def</span> <span class="nf">score2opus</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of score-events, and each event is itself a list.  A score-event</span>
@@ -1878,7 +1878,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">opus_tracks</span>
 
 <span class="k">def</span> <span class="nf">score2midi</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates a &quot;score&quot; into MIDI, using score2opus() then opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2midi</span><span class="p">(</span><span class="n">score2opus</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
@@ -1886,7 +1886,7 @@ event, with a duration:
 <span class="c1">#--------------------------- Decoding stuff ------------------------</span>
 
 <span class="k">def</span> <span class="nf">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
 <span class="sd">&quot;opus&quot; format, see opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="n">my_midi</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">midi</span><span class="p">)</span>
@@ -1926,7 +1926,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">my_opus</span>
 
 <span class="k">def</span> <span class="nf">opus2score</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
 <span class="sd">see opus2midi() and score2opus().</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opus</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -1977,13 +1977,13 @@ event, with a duration:
     <span class="k">return</span> <span class="n">score</span>
 
 <span class="k">def</span> <span class="nf">midi2score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot;, using midi2opus() then opus2score()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2score</span><span class="p">(</span><span class="n">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">midi2ms_score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot; with one beat per second and one</span>
 <span class="sd">tick per millisecond, using midi2opus() then to_millisecs()</span>
 <span class="sd">then opus2score()</span>
@@ -1993,7 +1993,7 @@ event, with a duration:
 <span class="c1">#------------------------ Other Transformations ---------------------</span>
 
 <span class="k">def</span> <span class="nf">to_millisecs</span><span class="p">(</span><span class="n">old_opus</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
 <span class="sd">per second and one tick per millisecond.  This makes it</span>
 <span class="sd">hard to retrieve any information about beats or barlines,</span>
 <span class="sd">but it does make it easy to mix different scores together.</span>
@@ -2058,14 +2058,14 @@ event, with a duration:
     <span class="k">return</span> <span class="n">new_opus</span>
 
 <span class="k">def</span> <span class="nf">event2alsaseq</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   <span class="c1"># 5.5</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
 <span class="sd">http://pp.com.mx/python/alsaseq</span>
 <span class="sd">The type of track (opus or score) is autodetected.</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">pass</span>
 
 <span class="k">def</span> <span class="nf">grep</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,[],]</span>
@@ -2089,7 +2089,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">new_score</span>
 
 <span class="k">def</span> <span class="nf">play_score</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts the &quot;score&quot; to midi, and feeds it into &#39;aplaymidi -&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts the &quot;score&quot; to midi, and feeds it into &#39;aplaymidi -&#39;</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
@@ -2102,7 +2102,7 @@ event, with a duration:
     <span class="n">pipe</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="k">def</span> <span class="nf">timeshift</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">from_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tracks</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">}):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; shifted in time by &quot;shift&quot; ticks, or shifted</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; shifted in time by &quot;shift&quot; ticks, or shifted</span>
 <span class="sd">so that the first event starts at &quot;start_time&quot; ticks.</span>
 
 <span class="sd">If &quot;from_time&quot; is specified, only those events in the score</span>
@@ -2192,7 +2192,7 @@ event, with a duration:
 
 <span class="k">def</span> <span class="nf">segment</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">100000000</span><span class="p">,</span>
  <span class="n">tracks</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">}):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; which is a segment of the one supplied</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; which is a segment of the one supplied</span>
 <span class="sd">as the argument, beginning at &quot;start_time&quot; ticks and ending</span>
 <span class="sd">at &quot;end_time&quot; ticks (or at the end if &quot;end_time&quot; is not supplied).</span>
 <span class="sd">If the set &quot;tracks&quot; is specified, only those tracks will</span>
@@ -2260,7 +2260,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">new_score</span>
 
 <span class="k">def</span> <span class="nf">score_type</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a string, either &#39;opus&#39; or &#39;score&#39; or &#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a string, either &#39;opus&#39; or &#39;score&#39; or &#39;&#39;</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">opus_or_score</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">opus_or_score</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">opus_or_score</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
@@ -2275,7 +2275,7 @@ event, with a duration:
     <span class="k">return</span> <span class="s1">&#39;&#39;</span>
 
 <span class="k">def</span> <span class="nf">concatenate_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Concatenates a list of scores into one score.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Concatenates a list of scores into one score.</span>
 <span class="sd">If the scores differ in their &quot;ticks&quot; parameter,</span>
 <span class="sd">they will all get converted to millisecond-tick format.</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -2297,7 +2297,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">output_score</span>
 
 <span class="k">def</span> <span class="nf">merge_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Merges a list of scores into one score.  A merged score comprises</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Merges a list of scores into one score.  A merged score comprises</span>
 <span class="sd">all of the tracks from all of the input scores; un-merging is possible</span>
 <span class="sd">by selecting just some of the tracks.  If the scores differ in their</span>
 <span class="sd">&quot;ticks&quot; parameter, they will all get converted to millisecond-tick</span>
@@ -2337,7 +2337,7 @@ event, with a duration:
 <span class="k">def</span> <span class="nf">_ticks</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="k">def</span> <span class="nf">mix_opus_tracks</span><span class="p">(</span><span class="n">input_tracks</span><span class="p">):</span>   <span class="c1"># 5.5</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes an array of tracks into one track.  A mixed track</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes an array of tracks into one track.  A mixed track</span>
 <span class="sd">cannot be un-mixed.  It is assumed that the tracks share the same</span>
 <span class="sd">ticks parameter and the same tempo.</span>
 <span class="sd">Mixing score-tracks is trivial (just insert all events into one array).</span>
@@ -2354,7 +2354,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">output_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">mix_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes a list of scores into one one-track score.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes a list of scores into one one-track score.</span>
 <span class="sd">A mixed score cannot be un-mixed.  Hopefully the scores</span>
 <span class="sd">have no undesirable channel-conflicts between them.</span>
 <span class="sd">If the scores differ in their &quot;ticks&quot; parameter,</span>
@@ -2368,7 +2368,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">output_score</span>
 
 <span class="k">def</span> <span class="nf">score2stats</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
 <span class="sd">bank_select (list of tuples (msb,lsb)),</span>
 <span class="sd">channels_by_track (list of lists), channels_total (set),</span>
 <span class="sd">general_midi_mode (list),</span>
@@ -2706,23 +2706,23 @@ event, with a duration:
 <span class="c1"># do with the actual encoding and decoding of binary MIDI data.</span>
 
 <span class="k">def</span> <span class="nf">_twobytes2int</span><span class="p">(</span><span class="n">byte_a</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 16 bit quantity from two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 16 bit quantity from two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">|</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">_int2twobytes</span><span class="p">(</span><span class="n">int_16bit</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 16 bit quantity into two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 16 bit quantity into two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="nb">bytes</span><span class="p">([(</span><span class="n">int_16bit</span><span class="o">&gt;&gt;</span><span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="n">int_16bit</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">])</span>
 
 <span class="k">def</span> <span class="nf">_read_14_bit</span><span class="p">(</span><span class="n">byte_a</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 14 bit quantity from two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;decode a 14 bit quantity from two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">|</span> <span class="p">(</span><span class="n">byte_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">_write_14_bit</span><span class="p">(</span><span class="n">int_14bit</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 14 bit quantity into two bytes,&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;encode a 14 bit quantity into two bytes,&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">int_14bit</span> <span class="o">&amp;</span> <span class="mh">0x7F</span><span class="p">,</span> <span class="p">(</span><span class="n">int_14bit</span><span class="o">&gt;&gt;</span><span class="mi">7</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7F</span><span class="p">])</span>
 
 <span class="k">def</span> <span class="nf">_ber_compressed_int</span><span class="p">(</span><span class="n">integer</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;BER compressed integer (not an ASN.1 BER, see perlpacktut for</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;BER compressed integer (not an ASN.1 BER, see perlpacktut for</span>
 <span class="sd">details).  Its bytes represent an unsigned integer in base 128,</span>
 <span class="sd">most significant digit first, with as few digits as possible.</span>
 <span class="sd">Bit eight (the high bit) is set on each byte except the last.</span>
@@ -2738,7 +2738,7 @@ event, with a duration:
     <span class="k">return</span> <span class="n">ber</span>
 
 <span class="k">def</span> <span class="nf">_unshift_ber_int</span><span class="p">(</span><span class="n">ba</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Given a bytearray, returns a tuple of (the ber-integer at the</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Given a bytearray, returns a tuple of (the ber-integer at the</span>
 <span class="sd">start, and the remainder of the bytearray).</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">ba</span><span class="p">):</span>   <span class="c1"># 6.7</span>
@@ -2816,7 +2816,7 @@ event, with a duration:
 
 <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="n">trackdata</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
  <span class="n">event_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclusive_event_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_eot_magic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Decodes MIDI track data into an opus-style list of events.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Decodes MIDI track data into an opus-style list of events.</span>
 <span class="sd">The options:</span>
 <span class="sd">  &#39;exclude&#39; is a list of event types which will be ignored SHOULD BE A SET</span>
 <span class="sd">  &#39;include&#39; (and no exclude), makes exclude a list</span>
@@ -3058,7 +3058,7 @@ event, with a duration:
         <span class="c1"># fe -- Active sense.  no data.</span>
         <span class="c1"># f4 f5 f9 fd -- unallocated</span>
 
-<span class="w">            </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+            <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        elif (first_byte &gt; 0xF0) { # Some unknown kinda F-series event ####</span>
 <span class="sd">            # Here we only produce a one-byte piece of raw data.</span>
 <span class="sd">            # But the encoder for &#39;raw_data&#39; accepts any length of it.</span>
@@ -3327,7 +3327,7 @@ event, with a duration:
 
 <span class="sd">    Python bindings for FluidSynth</span>
 
-<span class="sd">    Copyright 2008--2024, Nathan Whitehead &lt;nwhitehe@gmail.com&gt; and others.</span>
+<span class="sd">    Copyright 2008--2024, Nathan Whitehead &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="91ffe6f9f8e5f4f9f4d1f6fcf0f8fdbff2fefc">[email&#160;protected]</a>&gt; and others.</span>
 
 
 <span class="sd">    Released under the LGPL</span>
@@ -3374,7 +3374,7 @@ event, with a duration:
 <span class="c1"># A function to find the FluidSynth library</span>
 <span class="c1"># (mostly needed for Windows distributions of libfluidsynth supplied with QSynth)</span>
 <span class="k">def</span> <span class="nf">find_libfluidsynth</span><span class="p">(</span><span class="n">debug_print</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    macOS X64:</span>
 <span class="sd">    * &#39;fluidsynth&#39; was found at /usr/local/opt/fluid-synth/lib/libfluidsynth.dylib.</span>
 <span class="sd">    macOS ARM64:</span>
@@ -3411,7 +3411,7 @@ event, with a duration:
 
 <span class="c1"># Helper function for declaring function prototypes</span>
 <span class="k">def</span> <span class="nf">cfunc</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build and apply a ctypes prototype complete with parameter flags&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Build and apply a ctypes prototype complete with parameter flags&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">_fl</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">atypes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">aflags</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4066,7 +4066,7 @@ event, with a duration:
 
 
 <span class="k">def</span> <span class="nf">fluid_synth_write_s16_stereo</span><span class="p">(</span><span class="n">synth</span><span class="p">,</span> <span class="nb">len</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return generated samples in stereo 16-bit format</span>
+    <span class="sd">&quot;&quot;&quot;Return generated samples in stereo 16-bit format</span>
 
 <span class="sd">    Return value is a Numpy array of samples.</span>
 
@@ -4080,9 +4080,9 @@ event, with a duration:
 <span class="c1"># Object-oriented interface, simplifies access to functions</span>
 
 <span class="k">class</span> <span class="nc">Synth</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synth represents a FluidSynth synthesizer&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Synth represents a FluidSynth synthesizer&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">samplerate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new synthesizer object to control sound generation</span>
+        <span class="sd">&quot;&quot;&quot;Create new synthesizer object to control sound generation</span>
 
 <span class="sd">        Optional keyword arguments:</span>
 <span class="sd">        gain : scale factor for audio output, default is 0.2</span>
@@ -4102,7 +4102,7 @@ event, with a duration:
         <span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_router_callback</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">def</span> <span class="nf">setting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;change an arbitrary synth setting, type-smart&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;change an arbitrary synth setting, type-smart&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
             <span class="n">fluid_settings_setstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">val</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -4110,7 +4110,7 @@ event, with a duration:
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
             <span class="n">fluid_settings_setnum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">c_double</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
     <span class="k">def</span> <span class="nf">get_setting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;get current value of an arbitrary synth setting&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;get current value of an arbitrary synth setting&quot;&quot;&quot;</span>
         <span class="n">val</span> <span class="o">=</span> <span class="n">c_int</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">fluid_settings_getint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">byref</span><span class="p">(</span><span class="n">val</span><span class="p">))</span> <span class="o">==</span> <span class="n">FLUIDSETTING_EXISTS</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">value</span>
@@ -4123,7 +4123,7 @@ event, with a duration:
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">midi_driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">midi_router</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start audio output driver in separate background thread</span>
+        <span class="sd">&quot;&quot;&quot;Start audio output driver in separate background thread</span>
 
 <span class="sd">        Call this function any time after creating the Synth object.</span>
 <span class="sd">        If you don&#39;t call this function, use get_samples() to generate</span>
@@ -4164,19 +4164,19 @@ event, with a duration:
         <span class="n">delete_fluid_synth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
         <span class="n">delete_fluid_settings</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">sfload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">update_midi_preset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load SoundFont and return its ID&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Load SoundFont and return its ID&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_sfload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">update_midi_preset</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">sfunload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">update_midi_preset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unload a SoundFont and free memory it used&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Unload a SoundFont and free memory it used&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_sfunload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">update_midi_preset</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">program_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">preset</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select a program&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Select a program&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_program_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">preset</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">program_unset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the preset of a MIDI channel to an unassigned state&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Set the preset of a MIDI channel to an unassigned state&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_unset_program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">channel_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;get soundfont, bank, prog, preset name of channel&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;get soundfont, bank, prog, preset name of channel&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">fluid_synth_get_channel_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">info</span><span class="o">=</span><span class="n">fluid_synth_channel_info_t</span><span class="p">()</span>
             <span class="n">fluid_synth_get_channel_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">byref</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
@@ -4186,7 +4186,7 @@ event, with a duration:
             <span class="n">presetname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfpreset_name</span><span class="p">(</span><span class="n">sfontid</span><span class="p">,</span> <span class="n">banknum</span><span class="p">,</span> <span class="n">presetnum</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">sfontid</span><span class="p">,</span> <span class="n">banknum</span><span class="p">,</span> <span class="n">presetnum</span><span class="p">,</span> <span class="n">presetname</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">program_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;get active soundfont, bank, prog on a channel&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;get active soundfont, bank, prog on a channel&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">fluid_synth_get_program</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sfontid</span><span class="o">=</span><span class="n">c_int</span><span class="p">()</span>
             <span class="n">banknum</span><span class="o">=</span><span class="n">c_int</span><span class="p">()</span>
@@ -4197,7 +4197,7 @@ event, with a duration:
             <span class="p">(</span><span class="n">sfontid</span><span class="p">,</span> <span class="n">banknum</span><span class="p">,</span> <span class="n">prognum</span><span class="p">,</span> <span class="n">presetname</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_info</span><span class="p">(</span><span class="n">chan</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">sfontid</span><span class="p">,</span> <span class="n">banknum</span><span class="p">,</span> <span class="n">prognum</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">sfpreset_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">prenum</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return name of a soundfont preset&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return name of a soundfont preset&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">fluid_synth_get_sfont_by_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sfont</span><span class="o">=</span><span class="n">fluid_synth_get_sfont_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">sfid</span><span class="p">)</span>
             <span class="n">preset</span><span class="o">=</span><span class="n">fluid_sfont_get_preset</span><span class="p">(</span><span class="n">sfont</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">prenum</span><span class="p">)</span>
@@ -4213,7 +4213,7 @@ event, with a duration:
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fluid_midi_router_set_default_rules</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">router</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">router_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;types are [note|cc|prog|pbend|cpress|kpress]&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;types are [note|cc|prog|pbend|cpress|kpress]&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">type</span><span class="o">==</span><span class="s1">&#39;note&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">cmd_rule_type</span><span class="o">=</span><span class="mi">0</span>
@@ -4247,7 +4247,7 @@ event, with a duration:
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fluid_midi_router_rule_set_param2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">cmd_rule</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">mul</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">set_reverb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">roomsize</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">damping</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">level</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        roomsize Reverb room size value (0.0-1.0)</span>
 <span class="sd">        damping Reverb damping value (0.0-1.0)</span>
 <span class="sd">        width Reverb width value (0.0-100.0)</span>
@@ -4267,7 +4267,7 @@ event, with a duration:
                 <span class="n">flags</span><span class="o">+=</span><span class="mb">0b1000</span>
             <span class="k">return</span> <span class="n">fluid_synth_set_reverb_full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">roomsize</span><span class="p">,</span> <span class="n">damping</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">set_chorus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nr</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">speed</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        nr Chorus voice count (0-99, CPU time consumption proportional to this value)</span>
 <span class="sd">        level Chorus level (0.0-10.0)</span>
 <span class="sd">        speed Chorus speed in Hz (0.29-5.0)</span>
@@ -4359,7 +4359,7 @@ event, with a duration:
     <span class="k">def</span> <span class="nf">get_chorus_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">fluid_synth_get_chorus_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">noteon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">vel</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Play a note&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Play a note&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">chan</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -4368,14 +4368,14 @@ event, with a duration:
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">fluid_synth_noteon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">noteoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop a note&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Stop a note&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">chan</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">fluid_synth_noteoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">pitch_bend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adjust pitch of a playing channel by small amounts</span>
+        <span class="sd">&quot;&quot;&quot;Adjust pitch of a playing channel by small amounts</span>
 
 <span class="sd">        A pitch bend value of 0 is no pitch change from default.</span>
 <span class="sd">        A value of -2048 is 1 semitone down.</span>
@@ -4385,7 +4385,7 @@ event, with a duration:
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_pitch_bend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">val</span> <span class="o">+</span> <span class="mi">8192</span><span class="p">,</span> <span class="mi">16383</span><span class="p">)))</span>
     <span class="k">def</span> <span class="nf">cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">ctrl</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send control change value</span>
+        <span class="sd">&quot;&quot;&quot;Send control change value</span>
 
 <span class="sd">        The controls that are recognized are dependent on the</span>
 <span class="sd">        SoundFont.  Values are always 0 to 127.  Typical controls</span>
@@ -4404,28 +4404,28 @@ event, with a duration:
         <span class="n">fluid_synth_get_cc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">byref</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">i</span><span class="o">.</span><span class="n">value</span>
     <span class="k">def</span> <span class="nf">program_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">prg</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Change the program&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Change the program&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_program_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">prg</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">bank_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">bank</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Choose a bank&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Choose a bank&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_bank_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">all_notes_off</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Turn off all notes on a channel (release all keys)&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Turn off all notes on a channel (release all keys)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_all_notes_off</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">all_sounds_off</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Turn off all sounds on a channel (equivalent to mute)&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Turn off all sounds on a channel (equivalent to mute)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_all_sounds_off</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">sfont_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Choose a SoundFont&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Choose a SoundFont&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_sfont_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">program_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the programs on all channels&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Reset the programs on all channels&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_program_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">system_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop all notes and reset all programs&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Stop all notes and reset all programs&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_system_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate audio samples</span>
+        <span class="sd">&quot;&quot;&quot;Generate audio samples</span>
 
 <span class="sd">        The return value will be a NumPy array containing the given</span>
 <span class="sd">        length of audio samples.  If the synth is set to stereo output</span>
@@ -4434,7 +4434,7 @@ event, with a duration:
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">fluid_synth_write_s16_stereo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="nb">len</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">tuning_dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">prog</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get tuning information for given bank and preset</span>
+        <span class="sd">&quot;&quot;&quot;Get tuning information for given bank and preset</span>
 
 <span class="sd">        Return value is an array of length 128 with tuning factors for each MIDI note.</span>
 <span class="sd">        Tuning factor of 0.0 in each position is standard tuning. Measured in cents.</span>
@@ -4482,7 +4482,7 @@ event, with a duration:
         <span class="k">return</span> <span class="n">fluid_player_set_tempo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="p">,</span> <span class="n">tempo_type</span><span class="p">,</span> <span class="n">tempo</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">midi2audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">midifile</span><span class="p">,</span> <span class="n">audiofile</span> <span class="o">=</span> <span class="s2">&quot;output.wav&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a midi file to an audio file&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Convert a midi file to an audio file&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setting</span><span class="p">(</span><span class="s2">&quot;audio.file.name&quot;</span><span class="p">,</span> <span class="n">audiofile</span><span class="p">)</span>
         <span class="n">player</span> <span class="o">=</span> <span class="n">new_fluid_player</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
         <span class="n">fluid_player_add</span><span class="p">(</span><span class="n">player</span><span class="p">,</span> <span class="n">midifile</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
@@ -4522,7 +4522,7 @@ event, with a duration:
 
 <span class="k">class</span> <span class="nc">Modulator</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new modulator object&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Create new modulator object&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">new_fluid_mod</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
@@ -4629,7 +4629,7 @@ event, with a duration:
 
 <span class="k">class</span> <span class="nc">Sequencer</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_scale</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">use_system_timer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new sequencer object to control and schedule timing of midi events</span>
+        <span class="sd">&quot;&quot;&quot;Create new sequencer object to control and schedule timing of midi events</span>
 
 <span class="sd">        Optional keyword arguments:</span>
 <span class="sd">        time_scale: ticks per second, defaults to 1000</span>
@@ -4701,7 +4701,7 @@ event, with a duration:
         <span class="n">delete_fluid_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">raw_audio_string</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string of bytes to send to soundcard</span>
+    <span class="sd">&quot;&quot;&quot;Return a string of bytes to send to soundcard</span>
 
 <span class="sd">    Input is a numpy array of samples.  Default output format</span>
 <span class="sd">    is 16-bit signed (other formats not currently supported).</span>
@@ -4723,8 +4723,8 @@ event, with a duration:
                     <span class="n">per_channel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-9</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normalize audio to a target dBFS level.</span>
 
 <span class="sd">    Parameters</span>
@@ -4787,14 +4787,27 @@ event, with a duration:
 <span class="c1">#===============================================================================</span>
 
 <span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
-                              <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
-                              <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                              <span class="n">volume_level_db</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-                              <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                              <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
-                              <span class="p">):</span>
+                             <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
+                             <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
+                             <span class="n">volume_level_db</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                             <span class="n">enable_reverb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">reverb_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;roomsize&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;damping&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span>
+                                              <span class="p">},</span>
+                             <span class="n">enable_chorus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">chorus_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nr&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                               <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+                             <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">output_WAV_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                            <span class="p">):</span>
 
     <span class="k">if</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
 
@@ -4817,7 +4830,37 @@ event, with a duration:
         <span class="k">for</span> <span class="n">chan</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
             <span class="c1"># channel 9 = percussion GM bank 128</span>
             <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">chan</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">enable_reverb</span><span class="p">:</span>
+            <span class="n">fl</span><span class="o">.</span><span class="n">set_reverb</span><span class="p">(</span><span class="n">roomsize</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;roomsize&#39;</span><span class="p">],</span> 
+                          <span class="n">damping</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;damping&#39;</span><span class="p">],</span> 
+                          <span class="n">width</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+                          <span class="n">level</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span>
+                         <span class="p">)</span>
+            
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            roomsize Reverb room size value (0.0-1.0)</span>
+<span class="sd">            damping Reverb damping value (0.0-1.0)</span>
+<span class="sd">            width Reverb width value (0.0-100.0)</span>
+<span class="sd">            level Reverb level value (0.0-1.0)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
     
+        <span class="k">if</span> <span class="n">enable_chorus</span><span class="p">:</span>
+            <span class="n">fl</span><span class="o">.</span><span class="n">set_chorus</span><span class="p">(</span><span class="n">nr</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;nr&#39;</span><span class="p">],</span>
+                          <span class="n">level</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">],</span>
+                          <span class="n">speed</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">],</span>
+                          <span class="n">depth</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">],</span>
+                          <span class="nb">type</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+                         <span class="p">)</span>
+        
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        nr Chorus voice count (0-99, CPU time consumption proportional to this value)</span>
+<span class="sd">        level Chorus level (0.0-10.0)</span>
+<span class="sd">        speed Chorus speed in Hz (0.29-5.0)</span>
+<span class="sd">        depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)</span>
+<span class="sd">        type Chorus waveform type (0=sine, 1=triangle)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="c1"># Playback vars</span>
         <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>  <span class="c1"># default 120bpm</span>
         <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
@@ -4853,11 +4896,11 @@ event, with a duration:
     
             <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;key_after_touch&quot;</span><span class="p">:</span>
                 <span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="n">fl</span><span class="o">.</span><span class="n">key_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+                <span class="c1"># fl.key_pressure(chan, note, vel)</span>
     
             <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;channel_after_touch&quot;</span><span class="p">:</span>
                 <span class="n">chan</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="n">fl</span><span class="o">.</span><span class="n">channel_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+                <span class="c1"># fl.channel_pressure(chan, vel)</span>
     
             <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;pitch_wheel_change&quot;</span><span class="p">:</span>
                 <span class="n">chan</span><span class="p">,</span> <span class="n">wheel</span> <span class="o">=</span> <span class="n">data</span>
@@ -4927,6 +4970,8 @@ event, with a duration:
         <span class="c1"># Optionally write WAV to disk</span>
         <span class="k">if</span> <span class="n">write_audio_to_WAV</span><span class="p">:</span>
             <span class="n">wav_name</span> <span class="o">=</span> <span class="n">midi_file</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.wav&#39;</span>
+            <span class="k">if</span> <span class="n">output_WAV_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">wav_name</span> <span class="o">=</span> <span class="n">output_WAV_name</span>
             <span class="n">pcm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">raw_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">wav_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
                 <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
@@ -4947,10 +4992,23 @@ event, with a duration:
                         <span class="n">volume_level_db</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                         <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                        <span class="n">enable_reverb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">reverb_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;roomsize&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;damping&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span>
+                                         <span class="p">},</span>
+                        <span class="n">enable_chorus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">chorus_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nr&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                          <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
                         <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">output_WAV_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                        <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns raw audio to pass to IPython.disaply.Audio func</span>
 
 <span class="sd">    Example usage:</span>
@@ -4981,6 +5039,35 @@ event, with a duration:
         <span class="c1"># channel 9 = percussion GM bank 128</span>
         <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">chan</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">enable_reverb</span><span class="p">:</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">set_reverb</span><span class="p">(</span><span class="n">roomsize</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;roomsize&#39;</span><span class="p">],</span> 
+                      <span class="n">damping</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;damping&#39;</span><span class="p">],</span> 
+                      <span class="n">width</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+                      <span class="n">level</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span>
+                     <span class="p">)</span>
+        
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        roomsize Reverb room size value (0.0-1.0)</span>
+<span class="sd">        damping Reverb damping value (0.0-1.0)</span>
+<span class="sd">        width Reverb width value (0.0-100.0)</span>
+<span class="sd">        level Reverb level value (0.0-1.0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">enable_chorus</span><span class="p">:</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">set_chorus</span><span class="p">(</span><span class="n">nr</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;nr&#39;</span><span class="p">],</span>
+                      <span class="n">level</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">],</span>
+                      <span class="n">speed</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">],</span>
+                      <span class="n">depth</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">],</span>
+                      <span class="nb">type</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+                     <span class="p">)</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    nr Chorus voice count (0-99, CPU time consumption proportional to this value)</span>
+<span class="sd">    level Chorus level (0.0-10.0)</span>
+<span class="sd">    speed Chorus speed in Hz (0.29-5.0)</span>
+<span class="sd">    depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)</span>
+<span class="sd">    type Chorus waveform type (0=sine, 1=triangle)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Playback vars</span>
     <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>  <span class="c1"># default 120bpm</span>
     <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
@@ -5016,11 +5103,11 @@ event, with a duration:
 
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;key_after_touch&quot;</span><span class="p">:</span>
             <span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">key_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+            <span class="c1"># fl.key_pressure(chan, note, vel)</span>
 
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;channel_after_touch&quot;</span><span class="p">:</span>
             <span class="n">chan</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">channel_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+            <span class="c1"># fl.channel_pressure(chan, vel)</span>
 
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;pitch_wheel_change&quot;</span><span class="p">:</span>
             <span class="n">chan</span><span class="p">,</span> <span class="n">wheel</span> <span class="o">=</span> <span class="n">data</span>
@@ -5090,6 +5177,8 @@ event, with a duration:
     <span class="c1"># Optionally write WAV to disk</span>
     <span class="k">if</span> <span class="n">write_audio_to_WAV</span><span class="p">:</span>
         <span class="n">wav_name</span> <span class="o">=</span> <span class="n">midi_file</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.wav&#39;</span>
+        <span class="k">if</span> <span class="n">output_WAV_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">wav_name</span> <span class="o">=</span> <span class="n">output_WAV_name</span>
         <span class="n">pcm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">raw_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">wav_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
             <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
@@ -6540,7 +6629,7 @@ event, with a duration:
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.cfunc', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.cfunc" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cfunc</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build and apply a ctypes prototype complete with parameter flags&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Build and apply a ctypes prototype complete with parameter flags&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">_fl</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">atypes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">aflags</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6573,7 +6662,7 @@ they will all get converted to millisecond-tick format.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.concatenate_scores', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.concatenate_scores" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">concatenate_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Concatenates a list of scores into one score.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Concatenates a list of scores into one score.</span>
 <span class="sd">If the scores differ in their &quot;ticks&quot; parameter,</span>
 <span class="sd">they will all get converted to millisecond-tick format.</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -6616,7 +6705,7 @@ The type of track (opus or score) is autodetected.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.event2alsaseq', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.event2alsaseq" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">event2alsaseq</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   <span class="c1"># 5.5</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts an event into the format needed by the alsaseq module,</span>
 <span class="sd">http://pp.com.mx/python/alsaseq</span>
 <span class="sd">The type of track (opus or score) is autodetected.</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -6651,7 +6740,7 @@ Windows X86:
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.find_libfluidsynth', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.find_libfluidsynth" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_libfluidsynth</span><span class="p">(</span><span class="n">debug_print</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    macOS X64:</span>
 <span class="sd">    * &#39;fluidsynth&#39; was found at /usr/local/opt/fluid-synth/lib/libfluidsynth.dylib.</span>
 <span class="sd">    macOS ARM64:</span>
@@ -6701,7 +6790,7 @@ Windows X86:
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.fluid_synth_write_s16_stereo', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.fluid_synth_write_s16_stereo" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fluid_synth_write_s16_stereo</span><span class="p">(</span><span class="n">synth</span><span class="p">,</span> <span class="nb">len</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return generated samples in stereo 16-bit format</span>
+    <span class="sd">&quot;&quot;&quot;Return generated samples in stereo 16-bit format</span>
 
 <span class="sd">    Return value is a Numpy array of samples.</span>
 
@@ -6731,7 +6820,7 @@ Windows X86:
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.grep', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.grep" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">grep</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; containing only the channels specified</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,[],]</span>
@@ -6779,7 +6868,7 @@ but there are of course only 15 available channels&hellip;</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.merge_scores', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.merge_scores" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">merge_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Merges a list of scores into one score.  A merged score comprises</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Merges a list of scores into one score.  A merged score comprises</span>
 <span class="sd">all of the tracks from all of the input scores; un-merging is possible</span>
 <span class="sd">by selecting just some of the tracks.  If the scores differ in their</span>
 <span class="sd">&quot;ticks&quot; parameter, they will all get converted to millisecond-tick</span>
@@ -6838,7 +6927,7 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.midi2ms_score', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.midi2ms_score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2ms_score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot; with one beat per second and one</span>
 <span class="sd">tick per millisecond, using midi2opus() then to_millisecs()</span>
 <span class="sd">then opus2score()</span>
@@ -6866,7 +6955,7 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.midi2opus', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.midi2opus" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Translates MIDI into a &quot;opus&quot;.  For a description of the</span>
 <span class="sd">&quot;opus&quot; format, see opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="n">my_midi</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">midi</span><span class="p">)</span>
@@ -6925,7 +7014,7 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.midi2score', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.midi2score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2score</span><span class="p">(</span><span class="n">midi</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates MIDI into a &quot;score&quot;, using midi2opus() then opus2score()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2score</span><span class="p">(</span><span class="n">midi2opus</span><span class="p">(</span><span class="n">midi</span><span class="p">))</span>
@@ -6939,7 +7028,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_opus_to_colab_audio">
-    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_level_db=-1, trim_silence=True, silence_threshold=0.1, output_for_gradio=False, write_audio_to_WAV=&#39;&#39;)</p>
+    <p>def <span class="ident">midi_opus_to_colab_audio</span>(</p><p>midi_opus, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_level_db=-1, trim_silence=True, silence_threshold=0.1, enable_reverb=False, reverb_param_dic={&#39;roomsize&#39;: 0, &#39;damping&#39;: 0, &#39;width&#39;: 0, &#39;level&#39;: 0}, enable_chorus=False, chorus_param_dic={&#39;nr&#39;: 0, &#39;level&#39;: 0, &#39;speed&#39;: 0.1, &#39;depth&#39;: 0, &#39;type&#39;: 0}, output_for_gradio=False, write_audio_to_WAV=False, output_WAV_name=&#39;&#39;)</p>
     </div>
     
 
@@ -6949,14 +7038,27 @@ then opus2score()</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.midi_opus_to_colab_audio', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.midi_opus_to_colab_audio" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi_opus_to_colab_audio</span><span class="p">(</span><span class="n">midi_opus</span><span class="p">,</span> 
-                              <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
-                              <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
-                              <span class="n">volume_level_db</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-                              <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                              <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-                              <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
-                              <span class="p">):</span>
+                             <span class="n">soundfont_path</span><span class="o">=</span><span class="s1">&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;</span><span class="p">,</span> 
+                             <span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="c1"># 44100</span>
+                             <span class="n">volume_level_db</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                             <span class="n">enable_reverb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">reverb_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;roomsize&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;damping&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span>
+                                              <span class="p">},</span>
+                             <span class="n">enable_chorus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">chorus_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nr&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                               <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                               <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+                             <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">output_WAV_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                            <span class="p">):</span>
 
     <span class="k">if</span> <span class="n">midi_opus</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
 
@@ -6979,7 +7081,37 @@ then opus2score()</p></div>
         <span class="k">for</span> <span class="n">chan</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
             <span class="c1"># channel 9 = percussion GM bank 128</span>
             <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">chan</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">enable_reverb</span><span class="p">:</span>
+            <span class="n">fl</span><span class="o">.</span><span class="n">set_reverb</span><span class="p">(</span><span class="n">roomsize</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;roomsize&#39;</span><span class="p">],</span> 
+                          <span class="n">damping</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;damping&#39;</span><span class="p">],</span> 
+                          <span class="n">width</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+                          <span class="n">level</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span>
+                         <span class="p">)</span>
+            
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            roomsize Reverb room size value (0.0-1.0)</span>
+<span class="sd">            damping Reverb damping value (0.0-1.0)</span>
+<span class="sd">            width Reverb width value (0.0-100.0)</span>
+<span class="sd">            level Reverb level value (0.0-1.0)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
     
+        <span class="k">if</span> <span class="n">enable_chorus</span><span class="p">:</span>
+            <span class="n">fl</span><span class="o">.</span><span class="n">set_chorus</span><span class="p">(</span><span class="n">nr</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;nr&#39;</span><span class="p">],</span>
+                          <span class="n">level</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">],</span>
+                          <span class="n">speed</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">],</span>
+                          <span class="n">depth</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">],</span>
+                          <span class="nb">type</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+                         <span class="p">)</span>
+        
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        nr Chorus voice count (0-99, CPU time consumption proportional to this value)</span>
+<span class="sd">        level Chorus level (0.0-10.0)</span>
+<span class="sd">        speed Chorus speed in Hz (0.29-5.0)</span>
+<span class="sd">        depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)</span>
+<span class="sd">        type Chorus waveform type (0=sine, 1=triangle)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="c1"># Playback vars</span>
         <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>  <span class="c1"># default 120bpm</span>
         <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
@@ -7015,11 +7147,11 @@ then opus2score()</p></div>
     
             <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;key_after_touch&quot;</span><span class="p">:</span>
                 <span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="n">fl</span><span class="o">.</span><span class="n">key_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+                <span class="c1"># fl.key_pressure(chan, note, vel)</span>
     
             <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;channel_after_touch&quot;</span><span class="p">:</span>
                 <span class="n">chan</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="n">fl</span><span class="o">.</span><span class="n">channel_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+                <span class="c1"># fl.channel_pressure(chan, vel)</span>
     
             <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;pitch_wheel_change&quot;</span><span class="p">:</span>
                 <span class="n">chan</span><span class="p">,</span> <span class="n">wheel</span> <span class="o">=</span> <span class="n">data</span>
@@ -7089,6 +7221,8 @@ then opus2score()</p></div>
         <span class="c1"># Optionally write WAV to disk</span>
         <span class="k">if</span> <span class="n">write_audio_to_WAV</span><span class="p">:</span>
             <span class="n">wav_name</span> <span class="o">=</span> <span class="n">midi_file</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.wav&#39;</span>
+            <span class="k">if</span> <span class="n">output_WAV_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">wav_name</span> <span class="o">=</span> <span class="n">output_WAV_name</span>
             <span class="n">pcm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">raw_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">wav_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
                 <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
@@ -7110,7 +7244,7 @@ then opus2score()</p></div>
       
   <div class="item">
     <div class="name def" id="midi_to_colab_audio.midi_to_colab_audio">
-    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_level_db=-1, trim_silence=True, silence_threshold=0.1, output_for_gradio=False, write_audio_to_WAV=False)</p>
+    <p>def <span class="ident">midi_to_colab_audio</span>(</p><p>midi_file, soundfont_path=&#39;/usr/share/sounds/sf2/FluidR3_GM.sf2&#39;, sample_rate=16000, volume_level_db=-1, trim_silence=True, silence_threshold=0.1, enable_reverb=False, reverb_param_dic={&#39;roomsize&#39;: 0, &#39;damping&#39;: 0, &#39;width&#39;: 0, &#39;level&#39;: 0}, enable_chorus=False, chorus_param_dic={&#39;nr&#39;: 0, &#39;level&#39;: 0, &#39;speed&#39;: 0.1, &#39;depth&#39;: 0, &#39;type&#39;: 0}, output_for_gradio=False, write_audio_to_WAV=False, output_WAV_name=&#39;&#39;)</p>
     </div>
     
 
@@ -7129,10 +7263,23 @@ then opus2score()</p></div>
                         <span class="n">volume_level_db</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                         <span class="n">trim_silence</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">silence_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                        <span class="n">enable_reverb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">reverb_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;roomsize&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;damping&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span>
+                                         <span class="p">},</span>
+                        <span class="n">enable_chorus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">chorus_param_dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nr&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;speed&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                          <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
                         <span class="n">output_for_gradio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="n">write_audio_to_WAV</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">output_WAV_name</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
                        <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns raw audio to pass to IPython.disaply.Audio func</span>
 
 <span class="sd">    Example usage:</span>
@@ -7163,6 +7310,35 @@ then opus2score()</p></div>
         <span class="c1"># channel 9 = percussion GM bank 128</span>
         <span class="n">fl</span><span class="o">.</span><span class="n">program_select</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">chan</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">enable_reverb</span><span class="p">:</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">set_reverb</span><span class="p">(</span><span class="n">roomsize</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;roomsize&#39;</span><span class="p">],</span> 
+                      <span class="n">damping</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;damping&#39;</span><span class="p">],</span> 
+                      <span class="n">width</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+                      <span class="n">level</span><span class="o">=</span><span class="n">reverb_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span>
+                     <span class="p">)</span>
+        
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        roomsize Reverb room size value (0.0-1.0)</span>
+<span class="sd">        damping Reverb damping value (0.0-1.0)</span>
+<span class="sd">        width Reverb width value (0.0-100.0)</span>
+<span class="sd">        level Reverb level value (0.0-1.0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">enable_chorus</span><span class="p">:</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">set_chorus</span><span class="p">(</span><span class="n">nr</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;nr&#39;</span><span class="p">],</span>
+                      <span class="n">level</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">],</span>
+                      <span class="n">speed</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">],</span>
+                      <span class="n">depth</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">],</span>
+                      <span class="nb">type</span><span class="o">=</span><span class="n">chorus_param_dic</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+                     <span class="p">)</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    nr Chorus voice count (0-99, CPU time consumption proportional to this value)</span>
+<span class="sd">    level Chorus level (0.0-10.0)</span>
+<span class="sd">    speed Chorus speed in Hz (0.29-5.0)</span>
+<span class="sd">    depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)</span>
+<span class="sd">    type Chorus waveform type (0=sine, 1=triangle)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Playback vars</span>
     <span class="n">tempo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">60</span> <span class="o">/</span> <span class="mi">120</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>  <span class="c1"># default 120bpm</span>
     <span class="n">last_t</span> <span class="o">=</span> <span class="mi">0</span>
@@ -7198,11 +7374,11 @@ then opus2score()</p></div>
 
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;key_after_touch&quot;</span><span class="p">:</span>
             <span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">key_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+            <span class="c1"># fl.key_pressure(chan, note, vel)</span>
 
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;channel_after_touch&quot;</span><span class="p">:</span>
             <span class="n">chan</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="n">fl</span><span class="o">.</span><span class="n">channel_pressure</span><span class="p">(</span><span class="n">chan</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+            <span class="c1"># fl.channel_pressure(chan, vel)</span>
 
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;pitch_wheel_change&quot;</span><span class="p">:</span>
             <span class="n">chan</span><span class="p">,</span> <span class="n">wheel</span> <span class="o">=</span> <span class="n">data</span>
@@ -7272,6 +7448,8 @@ then opus2score()</p></div>
     <span class="c1"># Optionally write WAV to disk</span>
     <span class="k">if</span> <span class="n">write_audio_to_WAV</span><span class="p">:</span>
         <span class="n">wav_name</span> <span class="o">=</span> <span class="n">midi_file</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.wav&#39;</span>
+        <span class="k">if</span> <span class="n">output_WAV_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">wav_name</span> <span class="o">=</span> <span class="n">output_WAV_name</span>
         <span class="n">pcm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="n">raw_audio</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">raw_audio</span><span class="p">))</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">wav_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
             <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
@@ -7306,7 +7484,7 @@ that a dedicated function is useful.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.mix_opus_tracks', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.mix_opus_tracks" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">mix_opus_tracks</span><span class="p">(</span><span class="n">input_tracks</span><span class="p">):</span>   <span class="c1"># 5.5</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes an array of tracks into one track.  A mixed track</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes an array of tracks into one track.  A mixed track</span>
 <span class="sd">cannot be un-mixed.  It is assumed that the tracks share the same</span>
 <span class="sd">ticks parameter and the same tempo.</span>
 <span class="sd">Mixing score-tracks is trivial (just insert all events into one array).</span>
@@ -7346,7 +7524,7 @@ they will all get converted to millisecond-tick format.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.mix_scores', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.mix_scores" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">mix_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes a list of scores into one one-track score.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mixes a list of scores into one one-track score.</span>
 <span class="sd">A mixed score cannot be un-mixed.  Hopefully the scores</span>
 <span class="sd">have no undesirable channel-conflicts between them.</span>
 <span class="sd">If the scores differ in their &quot;ticks&quot; parameter,</span>
@@ -7402,8 +7580,8 @@ eps : float
                     <span class="n">per_channel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-9</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normalize audio to a target dBFS level.</span>
 
 <span class="sd">    Parameters</span>
@@ -7500,7 +7678,7 @@ sys.stdout.buffer.write(my_midi)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.opus2midi', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.opus2midi" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">opus2midi</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of midi-events, and each event is itself a list; see above.</span>
 <span class="sd">opus2midi() returns a bytestring of the MIDI, which can then be</span>
@@ -7558,7 +7736,7 @@ see opus2midi() and score2opus().</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.opus2score', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.opus2score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">opus2score</span><span class="p">(</span><span class="n">opus</span><span class="o">=</span><span class="p">[]):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;For a description of the &quot;opus&quot; and &quot;score&quot; formats,</span>
 <span class="sd">see opus2midi() and score2opus().</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opus</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -7628,7 +7806,7 @@ see opus2midi() and score2opus().</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.play_score', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.play_score" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">play_score</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts the &quot;score&quot; to midi, and feeds it into &#39;aplaymidi -&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Converts the &quot;score&quot; to midi, and feeds it into &#39;aplaymidi -&#39;</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
@@ -7662,7 +7840,7 @@ is 16-bit signed (other formats not currently supported).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.raw_audio_string', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.raw_audio_string" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">raw_audio_string</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string of bytes to send to soundcard</span>
+    <span class="sd">&quot;&quot;&quot;Return a string of bytes to send to soundcard</span>
 
 <span class="sd">    Input is a numpy array of samples.  Default output format</span>
 <span class="sd">    is 16-bit signed (other formats not currently supported).</span>
@@ -7691,7 +7869,7 @@ is 16-bit signed (other formats not currently supported).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.score2midi', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.score2midi" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score2midi</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Translates a &quot;score&quot; into MIDI, using score2opus() then opus2midi()</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">opus2midi</span><span class="p">(</span><span class="n">score2opus</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
@@ -7734,7 +7912,7 @@ my_opus = score2opus(my_score)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.score2opus', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.score2opus" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score2opus</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">The argument is a list: the first item in the list is the &quot;ticks&quot;</span>
 <span class="sd">parameter, the others are the tracks. Each track is a list</span>
 <span class="sd">of score-events, and each event is itself a list.  A score-event</span>
@@ -7832,7 +8010,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.score2stats', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.score2stats" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score2stats</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a dict of some basic stats about the score, like</span>
 <span class="sd">bank_select (list of tuples (msb,lsb)),</span>
 <span class="sd">channels_by_track (list of lists), channels_total (set),</span>
 <span class="sd">general_midi_mode (list),</span>
@@ -7971,7 +8149,7 @@ pitch_range_sum (sum over tracks of the pitch_ranges),</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.score_type', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.score_type" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">score_type</span><span class="p">(</span><span class="n">opus_or_score</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a string, either &#39;opus&#39; or &#39;score&#39; or &#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a string, either &#39;opus&#39; or &#39;score&#39; or &#39;&#39;</span>
 <span class="sd">&#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">opus_or_score</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">opus_or_score</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">opus_or_score</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
@@ -8010,7 +8188,7 @@ be returned.</p></div>
   <div id="source-midi_to_colab_audio.segment" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">segment</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">100000000</span><span class="p">,</span>
  <span class="n">tracks</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">}):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; which is a segment of the one supplied</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; which is a segment of the one supplied</span>
 <span class="sd">as the argument, beginning at &quot;start_time&quot; ticks and ending</span>
 <span class="sd">at &quot;end_time&quot; ticks (or at the end if &quot;end_time&quot; is not supplied).</span>
 <span class="sd">If the set &quot;tracks&quot; is specified, only those tracks will</span>
@@ -8113,7 +8291,7 @@ default if neither "shift" nor "start_time" are specified.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.timeshift', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.timeshift" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">timeshift</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">from_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tracks</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">}):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; shifted in time by &quot;shift&quot; ticks, or shifted</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Returns a &quot;score&quot; shifted in time by &quot;shift&quot; ticks, or shifted</span>
 <span class="sd">so that the first event starts at &quot;start_time&quot; ticks.</span>
 
 <span class="sd">If &quot;from_time&quot; is specified, only those events in the score</span>
@@ -8224,7 +8402,7 @@ but it does make it easy to mix different scores together.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.to_millisecs', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.to_millisecs" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">to_millisecs</span><span class="p">(</span><span class="n">old_opus</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Recallibrates all the times in an &quot;opus&quot; to use one beat</span>
 <span class="sd">per second and one tick per millisecond.  This makes it</span>
 <span class="sd">hard to retrieve any information about beats or barlines,</span>
 <span class="sd">but it does make it easy to mix different scores together.</span>
@@ -8966,7 +9144,7 @@ but it does make it easy to mix different scores together.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.all_notes_off', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.all_notes_off" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">all_notes_off</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Turn off all notes on a channel (release all keys)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Turn off all notes on a channel (release all keys)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_all_notes_off</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
 </pre></div>
 
@@ -8989,7 +9167,7 @@ but it does make it easy to mix different scores together.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.all_sounds_off', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.all_sounds_off" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">all_sounds_off</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Turn off all sounds on a channel (equivalent to mute)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Turn off all sounds on a channel (equivalent to mute)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_all_sounds_off</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
 </pre></div>
 
@@ -9012,7 +9190,7 @@ but it does make it easy to mix different scores together.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.bank_select', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.bank_select" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">bank_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">bank</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose a bank&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Choose a bank&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_bank_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span>
 </pre></div>
 
@@ -9045,7 +9223,7 @@ include:
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.cc', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.cc" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">ctrl</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send control change value</span>
+    <span class="sd">&quot;&quot;&quot;Send control change value</span>
 <span class="sd">    The controls that are recognized are dependent on the</span>
 <span class="sd">    SoundFont.  Values are always 0 to 127.  Typical controls</span>
 <span class="sd">    include:</span>
@@ -9079,7 +9257,7 @@ include:
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.channel_info', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.channel_info" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">channel_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;get soundfont, bank, prog, preset name of channel&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;get soundfont, bank, prog, preset name of channel&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fluid_synth_get_channel_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">info</span><span class="o">=</span><span class="n">fluid_synth_channel_info_t</span><span class="p">()</span>
         <span class="n">fluid_synth_get_channel_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">byref</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
@@ -9356,7 +9534,7 @@ length of audio samples.  If the synth is set to stereo output
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.get_samples', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.get_samples" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate audio samples</span>
+    <span class="sd">&quot;&quot;&quot;Generate audio samples</span>
 <span class="sd">    The return value will be a NumPy array containing the given</span>
 <span class="sd">    length of audio samples.  If the synth is set to stereo output</span>
 <span class="sd">    (the default) the array will be size 2 * len.</span>
@@ -9383,7 +9561,7 @@ length of audio samples.  If the synth is set to stereo output
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.get_setting', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.get_setting" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_setting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;get current value of an arbitrary synth setting&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;get current value of an arbitrary synth setting&quot;&quot;&quot;</span>
     <span class="n">val</span> <span class="o">=</span> <span class="n">c_int</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">fluid_settings_getint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">byref</span><span class="p">(</span><span class="n">val</span><span class="p">))</span> <span class="o">==</span> <span class="n">FLUIDSETTING_EXISTS</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">value</span>
@@ -9415,7 +9593,7 @@ length of audio samples.  If the synth is set to stereo output
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.midi2audio', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.midi2audio" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">midi2audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">midifile</span><span class="p">,</span> <span class="n">audiofile</span> <span class="o">=</span> <span class="s2">&quot;output.wav&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a midi file to an audio file&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Convert a midi file to an audio file&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setting</span><span class="p">(</span><span class="s2">&quot;audio.file.name&quot;</span><span class="p">,</span> <span class="n">audiofile</span><span class="p">)</span>
     <span class="n">player</span> <span class="o">=</span> <span class="n">new_fluid_player</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
     <span class="n">fluid_player_add</span><span class="p">(</span><span class="n">player</span><span class="p">,</span> <span class="n">midifile</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
@@ -9594,7 +9772,7 @@ length of audio samples.  If the synth is set to stereo output
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.noteoff', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.noteoff" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">noteoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stop a note&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Stop a note&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">chan</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -9621,7 +9799,7 @@ length of audio samples.  If the synth is set to stereo output
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.noteon', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.noteon" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">noteon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">vel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Play a note&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Play a note&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">chan</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -9654,7 +9832,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.pitch_bend', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.pitch_bend" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pitch_bend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adjust pitch of a playing channel by small amounts</span>
+    <span class="sd">&quot;&quot;&quot;Adjust pitch of a playing channel by small amounts</span>
 <span class="sd">    A pitch bend value of 0 is no pitch change from default.</span>
 <span class="sd">    A value of -2048 is 1 semitone down.</span>
 <span class="sd">    A value of 2048 is 1 semitone up.</span>
@@ -9759,7 +9937,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.program_change', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.program_change" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">program_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">prg</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Change the program&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Change the program&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_program_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">prg</span><span class="p">)</span>
 </pre></div>
 
@@ -9782,7 +9960,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.program_info', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.program_info" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">program_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;get active soundfont, bank, prog on a channel&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;get active soundfont, bank, prog on a channel&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fluid_synth_get_program</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sfontid</span><span class="o">=</span><span class="n">c_int</span><span class="p">()</span>
         <span class="n">banknum</span><span class="o">=</span><span class="n">c_int</span><span class="p">()</span>
@@ -9813,7 +9991,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.program_reset', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.program_reset" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">program_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reset the programs on all channels&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Reset the programs on all channels&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_program_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
 </pre></div>
 
@@ -9836,7 +10014,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.program_select', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.program_select" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">program_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">preset</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select a program&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Select a program&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_program_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">preset</span><span class="p">)</span>
 </pre></div>
 
@@ -9859,7 +10037,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.program_unset', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.program_unset" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">program_unset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the preset of a MIDI channel to an unassigned state&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Set the preset of a MIDI channel to an unassigned state&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_unset_program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span>
 </pre></div>
 
@@ -9882,7 +10060,7 @@ Maximum values are -8192 to +8191 (transposing by 4 semitones).</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.router_begin', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.router_begin" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">router_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;types are [note|cc|prog|pbend|cpress|kpress]&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;types are [note|cc|prog|pbend|cpress|kpress]&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">type</span><span class="o">==</span><span class="s1">&#39;note&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">cmd_rule_type</span><span class="o">=</span><span class="mi">0</span>
@@ -10060,7 +10238,7 @@ type Chorus waveform type (0=sine, 1=triangle)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.set_chorus', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.set_chorus" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">set_chorus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nr</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">speed</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    nr Chorus voice count (0-99, CPU time consumption proportional to this value)</span>
 <span class="sd">    level Chorus level (0.0-10.0)</span>
 <span class="sd">    speed Chorus speed in Hz (0.29-5.0)</span>
@@ -10226,7 +10404,7 @@ level Reverb level value (0.0-1.0)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.set_reverb', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.set_reverb" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">set_reverb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">roomsize</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">damping</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">level</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    roomsize Reverb room size value (0.0-1.0)</span>
 <span class="sd">    damping Reverb damping value (0.0-1.0)</span>
 <span class="sd">    width Reverb width value (0.0-100.0)</span>
@@ -10362,7 +10540,7 @@ level Reverb level value (0.0-1.0)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.setting', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.setting" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">setting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;change an arbitrary synth setting, type-smart&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;change an arbitrary synth setting, type-smart&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
         <span class="n">fluid_settings_setstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">val</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -10390,7 +10568,7 @@ level Reverb level value (0.0-1.0)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.sfload', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.sfload" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sfload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">update_midi_preset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load SoundFont and return its ID&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Load SoundFont and return its ID&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_sfload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">update_midi_preset</span><span class="p">)</span>
 </pre></div>
 
@@ -10413,7 +10591,7 @@ level Reverb level value (0.0-1.0)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.sfont_select', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.sfont_select" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sfont_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose a SoundFont&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Choose a SoundFont&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_sfont_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">chan</span><span class="p">,</span> <span class="n">sfid</span><span class="p">)</span>
 </pre></div>
 
@@ -10436,7 +10614,7 @@ level Reverb level value (0.0-1.0)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.sfpreset_name', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.sfpreset_name" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sfpreset_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">prenum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return name of a soundfont preset&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Return name of a soundfont preset&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fluid_synth_get_sfont_by_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sfont</span><span class="o">=</span><span class="n">fluid_synth_get_sfont_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">sfid</span><span class="p">)</span>
         <span class="n">preset</span><span class="o">=</span><span class="n">fluid_sfont_get_preset</span><span class="p">(</span><span class="n">sfont</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">prenum</span><span class="p">)</span>
@@ -10466,7 +10644,7 @@ level Reverb level value (0.0-1.0)</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.sfunload', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.sfunload" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sfunload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">update_midi_preset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unload a SoundFont and free memory it used&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Unload a SoundFont and free memory it used&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_sfunload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">,</span> <span class="n">sfid</span><span class="p">,</span> <span class="n">update_midi_preset</span><span class="p">)</span>
 </pre></div>
 
@@ -10497,7 +10675,7 @@ see http://www.fluidsynth.org/api/fluidsettings.xml for allowed values and defau
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.start', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.start" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">midi_driver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">midi_router</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Start audio output driver in separate background thread</span>
+    <span class="sd">&quot;&quot;&quot;Start audio output driver in separate background thread</span>
 <span class="sd">    Call this function any time after creating the Synth object.</span>
 <span class="sd">    If you don&#39;t call this function, use get_samples() to generate</span>
 <span class="sd">    samples.</span>
@@ -10547,7 +10725,7 @@ see http://www.fluidsynth.org/api/fluidsettings.xml for allowed values and defau
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.system_reset', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.system_reset" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">system_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stop all notes and reset all programs&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Stop all notes and reset all programs&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fluid_synth_system_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synth</span><span class="p">)</span>
 </pre></div>
 
@@ -10572,7 +10750,7 @@ Tuning factor of 0.0 in each position is standard tuning. Measured in cents.</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-midi_to_colab_audio.Synth.tuning_dump', this);">Show source &equiv;</a></p>
   <div id="source-midi_to_colab_audio.Synth.tuning_dump" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tuning_dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">prog</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get tuning information for given bank and preset</span>
+    <span class="sd">&quot;&quot;&quot;Get tuning information for given bank and preset</span>
 <span class="sd">    Return value is an array of length 128 with tuning factors for each MIDI note.</span>
 <span class="sd">    Tuning factor of 0.0 in each position is standard tuning. Measured in cents.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -10786,5 +10964,5 @@ Tuning factor of 0.0 in each position is standard tuning. Measured in cents.</p>
     </p>
   </footer>
 </div>
-</body>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>
