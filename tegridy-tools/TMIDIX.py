@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.27"
+__version__ = "25.8.29"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -14430,6 +14430,111 @@ def replace_chords_in_escore_notes(escore_notes,
 
     else:
         return []
+
+###################################################################################
+
+class Cell:
+    def __init__(self, cost, segments, gaps, prev_dir):
+        self.cost = cost
+        self.segments = segments
+        self.gaps = gaps
+        self.prev_dir = prev_dir
+
+def align_integer_lists(seq1, seq2):
+
+    n, m = len(seq1), len(seq2)
+    
+    if n == 0:
+        return [None]*m, seq2.copy(), sum(abs(x) for x in seq2)
+    if m == 0:
+        return seq1.copy(), [None]*n, sum(abs(x) for x in seq1)
+
+    priority = {'diag': 0, 'up': 1, 'left': 2}
+
+    dp = [
+        [Cell(cost=math.inf, segments=math.inf, gaps=math.inf, prev_dir='') for _ in range(m+1)]
+        for _ in range(n+1)
+    ]
+    dp[0][0] = Cell(cost=0, segments=0, gaps=0, prev_dir='')
+
+    for i in range(1, n+1):
+        prev = dp[i-1][0]
+        new_cost = prev.cost + abs(seq1[i-1])
+        new_seg  = prev.segments + (1 if prev.prev_dir != 'up' else 0)
+        new_gaps = prev.gaps + 1
+        dp[i][0]  = Cell(new_cost, new_seg, new_gaps, 'up')
+
+    for j in range(1, m+1):
+        prev = dp[0][j-1]
+        new_cost = prev.cost + abs(seq2[j-1])
+        new_seg  = prev.segments + (1 if prev.prev_dir != 'left' else 0)
+        new_gaps = prev.gaps + 1
+        dp[0][j] = Cell(new_cost, new_seg, new_gaps, 'left')
+
+    for i in range(1, n+1):
+        for j in range(1, m+1):
+            a, b = seq1[i-1], seq2[j-1]
+
+            c0 = dp[i-1][j-1]
+            cand_diag = Cell(
+                cost     = c0.cost + abs(a - b),
+                segments = c0.segments,
+                gaps     = c0.gaps,
+                prev_dir = 'diag'
+            )
+
+            c1 = dp[i-1][j]
+            seg1 = c1.segments + (1 if c1.prev_dir != 'up' else 0)
+            cand_up = Cell(
+                cost     = c1.cost + abs(a),
+                segments = seg1,
+                gaps     = c1.gaps + 1,
+                prev_dir = 'up'
+            )
+
+            c2 = dp[i][j-1]
+            seg2 = c2.segments + (1 if c2.prev_dir != 'left' else 0)
+            cand_left = Cell(
+                cost     = c2.cost + abs(b),
+                segments = seg2,
+                gaps     = c2.gaps + 1,
+                prev_dir = 'left'
+            )
+
+            best = min(
+                (cand_diag, cand_up, cand_left),
+                key=lambda c: (c.cost, c.segments, c.gaps, priority[c.prev_dir])
+            )
+            dp[i][j] = best
+
+    aligned1 = []
+    aligned2 = []
+    i, j = n, m
+    
+    while i > 0 or j > 0:
+        cell = dp[i][j]
+        
+        if cell.prev_dir == 'diag':
+            aligned1.append(seq1[i-1])
+            aligned2.append(seq2[j-1])
+            i, j = i-1, j-1
+            
+        elif cell.prev_dir == 'up':
+            aligned1.append(seq1[i-1])
+            aligned2.append(None)
+            i -= 1
+            
+        else:
+            aligned1.append(None)
+            aligned2.append(seq2[j-1])
+            j -= 1
+
+    aligned1.reverse()
+    aligned2.reverse()
+    
+    total_cost = int(dp[n][m].cost)
+    
+    return aligned1, aligned2, total_cost
 
 ###################################################################################
 
