@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.29"
+__version__ = "25.8.30"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1500,6 +1500,9 @@ from difflib import SequenceMatcher as SM
 
 import statistics
 import math
+from math import gcd
+
+from functools import reduce
 
 import matplotlib.pyplot as plt
 
@@ -14535,6 +14538,91 @@ def align_integer_lists(seq1, seq2):
     total_cost = int(dp[n][m].cost)
     
     return aligned1, aligned2, total_cost
+
+###################################################################################
+
+def most_common_delta_time(escore_notes):
+    
+    dscore = delta_score_notes(escore_notes)
+    
+    dtimes = [t[1] for t in dscore if t[1] != 0]
+    
+    cdtime, count = Counter(dtimes).most_common(1)[0]
+
+    return [cdtime, count / len(dtimes)]
+
+###################################################################################
+
+def delta_tones(escore_notes, 
+                ptcs_idx=4
+               ):
+    
+    pitches = [p[ptcs_idx] for p in escore_notes]
+    tones = [p % 12 for p in pitches]
+
+    return [b-a for a, b in zip(tones[:-1], tones[1:])]
+    
+###################################################################################
+
+def find_divisors(val, 
+                  reverse=False
+                 ):
+  
+    if val == 0:
+        return []
+
+    n = abs(val)
+    divisors = set()
+
+    for i in range(1, int(n**0.5) + 1):
+        if n % i == 0:
+            divisors.add(i)
+            divisors.add(n // i)
+
+    return sorted(divisors, reverse=reverse)
+
+###################################################################################
+
+def find_common_divisors(values, 
+                         reverse=False
+                        ):
+   
+    if not values:
+        return []
+
+    non_zero = [abs(v) for v in values if v != 0]
+    if not non_zero:
+        return []
+
+    overall_gcd = reduce(gcd, non_zero)
+
+    divisors = set()
+    
+    for i in range(1, int(overall_gcd**0.5) + 1):
+        if overall_gcd % i == 0:
+            divisors.add(i)
+            divisors.add(overall_gcd // i)
+
+    return sorted(divisors, reverse=reverse)
+
+###################################################################################
+
+def strings_dict(list_of_strings, 
+                 verbose=False
+                ):
+
+    str_set = set()
+    
+    for st in tqdm.tqdm(list_of_strings, disable=not verbose):
+        for cha in st:
+            str_set.add(cha)
+
+    str_lst = sorted(str_set)
+
+    str_dic = dict(zip(str_lst, range(len(str_lst))))
+    rev_str_dic = {v: k for k, v in str_dic.items()}
+
+    return str_dic, rev_str_dic
 
 ###################################################################################
 
