@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.30"
+__version__ = "25.8.31"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -14305,6 +14305,8 @@ def symmetric_match_ratio(list_a, list_b, threshold=0):
 
 def escore_notes_to_chords(escore_notes, 
                            use_full_chords=False,
+                           repair_bad_chords=True,
+                           skip_pitches=False,
                            convert_pitches=True,
                            shift_chords=False,
                            return_tones_chords=False
@@ -14327,10 +14329,12 @@ def escore_notes_to_chords(escore_notes,
 
         tones_chord = sorted(set([p % 12 for p in pitches]))
 
-        if tones_chord not in CHORDS:
-            tones_chord = check_and_fix_tones_chord(tones_chord, 
-                                                           use_full_chords=use_full_chords
-                                                          )
+        if repair_bad_chords:
+            if tones_chord not in CHORDS:
+                tones_chord = check_and_fix_tones_chord(tones_chord, 
+                                                        use_full_chords=use_full_chords
+                                                       )
+            
         if return_tones_chords:
             if convert_pitches:
                 chords.append(tones_chord)
@@ -14343,24 +14347,41 @@ def escore_notes_to_chords(escore_notes,
                     chords.append([-pitches[0]])
                     
         else:
-            cho_tok = CHORDS.index(tones_chord)
-            if convert_pitches:
-                if shift_chords:
-                    if len(pitches) > 1:
-                        chords.append(cho_tok+12)
+            if skip_pitches:
+                if tones_chord in CHORDS:
+                    cho_tok = CHORDS.index(tones_chord)
 
-                    else:
-                        chords.append(pitches[0] % 12)
-                        
                 else:
+                    cho_tok = -1
+
+                if len(pitches) > 1:
                     chords.append(cho_tok)
 
             else:
-                if len(pitches) > 1:
-                    chords.append(cho_tok+128)
+                if tones_chord in CHORDS:
+                    cho_tok = CHORDS.index(tones_chord)
 
                 else:
-                    chords.append(pitches[0])
+                    cho_tok = -1
+
+                if cho_tok != -1:
+                    if convert_pitches:
+                        if shift_chords:
+                            if len(pitches) > 1:
+                                chords.append(cho_tok+12)
+        
+                            else:
+                                chords.append(pitches[0] % 12)
+                                
+                        else:
+                            chords.append(cho_tok)
+        
+                    else:
+                        if len(pitches) > 1:
+                            chords.append(cho_tok+128)
+        
+                        else:
+                            chords.append(pitches[0])
 
     return chords
 
@@ -14623,6 +14644,75 @@ def strings_dict(list_of_strings,
     rev_str_dic = {v: k for k, v in str_dic.items()}
 
     return str_dic, rev_str_dic
+
+###################################################################################
+
+def chords_common_tones_chain(chords, 
+                              use_full_chords=False
+                             ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    tones_chords = [CHORDS[c] for c in chords if 0 <= c < len(CHORDS)]
+
+    n = len(tones_chords)
+    
+    if not tones_chords:
+        return []
+        
+    if n < 2:
+        return tones_chords
+
+    result = []
+
+    for i in range(n):
+        if i == 0:
+            common = set(tones_chords[0]) & set(tones_chords[1])
+            
+        elif i == n - 1:
+            common = set(tones_chords[n - 2]) & set(tones_chords[n - 1])
+            
+        else:
+            common = set(tones_chords[i - 1]) & set(tones_chords[i]) & set(tones_chords[i + 1])
+
+        result.append(min(common) if common else -1)
+
+    return result
+
+###################################################################################
+
+def tones_chord_to_int(tones_chord, 
+                       reverse_bits=True
+                      ):
+
+    cbits = tones_chord_to_bits(tones_chord, 
+                                reverse=reverse_bits
+                               )
+
+    cint = bits_to_int(cbits)
+    
+    return cint
+
+###################################################################################
+
+def int_to_tones_chord(integer, 
+                       reverse_bits=True
+                      ):
+
+    integer = integer % 4096
+
+    cbits = int_to_bits(integer)
+
+    if reverse_bits:
+        cbits.reverse()
+
+    tones_chord = bits_to_tones_chord(cbits)
+
+    return tones_chord
 
 ###################################################################################
 
