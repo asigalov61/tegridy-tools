@@ -13934,52 +13934,75 @@ def chunk_by_threshold_mode(nums, threshold=0, normalize=False):
 def proportional_adjust(values, target_sum, threshold):
 
     n = len(values)
+    if n == 0:
+        return []
+
     locked_idx = [i for i, v in enumerate(values) if v < threshold]
     adj_idx    = [i for i in range(n) if i not in locked_idx]
 
-    locked_sum     = sum(values[i] for i in locked_idx)
+    locked_sum       = sum(values[i] for i in locked_idx)
     adj_original_sum = sum(values[i] for i in adj_idx)
     adj_target_sum   = target_sum - locked_sum
 
-    if adj_target_sum < 0:
-        print("target_sum is smaller than the sum of locked values")
-        return None
+    def _proportional_scale(idxs, original, target):
+
+        scaled_vals = {i: original[i] * (target / sum(original[i] for i in idxs))
+                       if sum(original[i] for i in idxs) > 0 else 0
+                       for i in idxs}
         
+        floored = {i: math.floor(scaled_vals[i]) for i in idxs}
+        rem = target - sum(floored.values())
+
+        fracs = sorted(
+            ((scaled_vals[i] - floored[i], i) for i in idxs),
+            key=lambda x: (x[0], -x[1]),
+            reverse=True
+        )
+        
+        for _, idx in fracs[:rem]:
+            floored[idx] += 1
+            
+        result = original.copy()
+        
+        for i in idxs:
+            result[i] = floored[i]
+            
+        return result
+
     if not adj_idx:
         if locked_sum == target_sum:
             return values.copy()
-            
-        print("no entries >= threshold to adjust, but sums differ")
-        return None
+
+        return _proportional_scale(locked_idx, values, target_sum)
+
+    if adj_target_sum < 0:
+        return _proportional_scale(range(n), values, target_sum)
 
     if adj_original_sum == 0:
-        base      = adj_target_sum // len(adj_idx)
-        remainder = adj_target_sum - base * len(adj_idx)
-        new_vals = values.copy()
-
-        for j, i in enumerate(sorted(adj_idx)):
-            add = base + (1 if j >= len(adj_idx) - remainder else 0)
-            new_vals[i] = values[i] + add
+        base = adj_target_sum // len(adj_idx)
+        rem  = adj_target_sum - base * len(adj_idx)
+        result = values.copy()
+        
+        for j, idx in enumerate(sorted(adj_idx)):
+            increment = base + (1 if j < rem else 0)
+            result[idx] = values[idx] + increment
             
-        return new_vals
-
-    factor = adj_target_sum / adj_original_sum
-    scaled = {i: values[i] * factor for i in adj_idx}
-    floored = {i: math.floor(scaled[i]) for i in adj_idx}
-    floor_sum = sum(floored.values())
-
-    remainder = adj_target_sum - floor_sum
-    
-    fracs = sorted(
-        ((scaled[i] - floored[i], i) for i in adj_idx),
-        key=lambda x: (x[0], x[1]),
-        reverse=True
-    )
-
-    for frac, i in fracs[:remainder]:
-        floored[i] += 1
+        return result
 
     result = values.copy()
+    scaled = {i: values[i] * (adj_target_sum / adj_original_sum) for i in adj_idx}
+    floored = {i: math.floor(scaled[i]) for i in adj_idx}
+    floor_sum = sum(floored.values())
+    rem = adj_target_sum - floor_sum
+
+    fracs = sorted(
+        ((scaled[i] - floored[i], i) for i in adj_idx),
+        key=lambda x: (x[0], -x[1]),
+        reverse=True
+    )
+    
+    for _, idx in fracs[:rem]:
+        floored[idx] += 1
 
     for i in adj_idx:
         result[i] = floored[i]
