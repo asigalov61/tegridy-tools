@@ -21,5 +21,12 @@
 
 ***
 
+## Documentation
+
+### [Main docs](https://github.com/lucidrains/x-transformers/blob/main/README.md)
+### [Classification docs](https://github.com/lucidrains/x-transformers/pull/264)
+
+***
+
 ### Project Los Angeles
 ### Tegridy Code 2025
