@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.8.31"
+__version__ = "25.9.19"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1486,6 +1486,7 @@ import multiprocessing
 from itertools import zip_longest
 from itertools import groupby
 from itertools import cycle
+from itertools import product
 
 from collections import Counter
 from collections import defaultdict
@@ -3907,8 +3908,9 @@ def chordify_score(score,
       return None
 
 def fix_monophonic_score_durations(monophonic_score,
-                                   min_notes_gap=1,
-                                   min_notes_dur=1
+                                   min_notes_gap=0,
+                                   min_notes_dur=1,
+                                   extend_durs=False
                                    ):
   
     fixed_score = []
@@ -3923,7 +3925,11 @@ def fix_monophonic_score_durations(monophonic_score,
         if note[1]+note[2] >= nmt:
           note_dur = max(1, nmt-note[1]-min_notes_gap)
         else:
-          note_dur = note[2]
+            if extend_durs:
+                note_dur = max(1, nmt-note[1]-min_notes_gap)
+
+            else:
+                note_dur = note[2]
 
         new_note = [note[0], note[1], note_dur] + note[3:]
         
@@ -3941,9 +3947,13 @@ def fix_monophonic_score_durations(monophonic_score,
         nmt = monophonic_score[i+1][0]
 
         if note[0]+note[1] >= nmt:
-          note_dur = max(1, nmt-note[0]-min_notes_gap)
+            note_dur = max(1, nmt-note[0]-min_notes_gap)
         else:
-          note_dur = note[1]
+            if extend_durs:
+                note_dur = max(1, nmt-note[0]-min_notes_gap)
+
+            else:
+                note_dur = note[1]
           
         new_note = [note[0], note_dur] + note[2:]
         
@@ -3956,8 +3966,6 @@ def fix_monophonic_score_durations(monophonic_score,
     return fixed_score
 
 ###################################################################################
-
-from itertools import product
 
 ALL_CHORDS = [[0], [7], [5], [9], [2], [4], [11], [10], [8], [6], [3], [1], [0, 9], [2, 5],
               [4, 7], [7, 10], [2, 11], [0, 3], [6, 9], [1, 4], [8, 11], [5, 8], [1, 10],
@@ -14714,6 +14722,214 @@ def int_to_tones_chord(integer,
 
     return tones_chord
 
+###################################################################################
+
+def fix_bad_chords_in_escore_notes(escore_notes,
+                                   use_full_chords=False,
+                                   return_bad_chords_count=False
+                                  ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    bcount = 0
+
+    if escore_notes:
+
+        chords = chordify_score([1000, escore_notes])
+
+        fixed_chords = []
+    
+        for c in chords:
+            c.sort(key=lambda x: x[3])
+    
+            if len(c) > 1:
+    
+                groups = groupby(c, key=lambda x: x[3])
+        
+                for cha, gr in groups:
+
+                    if cha != 9:
+    
+                        gr = list(gr)
+                        
+                        tones_chord = sorted(set([p[4] % 12 for p in gr]))
+            
+                        if tones_chord not in CHORDS:
+                            tones_chord = check_and_fix_tones_chord(tones_chord, 
+                                                                    use_full_chords=use_full_chords
+                                                                   )
+                    
+                            bcount += 1
+            
+                        ngr = []
+                        
+                        for n in gr:
+                            if n[4] % 12 in tones_chord:
+                                ngr.append(n)
+            
+                        fixed_chords.extend(ngr)
+
+                    else:
+                        fixed_chords.extend(gr)
+                        
+    
+            else:
+                fixed_chords.extend(c)
+                
+        fixed_chords.sort(key=lambda x: (x[1], -x[4]))
+
+        if return_bad_chords_count:
+            return fixed_chords, bcount
+
+        else:
+            return fixed_chords
+            
+    else:
+        if return_bad_chords_count:
+            return escore_notes, bcount
+
+        else:
+            return escore_notes
+        
+###################################################################################
+        
+def remove_events_from_escore_notes(escore_notes,
+                                    ele_idx=2,
+                                    ele_vals=[1],
+                                    chan_idx=3,
+                                    skip_drums=True
+                                    ):
+
+    new_escore_notes = []
+    
+    for e in escore_notes:
+        if skip_drums:
+            if e[ele_idx] not in ele_vals or e[chan_idx] == 9:
+                new_escore_notes.append(e)
+
+        else:
+            if e[ele_idx] not in ele_vals:
+                new_escore_notes.append(e)
+
+    return new_escore_notes
+        
+###################################################################################
+
+def flatten_spikes(arr):
+    
+    if len(arr) < 3:
+        return arr[:]
+
+    result = arr[:]
+    
+    for i in range(1, len(arr) - 1):
+        prev, curr, next_ = arr[i - 1], arr[i], arr[i + 1]
+
+        if (prev <= next_ and (curr > prev and curr > next_)) or \
+           (prev >= next_ and (curr < prev and curr < next_)):
+            result[i] = max(min(prev, next_), min(max(prev, next_), curr))
+            
+    return result
+        
+###################################################################################
+
+def flatten_spikes_advanced(arr, window=1):
+    
+    if len(arr) < 3:
+        return arr[:]
+
+    result = arr[:]
+    n = len(arr)
+
+    def is_spike(i):
+        left = arr[i - window:i]
+        right = arr[i + 1:i + 1 + window]
+        
+        if not left or not right:
+            return False
+
+        avg_left = sum(left) / len(left)
+        avg_right = sum(right) / len(right)
+
+        if arr[i] > avg_left and arr[i] > avg_right:
+            return True
+
+        if arr[i] < avg_left and arr[i] < avg_right:
+            return True
+        
+        return False
+
+    for i in range(window, n - window):
+        if is_spike(i):
+            neighbors = arr[i - window:i] + arr[i + 1:i + 1 + window]
+            result[i] = int(sorted(neighbors)[len(neighbors) // 2])
+
+    return result
+        
+###################################################################################
+
+def add_smooth_melody_to_enhanced_score_notes(escore_notes,
+                                              melody_channel=3,
+                                              min_notes_gap=0,
+                                              exclude_durs=[1, 2],
+                                              adv_flattening=True,
+                                              extend_durs=False,
+                                              max_mel_vels=127,
+                                              max_acc_vels=80,
+                                              return_melody=False
+                                             ):
+
+    escore_notes1 = remove_duplicate_pitches_from_escore_notes(escore_notes)
+    
+    escore_notes2 = fix_escore_notes_durations(escore_notes1, 
+                                               min_notes_gap=min_notes_gap
+                                              )
+    
+    escore_notes3 = fix_bad_chords_in_escore_notes(escore_notes2)
+    
+    escore_notes4 = remove_events_from_escore_notes(escore_notes3, 
+                                                    ele_vals=exclude_durs
+                                                   )
+    
+    escore_notes5 = add_expressive_melody_to_enhanced_score_notes(escore_notes4, 
+                                                                  return_melody=True, 
+                                                                  melody_channel=melody_channel
+                                                                 )
+    
+    mel_score = remove_events_from_escore_notes(escore_notes5,
+                                                ele_vals=exclude_durs
+                                               )
+    
+    pitches = [p[4] for p in mel_score]
+    
+    if adv_flattening:
+        res = flatten_spikes_advanced(pitches)
+
+    else:
+        res = flatten_spikes(pitches)
+    
+    mel_score3 = copy.deepcopy(mel_score)
+    
+    for i, e in enumerate(mel_score3):
+        e[4] = res[i]
+    
+    mel_score3 = fix_monophonic_score_durations(merge_melody_notes(mel_score3),
+                                                extend_durs=extend_durs
+                                               )
+
+    adjust_score_velocities(mel_score3, max_mel_vels)
+    adjust_score_velocities(escore_notes4, max_acc_vels)
+
+    if return_melody:
+        return sorted(mel_score3, key=lambda x: (x[1], -x[4]))
+
+    else:
+        return sorted(mel_score3 + escore_notes4, key=lambda x: (x[1], -x[4]))
+    
 ###################################################################################
 
 print('Module loaded!')
