@@ -14874,6 +14874,8 @@ def flatten_spikes_advanced(arr, window=1):
 
 def add_smooth_melody_to_enhanced_score_notes(escore_notes,
                                               melody_channel=3,
+                                              melody_patch=40,
+                                              melody_start_chord=0,
                                               min_notes_gap=0,
                                               exclude_durs=[1, 2],
                                               adv_flattening=True,
@@ -14895,9 +14897,11 @@ def add_smooth_melody_to_enhanced_score_notes(escore_notes,
                                                     ele_vals=exclude_durs
                                                    )
     
-    escore_notes5 = add_expressive_melody_to_enhanced_score_notes(escore_notes4, 
-                                                                  return_melody=True, 
-                                                                  melody_channel=melody_channel
+    escore_notes5 = add_expressive_melody_to_enhanced_score_notes(escore_notes4,
+                                                                  melody_channel=melody_channel, 
+                                                                  melody_patch=melody_patch, 
+                                                                  melody_start_chord=melody_start_chord,
+                                                                  return_melody=True,
                                                                  )
     
     mel_score = remove_events_from_escore_notes(escore_notes5,
