@@ -3908,7 +3908,7 @@ def chordify_score(score,
       return None
 
 def fix_monophonic_score_durations(monophonic_score,
-                                   min_notes_gap=0,
+                                   min_notes_gap=1,
                                    min_notes_dur=1,
                                    extend_durs=False
                                    ):
@@ -14877,7 +14877,7 @@ def add_smooth_melody_to_enhanced_score_notes(escore_notes,
                                               min_notes_gap=0,
                                               exclude_durs=[1, 2],
                                               adv_flattening=True,
-                                              extend_durs=False,
+                                              extend_durs=True,
                                               max_mel_vels=127,
                                               max_acc_vels=80,
                                               return_melody=False
