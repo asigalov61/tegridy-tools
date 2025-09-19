@@ -14,6 +14,7 @@ import random
 import tqdm
 
 from midi_to_colab_audio import midi_to_colab_audio
+
 import TMIDIX
 
 import matplotlib.pyplot as plt
@@ -82,13 +83,20 @@ def AddMelody(input_midi,
                                                                melody_start_chord=input_start_chord
                                                               )
 
-        else:
+        elif input_mel_type == "Expressive":
             output = TMIDIX.add_expressive_melody_to_enhanced_score_notes(escore_notes, 
                                                                           melody_channel=input_channel, 
                                                                           melody_patch=input_patch, 
                                                                           melody_start_chord=input_start_chord
                                                                          )
-        
+
+        elif input_mel_type == "Smooth":
+            output = TMIDIX.add_smooth_melody_to_enhanced_score_notes(escore_notes,
+                                                                      melody_channel=input_channel, 
+                                                                      melody_patch=input_patch, 
+                                                                      melody_start_chord=input_start_chord
+                                                                     )
+            
         print('=' * 70)
         print('Done!')
         print('=' * 70)
@@ -174,9 +182,9 @@ if __name__ == "__main__":
         )
         gr.Markdown("## Upload your MIDI or select a sample example MIDI")
 
-        input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
+        input_midi = gr.File(label="Input MIDI")
         
-        input_mel_type = gr.Dropdown(['Expressive', 'Original'], value="Expressive", label="Melody type")
+        input_mel_type = gr.Dropdown(['Expressive', 'Smooth', 'Original'], value="Expressive", label="Melody type")
         input_channel = gr.Slider(0, 15, value=3, step=1, label="Melody MIDI channel")
         input_patch = gr.Slider(0, 127, value=40, step=1, label="Melody MIDI patch")
         input_start_chord = gr.Slider(0, 128, value=0, step=1, label="Melody start chord")
