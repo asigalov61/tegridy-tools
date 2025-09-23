@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.9.19"
+__version__ = "25.9.22"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -14900,7 +14900,7 @@ def add_smooth_melody_to_enhanced_score_notes(escore_notes,
                                               melody_patch=40,
                                               melody_start_chord=0,
                                               min_notes_gap=0,
-                                              exclude_durs=[1, 2],
+                                              exclude_durs=[1],
                                               adv_flattening=True,
                                               extend_durs=True,
                                               max_mel_vels=127,
@@ -14957,6 +14957,74 @@ def add_smooth_melody_to_enhanced_score_notes(escore_notes,
     else:
         return sorted(mel_score3 + escore_notes4, key=lambda x: (x[1], -x[4]))
     
+###################################################################################
+
+def sorted_chords_to_full_chords(chords):
+
+    cchords = []
+    
+    for c in chords:
+        tones_chord = ALL_CHORDS_SORTED[c]
+
+        if tones_chord not in ALL_CHORDS_FULL:
+            tones_chord = check_and_fix_tones_chord(tones_chord)
+
+        cchords.append(ALL_CHORDS_FULL.index(tones_chord))
+
+    return cchords
+
+###################################################################################
+
+def full_chords_to_sorted_chords(chords):
+
+    cchords = []
+    
+    for c in chords:
+        tones_chord = ALL_CHORDS_FULL[c]
+
+        if tones_chord not in ALL_CHORDS_SORTED:
+            tones_chord = check_and_fix_tones_chord(tones_chord, use_full_chords=False)
+
+        cchords.append(ALL_CHORDS_SORTED.index(tones_chord))
+
+    return cchords
+
+###################################################################################
+
+def chords_to_escore_notes(chords,
+                           use_full_chords=False,
+                           chords_dtime=500,
+                           add_melody=True,
+                           add_texture=True,
+                          ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    score = []
+
+    dtime = 0
+
+    dur = chords_dtime
+
+    for c in chords:
+
+        if add_melody:
+            score.append(['note', dtime, dur, 3, CHORDS[c][0]+72, 115+CHORDS[c][0], 40])
+
+        for cc in CHORDS[c]:
+            score.append(['note', dtime, dur, 0, cc+48, 30+cc+48, 0])
+
+            if random.randint(0, 1) and add_texture:
+                score.append(['note', dtime, dur, 0, cc+60, 20+cc+60, 0])    
+            
+        dtime += chords_dtime
+
+    return score
+
 ###################################################################################
 
 print('Module loaded!')
