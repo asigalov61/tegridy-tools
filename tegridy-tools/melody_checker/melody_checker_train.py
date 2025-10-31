@@ -35,6 +35,7 @@ r'''############################################################################
 #
 #       Critical dependencies
 #
+#       !pip install -U joblib
 #       !pip install numpy==1.24.4
 #       !pip install -U scikit-learn
 #
@@ -590,7 +591,7 @@ if __name__ == "__main__":
         raise RuntimeError("train_data not found. Provide train_data: List[List[int]] in the environment before running this script.")
 
     # Recommended start default is 0.95 / 3
-    pipeline = train_with_rules_and_threshold(train_data, target_precision=0.97, consider_last_k_triplets=7) 
+    pipeline = train_with_rules_and_threshold(train_data, target_precision=0.95, consider_last_k_triplets=3) 
 
     loaded = joblib.load("melody_checker.joblib")
     demo_rng = np.random.RandomState(SEED)
