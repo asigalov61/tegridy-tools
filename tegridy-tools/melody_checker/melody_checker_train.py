@@ -517,8 +517,8 @@ def train_with_rules_and_threshold(train_data: List[List[int]],
         "chosen_threshold": float(threshold),
     }
 
-    joblib.dump(pipeline, "deterministic_pipeline_with_rules_and_threshold_enhanced_picklable.joblib", compress=3)
-    print("Saved pipeline to deterministic_pipeline_with_rules_and_threshold_enhanced_picklable.joblib")
+    joblib.dump(pipeline, "melody_checker.joblib", compress=3)
+    print("Saved pipeline to melody_checker.joblib")
     print("Sentinel triplet:", pipeline["triplet_rules"]["sentinel_triplet"], "rel_freq:", pipeline["triplet_rules"]["sentinel_relative_freq"])
     print("Chosen threshold for target_precision", target_precision, ":", threshold)
     return pipeline
