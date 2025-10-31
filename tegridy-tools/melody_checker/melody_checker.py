@@ -58,6 +58,8 @@ print('=' * 70)
 
 ################################################################################
 
+import sys
+import types
 import joblib
 import numpy as np
 import hashlib
@@ -223,7 +225,39 @@ def extract_features_from_single_sequence(seq: List[int],
 
 # --- Load pipeline (ensure filename matches what was saved) ---
 PIPELINE_PATH = "melody_checker.joblib"
-pipeline = joblib.load(PIPELINE_PATH)
+
+###################################################################################
+
+def load_pipeline(path: str = PIPELINE_PATH) -> Dict[str, Any]:
+    """
+    Lazily load the saved pipeline from disk and handle pickles that
+    reference classes defined under __main__ at save time.
+
+    If unpickling raises an AttributeError (e.g. "Can't get attribute
+    'CalibratedAdapter' on <module '__main__'>"), this function will
+    inject the adapter classes from this module into sys.modules['__main__']
+    so pickle can resolve them, then retry the load.
+    """
+    try:
+        return joblib.load(path)
+    except AttributeError as exc:
+        msg = str(exc)
+        # Quick heuristic: only proceed when pickle complains about missing adapter classes
+        if "Can't get attribute" in msg and "__main__" in msg:
+            main_mod = sys.modules.get("__main__")
+            if main_mod is None:
+                main_mod = types.ModuleType("__main__")
+                sys.modules["__main__"] = main_mod
+
+            # Inject the adapter classes into the __main__ module so unpickler finds them
+            # Use the same names that appear in the pickle
+            setattr(main_mod, "CalibratedAdapter", CalibratedAdapter)
+            setattr(main_mod, "RawPipelineAdapter", RawPipelineAdapter)
+
+            # Retry loading now that classes are visible on __main__
+            return joblib.load(path)
+        # Re-raise other attribute errors
+        raise
 
 ###################################################################################
 
