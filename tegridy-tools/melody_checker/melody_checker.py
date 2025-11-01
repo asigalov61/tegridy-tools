@@ -35,6 +35,7 @@ r'''############################################################################
 #
 #       Critical dependencies
 #
+#       !pip install -U joblib
 #       !pip install numpy==1.24.4
 #       !pip install -U scikit-learn
 #
