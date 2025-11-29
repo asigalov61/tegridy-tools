@@ -12,10 +12,11 @@
 ## Requirements
 
 ```sh
-pip install numpy
 pip install pretty-midi
 pip install symusic
 pip install miditok
+pip install numba
+pip install numpy==1.24.4
 ```
 
 ***
@@ -25,7 +26,17 @@ pip install miditok
 ### Extract loops info
 
 ```python
-from process_file import detect_loops_from_path
+import os
+
+# Set desired environment variables
+os.environ["USE_NUMBA"] = "1"
+os.environ["USE_CUDA"] = "1"
+
+# Check the variables
+print(os.environ["USE_NUMBA"])
+print(os.environ["USE_CUDA"])
+
+from process_file_fast import detect_loops_from_path
 
 midi_file = './tegridy-tools/tegridy-tools/seed-lyrics.mid'
 
@@ -53,4 +64,4 @@ zero_start_time_loop.dump_midi(output_loop_MIDI)
 ***
 
 ### Project Los Angeles
-### Tegridy Code 2024
+### Tegridy Code 2025
