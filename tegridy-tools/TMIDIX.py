@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.9.22"
+__version__ = "25.12.29"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -11407,20 +11407,26 @@ def escore_notes_core(escore_notes, core_len=128):
 
 ###################################################################################
 
-def multiprocessing_wrapper(function, data_list, verbose=True):
+def multiprocessing_wrapper(function, 
+                            data_list, 
+                            num_workers=None, 
+                            verbose=True):
     
-    with multiprocessing.Pool() as pool:
-        
-        results = []
-        
-        for result in tqdm.tqdm(pool.imap(function, data_list),
-                                total=len(data_list),
-                                disable=not verbose
-                                ):
-            
+    if num_workers is None:
+        num_workers = multiprocessing.cpu_count()
+
+    results = []
+
+    with multiprocessing.Pool(processes=num_workers) as pool:
+        for result in tqdm.tqdm(
+            pool.imap(function, data_list),
+            total=len(data_list),
+            disable=not verbose
+        ):
             results.append(result)
-            
+
     return results
+
 
 ###################################################################################
 
@@ -11604,9 +11610,10 @@ def create_files_list(datasets_paths=['./'],
  
     for dataset_addr in datasets_paths:
         
-        print('=' * 70)
-        print('Processing', dataset_addr)
-        print('=' * 70)
+        if verbose:
+            print('=' * 70)
+            print('Processing', dataset_addr)
+            print('=' * 70)
         
         for dirpath, dirnames, filenames in tqdm.tqdm(os.walk(dataset_addr), disable=not verbose):
                 
