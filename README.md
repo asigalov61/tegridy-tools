@@ -101,14 +101,14 @@ import random
 ***
 
 ```bibtex
-@inproceedings{lev2024tegridytools,
+@inproceedings{lev2026tegridytools,
     title       = {tegridy-tools: Symbolic Music NLP Artificial Intelligence Toolkit},
     author      = {Aleksandr Lev},
     booktitle   = {GitHub},
-    year        = {2025},
+    year        = {2026},
 }
 ```
 ***
 
 ### Project Los Angeles
-### Tegridy Code 2025
+### Tegridy Code 2026
