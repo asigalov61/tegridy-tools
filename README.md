@@ -79,7 +79,7 @@ import TPLOTS
 import TMELODIES
 import HaystackSearch
 import midi_to_colab_audio
-from x_transformer_1_23_2 import *
+from x_transformer_2_4_1 import *
 
 import random
 ```
