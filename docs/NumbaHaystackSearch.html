@@ -1056,6 +1056,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#NumbaHaystackSearch.MAX_SHARED_NEEDLE">MAX_SHARED_NEEDLE</a></li>
+    <li class="mono"><a href="#NumbaHaystackSearch.USE_CUDA">USE_CUDA</a></li>
+  </ul>
+
+    </li>
 
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
@@ -1082,18 +1090,18 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_3"></h1>
 <h1 id="_4"></h1>
 <h1 id="numba-haystack-search-python-module">Numba Haystack Search Python Module</h1>
-<h1 id="version-10">Version 1.0</h1>
+<h1 id="version-20">Version 2.0</h1>
 <h1 id="_5"></h1>
 <h1 id="project-los-angeles">Project Los Angeles</h1>
 <h1 id="_6"></h1>
-<h1 id="tegridy-code-2025">Tegridy Code 2025</h1>
+<h1 id="tegridy-code-2026">Tegridy Code 2026</h1>
 <h1 id="_7"></h1>
 <h1 id="httpsgithubcomasigalov61tegridy-tools">https://github.com/asigalov61/tegridy-tools</h1>
 <h1 id="_8"></h1>
 <h1 id="_9"></h1>
 <h6 id="_10"></h6>
 <h1 id="_11"></h1>
-<h1 id="copyright-2025-project-los-angeles-tegridy-code">Copyright 2025 Project Los Angeles / Tegridy Code</h1>
+<h1 id="copyright-2026-project-los-angeles-tegridy-code">Copyright 2026 Project Los Angeles / Tegridy Code</h1>
 <h1 id="_12"></h1>
 <h1 id="licensed-under-the-apache-license-version-20-the-license">Licensed under the Apache License, Version 2.0 (the "License");</h1>
 <h1 id="you-may-not-use-this-file-except-in-compliance-with-the-license">you may not use this file except in compliance with the License.</h1>
@@ -1112,31 +1120,32 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_18"></h1>
 <h1 id="critical-dependencies">Critical dependencies</h1>
 <h1 id="_19"></h1>
+<h1 id="pip-install-numpy">!pip install numpy</h1>
 <h1 id="pip-install-numba">!pip install numba</h1>
 <h1 id="_20"></h1>
 <h6 id="_21"></h6>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-NumbaHaystackSearch', this);">Show source &equiv;</a></p>
   <div id="source-NumbaHaystackSearch" class="source">
-    <div class="codehilite"><pre><span></span><span class="ch">#! /usr/bin/python3</span>
+    <div class="codehilite"><pre><span></span><span class="ch">#! /usr/bin/env python3</span>
 
 <span class="sa">r</span><span class="sd">&#39;&#39;&#39;############################################################################</span>
 <span class="sd">################################################################################</span>
 <span class="sd">#</span>
 <span class="sd">#</span>
 <span class="sd">#	    Numba Haystack Search Python Module</span>
-<span class="sd">#	    Version 1.0</span>
+<span class="sd">#	    Version 2.0</span>
 <span class="sd">#</span>
 <span class="sd">#	    Project Los Angeles</span>
 <span class="sd">#</span>
-<span class="sd">#	    Tegridy Code 2025</span>
+<span class="sd">#	    Tegridy Code 2026</span>
 <span class="sd">#</span>
 <span class="sd">#       https://github.com/asigalov61/tegridy-tools</span>
 <span class="sd">#</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
 <span class="sd">#</span>
-<span class="sd">#       Copyright 2025 Project Los Angeles / Tegridy Code</span>
+<span class="sd">#       Copyright 2026 Project Los Angeles / Tegridy Code</span>
 <span class="sd">#</span>
 <span class="sd">#       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="sd">#       you may not use this file except in compliance with the License.</span>
@@ -1155,6 +1164,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#</span>
 <span class="sd">#       Critical dependencies</span>
 <span class="sd">#</span>
+<span class="sd">#       !pip install numpy</span>
 <span class="sd">#       !pip install numba</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
@@ -1171,134 +1181,284 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="c1">################################################################################</span>
+<span class="c1">###################################################################################</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">cuda</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;NumPy is required.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="c1"># Try to import Numba/CUDA. If not available, we&#39;ll provide a CPU fallback.</span>
+<span class="n">USE_CUDA</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">cuda</span><span class="p">,</span> <span class="n">int16</span> <span class="k">as</span> <span class="n">nb_int16</span><span class="p">,</span> <span class="n">int32</span> <span class="k">as</span> <span class="n">nb_int32</span>
+    <span class="n">USE_CUDA</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Numba is found!&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Will use Numba and GPU for processing!&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Numba CUDA is available. GPU path enabled.&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-
-<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Could not import Numba. Details: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please make sure Numba is installed.&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-    
-    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Numba could not be loaded!&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Numba CUDA not available. Falling back to CPU implementation.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Install Numba with CUDA support for GPU acceleration.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="n">USE_CUDA</span> <span class="o">=</span> <span class="kc">False</span>
 
-<span class="c1">################################################################################</span>
+<span class="c1">###################################################################################</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">cuda</span>
+<span class="c1"># Tunable constant: maximum needle length to copy into shared memory per block.</span>
+<span class="c1"># Keep this moderate to avoid exhausting shared memory per block.</span>
+<span class="n">MAX_SHARED_NEEDLE</span> <span class="o">=</span> <span class="mi">1024</span>  <span class="c1"># adjust if you know your device has more shared memory</span>
 
-<span class="c1">################################################################################</span>
+<span class="c1">###################################################################################</span>
 
-<span class="nd">@cuda</span><span class="o">.</span><span class="n">jit</span>
-<span class="k">def</span> <span class="nf">_search_kernel</span><span class="p">(</span>
-    <span class="n">hay_data</span><span class="p">,</span> <span class="n">hay_offsets</span><span class="p">,</span> <span class="n">needle</span><span class="p">,</span> <span class="n">needle_len</span><span class="p">,</span>
-    <span class="n">potential</span><span class="p">,</span> <span class="n">res_offsets</span><span class="p">,</span> <span class="n">counters</span><span class="p">,</span> <span class="n">matches</span><span class="p">,</span> <span class="n">seq_start</span>
-<span class="p">):</span>
-    <span class="c1"># local thread/block indices</span>
-    <span class="n">local_seq</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">y</span>
-    <span class="n">block_id</span>  <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">x</span>
-    <span class="n">tid</span>       <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">threadIdx</span><span class="o">.</span><span class="n">x</span>
-    <span class="n">tpb</span>       <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">blockDim</span><span class="o">.</span><span class="n">x</span>
+<span class="k">if</span> <span class="n">USE_CUDA</span><span class="p">:</span>
+    <span class="c1"># Kernel: each thread checks one candidate start position within a sequence.</span>
+    <span class="c1"># Grid layout: grid.x = blocks_per_seq (based on max potential), grid.y = batch_size</span>
+    <span class="c1"># blockDim.x = threads per block (tpb)</span>
+    <span class="nd">@cuda</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span> <span class="nf">_search_kernel_shared</span><span class="p">(</span>
+        <span class="n">hay_data</span><span class="p">,</span> <span class="n">hay_offsets</span><span class="p">,</span> <span class="n">needle</span><span class="p">,</span> <span class="n">needle_len</span><span class="p">,</span>
+        <span class="n">potential</span><span class="p">,</span> <span class="n">res_offsets</span><span class="p">,</span> <span class="n">counters</span><span class="p">,</span> <span class="n">matches</span><span class="p">,</span> <span class="n">seq_start</span><span class="p">,</span> <span class="n">use_shared</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optimized search kernel:</span>
+<span class="sd">          - Each thread maps to a candidate start position for a particular sequence.</span>
+<span class="sd">          - Optionally copies the needle into shared memory once per block for faster access.</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">          hay_data: int16 flattened haystack values</span>
+<span class="sd">          hay_offsets: int32 offsets into hay_data for each sequence</span>
+<span class="sd">          needle: int16 needle array (global)</span>
+<span class="sd">          needle_len: int32 length of needle</span>
+<span class="sd">          potential: int32 number of candidate starts per sequence</span>
+<span class="sd">          res_offsets: int32 result offsets per sequence (length n_seqs)</span>
+<span class="sd">          counters: int32 per-sequence atomic counters</span>
+<span class="sd">          matches: int32 flat array to store match start indices</span>
+<span class="sd">          seq_start: int32 offset for batch start</span>
+<span class="sd">          use_shared: int32 flag (1 =&gt; copy needle to shared memory, 0 =&gt; use global)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># local thread/block indices</span>
+        <span class="n">local_seq</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">block_id</span>  <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">tid</span>       <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">threadIdx</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">tpb</span>       <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">blockDim</span><span class="o">.</span><span class="n">x</span>
 
-    <span class="c1"># map to global sequence</span>
-    <span class="n">seq_id</span> <span class="o">=</span> <span class="n">seq_start</span> <span class="o">+</span> <span class="n">local_seq</span>
-    <span class="n">n_pos</span>  <span class="o">=</span> <span class="n">potential</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span>
-    <span class="n">start_pos</span> <span class="o">=</span> <span class="n">block_id</span> <span class="o">*</span> <span class="n">tpb</span> <span class="o">+</span> <span class="n">tid</span>
-    <span class="k">if</span> <span class="n">start_pos</span> <span class="o">&gt;=</span> <span class="n">n_pos</span><span class="p">:</span>
-        <span class="k">return</span>
-
-    <span class="c1"># compare needle</span>
-    <span class="n">base</span> <span class="o">=</span> <span class="n">hay_offsets</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">start_pos</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">needle_len</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">hay_data</span><span class="p">[</span><span class="n">base</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">needle</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="n">seq_id</span> <span class="o">=</span> <span class="n">seq_start</span> <span class="o">+</span> <span class="n">local_seq</span>
+        <span class="c1"># bounds check for sequences in this batch</span>
+        <span class="k">if</span> <span class="n">seq_id</span> <span class="o">&gt;=</span> <span class="n">potential</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">return</span>
 
-    <span class="c1"># record match slot</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">atomic</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">counters</span><span class="p">,</span> <span class="n">seq_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">matches</span><span class="p">[</span><span class="n">res_offsets</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_pos</span>
+        <span class="n">n_pos</span> <span class="o">=</span> <span class="n">potential</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span>
+        <span class="n">start_pos</span> <span class="o">=</span> <span class="n">block_id</span> <span class="o">*</span> <span class="n">tpb</span> <span class="o">+</span> <span class="n">tid</span>
+        <span class="k">if</span> <span class="n">start_pos</span> <span class="o">&gt;=</span> <span class="n">n_pos</span><span class="p">:</span>
+            <span class="k">return</span>
 
-<span class="k">def</span> <span class="nf">NumbaHaystackSearch</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">):</span>
+        <span class="c1"># compute base index in hay_data for this candidate</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">hay_offsets</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">start_pos</span>
+
+        <span class="c1"># Optionally copy needle into shared memory (only first block thread group does it)</span>
+        <span class="c1"># Shared buffer declared dynamically by the compiler; we index into it as if it&#39;s an array.</span>
+        <span class="c1"># We use a simple loop to compare; if use_shared==1 we read from shared, else from global.</span>
+        <span class="k">if</span> <span class="n">use_shared</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># allocate shared memory view</span>
+            <span class="c1"># Note: Numba maps cuda.shared.array to a block-local buffer; we index into it.</span>
+            <span class="n">shared_needle</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">MAX_SHARED_NEEDLE</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">nb_int16</span><span class="p">)</span>
+            <span class="c1"># copy needle into shared memory (only first tpb threads do the copy in chunks)</span>
+            <span class="c1"># We must ensure we don&#39;t read/write out of bounds</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">tid</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">needle_len</span><span class="p">:</span>
+                <span class="n">shared_needle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">needle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="n">tpb</span>
+            <span class="n">cuda</span><span class="o">.</span><span class="n">syncthreads</span><span class="p">()</span>
+
+            <span class="c1"># compare using shared memory</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">needle_len</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">hay_data</span><span class="p">[</span><span class="n">base</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">shared_needle</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># compare directly from global needle</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">needle_len</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">hay_data</span><span class="p">[</span><span class="n">base</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">needle</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">return</span>
+
+        <span class="c1"># record match slot atomically</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">atomic</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">counters</span><span class="p">,</span> <span class="n">seq_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">matches</span><span class="p">[</span><span class="n">res_offsets</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_pos</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CPU fallback: vectorized sliding-window search using NumPy stride tricks.</span>
+<span class="sd">    Returns list of lists of match-start-indices per sequence.</span>
+<span class="sd">    This is very fast for small-to-moderate workloads and avoids GPU overhead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">needle_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">needle</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">needle_arr</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># empty needle matches at every position by convention -&gt; return empty lists</span>
+        <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">haystack</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">haystack</span><span class="p">:</span>
+        <span class="n">seq_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">seq_arr</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">continue</span>
+        <span class="c1"># Use stride trick to create a (n-m+1, m) view</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+        <span class="n">strides</span> <span class="o">=</span> <span class="p">(</span><span class="n">seq_arr</span><span class="o">.</span><span class="n">strides</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">seq_arr</span><span class="o">.</span><span class="n">strides</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">windows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">as_strided</span><span class="p">(</span><span class="n">seq_arr</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">)</span>
+            <span class="c1"># Compare rows to needle</span>
+            <span class="c1"># For memory safety, copy windows if it&#39;s not safe to view (but as_strided is fine here)</span>
+            <span class="n">matches_bool</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">windows</span> <span class="o">==</span> <span class="n">needle_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">matches_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">matches_bool</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matches_idx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># Fallback to naive loop if stride trick fails</span>
+            <span class="n">idxs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">seq_arr</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">m</span><span class="p">],</span> <span class="n">needle_arr</span><span class="p">):</span>
+                    <span class="n">idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">NumbaHaystackSearch</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    haystack: list of int16 arrays/lists</span>
 <span class="sd">    needle:   int16 array/list</span>
+<span class="sd">    prefer_gpu: bool, if True attempt GPU path when available; otherwise use CPU fallback</span>
 <span class="sd">    returns:  list of lists of match-start-indices per sequence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n_seqs</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">haystack</span><span class="p">)</span>
+    <span class="c1"># Basic validation and conversion</span>
+    <span class="k">if</span> <span class="n">needle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;needle must be provided (non-None).&quot;</span><span class="p">)</span>
+    <span class="n">n_seqs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">haystack</span><span class="p">)</span>
     <span class="n">needle_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">needle</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    <span class="n">m</span>          <span class="o">=</span> <span class="n">needle_arr</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">needle_arr</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
-    <span class="c1"># 1) flatten haystack + compute offsets</span>
+    <span class="c1"># Quick edge cases</span>
+    <span class="k">if</span> <span class="n">n_seqs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># define empty needle -&gt; no matches (consistent with original)</span>
+        <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">)]</span>
+
+    <span class="c1"># Compute lengths and offsets</span>
     <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">haystack</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">offsets</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="n">total_vals</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
+    <span class="c1"># Flatten haystack into contiguous int16 array</span>
     <span class="n">hay_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_vals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">seq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">haystack</span><span class="p">):</span>
         <span class="n">seq_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-        <span class="n">start</span>   <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">hay_data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">lengths</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">seq_arr</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">hay_data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">lengths</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">seq_arr</span>
 
-    <span class="c1"># 2) how many possible start positions per sequence</span>
+    <span class="c1"># Potential start positions per sequence</span>
     <span class="n">potential</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lengths</span> <span class="o">-</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">)]</span>
 
-    <span class="c1"># 3) prefix‐sum of potentials → result‐offsets</span>
-    <span class="n">res_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="c1"># Result offsets (prefix sum of potentials)</span>
+    <span class="n">res_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">res_offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">potential</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">res_offsets</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="n">total_pot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="c1"># 4) host buffers for atomics + matches</span>
-    <span class="n">matches_host</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_pot</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">counters_host</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="c1"># Heuristic: if problem is small, prefer CPU path to avoid GPU overhead</span>
+    <span class="c1"># Thresholds chosen conservatively; tune for your hardware.</span>
+    <span class="n">SMALL_TOTAL_POT</span> <span class="o">=</span> <span class="mi">1_000</span>  <span class="c1"># if fewer than this many candidate positions, CPU is often faster</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">USE_CUDA</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">prefer_gpu</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">total_pot</span> <span class="o">&lt;=</span> <span class="n">SMALL_TOTAL_POT</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle_arr</span><span class="p">)</span>
 
-    <span class="c1"># 5) copy everything GPU</span>
-    <span class="n">d_data</span>      <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">hay_data</span><span class="p">)</span>
-    <span class="n">d_offsets</span>   <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
-    <span class="n">d_needle</span>    <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">needle_arr</span><span class="p">)</span>
-    <span class="n">d_potential</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">potential</span><span class="p">)</span>
-    <span class="n">d_res_off</span>   <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">d_counters</span>  <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
-    <span class="n">d_matches</span>   <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
+    <span class="c1"># GPU path</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Use pinned host memory for faster transfers</span>
+        <span class="n">matches_host</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">pinned_array</span><span class="p">(</span><span class="n">total_pot</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">counters_host</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">pinned_array</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="c1"># initialize</span>
+        <span class="n">counters_host</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Device copies</span>
+        <span class="n">d_data</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">hay_data</span><span class="p">)</span>
+        <span class="n">d_offsets</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
+        <span class="n">d_needle</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">needle_arr</span><span class="p">)</span>
+        <span class="n">d_potential</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">potential</span><span class="p">)</span>
+        <span class="c1"># res_offsets[:-1] maps each sequence to its result base index</span>
+        <span class="n">d_res_off</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">d_counters</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
+        <span class="n">d_matches</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
 
-    <span class="c1"># 6) launch parameters</span>
-    <span class="n">max_pot</span>        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">potential</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-    <span class="n">tpb</span>            <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">max_pot</span> <span class="o">&gt;=</span> <span class="mi">256</span> <span class="k">else</span> <span class="n">max_pot</span>
-    <span class="n">blocks_per_seq</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_pot</span> <span class="o">+</span> <span class="n">tpb</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">tpb</span>
+        <span class="c1"># Determine device properties and tune tpb</span>
+        <span class="n">dev</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">get_current_device</span><span class="p">()</span>
+        <span class="n">max_threads_per_block</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">MAX_THREADS_PER_BLOCK</span>
+        <span class="c1"># choose tpb as power-of-two up to 256 or device limit</span>
+        <span class="n">tpb</span> <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">max_threads_per_block</span> <span class="o">&gt;=</span> <span class="mi">256</span> <span class="k">else</span> <span class="n">max_threads_per_block</span>
+        <span class="c1"># but don&#39;t exceed max potential (no point in more threads than max_pot)</span>
+        <span class="n">max_pot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">potential</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">max_pot</span> <span class="o">&lt;</span> <span class="n">tpb</span><span class="p">:</span>
+            <span class="c1"># choose nearest power-of-two &lt;= max_pot</span>
+            <span class="n">tpb</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">max_pot</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_pot</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">tpb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tpb</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1"># 7) BATCH on the y‐dimension limit = 65 535</span>
-    <span class="n">MAX_GRID_Y</span> <span class="o">=</span> <span class="mi">65_535</span>
+        <span class="c1"># blocks per sequence (based on max potential)</span>
+        <span class="n">blocks_per_seq</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_pot</span> <span class="o">+</span> <span class="n">tpb</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">tpb</span>
+        <span class="c1"># grid.y batch size limit</span>
+        <span class="n">MAX_GRID_Y</span> <span class="o">=</span> <span class="mi">65_535</span>
+        <span class="c1"># decide whether to use shared memory for needle</span>
+        <span class="n">use_shared</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">&lt;=</span> <span class="n">MAX_SHARED_NEEDLE</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">for</span> <span class="n">seq_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_seqs</span><span class="p">,</span> <span class="n">MAX_GRID_Y</span><span class="p">):</span>
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">MAX_GRID_Y</span><span class="p">,</span> <span class="n">n_seqs</span> <span class="o">-</span> <span class="n">seq_start</span><span class="p">)</span>
-        <span class="n">grid_dims</span>  <span class="o">=</span> <span class="p">(</span><span class="n">blocks_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
-        <span class="n">_search_kernel</span><span class="p">[</span><span class="n">grid_dims</span><span class="p">,</span> <span class="n">tpb</span><span class="p">](</span>
-            <span class="n">d_data</span><span class="p">,</span> <span class="n">d_offsets</span><span class="p">,</span> <span class="n">d_needle</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">m</span><span class="p">),</span>
-            <span class="n">d_potential</span><span class="p">,</span> <span class="n">d_res_off</span><span class="p">,</span> <span class="n">d_counters</span><span class="p">,</span> <span class="n">d_matches</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">seq_start</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="c1"># Launch in batches along y dimension</span>
+        <span class="k">for</span> <span class="n">seq_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_seqs</span><span class="p">,</span> <span class="n">MAX_GRID_Y</span><span class="p">):</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">MAX_GRID_Y</span><span class="p">,</span> <span class="n">n_seqs</span> <span class="o">-</span> <span class="n">seq_start</span><span class="p">)</span>
+            <span class="n">grid_dims</span> <span class="o">=</span> <span class="p">(</span><span class="n">blocks_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+            <span class="c1"># Launch kernel</span>
+            <span class="c1"># We pass use_shared as int32 flag</span>
+            <span class="n">_search_kernel_shared</span><span class="p">[</span><span class="n">grid_dims</span><span class="p">,</span> <span class="n">tpb</span><span class="p">](</span>
+                <span class="n">d_data</span><span class="p">,</span> <span class="n">d_offsets</span><span class="p">,</span> <span class="n">d_needle</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">m</span><span class="p">),</span>
+                <span class="n">d_potential</span><span class="p">,</span> <span class="n">d_res_off</span><span class="p">,</span> <span class="n">d_counters</span><span class="p">,</span> <span class="n">d_matches</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">seq_start</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">use_shared</span><span class="p">)</span>
+            <span class="p">)</span>
 
-    <span class="c1"># 8) fetch results back</span>
-    <span class="n">d_counters</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
-    <span class="n">d_matches</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
+        <span class="c1"># Ensure kernel finished</span>
+        <span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
 
-    <span class="c1"># 9) split into per‐sequence lists</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">):</span>
-        <span class="n">cnt</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">counters_host</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matches_host</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">cnt</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="c1"># Copy results back</span>
+        <span class="n">d_counters</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
+        <span class="n">d_matches</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">results</span>
+        <span class="c1"># Build per-sequence lists</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">):</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">counters_host</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">cnt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># slice and convert to Python list</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matches_host</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">cnt</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">except</span> <span class="n">cuda</span><span class="o">.</span><span class="n">CudaSupportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CUDA support error encountered: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Falling back to CPU.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle_arr</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPU path failed with exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Falling back to CPU.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle_arr</span><span class="p">)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -1316,12 +1476,29 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   </header>
 
   <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="NumbaHaystackSearch.MAX_SHARED_NEEDLE" class="name">var <span class="ident">MAX_SHARED_NEEDLE</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="NumbaHaystackSearch.USE_CUDA" class="name">var <span class="ident">USE_CUDA</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
     <div class="name def" id="NumbaHaystackSearch.NumbaHaystackSearch">
-    <p>def <span class="ident">NumbaHaystackSearch</span>(</p><p>haystack, needle)</p>
+    <p>def <span class="ident">NumbaHaystackSearch</span>(</p><p>haystack, needle, prefer_gpu=True)</p>
     </div>
     
 
@@ -1329,86 +1506,138 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   
     <div class="desc"><p>haystack: list of int16 arrays/lists
 needle:   int16 array/list
+prefer_gpu: bool, if True attempt GPU path when available; otherwise use CPU fallback
 returns:  list of lists of match-start-indices per sequence</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-NumbaHaystackSearch.NumbaHaystackSearch', this);">Show source &equiv;</a></p>
   <div id="source-NumbaHaystackSearch.NumbaHaystackSearch" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">NumbaHaystackSearch</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">NumbaHaystackSearch</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    haystack: list of int16 arrays/lists</span>
 <span class="sd">    needle:   int16 array/list</span>
+<span class="sd">    prefer_gpu: bool, if True attempt GPU path when available; otherwise use CPU fallback</span>
 <span class="sd">    returns:  list of lists of match-start-indices per sequence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n_seqs</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">haystack</span><span class="p">)</span>
+    <span class="c1"># Basic validation and conversion</span>
+    <span class="k">if</span> <span class="n">needle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;needle must be provided (non-None).&quot;</span><span class="p">)</span>
+    <span class="n">n_seqs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">haystack</span><span class="p">)</span>
     <span class="n">needle_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">needle</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-    <span class="n">m</span>          <span class="o">=</span> <span class="n">needle_arr</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">needle_arr</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
-    <span class="c1"># 1) flatten haystack + compute offsets</span>
+    <span class="c1"># Quick edge cases</span>
+    <span class="k">if</span> <span class="n">n_seqs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># define empty needle -&gt; no matches (consistent with original)</span>
+        <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">)]</span>
+
+    <span class="c1"># Compute lengths and offsets</span>
     <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">haystack</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">offsets</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="n">total_vals</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
+    <span class="c1"># Flatten haystack into contiguous int16 array</span>
     <span class="n">hay_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_vals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">seq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">haystack</span><span class="p">):</span>
         <span class="n">seq_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
-        <span class="n">start</span>   <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">hay_data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">lengths</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">seq_arr</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">hay_data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">lengths</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">seq_arr</span>
 
-    <span class="c1"># 2) how many possible start positions per sequence</span>
+    <span class="c1"># Potential start positions per sequence</span>
     <span class="n">potential</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lengths</span> <span class="o">-</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">)]</span>
 
-    <span class="c1"># 3) prefix‐sum of potentials → result‐offsets</span>
-    <span class="n">res_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="c1"># Result offsets (prefix sum of potentials)</span>
+    <span class="n">res_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_seqs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">res_offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">potential</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">res_offsets</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="n">total_pot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="c1"># 4) host buffers for atomics + matches</span>
-    <span class="n">matches_host</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_pot</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">counters_host</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="c1"># Heuristic: if problem is small, prefer CPU path to avoid GPU overhead</span>
+    <span class="c1"># Thresholds chosen conservatively; tune for your hardware.</span>
+    <span class="n">SMALL_TOTAL_POT</span> <span class="o">=</span> <span class="mi">1_000</span>  <span class="c1"># if fewer than this many candidate positions, CPU is often faster</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">USE_CUDA</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">prefer_gpu</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">total_pot</span> <span class="o">&lt;=</span> <span class="n">SMALL_TOTAL_POT</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle_arr</span><span class="p">)</span>
 
-    <span class="c1"># 5) copy everything GPU</span>
-    <span class="n">d_data</span>      <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">hay_data</span><span class="p">)</span>
-    <span class="n">d_offsets</span>   <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
-    <span class="n">d_needle</span>    <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">needle_arr</span><span class="p">)</span>
-    <span class="n">d_potential</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">potential</span><span class="p">)</span>
-    <span class="n">d_res_off</span>   <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">d_counters</span>  <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
-    <span class="n">d_matches</span>   <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
+    <span class="c1"># GPU path</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Use pinned host memory for faster transfers</span>
+        <span class="n">matches_host</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">pinned_array</span><span class="p">(</span><span class="n">total_pot</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">counters_host</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">pinned_array</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="c1"># initialize</span>
+        <span class="n">counters_host</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Device copies</span>
+        <span class="n">d_data</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">hay_data</span><span class="p">)</span>
+        <span class="n">d_offsets</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
+        <span class="n">d_needle</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">needle_arr</span><span class="p">)</span>
+        <span class="n">d_potential</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">potential</span><span class="p">)</span>
+        <span class="c1"># res_offsets[:-1] maps each sequence to its result base index</span>
+        <span class="n">d_res_off</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">d_counters</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
+        <span class="n">d_matches</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
 
-    <span class="c1"># 6) launch parameters</span>
-    <span class="n">max_pot</span>        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">potential</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-    <span class="n">tpb</span>            <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">max_pot</span> <span class="o">&gt;=</span> <span class="mi">256</span> <span class="k">else</span> <span class="n">max_pot</span>
-    <span class="n">blocks_per_seq</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_pot</span> <span class="o">+</span> <span class="n">tpb</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">tpb</span>
+        <span class="c1"># Determine device properties and tune tpb</span>
+        <span class="n">dev</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">get_current_device</span><span class="p">()</span>
+        <span class="n">max_threads_per_block</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">MAX_THREADS_PER_BLOCK</span>
+        <span class="c1"># choose tpb as power-of-two up to 256 or device limit</span>
+        <span class="n">tpb</span> <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">max_threads_per_block</span> <span class="o">&gt;=</span> <span class="mi">256</span> <span class="k">else</span> <span class="n">max_threads_per_block</span>
+        <span class="c1"># but don&#39;t exceed max potential (no point in more threads than max_pot)</span>
+        <span class="n">max_pot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">potential</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">max_pot</span> <span class="o">&lt;</span> <span class="n">tpb</span><span class="p">:</span>
+            <span class="c1"># choose nearest power-of-two &lt;= max_pot</span>
+            <span class="n">tpb</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">max_pot</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_pot</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">tpb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tpb</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1"># 7) BATCH on the y‐dimension limit = 65 535</span>
-    <span class="n">MAX_GRID_Y</span> <span class="o">=</span> <span class="mi">65_535</span>
+        <span class="c1"># blocks per sequence (based on max potential)</span>
+        <span class="n">blocks_per_seq</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_pot</span> <span class="o">+</span> <span class="n">tpb</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">tpb</span>
+        <span class="c1"># grid.y batch size limit</span>
+        <span class="n">MAX_GRID_Y</span> <span class="o">=</span> <span class="mi">65_535</span>
+        <span class="c1"># decide whether to use shared memory for needle</span>
+        <span class="n">use_shared</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">&lt;=</span> <span class="n">MAX_SHARED_NEEDLE</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">for</span> <span class="n">seq_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_seqs</span><span class="p">,</span> <span class="n">MAX_GRID_Y</span><span class="p">):</span>
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">MAX_GRID_Y</span><span class="p">,</span> <span class="n">n_seqs</span> <span class="o">-</span> <span class="n">seq_start</span><span class="p">)</span>
-        <span class="n">grid_dims</span>  <span class="o">=</span> <span class="p">(</span><span class="n">blocks_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
-        <span class="n">_search_kernel</span><span class="p">[</span><span class="n">grid_dims</span><span class="p">,</span> <span class="n">tpb</span><span class="p">](</span>
-            <span class="n">d_data</span><span class="p">,</span> <span class="n">d_offsets</span><span class="p">,</span> <span class="n">d_needle</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">m</span><span class="p">),</span>
-            <span class="n">d_potential</span><span class="p">,</span> <span class="n">d_res_off</span><span class="p">,</span> <span class="n">d_counters</span><span class="p">,</span> <span class="n">d_matches</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">seq_start</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="c1"># Launch in batches along y dimension</span>
+        <span class="k">for</span> <span class="n">seq_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_seqs</span><span class="p">,</span> <span class="n">MAX_GRID_Y</span><span class="p">):</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">MAX_GRID_Y</span><span class="p">,</span> <span class="n">n_seqs</span> <span class="o">-</span> <span class="n">seq_start</span><span class="p">)</span>
+            <span class="n">grid_dims</span> <span class="o">=</span> <span class="p">(</span><span class="n">blocks_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+            <span class="c1"># Launch kernel</span>
+            <span class="c1"># We pass use_shared as int32 flag</span>
+            <span class="n">_search_kernel_shared</span><span class="p">[</span><span class="n">grid_dims</span><span class="p">,</span> <span class="n">tpb</span><span class="p">](</span>
+                <span class="n">d_data</span><span class="p">,</span> <span class="n">d_offsets</span><span class="p">,</span> <span class="n">d_needle</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">m</span><span class="p">),</span>
+                <span class="n">d_potential</span><span class="p">,</span> <span class="n">d_res_off</span><span class="p">,</span> <span class="n">d_counters</span><span class="p">,</span> <span class="n">d_matches</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">seq_start</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">use_shared</span><span class="p">)</span>
+            <span class="p">)</span>
 
-    <span class="c1"># 8) fetch results back</span>
-    <span class="n">d_counters</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
-    <span class="n">d_matches</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
+        <span class="c1"># Ensure kernel finished</span>
+        <span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
 
-    <span class="c1"># 9) split into per‐sequence lists</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">):</span>
-        <span class="n">cnt</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">counters_host</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matches_host</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">cnt</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="c1"># Copy results back</span>
+        <span class="n">d_counters</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">counters_host</span><span class="p">)</span>
+        <span class="n">d_matches</span><span class="o">.</span><span class="n">copy_to_host</span><span class="p">(</span><span class="n">matches_host</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">results</span>
+        <span class="c1"># Build per-sequence lists</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_seqs</span><span class="p">):</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">counters_host</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res_offsets</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">cnt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># slice and convert to Python list</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matches_host</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">cnt</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">except</span> <span class="n">cuda</span><span class="o">.</span><span class="n">CudaSupportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CUDA support error encountered: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Falling back to CPU.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle_arr</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPU path failed with exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Falling back to CPU.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_cpu_search</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle_arr</span><span class="p">)</span>
 </pre></div>
 
   </div>
