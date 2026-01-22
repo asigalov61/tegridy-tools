@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 4.0
+# Version 5.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -45,6 +45,7 @@ import torch
 from torch.nn import Module
 from torch import nn, einsum, Tensor
 import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
 
 from collections import namedtuple
 from functools import wraps
@@ -4832,6 +4833,125 @@ class AutoregressiveWrapper(Module):
             return loss, acc
 
         return loss, acc, logits, cache
+
+# Binary classifier fuctions
+
+class ClsInferenceDataset(Dataset):
+    """
+    Dataset for pairs (src_seq, label).
+    src_seq: list of token IDs (ints).
+    label: single int or float (0 or 1).
+    """
+    def __init__(self, data_pairs):
+        self.data_pairs = data_pairs
+
+    def __len__(self):
+        return len(self.data_pairs)
+
+    def __getitem__(self, idx):
+        src_seq = self.data_pairs[idx]
+        x = torch.tensor(src_seq, dtype=torch.long)
+        return x
+
+def build_cls_model(num_tokens=18819,
+                    max_seq_len=1024,
+                    logits_dim=1,
+                    use_cls_token=True,
+                    squeeze_out_last_dim=True,
+                    dim=1024,
+                    depth=8,
+                    heads=8,
+                    device='cuda'
+                   ):
+
+    """
+    Constructs the Transformer model that outputs a single logit per input.
+    """
+
+    model = TransformerWrapper(
+        num_tokens=num_tokens,
+        max_seq_len=max_seq_len,
+        logits_dim=logits_dim,
+        use_cls_token=use_cls_token,
+        squeeze_out_last_dim = squeeze_out_last_dim,
+        attn_layers=Encoder(dim=dim,
+                            depth=depth,
+                            heads=heads
+                           )
+    )
+
+    return model.to(device)
+
+def load_cls_model(checkpoint_path, device='cuda'):
+    
+    """
+    Rebuilds the architecture, loads weights.
+    """
+    
+    model = build_cls_model(device=device)
+    state = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(state)
+    model.to(device).eval()
+    
+    return model
+
+def cls_predict(model,
+                seqs,
+                batch_size=8,
+                threshold=0.5,
+                seq_len=1024,
+                pad_token=18818,
+                device='cuda'
+               ):
+    
+    """
+    Returns two lists:
+      - probs: float probabilities  
+      - preds: int 0/1 predictions  
+    """
+    
+    def collate_fn(batch):
+        # batch: list of sequences (list/1D-tensor)
+        tensors = [s[:seq_len].detach().clone() for s in batch]
+        max_len = min(seq_len, max(t.size(0) for t in tensors))
+        padded = torch.full((len(tensors), max_len), pad_token, dtype=torch.long)
+        for i, t in enumerate(tensors):
+            L = t.size(0)
+            padded[i, :L] = t
+        return padded
+
+    ds = ClsInferenceDataset(seqs)
+    loader = DataLoader(ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+
+    all_probs = []
+    all_preds = []
+
+    model.to(device)
+    model.eval()
+    
+    with torch.inference_mode():
+        for x in loader:
+            
+            x = x.to(device)                       # [B, L] (truncated & padded)
+            
+            logits = model(x).squeeze()            # [B]
+            
+            probs = torch.sigmoid(logits)         # [B]
+            
+            preds = (probs >= threshold).long()
+
+            probs = probs.cpu().tolist()
+            preds = preds.cpu().tolist()
+
+            if type(preds) == list:
+                all_probs.extend(probs)
+                all_preds.extend(preds)
+
+            else:
+                all_probs.append(probs)
+                all_preds.append(preds)                
+
+    return all_preds, all_probs
 
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
