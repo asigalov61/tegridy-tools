@@ -1125,14 +1125,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_5"></h1>
 <h1 id="project-los-angeles">Project Los Angeles</h1>
 <h1 id="_6"></h1>
-<h1 id="tegridy-code-2025">Tegridy Code 2025</h1>
+<h1 id="tegridy-code-2026">Tegridy Code 2026</h1>
 <h1 id="_7"></h1>
 <h1 id="httpsgithubcomasigalov61tegridy-tools">https://github.com/asigalov61/tegridy-tools</h1>
 <h1 id="_8"></h1>
 <h1 id="_9"></h1>
 <h6 id="_10"></h6>
 <h1 id="_11"></h1>
-<h1 id="copyright-2024-project-los-angeles-tegridy-code">Copyright 2024 Project Los Angeles / Tegridy Code</h1>
+<h1 id="copyright-2026-project-los-angeles-tegridy-code">Copyright 2026 Project Los Angeles / Tegridy Code</h1>
 <h1 id="_12"></h1>
 <h1 id="licensed-under-the-apache-license-version-20-the-license">Licensed under the Apache License, Version 2.0 (the "License");</h1>
 <h1 id="you-may-not-use-this-file-except-in-compliance-with-the-license">you may not use this file except in compliance with the License.</h1>
@@ -1152,7 +1152,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="critical-dependencies">Critical dependencies</h1>
 <h1 id="_19"></h1>
 <h1 id="pip-install-cupy-cuda12x">!pip install cupy-cuda12x</h1>
-<h1 id="pip-install-numpy1244">!pip install numpy==1.24.4</h1>
+<h1 id="pip-install-numpy1264">!pip install numpy==1.26.4</h1>
 <h1 id="_20"></h1>
 <h6 id="_21"></h6>
   
@@ -1169,14 +1169,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#</span>
 <span class="sd">#	    Project Los Angeles</span>
 <span class="sd">#</span>
-<span class="sd">#	    Tegridy Code 2025</span>
+<span class="sd">#	    Tegridy Code 2026</span>
 <span class="sd">#</span>
 <span class="sd">#       https://github.com/asigalov61/tegridy-tools</span>
 <span class="sd">#</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
 <span class="sd">#</span>
-<span class="sd">#       Copyright 2024 Project Los Angeles / Tegridy Code</span>
+<span class="sd">#       Copyright 2026 Project Los Angeles / Tegridy Code</span>
 <span class="sd">#</span>
 <span class="sd">#       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="sd">#       you may not use this file except in compliance with the License.</span>
@@ -1196,7 +1196,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#       Critical dependencies</span>
 <span class="sd">#</span>
 <span class="sd">#       !pip install cupy-cuda12x</span>
-<span class="sd">#       !pip install numpy==1.24.4</span>
+<span class="sd">#       !pip install numpy==1.26.4</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
 <span class="sd">&#39;&#39;&#39;</span>
@@ -2356,11 +2356,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Count how many rows in src_array also appear in trg_array using CuPy (GPU).</span>
-<span class="sd">    Works with NumPy or CuPy inputs; computation runs on the GPU.</span>
-<span class="sd">    Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.</span>
-<span class="sd">    Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.</span>
+<span class="sd">    Uses a non-linear 64-bit FNV-1a hash over raw bytes to avoid collisions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">src</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">src_array</span><span class="p">))</span>
     <span class="n">trg</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">trg_array</span><span class="p">))</span>
 
@@ -2374,16 +2372,22 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">src_bytes</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
     <span class="n">trg_bytes</span> <span class="o">=</span> <span class="n">trg</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">trg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
 
-    <span class="c1"># deterministic 64-bit &quot;random&quot; weights (cheap, no RNG kernel)</span>
-    <span class="c1"># use a large odd multiplier to spread bits; XOR with seed for reproducibility</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bpr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">11400714819323198485</span><span class="p">))</span>
-    <span class="n">weights</span> <span class="o">^=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x9e3779b97f4a7c15</span><span class="p">)</span>
+    <span class="c1"># FNV-1a constants</span>
+    <span class="n">FNV_OFFSET</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0xcbf29ce484222325</span> <span class="o">^</span> <span class="n">seed</span><span class="p">)</span>
+    <span class="n">FNV_PRIME</span>  <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x100000001b3</span><span class="p">)</span>
 
-    <span class="c1"># compute 64-bit fingerprint per row (wrap-around via uint64)</span>
-    <span class="n">src_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
-    <span class="n">trg_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">trg_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="c1"># hash rows</span>
+    <span class="k">def</span> <span class="nf">fnv1a_hash</span><span class="p">(</span><span class="n">byte_matrix</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">byte_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">FNV_OFFSET</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bpr</span><span class="p">):</span>
+            <span class="n">h</span> <span class="o">^=</span> <span class="n">byte_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">*=</span> <span class="n">FNV_PRIME</span>
+        <span class="k">return</span> <span class="n">h</span>
 
-    <span class="c1"># count how many src fingerprints appear in trg fingerprints</span>
+    <span class="n">src_fp</span> <span class="o">=</span> <span class="n">fnv1a_hash</span><span class="p">(</span><span class="n">src_bytes</span><span class="p">)</span>
+    <span class="n">trg_fp</span> <span class="o">=</span> <span class="n">fnv1a_hash</span><span class="p">(</span><span class="n">trg_bytes</span><span class="p">)</span>
+
+    <span class="c1"># count matches</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">src_fp</span><span class="p">,</span> <span class="n">trg_fp</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 
 <span class="c1">###################################################################################</span>
@@ -3264,9 +3268,7 @@ If provided as a scalar, promote it to a triplet.</p></div>
     
   
     <div class="desc"><p>Count how many rows in src_array also appear in trg_array using CuPy (GPU).
-Works with NumPy or CuPy inputs; computation runs on the GPU.
-Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.
-Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.</p></div>
+Uses a non-linear 64-bit FNV-1a hash over raw bytes to avoid collisions.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.find_matches_fast', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.find_matches_fast" class="source">
@@ -3274,11 +3276,9 @@ Note: fingerprints can collide (extremely unlikely for typical data); set seed f
     
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Count how many rows in src_array also appear in trg_array using CuPy (GPU).</span>
-<span class="sd">    Works with NumPy or CuPy inputs; computation runs on the GPU.</span>
-<span class="sd">    Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.</span>
-<span class="sd">    Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.</span>
+<span class="sd">    Uses a non-linear 64-bit FNV-1a hash over raw bytes to avoid collisions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">src</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">src_array</span><span class="p">))</span>
     <span class="n">trg</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">trg_array</span><span class="p">))</span>
 
@@ -3292,16 +3292,22 @@ Note: fingerprints can collide (extremely unlikely for typical data); set seed f
     <span class="n">src_bytes</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
     <span class="n">trg_bytes</span> <span class="o">=</span> <span class="n">trg</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">trg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
 
-    <span class="c1"># deterministic 64-bit &quot;random&quot; weights (cheap, no RNG kernel)</span>
-    <span class="c1"># use a large odd multiplier to spread bits; XOR with seed for reproducibility</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bpr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">11400714819323198485</span><span class="p">))</span>
-    <span class="n">weights</span> <span class="o">^=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x9e3779b97f4a7c15</span><span class="p">)</span>
+    <span class="c1"># FNV-1a constants</span>
+    <span class="n">FNV_OFFSET</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0xcbf29ce484222325</span> <span class="o">^</span> <span class="n">seed</span><span class="p">)</span>
+    <span class="n">FNV_PRIME</span>  <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x100000001b3</span><span class="p">)</span>
 
-    <span class="c1"># compute 64-bit fingerprint per row (wrap-around via uint64)</span>
-    <span class="n">src_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
-    <span class="n">trg_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">trg_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="c1"># hash rows</span>
+    <span class="k">def</span> <span class="nf">fnv1a_hash</span><span class="p">(</span><span class="n">byte_matrix</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">byte_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">FNV_OFFSET</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bpr</span><span class="p">):</span>
+            <span class="n">h</span> <span class="o">^=</span> <span class="n">byte_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">*=</span> <span class="n">FNV_PRIME</span>
+        <span class="k">return</span> <span class="n">h</span>
 
-    <span class="c1"># count how many src fingerprints appear in trg fingerprints</span>
+    <span class="n">src_fp</span> <span class="o">=</span> <span class="n">fnv1a_hash</span><span class="p">(</span><span class="n">src_bytes</span><span class="p">)</span>
+    <span class="n">trg_fp</span> <span class="o">=</span> <span class="n">fnv1a_hash</span><span class="p">(</span><span class="n">trg_bytes</span><span class="p">)</span>
+
+    <span class="c1"># count matches</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">src_fp</span><span class="p">,</span> <span class="n">trg_fp</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 </pre></div>
 
