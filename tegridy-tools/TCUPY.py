@@ -9,14 +9,14 @@ r'''############################################################################
 #
 #	    Project Los Angeles
 #
-#	    Tegridy Code 2025
+#	    Tegridy Code 2026
 #
 #       https://github.com/asigalov61/tegridy-tools
 #
 #
 ################################################################################
 #
-#       Copyright 2024 Project Los Angeles / Tegridy Code
+#       Copyright 2026 Project Los Angeles / Tegridy Code
 #
 #       Licensed under the Apache License, Version 2.0 (the "License");
 #       you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ r'''############################################################################
 #       Critical dependencies
 #
 #       !pip install cupy-cuda12x
-#       !pip install numpy==1.24.4
+#       !pip install numpy==1.26.4
 #
 ################################################################################
 '''
@@ -1196,11 +1196,9 @@ def find_matches_fast(src_array, trg_array, seed: int = 0) -> int:
     
     """
     Count how many rows in src_array also appear in trg_array using CuPy (GPU).
-    Works with NumPy or CuPy inputs; computation runs on the GPU.
-    Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.
-    Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.
+    Uses a non-linear 64-bit FNV-1a hash over raw bytes to avoid collisions.
     """
-    
+
     src = cp.ascontiguousarray(cp.asarray(src_array))
     trg = cp.ascontiguousarray(cp.asarray(trg_array))
 
@@ -1214,16 +1212,22 @@ def find_matches_fast(src_array, trg_array, seed: int = 0) -> int:
     src_bytes = src.view(cp.uint8).reshape(src.shape[0], bpr)
     trg_bytes = trg.view(cp.uint8).reshape(trg.shape[0], bpr)
 
-    # deterministic 64-bit "random" weights (cheap, no RNG kernel)
-    # use a large odd multiplier to spread bits; XOR with seed for reproducibility
-    weights = (cp.arange(bpr, dtype=cp.uint64) * cp.uint64(11400714819323198485))
-    weights ^= cp.uint64(seed) * cp.uint64(0x9e3779b97f4a7c15)
+    # FNV-1a constants
+    FNV_OFFSET = cp.uint64(0xcbf29ce484222325 ^ seed)
+    FNV_PRIME  = cp.uint64(0x100000001b3)
 
-    # compute 64-bit fingerprint per row (wrap-around via uint64)
-    src_fp = (src_bytes.astype(cp.uint64) * weights).sum(axis=1, dtype=cp.uint64)
-    trg_fp = (trg_bytes.astype(cp.uint64) * weights).sum(axis=1, dtype=cp.uint64)
+    # hash rows
+    def fnv1a_hash(byte_matrix):
+        h = cp.full((byte_matrix.shape[0],), FNV_OFFSET, dtype=cp.uint64)
+        for i in range(bpr):
+            h ^= byte_matrix[:, i].astype(cp.uint64)
+            h *= FNV_PRIME
+        return h
 
-    # count how many src fingerprints appear in trg fingerprints
+    src_fp = fnv1a_hash(src_bytes)
+    trg_fp = fnv1a_hash(trg_bytes)
+
+    # count matches
     return int(cp.isin(src_fp, trg_fp).sum())
 
 ###################################################################################
