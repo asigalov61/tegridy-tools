@@ -1088,6 +1088,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TCUPY.count_best_pair_gpu">count_best_pair_gpu</a></li>
     <li class="mono"><a href="#TCUPY.embeddings_topk_cosine_neighbors">embeddings_topk_cosine_neighbors</a></li>
     <li class="mono"><a href="#TCUPY.ensure_triplet">ensure_triplet</a></li>
+    <li class="mono"><a href="#TCUPY.find_matches_fast">find_matches_fast</a></li>
     <li class="mono"><a href="#TCUPY.find_numpy_array">find_numpy_array</a></li>
     <li class="mono"><a href="#TCUPY.generate_sequence_optimized">generate_sequence_optimized</a></li>
     <li class="mono"><a href="#TCUPY.learn_bpe_codes_gpu">learn_bpe_codes_gpu</a></li>
@@ -1251,7 +1252,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">find_numpy_array</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds 1D numpy array in 2D numpy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1262,8 +1263,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">vertical_list_search</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For each vertical window of consecutive rows of height len(trg_list) in src_list,</span>
 <span class="sd">    this function checks whether for every offset j (0 &lt;= j &lt; len(trg_list)) the row</span>
 <span class="sd">    at index (window_start + j) contains trg_list[j].</span>
@@ -1327,7 +1328,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">pack_sequences</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Packs a list of variable-length token sequences into a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    This version computes lengths and builds the padded array and mask entirely on GPU.</span>
@@ -1355,7 +1356,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">count_best_pair_gpu</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given the entire GPU-resident packed data, compute the most frequent</span>
 <span class="sd">    adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1427,7 +1428,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">learn_bpe_codes_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">vocab_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">max_merges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Learn BPE merge rules completely on GPU.</span>
 <span class="sd">    </span>
 <span class="sd">    The training data is packed once (using the vectorized pack_sequences).</span>
@@ -1557,7 +1558,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">retokenize_train_data_fused_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retokenize training data using the fully fused GPU kernel.</span>
 <span class="sd">    </span>
 <span class="sd">    The entire training dataset is first packed into GPU memory (using pack_sequences).</span>
@@ -1594,7 +1595,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">bpe_encode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iteratively encodes a sequence using BPE merge rules provided in a dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -1639,7 +1640,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">bpe_decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decodes a sequence encoded with BPE merge rules defined in a codes dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -1675,7 +1676,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">ensure_triplet</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensure the given parameter is returned as a triplet.</span>
 <span class="sd">    If provided as a scalar, promote it to a triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1695,7 +1696,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">sliding_window_view_alternative</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">window_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a sliding-window view (without copying) of an array.</span>
 <span class="sd">    Expected input shape: (n, L, d) and returns: (n, L - window_length + 1, window_length, d)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1707,7 +1708,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">build_ngram_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build an n-gram mapping from a context (a sequence of triplets) to candidate triplets with frequencies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
@@ -1738,7 +1739,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">precompute_mapping_lookup</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the mapping into a lookup table: context -&gt; (tuple(candidates), frequencies_array).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping_lookup</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1751,7 +1752,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">build_training_sequences_set</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a set of training sequences (each as a tuple of triplets) for uniqueness checking.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">seq</span><span class="p">))</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">data</span><span class="p">}</span>
@@ -1763,7 +1764,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                 <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                                 <span class="n">sequence_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
                                 <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Autoregressively generate a new, unique sequence using the precomputed mapping lookup.</span>
 <span class="sd">    The invariant maintained is: the second element of one triplet is never greater than the first element</span>
 <span class="sd">    of the following triplet.</span>
@@ -1885,7 +1886,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">analyze_generated_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">mapping_lookup</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the generated sequence and return several useful statistics</span>
 <span class="sd">    as both a dictionary and as a nicely formatted string report.</span>
 <span class="sd">    </span>
@@ -2140,8 +2141,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the Minkowski distance between a 1D CuPy array &#39;x&#39; and each row of a 2D CuPy array &#39;X&#39;.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
@@ -2180,8 +2181,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes pairwise Minkowski distances for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
@@ -2212,8 +2213,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the pairwise cosine similarity for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
@@ -2244,8 +2245,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">cosine_similarities</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes cosine similarities between 1D src array and 2D trg array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
    
@@ -2266,8 +2267,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                      <span class="n">row_batch</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
                                      <span class="n">col_batch</span><span class="o">=</span><span class="mi">4096</span>
                                     <span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For each embedding, find the indices and similarities of its top-k neighbors,</span>
 <span class="sd">    excluding itself, sorted by descending similarity.</span>
 
@@ -2348,6 +2349,42 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         <span class="k">return</span> <span class="n">top_idx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">top_sim</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
     
     <span class="k">return</span> <span class="n">top_idx</span><span class="p">,</span> <span class="n">top_sim</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">find_matches_fast</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Count how many rows in src_array also appear in trg_array using CuPy (GPU).</span>
+<span class="sd">    Works with NumPy or CuPy inputs; computation runs on the GPU.</span>
+<span class="sd">    Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.</span>
+<span class="sd">    Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">src</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">src_array</span><span class="p">))</span>
+    <span class="n">trg</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">trg_array</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">trg</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">or</span> <span class="n">src</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">trg</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">trg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;src and trg must be 2D arrays with same dtype and same number of columns&quot;</span><span class="p">)</span>
+
+    <span class="c1"># bytes per row</span>
+    <span class="n">bpr</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># view rows as bytes</span>
+    <span class="n">src_bytes</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
+    <span class="n">trg_bytes</span> <span class="o">=</span> <span class="n">trg</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">trg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
+
+    <span class="c1"># deterministic 64-bit &quot;random&quot; weights (cheap, no RNG kernel)</span>
+    <span class="c1"># use a large odd multiplier to spread bits; XOR with seed for reproducibility</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bpr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">11400714819323198485</span><span class="p">))</span>
+    <span class="n">weights</span> <span class="o">^=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x9e3779b97f4a7c15</span><span class="p">)</span>
+
+    <span class="c1"># compute 64-bit fingerprint per row (wrap-around via uint64)</span>
+    <span class="n">src_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">trg_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">trg_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+    <span class="c1"># count how many src fingerprints appear in trg fingerprints</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">src_fp</span><span class="p">,</span> <span class="n">trg_fp</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -2501,7 +2538,7 @@ as both a dictionary and as a nicely formatted string report.</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.analyze_generated_sequence', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.analyze_generated_sequence" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">analyze_generated_sequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">mapping_lookup</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyze the generated sequence and return several useful statistics</span>
 <span class="sd">    as both a dictionary and as a nicely formatted string report.</span>
 <span class="sd">    </span>
@@ -2796,7 +2833,7 @@ its constituent pair. Each token in the sequence is then recursively expanded.</
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.bpe_decode', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.bpe_decode" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">bpe_decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decodes a sequence encoded with BPE merge rules defined in a codes dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -2859,7 +2896,7 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.bpe_encode', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.bpe_encode" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">bpe_encode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iteratively encodes a sequence using BPE merge rules provided in a dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -2921,7 +2958,7 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.build_ngram_mapping', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.build_ngram_mapping" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">build_ngram_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build an n-gram mapping from a context (a sequence of triplets) to candidate triplets with frequencies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
@@ -2969,7 +3006,7 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.build_training_sequences_set', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.build_training_sequences_set" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">build_training_sequences_set</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a set of training sequences (each as a tuple of triplets) for uniqueness checking.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">seq</span><span class="p">))</span> <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">data</span><span class="p">}</span>
@@ -2994,8 +3031,8 @@ repeated until no more merges are possible.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.cosine_similarities', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.cosine_similarities" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cosine_similarities</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes cosine similarities between 1D src array and 2D trg array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
    
@@ -3030,7 +3067,7 @@ adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.count_best_pair_gpu', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.count_best_pair_gpu" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_best_pair_gpu</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given the entire GPU-resident packed data, compute the most frequent</span>
 <span class="sd">    adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3096,8 +3133,8 @@ excluding itself, sorted by descending similarity.</p>
                                      <span class="n">row_batch</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
                                      <span class="n">col_batch</span><span class="o">=</span><span class="mi">4096</span>
                                     <span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For each embedding, find the indices and similarities of its top-k neighbors,</span>
 <span class="sd">    excluding itself, sorted by descending similarity.</span>
 
@@ -3200,7 +3237,7 @@ If provided as a scalar, promote it to a triplet.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.ensure_triplet', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.ensure_triplet" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ensure_triplet</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensure the given parameter is returned as a triplet.</span>
 <span class="sd">    If provided as a scalar, promote it to a triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3210,6 +3247,62 @@ If provided as a scalar, promote it to a triplet.</p></div>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">val</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be a scalar or a sequence of 3 numbers.&quot;</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TCUPY.find_matches_fast">
+    <p>def <span class="ident">find_matches_fast</span>(</p><p>src_array, trg_array, seed: int = 0)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Count how many rows in src_array also appear in trg_array using CuPy (GPU).
+Works with NumPy or CuPy inputs; computation runs on the GPU.
+Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.
+Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.find_matches_fast', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.find_matches_fast" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_matches_fast</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Count how many rows in src_array also appear in trg_array using CuPy (GPU).</span>
+<span class="sd">    Works with NumPy or CuPy inputs; computation runs on the GPU.</span>
+<span class="sd">    Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.</span>
+<span class="sd">    Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">src</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">src_array</span><span class="p">))</span>
+    <span class="n">trg</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">trg_array</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">trg</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">or</span> <span class="n">src</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">trg</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">trg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;src and trg must be 2D arrays with same dtype and same number of columns&quot;</span><span class="p">)</span>
+
+    <span class="c1"># bytes per row</span>
+    <span class="n">bpr</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># view rows as bytes</span>
+    <span class="n">src_bytes</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
+    <span class="n">trg_bytes</span> <span class="o">=</span> <span class="n">trg</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">trg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bpr</span><span class="p">)</span>
+
+    <span class="c1"># deterministic 64-bit &quot;random&quot; weights (cheap, no RNG kernel)</span>
+    <span class="c1"># use a large odd multiplier to spread bits; XOR with seed for reproducibility</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bpr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">11400714819323198485</span><span class="p">))</span>
+    <span class="n">weights</span> <span class="o">^=</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x9e3779b97f4a7c15</span><span class="p">)</span>
+
+    <span class="c1"># compute 64-bit fingerprint per row (wrap-around via uint64)</span>
+    <span class="n">src_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">trg_fp</span> <span class="o">=</span> <span class="p">(</span><span class="n">trg_bytes</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+    <span class="c1"># count how many src fingerprints appear in trg fingerprints</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">src_fp</span><span class="p">,</span> <span class="n">trg_fp</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 </pre></div>
 
   </div>
@@ -3232,7 +3325,7 @@ If provided as a scalar, promote it to a triplet.</p></div>
   <div id="source-TCUPY.find_numpy_array" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_numpy_array</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">trg_array</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds 1D numpy array in 2D numpy array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -3292,7 +3385,7 @@ A numerical stable softmax is then applied over these scores to determine the pr
                                 <span class="n">memory_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                                 <span class="n">sequence_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
                                 <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Autoregressively generate a new, unique sequence using the precomputed mapping lookup.</span>
 <span class="sd">    The invariant maintained is: the second element of one triplet is never greater than the first element</span>
 <span class="sd">    of the following triplet.</span>
@@ -3437,7 +3530,7 @@ into a new token via a custom merge kernel (with double-buffering).</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.learn_bpe_codes_gpu', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.learn_bpe_codes_gpu" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">learn_bpe_codes_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">vocab_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">max_merges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Learn BPE merge rules completely on GPU.</span>
 <span class="sd">    </span>
 <span class="sd">    The training data is packed once (using the vectorized pack_sequences).</span>
@@ -3547,8 +3640,8 @@ into a new token via a custom merge kernel (with double-buffering).</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.minkowski_distance_vector_to_matrix', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.minkowski_distance_vector_to_matrix" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the Minkowski distance between a 1D CuPy array &#39;x&#39; and each row of a 2D CuPy array &#39;X&#39;.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
@@ -3609,7 +3702,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pack_sequences', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.pack_sequences" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pack_sequences</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Packs a list of variable-length token sequences into a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    This version computes lengths and builds the padded array and mask entirely on GPU.</span>
@@ -3659,8 +3752,8 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pairwise_cosine_similarity', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.pairwise_cosine_similarity" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the pairwise cosine similarity for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
@@ -3717,8 +3810,8 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pairwise_minkowski_distance', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.pairwise_minkowski_distance" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes pairwise Minkowski distances for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
@@ -3766,7 +3859,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.precompute_mapping_lookup', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.precompute_mapping_lookup" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">precompute_mapping_lookup</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the mapping into a lookup table: context -&gt; (tuple(candidates), frequencies_array).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping_lookup</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3801,7 +3894,7 @@ Each GPU thread processes one sequence by applying all merge rules sequentially.
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.retokenize_train_data_fused_gpu', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.retokenize_train_data_fused_gpu" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">retokenize_train_data_fused_gpu</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">pad_val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retokenize training data using the fully fused GPU kernel.</span>
 <span class="sd">    </span>
 <span class="sd">    The entire training dataset is first packed into GPU memory (using pack_sequences).</span>
@@ -3856,7 +3949,7 @@ Expected input shape: (n, L, d) and returns: (n, L - window_length + 1, window_l
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.sliding_window_view_alternative', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.sliding_window_view_alternative" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sliding_window_view_alternative</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">window_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a sliding-window view (without copying) of an array.</span>
 <span class="sd">    Expected input shape: (n, L, d) and returns: (n, L - window_length + 1, window_length, d)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3888,8 +3981,8 @@ at index (window_start + j) contains trg_list[j].</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.vertical_list_search', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.vertical_list_search" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">vertical_list_search</span><span class="p">(</span><span class="n">src_list</span><span class="p">,</span> <span class="n">trg_list</span><span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For each vertical window of consecutive rows of height len(trg_list) in src_list,</span>
 <span class="sd">    this function checks whether for every offset j (0 &lt;= j &lt; len(trg_list)) the row</span>
 <span class="sd">    at index (window_start + j) contains trg_list[j].</span>
