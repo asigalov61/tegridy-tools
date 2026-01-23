@@ -1192,6 +1192,42 @@ def embeddings_topk_cosine_neighbors(embeddings,
 
 ###################################################################################
 
+def find_matches_fast(src_array, trg_array, seed: int = 0) -> int:
+    
+    """
+    Count how many rows in src_array also appear in trg_array using CuPy (GPU).
+    Works with NumPy or CuPy inputs; computation runs on the GPU.
+    Uses a fast 64-bit fingerprint computed from row bytes to avoid unsupported void dtype.
+    Note: fingerprints can collide (extremely unlikely for typical data); set seed for reproducibility.
+    """
+    
+    src = cp.ascontiguousarray(cp.asarray(src_array))
+    trg = cp.ascontiguousarray(cp.asarray(trg_array))
+
+    if src.dtype != trg.dtype or src.ndim != 2 or trg.ndim != 2 or src.shape[1] != trg.shape[1]:
+        raise ValueError("src and trg must be 2D arrays with same dtype and same number of columns")
+
+    # bytes per row
+    bpr = src.dtype.itemsize * src.shape[1]
+
+    # view rows as bytes
+    src_bytes = src.view(cp.uint8).reshape(src.shape[0], bpr)
+    trg_bytes = trg.view(cp.uint8).reshape(trg.shape[0], bpr)
+
+    # deterministic 64-bit "random" weights (cheap, no RNG kernel)
+    # use a large odd multiplier to spread bits; XOR with seed for reproducibility
+    weights = (cp.arange(bpr, dtype=cp.uint64) * cp.uint64(11400714819323198485))
+    weights ^= cp.uint64(seed) * cp.uint64(0x9e3779b97f4a7c15)
+
+    # compute 64-bit fingerprint per row (wrap-around via uint64)
+    src_fp = (src_bytes.astype(cp.uint64) * weights).sum(axis=1, dtype=cp.uint64)
+    trg_fp = (trg_bytes.astype(cp.uint64) * weights).sum(axis=1, dtype=cp.uint64)
+
+    # count how many src fingerprints appear in trg fingerprints
+    return int(cp.isin(src_fp, trg_fp).sum())
+
+###################################################################################
+
 print('Module is loaded!')
 print('Enjoy! :)')
 print('=' * 70)
