@@ -6303,5 +6303,198 @@ def score_sequences(
         return result
 
 #=================================================================================================================================
+# ETA functions
+#=================================================================================================================================
+
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+def calculate_eta(
+    hours_until_done: float,
+    *,
+    tz: str = "America/Los_Angeles",
+    now: datetime | None = None,
+    return_dict: bool = False,
+    verbose: bool = True,
+    ):
+    
+    """
+    Compute an ETA timestamp based on the current time (or a provided time)
+    in a specified timezone.
+
+    Parameters
+    ----------
+    hours_until_done : float
+        Number of hours remaining until completion.
+    tz : str, optional
+        IANA timezone name (default: "America/Los_Angeles").
+    now : datetime or None, optional
+        If provided, use this datetime as the starting point.
+        If None, the current time in the given timezone is used.
+    return_dict : bool, optional
+        If True, return a dictionary with ETA components.
+    verbose : bool, optional
+        If True, print a formatted ETA string.
+
+    Returns
+    -------
+    datetime or dict
+        ETA as a datetime object or a dictionary (if return_dict=True).
+
+    Examples
+    --------
+    
+    # Simple ETA 5.5 hours from now
+    calculate_eta(5.5)
+    
+    # ETA using a custom starting time in Tokyo
+    from datetime import datetime
+    calculate_eta(
+        12,
+        tz="Asia/Tokyo",
+        now=datetime(2026, 1, 29, 8, 30),
+    )
+    
+    # Get ETA as a dict without printing
+    info = calculate_eta(3, verbose=False, return_dict=True)
+    print(info["pretty"])
+    """
+
+    # Resolve timezone
+    zone = ZoneInfo(tz)
+
+    # Determine current time
+    current_time = now.astimezone(zone) if now else datetime.now(zone)
+
+    # Compute ETA
+    eta = current_time + timedelta(hours=hours_until_done)
+
+    # Format for printing
+    pretty = eta.strftime("ETA: %A, %B %d %Y @ %H:%M")
+
+    if verbose:
+        print(pretty)
+
+    if return_dict:
+        return {
+            "eta_datetime": eta,
+            "year": eta.year,
+            "month": eta.month,
+            "day": eta.day,
+            "hour": eta.hour,
+            "minute": eta.minute,
+            "second": eta.second,
+            "timezone": tz,
+            "pretty": pretty,
+        }
+
+    return eta
+
+def calculate_training_run_eta(
+    num_epochs: int,
+    num_steps_per_epoch: int,
+    sec_per_iter: float,
+    *,
+    cost_per_hr: float = 0.0,
+    tz: str = "America/Los_Angeles",
+    now: datetime | None = None,
+    return_dict: bool = False,
+    verbose: bool = True,
+):
+    """
+    Compute ETA and cost for a full training run based on:
+    - number of epochs
+    - number of steps per epoch
+    - seconds per iteration
+    - optional cost per hour of compute
+
+    Prints:
+        - start time
+        - ETA timestamp
+        - per-epoch runtime (h/m/s)
+        - total runtime (h/m/s)
+        - cost per epoch
+        - total run cost
+
+    Returns:
+        datetime or dict (if return_dict=True)
+
+    Examples:
+
+    # 2 epochs, 7770 steps each, 15.07 sec/iter, $5.3 per/hr
+    calculate_training_run_eta(
+        num_epochs=2,
+        num_steps_per_epoch=7771,
+        cost_per_hr=5.3,
+        sec_per_iter=15.07,
+    )
+    
+    # Get structured info without printing
+    info = calculate_training_run_eta(
+        3, 1000, 0.5,
+        verbose=False,
+        return_dict=True
+    )
+    print(info["eta_str"])
+    """
+
+    zone = ZoneInfo(tz)
+    start_time = now.astimezone(zone) if now else datetime.now(zone)
+
+    # Core calculations
+    total_iters = num_epochs * num_steps_per_epoch
+    total_seconds = total_iters * sec_per_iter
+    epoch_seconds = num_steps_per_epoch * sec_per_iter
+
+    eta = start_time + timedelta(seconds=total_seconds)
+
+    # Formatting helpers
+    def fmt(seconds: float) -> str:
+        seconds = int(seconds)
+        h = seconds // 3600
+        m = (seconds % 3600) // 60
+        s = seconds % 60
+        return f"{h}h {m}m {s}s"
+
+    # Cost calculations
+    total_hours = total_seconds / 3600
+    epoch_hours = epoch_seconds / 3600
+
+    cost_epoch = epoch_hours * cost_per_hr
+    cost_total = total_hours * cost_per_hr
+
+    # Pretty strings
+    start_str = start_time.strftime("%A, %B %d %Y @ %H:%M")
+    eta_str = eta.strftime("%A, %B %d %Y @ %H:%M")
+
+    if verbose:
+        print(f"Start Time: {start_str}")
+        print(f"ETA:        {eta_str}")
+        print(f"Per Epoch:  {fmt(epoch_seconds)}")
+        print(f"Total Run:  {fmt(total_seconds)}")
+        print(f"Cost/Epoch: ${cost_epoch:,.2f}")
+        print(f"Cost/Run:   ${cost_total:,.2f}")
+
+    if return_dict:
+        return {
+            "start_time": start_time,
+            "eta": eta,
+            "start_str": start_str,
+            "eta_str": eta_str,
+            "epoch_seconds": epoch_seconds,
+            "total_seconds": total_seconds,
+            "epoch_runtime_hms": fmt(epoch_seconds),
+            "total_runtime_hms": fmt(total_seconds),
+            "epoch_hours": epoch_hours,
+            "total_hours": total_hours,
+            "cost_per_hr": cost_per_hr,
+            "cost_epoch": cost_epoch,
+            "cost_total": cost_total,
+            "timezone": tz,
+        }
+
+    return eta
+
+#=================================================================================================================================
 # This is the end of x_transformer_2_14_2 Python module
 #=================================================================================================================================
