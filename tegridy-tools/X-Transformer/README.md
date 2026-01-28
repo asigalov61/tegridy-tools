@@ -3,8 +3,8 @@
 
 ***
 
-## Original source code retrieved on 04/30/2025
-## Original version 2.3.1 / Commit 458bc12
+## Original source code retrieved on 01/27/2026
+## Original version 2.14.2 / Commit 03d11fa
 
 ***
 
@@ -29,4 +29,4 @@
 ***
 
 ### Project Los Angeles
-### Tegridy Code 2025
+### Tegridy Code 2026
