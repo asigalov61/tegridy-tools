@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 6.0
+# Version 7.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -5145,9 +5145,10 @@ class AutoregressiveWrapper(Module):
     
         return out
 
-#=========================================================================================
-
+#=================================================================================================================================
 # Binary classifier fuctions
+# https://github.com/lucidrains/x-transformers/pull/264
+#=================================================================================================================================
 
 class ClsInferenceDataset(Dataset):
     """
@@ -5265,6 +5266,837 @@ def cls_predict(model,
                 all_preds.append(preds)                
 
     return all_preds, all_probs
+
+#=================================================================================================================================
+# Sequences probabilities and scores functions
+#=================================================================================================================================
+
+import inspect
+import math
+from typing import Callable, Optional, Dict, Any, List, Tuple
+import torch
+import torch.nn.functional as F
+
+def print_probs_scoring_guide():
+    print(inspect.getdoc(probs_scoring_guide))
+
+def probs_scoring_guide():
+
+    """
+    Return dictionary structure and metric descriptions for generate_with_probs / score_sequences.
+    
+    Returns
+    -------
+    result : dict
+        A dictionary containing token-level and sequence-level scoring information.
+    
+        Keys
+        ----
+        tokens : torch.Tensor
+            Tensor of token ids for each batch entry. Shape (batch, seq_len).
+            - Meaning: Generated tokens (for generate_with_probs) or the original
+              input sequences (for score_sequences).
+            - Interpretation: Map ids to text with your tokenizer to inspect outputs.
+    
+        token_probs : List[List[float]]
+            Per-batch lists of probabilities assigned to each chosen token at the time
+            it was produced. Values in [0, 1].
+            - Meaning: Softmax probability for the selected token at each step.
+            - Interpretation: Higher → model more confident about that token. Do not
+              multiply many token_probs directly (underflow risk); use log-probs.
+    
+        token_logprobs : List[List[float]]
+            Per-batch lists of natural log probabilities (nats) for each chosen token:
+            log p(x_t | x_<t).
+            - Meaning: Numerically stable per-token log-probabilities.
+            - Interpretation: Less negative = more likely. Sum these to get sequence_logprobs.
+    
+        token_scores : List[List[float]]
+            Per-batch lists of token negative log-probabilities (NLL) computed as -log p.
+            - Meaning: Token-level loss (positive).
+            - Interpretation: Lower = model found token less surprising. Useful to spot spikes.
+    
+        sequence_logprobs : List[float]
+            Sum of token log-probabilities for each sequence (nats): sum_t log p(x_t | x_<t).
+            - Meaning: Canonical sequence score; additive and numerically stable.
+            - Interpretation: Use this to compare sequences. Higher (less negative) is better.
+    
+        nll : List[float]
+            Negative sequence log-probabilities (nats): -sequence_logprobs.
+            - Meaning: Sequence-level negative log-likelihood (loss).
+            - Interpretation: Lower NLL indicates a sequence the model finds more probable.
+    
+        sequence_probs : List[float]
+            Numeric probabilities computed as exp(sequence_logprobs) (float64 when possible).
+            - Meaning: Absolute probability of the full sequence.
+            - Interpretation: Often underflows to 0.0 for realistic lengths; prefer sequence_logprobs.
+    
+        sequence_prob_display : List[str]
+            Human-readable string for sequence probability. If numeric underflow occurs,
+            this shows an approximate scientific form (e.g., "~10^-550.65").
+            - Meaning: Readable magnitude of the sequence probability.
+            - Interpretation: Use this for reporting instead of raw sequence_probs when it is 0.0.
+    
+        mask : torch.Tensor
+            Boolean tensor indicating which positions were included in scoring.
+            Shape (batch, scored_len). False for padded positions or tokens after the first EOS.
+            - Meaning: Aligns token-level lists with original sequence positions.
+            - Interpretation: Use to ignore padded or post-EOS tokens in aggregates.
+    
+        metadata : dict
+            Miscellaneous run information such as:
+            - prompt_len : int or list[int] — length of prompt tokens (if applicable)
+            - generated_len : int — number of generated tokens (generate_with_probs)
+            - temperature : float — sampling temperature used
+            - seq_len : int — original sequence length (score_sequences)
+            - Interpretation: Useful for reproducing runs and normalizing comparisons.
+    
+        metrics : dict
+            Per-sequence derived diagnostics (under result["metrics"]["per_sequence"]).
+            Each entry contains:
+            - sequence_index : int
+            - token_count : int
+            - sequence_logprob_nats : float
+                Sum of log-probs (nats). Primary canonical score.
+            - sequence_log10 : float
+                Log10 of the sequence probability (for display).
+            - sequence_prob_display : str
+                Human-friendly scientific display of the sequence probability.
+            - avg_logprob_per_token_nats : float
+                Average log-prob per token (nats): (1/T) * sum_t log p.
+                - Interpretation: Normalizes for length; higher (less negative) is better.
+            - avg_logprob_per_token_bits : float
+                Average log-prob per token in bits (divide nats by ln(2)).
+                - Interpretation: Intuitive unit; lower bits = easier prediction.
+            - geometric_mean_token_prob : str
+                Geometric mean of token probabilities (display).
+                - Interpretation: Typical per-token probability; quick sense of per-token confidence.
+            - perplexity : float
+                exp(-avg_logprob_per_token). Standard LM metric; lower is better.
+    
+    Notes
+    -----
+    - Use `sequence_logprobs` (or `nll`) as the authoritative score for comparisons and ranking.
+    - Avoid relying on `sequence_probs` for comparisons because of floating-point underflow.
+    - Prefer `avg_logprob_per_token_nats` or `perplexity` when comparing sequences of different lengths.
+    - Token-level spikes in `token_scores` (large -log p) indicate surprising tokens and are useful
+      for debugging prompts or model behavior.
+    
+    Examples
+    --------
+    # Example usage after calling generate_with_probs or score_sequences:
+    res = generate_with_probs(...)
+    print("Sequence logprob (nats):", res["sequence_logprobs"][0])
+    print("Sequence prob (display):", res["sequence_prob_display"][0])
+    print("Avg logprob/token (nats):", res["metrics"]["per_sequence"][0]["avg_logprob_per_token_nats"])
+    print("Perplexity:", res["metrics"]["per_sequence"][0]["perplexity"])
+    """
+
+    return inspect.getdoc(probs_scoring_guide)
+
+# --- helpers ---
+def _safe_exp64(logp: float) -> Tuple[float, str]:
+    lp64 = torch.tensor(logp, dtype=torch.float64)
+    try:
+        p64 = float(torch.exp(lp64).item())
+    except Exception:
+        p64 = 0.0
+    if p64 == 0.0:
+        log10_prob = float(lp64.item() / math.log(10.0))
+        display = f"~10^{log10_prob:.2f}"
+    else:
+        display = f"{p64:.6e}"
+    return p64, display
+
+def _attach_metrics_to_result(result: Dict[str, Any]) -> Dict[str, Any]:
+    seq_logprobs: List[float] = result.get("sequence_logprobs", [])
+    token_logprobs: List[List[float]] = result.get("token_logprobs", [])
+    token_probs: List[List[float]] = result.get("token_probs", [])
+    metrics = {"per_sequence": []}
+    for i, seq_lp in enumerate(seq_logprobs):
+        toks_lp = token_logprobs[i] if i < len(token_logprobs) else []
+        token_count = len(toks_lp)
+        avg_lp = float(sum(toks_lp) / token_count) if token_count > 0 else 0.0
+        avg_lp_bits = avg_lp / math.log(2.0)
+        try:
+            perplexity = math.exp(-avg_lp)
+        except OverflowError:
+            perplexity = float("inf")
+        log10_prob = seq_lp / math.log(10.0)
+        seq_prob_display = result.get("sequence_prob_display", [None]*len(seq_logprobs))[i]
+        if seq_prob_display is None:
+            seq_prob_display = f"~10^{log10_prob:.2f}"
+        if token_count > 0:
+            try:
+                geom_mean = math.exp(avg_lp)
+                geom_mean_display = f"{geom_mean:.6e}"
+            except OverflowError:
+                geom_mean_display = f"exp({avg_lp:.3f})"
+        else:
+            geom_mean_display = "n/a"
+        metrics["per_sequence"].append({
+            "sequence_index": i,
+            "token_count": token_count,
+            "sequence_logprob_nats": float(seq_lp),
+            "sequence_log10": float(log10_prob),
+            "sequence_prob_display": seq_prob_display,
+            "avg_logprob_per_token_nats": float(avg_lp),
+            "avg_logprob_per_token_bits": float(avg_lp_bits),
+            "geometric_mean_token_prob": geom_mean_display,
+            "perplexity": float(perplexity)
+        })
+    result["metrics"] = metrics
+    return result
+
+def _decode_token(tokenizer, tok_id: int) -> str:
+    if tokenizer is None:
+        return str(tok_id)
+    try:
+        if hasattr(tokenizer, "decode"):
+            return tokenizer.decode([tok_id])
+        if hasattr(tokenizer, "convert_ids_to_tokens"):
+            return tokenizer.convert_ids_to_tokens([tok_id])[0]
+    except Exception:
+        pass
+    return str(tok_id)
+
+# ---------------------------
+# generate_with_probs (with diff)
+# ---------------------------
+@torch.inference_mode()
+def generate_with_probs(
+    model,
+    prompts: torch.Tensor,
+    seq_len: int,
+    eos_token: Optional[int] = None,
+    temperature: float = 1.0,
+    prompt_lens: Optional[torch.Tensor] = None,
+    filter_logits_fn: Optional[Callable] = None,
+    filter_kwargs: Optional[Dict[str, Any]] = None,
+    pad_value: Optional[int] = None,
+    tokenizer = None,
+    print_table: bool = False,
+    device: Optional[torch.device] = None,
+    verbose: bool = True,
+    include_top1: bool = True,
+    **kwargs
+) -> Dict[str, Any]:
+    """
+    Generate sequences from an autoregressive model while collecting per-token probabilities,
+    log-probabilities, scores and an optional "diff" view comparing sampled tokens to the
+    model's top-1 (greedy) tokens.
+
+    This function runs the model in inference mode and appends sampled tokens to the provided
+    prompts until `seq_len` tokens have been generated (or until an `eos_token` ends all
+    sequences). It supports temperature sampling, optional logits filtering, and returns
+    detailed diagnostics useful for evaluation, debugging and analysis (per-token probs,
+    cumulative sequence log-probabilities, NLL, perplexity, and a diff of sampled vs top-1).
+
+    Key behaviors
+    - Operates under `torch.inference_mode()` (no gradients).
+    - If `prompt_lens` is provided, prompts are right-aligned into a padded buffer of the
+      same shape as `prompts` before generation (useful when prompts are suffixes).
+    - If `filter_logits_fn` is provided it is applied to raw logits before softmax.
+    - If `temperature == 0.0` the function performs greedy decoding (argmax).
+    - If `include_top1` is True, the function computes the top-1 token and its probability
+      at each step (after optional filtering) and records whether the sampled token matched it.
+    - If `eos_token` is provided, generation stops early when every batch item has produced
+      an EOS; generated outputs after the first EOS are optionally padded with `pad_value`.
+    - Returned numeric log-probabilities are in natural log (nats) and converted to float64
+      for sequence-level aggregation to reduce numerical error.
+
+    Parameters
+    - model: A model object exposing a `net` callable with signature
+      `logits = model.net(tokens, return_intermediates=True, cache=None, seq_start_pos=None, **kwargs)`.
+      `logits` must be a tensor of shape (batch, seq, vocab) or a tuple/list whose first
+      element is that tensor.
+    - prompts (torch.Tensor): Integer token tensor of shape (batch, prompt_len) containing
+      prompt tokens. Prompts are copied and extended in-place to produce generated sequences.
+    - seq_len (int): Maximum number of tokens to generate per example (not counting prompt).
+    - eos_token (Optional[int]): Token id that marks end-of-sequence. If provided, generation
+      may stop early and outputs after the first EOS are optionally replaced with `pad_value`.
+    - temperature (float): Sampling temperature. `0.0` forces greedy decoding.
+    - prompt_lens (Optional[torch.Tensor]): Optional per-batch prompt lengths (int or tensor)
+      used to right-align prompts into the generation buffer when prompts are suffixes.
+    - filter_logits_fn (Optional[Callable]): Function applied to raw logits before softmax.
+      Signature should accept `(logits, **filter_kwargs)` and return logits of same shape.
+    - filter_kwargs (Optional[Dict[str, Any]]): Keyword arguments forwarded to `filter_logits_fn`.
+    - pad_value (Optional[int]): Token id used to pad generated outputs after EOS (if any).
+    - tokenizer: Optional tokenizer used to decode token ids for human-readable diffs and
+      printed tables. If absent, token ids are stringified.
+    - print_table (bool): If True, prints a human-readable table summarizing per-token stats.
+    - device (Optional[torch.device]): Device to run generation on. Defaults to `prompts.device`.
+    - verbose (bool): If True, prints progress messages during generation.
+    - include_top1 (bool): If True, compute and return top-1 tokens, their probs/logprobs,
+      and a `diff` structure listing positions where sampled != top-1.
+    - **kwargs: Additional keyword arguments forwarded to `model.net`.
+
+    Returns
+    A dictionary with the following keys (types shown informally):
+    - "tokens" (torch.Tensor): Generated tokens (batch, generated_len) as CPU tensor.
+    - "token_probs" (List[List[float]]): Per-batch list of per-token sampling probabilities.
+    - "token_logprobs" (List[List[float]]): Per-batch list of per-token log-probabilities (nats).
+    - "token_scores" (List[List[float]]): Per-token scores (negative log-probabilities).
+    - "sequence_logprobs" (List[float]): Sum of token log-probabilities per generated sequence.
+    - "sequence_probs" (List[float]): Sequence probabilities (exp of sequence_logprobs) where
+      numerically possible; extremely small values may be represented as 0.0.
+    - "sequence_prob_display" (List[str]): Human-friendly display of sequence probability
+      (either decimal or approximate 10^x form for tiny values).
+    - "nll" (List[float]): Negative log-likelihood per sequence (i.e., -sequence_logprob).
+    - "metadata" (dict): Contains "prompt_len", "generated_len", and "temperature".
+    - "diff" (List[List[Dict]]): Per-batch list of dictionaries for positions where the sampled
+      token differed from the top-1 token. Each dict contains:
+        - "pos": position index within the generated span (0-based)
+        - "token": sampled token id
+        - "token_str": decoded sampled token (or id string)
+        - "token_prob": sampled token probability
+        - "top1_token": top-1 token id
+        - "top1_token_str": decoded top-1 token
+        - "top1_prob": top-1 probability
+        - "match": boolean (always False for entries in diff)
+    - If `include_top1` is True, additional keys are included:
+      - "top1_tokens", "top1_token_probs", "top1_token_logprobs", "top1_matches"
+
+    After the primary result is assembled the function attaches a "metrics" entry with:
+    - "per_sequence": list of per-sequence metric dicts containing:
+      - "sequence_index", "token_count", "sequence_logprob_nats", "sequence_log10",
+        "sequence_prob_display", "avg_logprob_per_token_nats", "avg_logprob_per_token_bits",
+        "geometric_mean_token_prob", "perplexity"
+
+    Notes and caveats
+    - Numerical stability: very small probabilities are clamped before log to avoid -inf;
+      sequence probabilities that underflow are represented with an approximate 10^x string.
+    - The function assumes the model's logits correspond to the next-token distribution for
+      the last position of the provided input; it uses `logits[:, -1, :]` for sampling.
+    - The function may raise exceptions if `model.net` returns tensors of unexpected shape
+      or if device/dtype mismatches occur.
+    - This function is intended for analysis and debugging; it is not optimized for maximal
+      throughput in production sampling loops.
+
+    Example (conceptual)
+    >>> res = generate_with_probs(model, prompts, seq_len=20, temperature=0.8, tokenizer=tok)
+    >>> print(res["metrics"]["per_sequence"][0]["perplexity"])
+    """
+    if filter_kwargs is None:
+        filter_kwargs = {}
+    if device is None:
+        device = prompts.device
+    if pad_value is None:
+        pad_value = getattr(model, "pad_value", None)
+
+    model.eval()
+    with torch.inference_mode():
+        prompts_in = prompts.to(device)
+        b, t = prompts_in.shape
+
+        if prompt_lens is not None:
+            aligned = torch.full_like(prompts_in, pad_value)
+            for i in range(b):
+                L = int(prompt_lens[i].item()) if isinstance(prompt_lens[i], torch.Tensor) else int(prompt_lens[i])
+                if L > 0:
+                    aligned[i, -L:] = prompts_in[i, -L:]
+            prompts_in = aligned
+
+        out = prompts_in.clone()
+
+        token_probs: List[List[float]] = [[] for _ in range(b)]
+        token_logprobs: List[List[float]] = [[] for _ in range(b)]
+        token_scores: List[List[float]] = [[] for _ in range(b)]
+        seq_logprob_tensors = [torch.tensor(0.0, dtype=torch.float64) for _ in range(b)]
+
+        top1_tokens: List[List[int]] = [[] for _ in range(b)]
+        top1_token_probs: List[List[float]] = [[] for _ in range(b)]
+        top1_token_logprobs: List[List[float]] = [[] for _ in range(b)]
+        top1_matches: List[List[bool]] = [[] for _ in range(b)]
+
+        greedy = (temperature == 0.0)
+
+        if verbose:
+            print("Generating sequence of max length:", seq_len)
+
+        for sl in range(seq_len):
+            max_seq_len = getattr(model, "max_seq_len", None)
+            x = out if max_seq_len is None else out[:, -max_seq_len:]
+
+            logits_out = model.net(x, return_intermediates=True, cache=None, seq_start_pos=None, **kwargs)
+            logits = logits_out[0] if isinstance(logits_out, (tuple, list)) else logits_out
+            logits = logits[:, -1, :]
+
+            # top1 (greedy) from raw logits
+            if include_top1:
+                top1_ids = logits.argmax(dim=-1, keepdim=True)  # (batch,1)
+                filtered_for_top1 = logits if filter_logits_fn is None else filter_logits_fn(logits, **filter_kwargs)
+                probs_for_top1 = F.softmax(filtered_for_top1 / (temperature if temperature > 0 else 1.0), dim=-1)
+                top1_p = probs_for_top1.gather(1, top1_ids).squeeze(1)
+                top1_lp = torch.log(top1_p.clamp_min(1e-45)).to(dtype=torch.float64)
+
+            if greedy:
+                filtered_logits = logits if filter_logits_fn is None else filter_logits_fn(logits, **filter_kwargs)
+                probs = F.softmax(filtered_logits / (temperature if temperature > 0 else 1.0), dim=-1)
+                sample = logits.argmax(dim=-1, keepdim=True)
+            else:
+                filtered_logits = logits if filter_logits_fn is None else filter_logits_fn(logits, **filter_kwargs)
+                probs = F.softmax(filtered_logits / temperature, dim=-1)
+                sample = torch.multinomial(probs, 1)
+
+            picked_probs = probs.gather(1, sample).squeeze(1)
+            picked_logprobs = torch.log(picked_probs.clamp_min(1e-45)).to(dtype=torch.float64)
+
+            out = torch.cat((out, sample), dim=-1)
+
+            for i in range(b):
+                p = float(picked_probs[i].cpu().item())
+                lp = float(picked_logprobs[i].cpu().item())
+                token_probs[i].append(p)
+                token_logprobs[i].append(lp)
+                token_scores[i].append(-lp)
+                seq_logprob_tensors[i] = seq_logprob_tensors[i] + torch.tensor(lp, dtype=torch.float64)
+
+                if include_top1:
+                    tid = int(top1_ids[i].item())
+                    tp = float(top1_p[i].cpu().item())
+                    tlp = float(top1_lp[i].cpu().item())
+                    top1_tokens[i].append(tid)
+                    top1_token_probs[i].append(tp)
+                    top1_token_logprobs[i].append(tlp)
+                    top1_matches[i].append(int(sample[i].item()) == tid)
+
+            if verbose and (sl % 32 == 0):
+                print(f"{sl} / {seq_len}")
+
+            if eos_token is not None:
+                last_tokens = out[:, -1]
+                if (last_tokens == eos_token).any(dim=-1).all():
+                    if verbose:
+                        print('Model called the end of sequence at:', sl, '/', seq_len)
+                    break
+
+        gen = out[:, t:].cpu()
+
+        if eos_token is not None:
+            for i in range(b):
+                seq_full = out[i].cpu()
+                eos_positions = (seq_full == eos_token).nonzero(as_tuple=False)
+                if eos_positions.numel() > 0:
+                    first_eos_idx = int(eos_positions[0].item())
+                    gen_len_before_eos = max(0, first_eos_idx - t)
+                    token_probs[i] = token_probs[i][:gen_len_before_eos]
+                    token_logprobs[i] = token_logprobs[i][:gen_len_before_eos]
+                    token_scores[i] = token_scores[i][:gen_len_before_eos]
+                    seq_logprob_tensors[i] = torch.tensor(sum(token_logprobs[i]), dtype=torch.float64)
+                    if include_top1:
+                        top1_tokens[i] = top1_tokens[i][:gen_len_before_eos]
+                        top1_token_probs[i] = top1_token_probs[i][:gen_len_before_eos]
+                        top1_token_logprobs[i] = top1_token_logprobs[i][:gen_len_before_eos]
+                        top1_matches[i] = top1_matches[i][:gen_len_before_eos]
+                    if pad_value is not None:
+                        start_mask = max(0, first_eos_idx - t)
+                        if start_mask < gen.shape[1]:
+                            gen[i, start_mask:] = pad_value
+
+        sequence_logprobs: List[float] = [float(x.item()) for x in seq_logprob_tensors]
+        sequence_probs: List[float] = []
+        sequence_prob_display: List[str] = []
+        nll: List[float] = []
+
+        for lp in sequence_logprobs:
+            pnum, disp = _safe_exp64(lp)
+            sequence_probs.append(pnum)
+            sequence_prob_display.append(disp)
+            nll.append(-lp)
+
+        result = {
+            "tokens": gen,
+            "token_probs": token_probs,
+            "token_logprobs": token_logprobs,
+            "token_scores": token_scores,
+            "sequence_logprobs": sequence_logprobs,
+            "sequence_probs": sequence_probs,
+            "sequence_prob_display": sequence_prob_display,
+            "nll": nll,
+            "metadata": {
+                "prompt_len": t,
+                "generated_len": gen.shape[1],
+                "temperature": temperature
+            }
+        }
+
+        if include_top1:
+            result.update({
+                "top1_tokens": top1_tokens,
+                "top1_token_probs": top1_token_probs,
+                "top1_token_logprobs": top1_token_logprobs,
+                "top1_matches": top1_matches
+            })
+
+        # build diff view: sampled != top1
+        diff_all: List[List[Dict[str, Any]]] = [[] for _ in range(b)]
+        if include_top1:
+            for i in range(b):
+                for pos, (sample_tok, sample_p, t1_tok, t1_p, match) in enumerate(zip(
+                    [int(x) for x in gen[i].tolist()],
+                    token_probs[i],
+                    top1_tokens[i],
+                    top1_token_probs[i],
+                    top1_matches[i]
+                )):
+                    if not match:
+                        diff_all[i].append({
+                            "pos": pos,
+                            "token": sample_tok,
+                            "token_str": _decode_token(tokenizer, sample_tok),
+                            "token_prob": sample_p,
+                            "top1_token": int(t1_tok),
+                            "top1_token_str": _decode_token(tokenizer, int(t1_tok)),
+                            "top1_prob": t1_p,
+                            "match": bool(match)
+                        })
+        result["diff"] = diff_all
+
+        result = _attach_metrics_to_result(result)
+
+        if print_table:
+            for i in range(b):
+                print("="*110)
+                print(f"Batch {i}  (prompt_len={t})")
+                print("-"*110)
+                print(" idx | token        |   prob    |   logprob   |   cum_logp   | token_nll | top1_token (p) | match")
+                print("-"*110)
+                cum_logp = 0.0
+                for idx, (p, lp, sc) in enumerate(zip(token_probs[i], token_logprobs[i], token_scores[i])):
+                    cum_logp += lp
+                    tok_id = int(gen[i, idx].item()) if idx < gen.shape[1] else -1
+                    tok_display = _decode_token(tokenizer, tok_id)
+                    if include_top1:
+                        t1_id = top1_tokens[i][idx]
+                        t1_p = top1_token_probs[i][idx]
+                        match_mark = "*" if top1_matches[i][idx] else " "
+                        print(f"{idx:3d} | {tok_display:>12s} | {p:9.6f} | {lp:11.6f} | {cum_logp:12.6f} | {sc:10.6f} | {_decode_token(tokenizer, t1_id):>12s} ({t1_p:5.3f}){match_mark}")
+                    else:
+                        print(f"{idx:3d} | {tok_display:>12s} | {p:9.6f} | {lp:11.6f} | {cum_logp:12.6f} | {sc:10.6f}")
+                print("-"*110)
+                print(f"Sequence logprob (nats): {result['sequence_logprobs'][i]:.6f} | Sequence prob: {result['sequence_prob_display'][i]} | NLL: {result['nll'][i]:.6f}")
+                m = result["metrics"]["per_sequence"][i]
+                print(f"Avg logprob/token: {m['avg_logprob_per_token_nats']:.6f} nats ({m['avg_logprob_per_token_bits']:.4f} bits) | Perplexity: {m['perplexity']:.6f}")
+                if result["diff"][i]:
+                    print("DIFF (sampled != top1) positions:")
+                    for d in result["diff"][i]:
+                        print(f" pos={d['pos']} token={d['token_str']}({d['token']}) p={d['token_prob']:.6f} | top1={d['top1_token_str']}({d['top1_token']}) p={d['top1_prob']:.6f}")
+                else:
+                    print("No diffs: sampled tokens matched top1 at every step.")
+                print("="*110)
+
+        return result
+
+# ---------------------------
+# score_sequences (with diff)
+# ---------------------------
+@torch.inference_mode()
+def score_sequences(
+    model,
+    sequences: torch.Tensor,
+    prompt_lens: Optional[torch.Tensor] = None,
+    eos_token: Optional[int] = None,
+    pad_value: Optional[int] = None,
+    filter_logits_fn: Optional[Callable] = None,
+    filter_kwargs: Optional[Dict[str, Any]] = None,
+    tokenizer = None,
+    print_table: bool = False,
+    device: Optional[torch.device] = None,
+    verbose: bool = False,
+    include_top1: bool = True,
+    **kwargs
+) -> Dict[str, Any]:
+    """
+    Compute per-token and per-sequence likelihood statistics for given full sequences
+    under an autoregressive model, optionally comparing each target token to the model's
+    top-1 prediction and producing a diff of mismatches.
+
+    This function scores provided sequences by computing the model's next-token distribution
+    for each position and extracting the probability and log-probability assigned to the
+    actual target token (i.e., the token that follows each input prefix). It supports
+    masking of padding tokens, optional EOS-based truncation, and an optional logits filter.
+    The function returns detailed per-token lists, aggregated sequence log-probabilities,
+    NLLs, human-friendly probability displays, and diagnostic "diff" entries where the
+    target token differs from the model's greedy top-1.
+
+    Key behaviors
+    - Operates under `torch.inference_mode()` (no gradients).
+    - Expects `sequences` shaped (batch, seq_len). The function scores tokens at positions
+      1..(seq_len-1) where each target is `sequences[:, pos]` and the corresponding input
+      is `sequences[:, :pos]`.
+    - If `filter_logits_fn` is provided it is applied to the model logits before softmax.
+    - If `pad_value` is provided, positions where the target equals `pad_value` are masked
+      out and not counted in sequence sums or per-token lists.
+    - If `eos_token` is provided, tokens after the first EOS in each sequence are masked out.
+    - If `include_top1` is True, the function computes top-1 ids and probabilities and
+      records whether the target matched the top-1 at each scored position.
+
+    Parameters
+    - model: A model object exposing a `net` callable with signature
+      `logits = model.net(tokens, return_intermediates=True, cache=None, seq_start_pos=None, **kwargs)`.
+      `logits` must be a tensor of shape (batch, seq, vocab) or a tuple/list whose first
+      element is that tensor.
+    - sequences (torch.Tensor): Integer token tensor of shape (batch, seq_len) containing
+      full sequences to be scored. The first token of each sequence is treated as context
+      and scoring begins at the second token.
+    - prompt_lens (Optional[torch.Tensor]): Optional per-batch prompt lengths; included in
+      returned metadata for bookkeeping (does not change scoring logic).
+    - eos_token (Optional[int]): Token id that marks end-of-sequence. If provided, tokens
+      after the first EOS are excluded from scoring.
+    - pad_value (Optional[int]): Token id used to indicate padding; masked positions are
+      excluded from per-token lists and sequence aggregates.
+    - filter_logits_fn (Optional[Callable]): Function applied to raw logits before softmax.
+      Signature should accept `(logits, **filter_kwargs)` and return logits of same shape.
+    - filter_kwargs (Optional[Dict[str, Any]]): Keyword arguments forwarded to `filter_logits_fn`.
+    - tokenizer: Optional tokenizer used to decode token ids for human-readable diffs and
+      printed tables. If absent, token ids are stringified.
+    - print_table (bool): If True, prints a human-readable table summarizing per-token stats.
+    - device (Optional[torch.device]): Device to run scoring on. Defaults to `sequences.device`.
+    - verbose (bool): If True, prints progress or extra information (currently minimal).
+    - include_top1 (bool): If True, compute and return top-1 tokens, their probs/logprobs,
+      and a `diff` structure listing positions where target != top-1.
+    - **kwargs: Additional keyword arguments forwarded to `model.net`.
+
+    Returns
+    A dictionary with the following keys:
+    - "tokens" (torch.Tensor): The input `sequences` returned as a CPU tensor.
+    - "token_probs" (List[List[float]]): Per-batch lists of probabilities assigned to each
+      scored target token (masked positions removed).
+    - "token_logprobs" (List[List[float]]): Per-batch lists of log-probabilities (nats).
+    - "token_scores" (List[List[float]]): Per-token scores (negative log-probabilities).
+    - "sequence_logprobs" (List[float]): Sum of log-probabilities over unmasked target tokens.
+    - "sequence_probs" (List[float]): Sequence probabilities where numerically representable.
+    - "sequence_prob_display" (List[str]): Human-friendly display of sequence probability.
+    - "nll" (List[float]): Negative log-likelihood per sequence (i.e., -sequence_logprob).
+    - "mask" (torch.BoolTensor): Boolean mask (batch, scored_len) indicating which target
+      positions were included in scoring (True = scored).
+    - "diff" (List[List[Dict]]): Per-batch list of dicts for positions where the target
+      token did not match the model's top-1. Each dict contains:
+        - "pos": index within the scored positions (0-based)
+        - "token": target token id
+        - "token_str": decoded target token (or id string)
+        - "token_prob": probability assigned to the target token
+        - "top1_token": top-1 token id
+        - "top1_token_str": decoded top-1 token
+        - "top1_prob": top-1 probability
+        - "match": boolean (False for entries in diff)
+    - "metadata" (dict): Contains "prompt_len" (if provided), "seq_len" (original sequence
+      length), and "scored_len_per_batch" (number of scored tokens per batch item).
+    - If `include_top1` is True, additional keys are included:
+      - "top1_tokens", "top1_token_probs", "top1_token_logprobs", "top1_matches"
+
+    After assembling the primary result the function attaches a "metrics" entry with:
+    - "per_sequence": list of per-sequence metric dicts containing:
+      - "sequence_index", "token_count", "sequence_logprob_nats", "sequence_log10",
+        "sequence_prob_display", "avg_logprob_per_token_nats", "avg_logprob_per_token_bits",
+        "geometric_mean_token_prob", "perplexity"
+
+    Notes and caveats
+    - The function expects `sequences` to contain at least two tokens per batch item; if
+      `seq_len < 2` a minimal result with empty scored lists is returned.
+    - Numerical stability: probabilities are clamped before log to avoid -inf; extremely
+      small sequence probabilities are represented in approximate 10^x form.
+    - The function may raise ValueError if `model.net` returns logits of unexpected shape.
+    - This routine is intended for evaluation and analysis of model likelihoods rather than
+      high-performance batched scoring in production.
+
+    Example (conceptual)
+    >>> res = score_sequences(model, sequences, pad_value=0, eos_token=2, tokenizer=tok)
+    >>> print(res["metrics"]["per_sequence"][0]["avg_logprob_per_token_nats"])
+    """
+    if filter_kwargs is None:
+        filter_kwargs = {}
+    if device is None:
+        device = sequences.device
+
+    model.eval()
+    with torch.inference_mode():
+        sequences = sequences.to(device)
+        b, L = sequences.shape
+
+        if L < 2:
+            empty = [[] for _ in range(b)]
+            return {
+                "tokens": sequences.cpu(),
+                "token_probs": empty,
+                "token_logprobs": empty,
+                "token_scores": empty,
+                "sequence_probs": [1.0 for _ in range(b)],
+                "sequence_prob_display": [f"{1.0:.6e}" for _ in range(b)],
+                "sequence_logprobs": [0.0 for _ in range(b)],
+                "nll": [0.0 for _ in range(b)],
+                "mask": torch.zeros((b, 0), dtype=torch.bool),
+                "diff": [[] for _ in range(b)],
+                "metadata": {"prompt_len": None if prompt_lens is None else (prompt_lens.tolist() if isinstance(prompt_lens, torch.Tensor) else prompt_lens),
+                             "seq_len": L,
+                             "scored_len": 0}
+            }
+
+        inputs = sequences[:, :-1]
+        targets = sequences[:, 1:]
+
+        logits_out = model.net(inputs, return_intermediates=True, cache=None, seq_start_pos=None, **kwargs)
+        logits = logits_out[0] if isinstance(logits_out, (tuple, list)) else logits_out
+
+        if logits.dim() != 3:
+            raise ValueError(f"Expected logits with shape (b, seq, vocab), got {logits.shape}")
+
+        filtered_logits = logits if filter_logits_fn is None else filter_logits_fn(logits, **(filter_kwargs or {}))
+        probs = F.softmax(filtered_logits, dim=-1)
+        targets_unsq = targets.unsqueeze(-1)
+        picked_probs = probs.gather(dim=-1, index=targets_unsq).squeeze(-1)
+        picked_logprobs = torch.log(picked_probs.clamp_min(1e-45)).to(dtype=torch.float64)
+
+        if include_top1:
+            top1_ids = probs.argmax(dim=-1)            # (b, seq)
+            top1_p = probs.gather(-1, top1_ids.unsqueeze(-1)).squeeze(-1)
+            top1_lp = torch.log(top1_p.clamp_min(1e-45)).to(dtype=torch.float64)
+
+        mask = torch.ones_like(picked_probs, dtype=torch.bool)
+        if pad_value is not None:
+            mask = mask & (targets != pad_value)
+
+        if eos_token is not None:
+            for i in range(b):
+                seq_full = sequences[i]
+                eos_positions = (seq_full == eos_token).nonzero(as_tuple=False)
+                if eos_positions.numel() > 0:
+                    first_eos = int(eos_positions[0].item())
+                    cutoff = max(0, first_eos - 1)
+                    if cutoff + 1 < mask.shape[1]:
+                        mask[i, cutoff+1:] = False
+
+        token_probs: List[List[float]] = []
+        token_logprobs: List[List[float]] = []
+        token_scores: List[List[float]] = []
+        sequence_logprobs: List[float] = []
+        sequence_probs: List[float] = []
+        sequence_prob_display: List[str] = []
+        nll: List[float] = []
+
+        top1_tokens: List[List[int]] = [[] for _ in range(b)]
+        top1_token_probs: List[List[float]] = [[] for _ in range(b)]
+        top1_token_logprobs: List[List[float]] = [[] for _ in range(b)]
+        top1_matches: List[List[bool]] = [[] for _ in range(b)]
+
+        diff_all: List[List[Dict[str, Any]]] = [[] for _ in range(b)]
+
+        for i in range(b):
+            row_mask = mask[i]
+            row_probs = picked_probs[i]
+            row_logps = picked_logprobs[i]
+            kept_probs = row_probs[row_mask].cpu().tolist()
+            kept_logps = row_logps[row_mask].cpu().tolist()
+            kept_scores = [-lp for lp in kept_logps]
+            token_probs.append([float(x) for x in kept_probs])
+            token_logprobs.append([float(x) for x in kept_logps])
+            token_scores.append([float(x) for x in kept_scores])
+
+            if include_top1:
+                t1_row = top1_ids[i]
+                t1_p_row = top1_p[i]
+                t1_lp_row = top1_lp[i]
+                kept_t1_ids = t1_row[row_mask].cpu().tolist()
+                kept_t1_ps = t1_p_row[row_mask].cpu().tolist()
+                kept_t1_lps = t1_lp_row[row_mask].cpu().tolist()
+                top1_tokens[i] = [int(x) for x in kept_t1_ids]
+                top1_token_probs[i] = [float(x) for x in kept_t1_ps]
+                top1_token_logprobs[i] = [float(x) for x in kept_t1_lps]
+                kept_targets = targets[i][row_mask].cpu().tolist()
+                top1_matches[i] = [int(t == top1) for t, top1 in zip(kept_targets, kept_t1_ids)]
+
+                # build diff entries where target != top1
+                for pos_idx, (tgt, tgt_p, t1, t1_p, match) in enumerate(zip(kept_targets, kept_probs, kept_t1_ids, kept_t1_ps, top1_matches[i])):
+                    if not match:
+                        diff_all[i].append({
+                            "pos": pos_idx,
+                            "token": int(tgt),
+                            "token_str": _decode_token(tokenizer, int(tgt)),
+                            "token_prob": float(tgt_p),
+                            "top1_token": int(t1),
+                            "top1_token_str": _decode_token(tokenizer, int(t1)),
+                            "top1_prob": float(t1_p),
+                            "match": bool(match)
+                        })
+
+            seq_lp_tensor = torch.tensor(sum(kept_logprobs := kept_logps), dtype=torch.float64)
+            seq_lp = float(seq_lp_tensor.item())
+            pnum, disp = _safe_exp64(seq_lp)
+            sequence_logprobs.append(seq_lp)
+            sequence_probs.append(pnum)
+            sequence_prob_display.append(disp)
+            nll.append(-seq_lp)
+
+        result = {
+            "tokens": sequences.cpu(),
+            "token_probs": token_probs,
+            "token_logprobs": token_logprobs,
+            "token_scores": token_scores,
+            "sequence_logprobs": sequence_logprobs,
+            "sequence_probs": sequence_probs,
+            "sequence_prob_display": sequence_prob_display,
+            "nll": nll,
+            "mask": mask.cpu(),
+            "diff": diff_all,
+            "metadata": {
+                "prompt_len": None if prompt_lens is None else (prompt_lens.tolist() if isinstance(prompt_lens, torch.Tensor) else prompt_lens),
+                "seq_len": L,
+                "scored_len_per_batch": [int(m.sum().item()) for m in mask]
+            }
+        }
+
+        if include_top1:
+            result.update({
+                "top1_tokens": top1_tokens,
+                "top1_token_probs": top1_token_probs,
+                "top1_token_logprobs": top1_token_logprobs,
+                "top1_matches": top1_matches
+            })
+
+        result = _attach_metrics_to_result(result)
+
+        if print_table:
+            for i in range(b):
+                print("=" * 120)
+                header = f"Batch {i}  (seq_len={L})"
+                if prompt_lens is not None:
+                    header += f"  prompt_len={int(prompt_lens[i].item()) if isinstance(prompt_lens[i], torch.Tensor) else prompt_lens[i]}"
+                print(header)
+                print("-" * 120)
+                print(" idx | token        |   prob    |   logprob   |   cum_logp   |   token_nll | top1_token (p) | match")
+                print("-" * 120)
+                cum_logp = 0.0
+                pos_idx = 0
+                for pos in range(1, L):
+                    if not mask[i, pos-1]:
+                        continue
+                    tok_id = int(sequences[i, pos].item())
+                    p = float(picked_probs[i, pos-1].cpu().item())
+                    lp = float(picked_logprobs[i, pos-1].cpu().item())
+                    cum_logp += lp
+                    sc = -lp
+                    if include_top1:
+                        t1_id = top1_tokens[i][pos_idx]
+                        t1_p = top1_token_probs[i][pos_idx]
+                        match = top1_matches[i][pos_idx]
+                        print(f"{pos_idx:3d} | {_decode_token(tokenizer, tok_id):>12s} | {p:9.6f} | {lp:11.6f} | {cum_logp:12.6f} | {sc:10.6f} | {_decode_token(tokenizer, t1_id):>12s} ({t1_p:5.3f}) | {match}")
+                    else:
+                        print(f"{pos_idx:3d} | {_decode_token(tokenizer, tok_id):>12s} | {p:9.6f} | {lp:11.6f} | {cum_logp:12.6f} | {sc:10.6f}")
+                    pos_idx += 1
+                print("-" * 120)
+                print(f"Sequence logprob (nats): {result['sequence_logprobs'][i]:.6f} | Sequence prob: {result['sequence_prob_display'][i]} | NLL: {result['nll'][i]:.6f}")
+                m = result["metrics"]["per_sequence"][i]
+                print(f"Avg logprob/token: {m['avg_logprob_per_token_nats']:.6f} nats ({m['avg_logprob_per_token_bits']:.4f} bits) | Perplexity: {m['perplexity']:.6f}")
+                if result["diff"][i]:
+                    print("DIFF (target != top1) positions:")
+                    for d in result["diff"][i]:
+                        print(f" pos={d['pos']} token={d['token_str']}({d['token']}) p={d['token_prob']:.6f} | top1={d['top1_token_str']}({d['top1_token']}) p={d['top1_prob']:.6f}")
+                else:
+                    print("No diffs: target tokens matched top1 at every scored position.")
+                print("=" * 120)
+
+        return result
 
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
