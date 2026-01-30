@@ -6511,42 +6511,22 @@ def exists(x: Any) -> bool:
     return x is not None
 
 def default_token_type_ids(tokens: torch.Tensor) -> torch.Tensor:
-    """
-    Vectorized mapping of token ids -> type ids in {0,1,2,3}.
-    Mirrors original behavior:
-      0: tokens < 128
-      1: 128 <= tokens < 256
-      2: 256 <= tokens < 384
-      3: tokens >= 384
-    """
-    t0 = (tokens < 128).to(torch.long) * 0
-    t1 = ((tokens >= 128) & (tokens < 256)).to(torch.long) * 1
-    t2 = ((tokens >= 256) & (tokens < 384)).to(torch.long) * 2
-    t3 = (tokens >= 384).to(torch.long) * 3
-    return t0 + t1 + t2 + t3
+    """Map token ids to 4 types: [0-127]→0, [128-255]→1, etc."""
+    return torch.clamp(tokens // 128, min=0, max=3).to(torch.long)
 
 def build_type_map_from_ranges(vocab_size: int, ranges: List[Tuple[int, int, int]], default_type: int = 0) -> torch.Tensor:
-    """
-    Build a 1D torch.LongTensor of length vocab_size mapping token_id -> type_id.
-    ranges: list of (start, end, type_id) inclusive ranges. Values outside 0..vocab_size-1 are clamped.
-    default_type: type id for tokens not covered by any range.
-    """
     type_map = torch.full((vocab_size,), fill_value=int(default_type), dtype=torch.long)
     for (start, end, type_id) in ranges:
         s = max(0, int(start))
         e = min(vocab_size - 1, int(end))
-        if e < s:
-            continue
-        type_map[s:e+1] = int(type_id)
+        if e >= s:
+            type_map[s:e+1] = int(type_id)
     return type_map
 
 def infer_num_types_from_ranges_or_map(vocab_size: int, type_ranges: Optional[List[Tuple[int,int,int]]], type_map: Optional[torch.Tensor]) -> Optional[int]:
-    """
-    Return inferred num_types if possible, else None.
-    """
     if type_map is not None:
         if type_map.numel() != vocab_size:
-            raise ValueError("type_map length must equal vocab_size for inference")
+            raise ValueError("type_map length must equal vocab_size")
         return int(type_map.max().item()) + 1
     if type_ranges is not None and len(type_ranges) > 0:
         max_type = max(int(tr[2]) for tr in type_ranges)
@@ -6554,22 +6534,9 @@ def infer_num_types_from_ranges_or_map(vocab_size: int, type_ranges: Optional[Li
     return None
 
 # -------------------------
-# Shared + delta embeddings (with padding handling)
+# Shared + Delta Embedding
 # -------------------------
 class SharedDeltaEmbedding(nn.Module):
-    """
-    MuseNet-style factorized embedding:
-        final_emb = base[token] + delta[type]
-
-    Two ways to supply token types:
-      - token_type_fn: callable(tokens) -> type_ids (vectorized torch ops)
-      - type_map: 1D tensor of length vocab_size mapping token_id -> type_id (fast indexing)
-
-    If padding_idx is provided, the base embedding row at padding_idx is
-    handled by nn.Embedding(padding_idx=...), and the delta contribution
-    is explicitly zeroed at pad positions so the final pad embedding is zero.
-    Returns (B, L, dim).
-    """
     def __init__(
         self,
         dim: int,
@@ -6582,7 +6549,7 @@ class SharedDeltaEmbedding(nn.Module):
         super().__init__()
         self.padding_idx = padding_idx
 
-        # If a type_map is provided, register it as a buffer and infer num_types if not given
+        # Register type_map if provided
         if type_map is not None:
             tm = type_map.to(dtype=torch.long).flatten()
             if tm.numel() != vocab_size:
@@ -6591,79 +6558,125 @@ class SharedDeltaEmbedding(nn.Module):
             inferred = int(tm.max().item()) + 1
             if num_types is None:
                 num_types = inferred
-            else:
-                if int(num_types) < inferred:
-                    raise ValueError(f"Provided num_types={num_types} is smaller than max(type_map)+1={inferred}")
+            elif int(num_types) < inferred:
+                raise ValueError(f"Provided num_types={num_types} < max(type_map)+1={inferred}")
         else:
             self.type_map = None
 
-        # If num_types still None, leave it None for now; will be resolved below or defaulted
         if num_types is None:
-            # If no type_map but user provided token_type_fn, we cannot infer reliably
-            # fall back to default 4 and warn
             num_types = 4
-            warnings.warn("num_types not provided and cannot be inferred from ranges/map; defaulting to 4. Provide num_types if your token_type_fn produces a different number of types.", UserWarning)
-
+            warnings.warn(
+                "num_types not provided and cannot be inferred; defaulting to 4. "
+                "Provide num_types if your token_type_fn produces a different number of types.",
+                UserWarning
+            )
         self.num_types = int(num_types)
 
-        # base embedding: padding_idx will ensure base[padding_idx] stays zero and not updated
+        # Embeddings
         self.base = nn.Embedding(vocab_size, dim, padding_idx=padding_idx)
-        # small delta per token type; must be zeroed at pad positions manually
         self.delta = nn.Embedding(self.num_types, dim)
 
-        # token_type_fn should be vectorized and use torch ops only
+        # Initialize both with same scale
+        std = dim ** -0.5
+        nn.init.normal_(self.base.weight, mean=0.0, std=std)
+        nn.init.normal_(self.delta.weight, mean=0.0, std=std)
+        if padding_idx is not None:
+            with torch.no_grad():
+                self.base.weight[padding_idx].zero_()
+
         self.token_type_fn = token_type_fn if token_type_fn is not None else default_token_type_ids
 
     def forward(self, tokens: torch.Tensor) -> torch.Tensor:
-        """
-        tokens: (B, L) with integer token ids
-        returns: (B, L, dim)
-        """
-        if hasattr(self, "type_map") and self.type_map is not None:
+        if self.type_map is not None:
             type_ids = self.type_map[tokens]
         else:
             type_ids = self.token_type_fn(tokens).to(torch.long)
 
-        base_emb  = self.base(tokens)                  # (B, L, dim)
-        delta_emb = self.delta(type_ids)               # (B, L, dim)
+        base_emb = self.base(tokens)
+        delta_emb = self.delta(type_ids)
 
         if self.padding_idx is not None:
-            pad_mask = tokens == self.padding_idx     # (B, L) boolean
-            delta_emb = delta_emb.masked_fill(pad_mask.unsqueeze(-1), 0.0)
+            pad_mask = (tokens == self.padding_idx).unsqueeze(-1)
+            delta_emb = delta_emb.masked_fill(pad_mask, 0.0)
 
         return base_emb + delta_emb
 
 # -------------------------
-# MusicTransformer compatible with x-transformers AutoregressiveWrapper
+# MusicTransformer — fully compatible with x-transformers 2.14.2
 # -------------------------
 class MusicTransformer(nn.Module):
-    
+
     """
-    Transformer model adapted to be wrapped by x-transformers' AutoregressiveWrapper.
+    A MuseNet-inspired autoregressive transformer that uses **factorized token embeddings**:
+      final_embedding[token] = base[token] + delta[type[token]]
 
-    Constructor args:
-      - token_type_fn: optional callable(tokens) -> type_ids tensor
-      - type_ranges: optional list of (start, end, type_id) tuples (inclusive)
-      - type_map: optional prebuilt 1D tensor mapping token_id -> type_id
-      - num_token_types: optional int; if omitted, will be inferred from ranges or type_map when possible
+    This architecture separates per-token identity (via `base`) from coarse semantic type (via `delta`),
+    which can improve generalization and training stability for structured symbolic sequences like music.
 
+    The model is fully compatible with `x_transformers.AutoregressiveWrapper` and uses a clean,
+    explicit forward pass that ensures gradients flow correctly to both embedding components.
+
+    Parameters
+    ----------
+    dim : int, default=2048
+        Model dimension (also embedding dimension).
+    depth : int, default=12
+        Number of transformer decoder layers.
+    heads : int, default=16
+        Number of attention heads.
+    max_seq_len : int, default=4096
+        Maximum sequence length supported (used by positional embeddings in wrapper).
+    vocab_size : int, default=718
+        Size of the token vocabulary.
+    pad_value : int or None, default=None
+        Token ID used for padding; its embedding will be zeroed out.
+    num_token_types : int or None, default=None
+        Number of distinct token types. If omitted, inferred from `type_ranges` or `type_map`.
+        If neither is provided and `token_type_fn` is custom, defaults to 4 with a warning.
+    token_type_fn : callable or None, default=None
+        Function mapping `(B, L) -> (B, L)` integer token IDs to type IDs.
+        If None, uses default 4-type grouping based on token value ranges.
+    type_ranges : list of (start, end, type_id) or None, default=None
+        Inclusive token ID ranges used to build an internal `type_map`. Overrides `token_type_fn`.
+    type_map : torch.Tensor or None, default=None
+        Precomputed 1D tensor of shape `(vocab_size,)` mapping token_id → type_id.
+        Takes precedence over `type_ranges`.
+    decoder_kwargs : dict, optional
+        Additional arguments passed to `x_transformers.Decoder` (e.g., attention variants).
+    tw_kwargs : dict, optional
+        Additional arguments passed to `x_transformers.TransformerWrapper`.
+
+    Attributes (for AutoregressiveWrapper compatibility)
+    -----------------------------------------------
+    max_seq_len : int
+    add_continuous_pred_head : bool (False)
+    output_is_log_prob : bool (False)
+    can_cache_kv : bool (True)
+    can_cache_kv_outside_max_seq_len : bool (False)
+
+    Forward Returns
+    ---------------
+    logits : torch.Tensor
+        Shape `(B, L, vocab_size)` — predicted next-token logits.
+    cache : Any or None
+        KV cache if `return_intermediates=True`; otherwise None.
 
     Use Example
-    -------
+    -----------
 
     vocab_size = 718
     pad_value = 717
     SEQ_LEN = 1024
 
-    # Example: specify contiguous ranges for token types (inclusive)
+    # Define token type ranges (inclusive): e.g., notes, instruments, etc.
     type_ranges = [
-        (0, 127, 0),
-        (128, 255, 1),
-        (256, 383, 2),
-        (384, vocab_size - 1, 3),
+        (0, 127, 0),   # e.g., delta onsets tokens
+        (128, 255, 1), # e.g., durations tokens
+        (256, 383, 2), # e.g., pitches tokens
+        (384, vocab_size - 1, 3), # chords tokens
     ]
 
-    # You can omit num_token_types and it will be inferred from type_ranges
+    # num_token_types is inferred automatically from type_ranges
     model = MusicTransformer(
         dim=2048,
         depth=12,
@@ -6671,32 +6684,34 @@ class MusicTransformer(nn.Module):
         max_seq_len=SEQ_LEN,
         vocab_size=vocab_size,
         pad_value=pad_value,
-        token_type_fn=None,
+        token_type_fn=None,      # use type_ranges instead
         type_ranges=type_ranges,
-        num_token_types=None,  # will be inferred as 4
-        decoder_kwargs = dict(
-            attn_orthog_projected_values = True,
-            attn_orthog_projected_values_per_head = True
+        num_token_types=None,    # ← inferred as 4
+        decoder_kwargs=dict(
+            attn_orthog_projected_values=True, # Belief attention flags
+            attn_orthog_projected_values_per_head=True # Belief attention flags
         ),
-        tw_kwargs = dict()
+        tw_kwargs=dict()
     )
 
+    # Wrap for autoregressive training/generation
     wrapped = AutoregressiveWrapper(model, ignore_index=pad_value, pad_value=pad_value)
 
-    # Recommended compile & device order:
+    # Move to device and compile (recommended order)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     wrapped.to(device)
     wrapped = torch.compile(wrapped)
 
+    # Test forward pass
     tokens = torch.randint(0, vocab_size, (2, 16), device=device)
     logits, cache = wrapped.net(tokens, return_intermediates=True)
-    print("Logits shape:", logits.shape)
+    print("Logits shape:", logits.shape)  # (2, 16, 718)
     """
-    
+
     def __init__(
         self,
         dim: int = 2048,
-        depth: int = 8,
+        depth: int = 12,
         heads: int = 16,
         max_seq_len: int = 4096,
         vocab_size: int = 718,
@@ -6710,45 +6725,38 @@ class MusicTransformer(nn.Module):
     ):
         super().__init__()
 
-        if decoder_kwargs is None:
-            decoder_kwargs = {}
-        if tw_kwargs is None:
-            tw_kwargs = {}
+        decoder_kwargs = decoder_kwargs or {}
+        tw_kwargs = tw_kwargs or {}
 
-        # Attributes used by AutoregressiveWrapper
+        # Attributes expected by AutoregressiveWrapper
         self.max_seq_len = max_seq_len
         self.add_continuous_pred_head = False
         self.output_is_log_prob = False
         self.can_cache_kv = True
         self.can_cache_kv_outside_max_seq_len = False
 
-        # If type_ranges provided, build a type_map and infer num types if needed
+        # Build type_map if needed
         built_type_map = None
         if type_ranges is not None:
             built_type_map = build_type_map_from_ranges(vocab_size, type_ranges, default_type=0)
-
-        # If user provided a type_map argument, prefer it (but ensure shape)
         if type_map is not None:
             tm = type_map.to(dtype=torch.long).flatten()
             if tm.numel() != vocab_size:
-                raise ValueError("Provided type_map length must equal vocab_size")
+                raise ValueError("type_map length must equal vocab_size")
             built_type_map = tm
 
-        # Try to infer num_token_types if not provided
+        # Infer num_token_types
         inferred = infer_num_types_from_ranges_or_map(vocab_size, type_ranges, built_type_map)
-        if num_token_types is None and inferred is not None:
-            num_token_types = inferred
-
-        # If still None and token_type_fn provided, we cannot infer; warn and default to 4
         if num_token_types is None:
-            if token_type_fn is not None:
-                warnings.warn("num_token_types not provided and cannot be inferred from ranges/map; defaulting to 4. Provide num_token_types if your token_type_fn produces a different number of types.", UserWarning)
+            if inferred is not None:
+                num_token_types = inferred
+            elif token_type_fn is not None:
+                warnings.warn("num_token_types not provided; defaulting to 4.", UserWarning)
                 num_token_types = 4
             else:
-                # no token_type_fn and no ranges/map: default to 4 to preserve original behavior
                 num_token_types = 4
 
-        # Embeddings and transformer
+        # Embedding layer
         self.token_emb = SharedDeltaEmbedding(
             dim=dim,
             vocab_size=vocab_size,
@@ -6758,138 +6766,65 @@ class MusicTransformer(nn.Module):
             type_map=built_type_map
         )
 
-        # Build Decoder with decoder_kwargs but ensure required args are present/overridden
+        # Decoder
         decoder_init_kwargs = dict(
-            dim = dim,
-            depth = depth,
-            heads = heads,
-            rotary_pos_emb = True,
-            attn_flash = True
+            dim=dim,
+            depth=depth,
+            heads=heads,
+            rotary_pos_emb=True,
+            attn_flash=True
         )
         decoder_init_kwargs.update(decoder_kwargs)
         decoder = Decoder(**decoder_init_kwargs)
 
-        # TransformerWrapper requires num_tokens even when using a custom token_emb.
+        # TransformerWrapper — critical: we provide token_emb and disable internal logits via external head
         tw_init_kwargs = dict(
-            num_tokens = vocab_size,
-            max_seq_len = max_seq_len,
-            token_emb = self.token_emb,
-            attn_layers = decoder
+            num_tokens=vocab_size,          # required by TW even with custom emb
+            max_seq_len=max_seq_len,
+            token_emb=self.token_emb,
+            attn_layers=decoder,
+            use_abs_pos_emb=False,          # because we use rotary
+            tie_embedding=False             # we use our own to_logits
         )
         tw_init_kwargs.update(tw_kwargs)
-
         self.transformer = TransformerWrapper(**tw_init_kwargs)
+
+        # Final prediction head
         self.to_logits = nn.Linear(dim, vocab_size)
 
     def forward(
         self,
         x: torch.Tensor,
-        return_embeddings: bool = False,
-        return_logits_and_embeddings: bool = False,
-        return_intermediates: bool = False,
-        return_embeddings_and_intermediates: bool = False,
-        return_logit_entropies: bool = False,
-        return_next_embed_pred: bool = False,
-        mask = None,
-        return_mems: bool = False,
-        return_attn: bool = False,
-        mems = None,
-        mem_masks = None,
-        recycle_steps = None,
-        pos = None,
-        prepend_embeds: Optional[torch.Tensor] = None,
-        prepend_mask = None,
-        embed_ids: Dict[str, torch.Tensor] = dict(),
-        sum_embeds = None,
-        return_attn_z_loss: bool = False,
-        attn_z_loss_weight: float = 1e-4,
-        seq_start_pos: Optional[torch.Tensor] = None,
-        cache: Any = None,
-        input_not_include_cache: bool = False,
-        token_emb_kwargs: dict = dict(),
-        to_logits_kwargs: dict = dict(),
-        **kwargs,
+        mask=None,
+        cache=None,
+        return_intermediates=False,
+        **kwargs
     ) -> Tuple[torch.Tensor, Optional[Any]]:
         """
-        Forward adapted to TransformerWrapper's signature.
-
-        Returns:
-          - (logits, cache) when return_intermediates=True
-          - (logits, None) otherwise
+        Forward pass that explicitly requests embeddings from TransformerWrapper,
+        then applies our own to_logits head.
+        This ensures gradients flow correctly to token_emb.
         """
-        tw_out = self.transformer(
+        # Get embeddings directly from transformer (bypasses TW's internal logits)
+        embeddings = self.transformer(
             x,
-            return_embeddings = return_embeddings,
-            return_logits_and_embeddings = return_logits_and_embeddings,
-            return_intermediates = return_intermediates,
-            return_embeddings_and_intermediates = return_embeddings_and_intermediates,
-            return_logit_entropies = return_logit_entropies,
-            return_next_embed_pred = return_next_embed_pred,
-            mask = mask,
-            return_mems = return_mems,
-            return_attn = return_attn,
-            mems = mems,
-            mem_masks = mem_masks,
-            recycle_steps = recycle_steps,
-            pos = pos,
-            prepend_embeds = prepend_embeds,
-            prepend_mask = prepend_mask,
-            embed_ids = embed_ids,
-            sum_embeds = sum_embeds,
-            return_attn_z_loss = return_attn_z_loss,
-            attn_z_loss_weight = attn_z_loss_weight,
-            seq_start_pos = seq_start_pos,
-            cache = cache,
-            input_not_include_cache = input_not_include_cache,
-            token_emb_kwargs = token_emb_kwargs,
-            to_logits_kwargs = to_logits_kwargs,
+            return_embeddings=True,   # ←←← KEY: ensures no internal logits applied
+            mask=mask,
+            cache=cache,
             **kwargs
         )
 
-        # Normalize TW outputs into (embeddings_or_logits, new_cache)
+        # Handle case where cache is returned (x-transformers may return tuple when caching)
         new_cache = None
-        embeddings_or_logits = tw_out
+        if isinstance(embeddings, tuple):
+            embeddings, new_cache = embeddings[0], embeddings[1]
 
-        if isinstance(tw_out, tuple):
-            possible_cache = tw_out[-1]
-            if not isinstance(possible_cache, torch.Tensor):
-                new_cache = possible_cache
-                embeddings_or_logits = tw_out[0]
-            else:
-                embeddings_or_logits = tw_out[0]
-
-        # Unpack embeddings_or_logits if it's a tuple like (logits, embeddings) or (embeddings, logits)
-        embeddings = None
-        logits_candidate = None
-
-        if isinstance(embeddings_or_logits, tuple):
-            first, second = embeddings_or_logits[0], embeddings_or_logits[1]
-            if isinstance(second, torch.Tensor) and second.dim() == 3 and second.shape[-1] == self.to_logits.in_features:
-                embeddings = second
-                logits_candidate = first
-            elif isinstance(first, torch.Tensor) and first.dim() == 3 and first.shape[-1] == self.to_logits.in_features:
-                embeddings = first
-                logits_candidate = second
-            else:
-                embeddings = first if isinstance(first, torch.Tensor) else None
-                logits_candidate = second if isinstance(second, torch.Tensor) else None
-        else:
-            candidate = embeddings_or_logits
-            if isinstance(candidate, torch.Tensor) and candidate.dim() == 3 and candidate.shape[-1] == self.to_logits.in_features:
-                embeddings = candidate
-            else:
-                logits_candidate = candidate
-
-        if exists(embeddings):
-            logits = self.to_logits(embeddings)
-        elif exists(logits_candidate):
-            logits = logits_candidate
-        else:
-            raise RuntimeError("Unable to determine logits or embeddings from TransformerWrapper output. Check flags passed to TW.")
+        # Apply our own logits head
+        logits = self.to_logits(embeddings)
 
         if return_intermediates:
             return logits, new_cache
-
+            
         return logits, None
         
 #=================================================================================================================================
