@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 2.0
+# Version 3.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -5231,8 +5231,9 @@ class GPTVAE(Module):
 
         self.vae_kl_div_floor = vae_kl_div_floor
         self.vae_kl_loss_weight = vae_kl_loss_weight
-
-        self.latents_dropout = nn.Dropout(latents_dropout_prob)
+        
+        # Store prob for efficient mask generation
+        self.latents_dropout_prob = latents_dropout_prob
 
     @property
     def device(self):
@@ -5247,10 +5248,9 @@ class GPTVAE(Module):
         pooled = self.encoder(seq, mask = mask)
 
         latents_mean, latents_log_var = self.to_latent_mean_log_variance(pooled)
-        latents_std = (0.5 * latents_log_var).exp()
-
+        
         # reparam trick
-
+        latents_std = (0.5 * latents_log_var).exp()
         latents = latents_mean + latents_std * torch.randn_like(latents_mean)
 
         if not return_mean_log_var:
@@ -5258,7 +5258,7 @@ class GPTVAE(Module):
 
         return latents, (latents_mean, latents_log_var)
 
-    @torch.no_grad()
+    @torch.inference_mode()
     def generate(
         self,
         prompts,
@@ -5271,26 +5271,28 @@ class GPTVAE(Module):
         batch = prompts.shape[0] if prompts.ndim == 2 else 1
 
         # if seq_for_latents passed in, derive latents from it
-
         if exists(seq_for_latents):
             assert not exists(latents), 'latents should not be passed in if given the seq from which to derive them'
-
             latents = self.encode_to_latents(seq_for_latents)
 
         # prepend embeds
-
         prepend_embeds = None
         if exists(latents):
             if not is_tensor(latents):
                 latents = tensor(latents, device = self.device)
 
-            if latents.ndim == 1: # repeat latents
-                latents = repeat(latents, 'd -> b d', b = batch)
-
-            prepend_embeds = self.from_latent_to_prepend_token(latents)
+            # Optimization: If latents are 1D (single vector), project once and expand.
+            # Avoids B separate projections of the same vector.
+            if latents.ndim == 1:
+                # 1. Project single vector: (D) -> (1, 1, D)
+                single_prepend = self.from_latent_to_prepend_token(latents.unsqueeze(0))
+                # 2. Expand to batch
+                prepend_embeds = single_prepend.expand(batch, -1, -1)
+            else:
+                # Standard batch projection
+                prepend_embeds = self.from_latent_to_prepend_token(latents)
 
         # generated
-
         generated = self.ar_wrapped_decoder.generate(
             prompts,
             seq_len,
@@ -5312,42 +5314,42 @@ class GPTVAE(Module):
 
         latents, (latents_mean, latents_log_var) = self.encode_to_latents(seq_for_latents, return_mean_log_var = True)
 
-        dropped_latents = ~self.latents_dropout(torch.ones((batch,), device = device)).bool()
+        # Optimization: Efficient mask generation
+        # True = Dropped (do not attend), False = Keep.
+        dropped_latents = torch.rand(batch, device=device) < self.latents_dropout_prob
 
         prepend_embeds = self.from_latent_to_prepend_token(latents)
 
-        ar_loss = self.ar_wrapped_decoder(
+        ar_loss, acc = self.ar_wrapped_decoder(
             seq,
             prepend_embeds = prepend_embeds,
             seq_start_pos = dropped_latents.long() # sequence starts at 1 and does not attend to the first style latent
         )
 
         # vae kl loss
-
+        # Fixed: Reverted to out-of-place operation to avoid view modification error
         vae_kl_loss = 0.5 * (
             latents_log_var.exp()
-            + latents_mean.square()
+            + latents_mean ** 2
             - latents_log_var
             - 1.
         )
 
         vae_kl_loss = F.relu(vae_kl_loss - self.vae_kl_div_floor)
-
         vae_kl_loss = vae_kl_loss.sum(dim = -1).mean()
 
         # return losses
-
         total_loss = (
             ar_loss +
             vae_kl_loss * self.vae_kl_loss_weight
         )
 
         if not return_all_losses:
-            return total_loss
+            return total_loss, acc
 
         losses = (ar_loss, vae_kl_loss)
 
-        return total_loss, losses
+        return total_loss, losses, acc
 
 #=================================================================================================================================
 # Binary classifier fuctions
