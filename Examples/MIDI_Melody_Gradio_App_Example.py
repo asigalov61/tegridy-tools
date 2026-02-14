@@ -2,7 +2,7 @@
 # https://huggingface.co/spaces/asigalov61/MIDI-Melody
 #=====================================================
 
-import os.path
+import os
 
 import time as reqtime
 import datetime
@@ -90,6 +90,13 @@ def AddMelody(input_midi,
                                                                           melody_start_chord=input_start_chord
                                                                          )
 
+        elif input_mel_type == "Smooth Expressive":
+            output = TMIDIX.add_smooth_expressive_melody_to_enhanced_score_notes(escore_notes, 
+                                                                                 melody_channel=input_channel, 
+                                                                                 melody_patch=input_patch, 
+                                                                                 melody_start_chord=input_start_chord
+                                                                                )
+        
         elif input_mel_type == "Smooth":
             output = TMIDIX.add_smooth_melody_to_enhanced_score_notes(escore_notes,
                                                                       melody_channel=input_channel, 
@@ -124,7 +131,6 @@ def AddMelody(input_midi,
         audio = midi_to_colab_audio(new_fn, 
                             soundfont_path=soundfont,
                             sample_rate=16000,
-                            volume_scale=10,
                             output_for_gradio=True
                             )
         
@@ -137,12 +143,12 @@ def AddMelody(input_midi,
         output_midi_summary = str(output_score[:3])
         output_midi = str(new_fn)
         output_audio = (16000, audio)
-
-        for o in output_score:
-            o[1] *= 16
-            o[2] *= 16
         
-        output_plot = TMIDIX.plot_ms_SONG(output_score, plot_title=output_midi_title, return_plt=True)
+        output_plot = TMIDIX.plot_ms_SONG(output_score,
+                                          plot_title=output_midi_title,
+                                          timings_multiplier=16,
+                                          return_plt=True
+                                         )
     
         print('Output MIDI file name:', output_midi)
         print('Output MIDI title:', output_midi_title)
@@ -184,11 +190,11 @@ if __name__ == "__main__":
 
         input_midi = gr.File(label="Input MIDI")
         
-        input_mel_type = gr.Dropdown(['Expressive', 'Smooth', 'Original'], value="Expressive", label="Melody type")
+        input_mel_type = gr.Dropdown(['Expressive', 'Smooth Expressive', 'Smooth', 'Original'], value="Expressive", label="Melody type")
         input_channel = gr.Slider(0, 15, value=3, step=1, label="Melody MIDI channel")
         input_patch = gr.Slider(0, 127, value=40, step=1, label="Melody MIDI patch")
         input_start_chord = gr.Slider(0, 128, value=0, step=1, label="Melody start chord")
-        input_apply_sustains = gr.Checkbox(value=False, label="Apply sustains (if present)")
+        input_apply_sustains = gr.Checkbox(value=True, label="Apply sustains (if present)")
         
         run_btn = gr.Button("add melody", variant="primary")
 
