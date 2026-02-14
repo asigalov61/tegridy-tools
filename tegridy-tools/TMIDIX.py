@@ -12,14 +12,14 @@ r'''############################################################################
 #
 #	Project Los Angeles
 #
-#	Tegridy Code 2025
+#	Tegridy Code 2026
 #
 #   https://github.com/Tegridy-Code/Project-Los-Angeles
 #
 #
 ###################################################################################
 ###################################################################################
-#   Copyright 2025 Project Los Angeles / Tegridy Code
+#   Copyright 2026 Project Los Angeles / Tegridy Code
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "25.12.29"
+__version__ = "26.2.14"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1948,7 +1948,7 @@ def Tegridy_File_Time_Stamp(input_file_name='File_Created_on_', ext = ''):
 
 ###################################################################################
 
-def Tegridy_Any_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
+def Tegridy_Any_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File', verbose=True):
 
   '''Tegridy Pickle File Writer
      
@@ -1959,23 +1959,27 @@ def Tegridy_Any_Pickle_File_Writer(Data, input_file_name='TMIDI_Pickle_File'):
 
   Project Los Angeles
   Tegridy Code 2021'''
-
-  print('Tegridy Pickle File Writer')
+  
+  if verbose:
+      print('Tegridy Pickle File Writer')
 
   full_path_to_output_dataset_to = input_file_name + '.pickle'
 
   if os.path.exists(full_path_to_output_dataset_to):
     os.remove(full_path_to_output_dataset_to)
-    print('Removing old Dataset...')
+    if verbose:
+        print('Removing old Dataset...')
   else:
-    print("Creating new Dataset file...")
+    if verbose:
+        print("Creating new Dataset file...")
 
   with open(full_path_to_output_dataset_to, 'wb') as filehandle:
     # store the data as binary data stream
     pickle.dump(Data, filehandle, protocol=pickle.HIGHEST_PROTOCOL)
 
-  print('Dataset was saved as:', full_path_to_output_dataset_to)
-  print('Task complete. Enjoy! :)')
+  if verbose:
+      print('Dataset was saved as:', full_path_to_output_dataset_to)
+      print('Task complete. Enjoy! :)')
 
 ###################################################################################
 
@@ -13314,6 +13318,136 @@ def add_expressive_melody_to_enhanced_score_notes(escore_notes,
     else:
         return song_f
 
+###################################################################################
+
+def add_smooth_expressive_melody_to_enhanced_score_notes(escore_notes,
+                                                         melody_start_chord=0,
+                                                         melody_prime_pitch=60,
+                                                         melody_step=1,
+                                                         melody_channel=3,
+                                                         melody_patch=40,
+                                                         melody_notes_max_duration=2000,
+                                                         melody_last_note_dur=2000,
+                                                         melody_notes_min_duration=100,
+                                                         suppress_trills=True,
+                                                         melody_smooth_leap=7,
+                                                         melody_clip_max_min_durs=[],
+                                                         melody_max_velocity=120,
+                                                         acc_max_velocity=90,
+                                                         return_melody=False
+                                                        ):
+
+    score = copy.deepcopy(escore_notes)
+    adjust_score_velocities(score, acc_max_velocity)
+    cscore = chordify_score([1000, score])
+
+    candidate_indices = [i for i in range(melody_start_chord, len(cscore))
+                         if (i - melody_start_chord) % melody_step == 0]
+
+    kept_indices = []
+    
+    for i in candidate_indices:
+        
+        t = cscore[i][0][1]
+        
+        if not kept_indices:
+            kept_indices.append(i)
+            
+        else:
+            last_t = cscore[kept_indices[-1]][0][1]
+            
+            if t - last_t >= melody_notes_min_duration:
+                kept_indices.append(i)
+                
+    melody_pitches = [melody_prime_pitch]
+    
+    for idx in kept_indices:
+        chord = cscore[idx]
+        pitches = [e[4] for e in chord if e[3] != 9]
+        
+        if not pitches:
+            melody_pitches.append(melody_pitches[-1])
+            continue
+
+        candidates = mult_pitches(pitches)
+        prev = melody_pitches[-1]
+
+        if suppress_trills and len(melody_pitches) >= 2:
+            prev2 = melody_pitches[-2]
+
+            sorted_candidates = sorted(candidates, key=lambda p: abs(p - prev))
+            closest = sorted_candidates[0]
+
+            if prev2 != prev and closest == prev2:
+
+                alt_candidates = [p for p in candidates
+                                  if p != prev2 and abs(p - prev) <= melody_smooth_leap]
+                
+                if alt_candidates:
+                    chosen = min(alt_candidates, key=lambda p: abs(p - prev))
+                    
+                else:
+                    chosen = closest
+                    
+            else:
+                chosen = closest
+                
+        else:
+            chosen = min(candidates, key=lambda p: abs(p - prev))
+
+        melody_pitches.append(chosen)
+
+    melody_pitches = melody_pitches[1:]
+    
+    mel_f = []
+    
+    for j, i in enumerate(kept_indices):
+        
+        t = cscore[i][0][1]
+
+        if j < len(kept_indices) - 1:
+            next_t = cscore[kept_indices[j+1]][0][1]
+            dur = min(next_t - t, melody_notes_max_duration)
+            
+        else:
+            dur = melody_last_note_dur
+
+        pitch = melody_pitches[j]
+        
+        note_num = 60 + (pitch % 24)
+        velocity = 100 + ((pitch % 12) * 2)
+
+        mel_f.append(['note',
+                      t,
+                      dur,
+                      melody_channel,
+                      note_num,
+                      velocity,
+                      melody_patch])
+
+    song_f = []
+    
+    for c in cscore:
+        song_f.extend(c)
+
+    if len(melody_clip_max_min_durs) == 2:
+        for e in mel_f:
+            if e[2] >= melody_clip_max_min_durs[0]:
+                e[2] = melody_clip_max_min_durs[1]
+
+    adjust_score_velocities(mel_f, melody_max_velocity)
+    merged_melody = merge_melody_notes(mel_f,
+                                       max_dur=melody_notes_max_duration,
+                                       last_dur=melody_last_note_dur)
+
+    song_f = sorted(merged_melody + song_f, key=lambda x: x[1])
+
+    if return_melody:
+        return mel_f
+        
+    else:
+        return song_f
+    
 ###################################################################################
     
 def list_md5_hash(ints_list):
