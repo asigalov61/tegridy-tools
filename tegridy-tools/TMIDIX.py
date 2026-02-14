@@ -1522,6 +1522,8 @@ from array import array
 from pathlib import Path
 from fnmatch import fnmatch
 
+from typing import List, Optional
+
 ###################################################################################
 #
 # Original TMIDI Tegridy helper functions
@@ -15165,6 +15167,452 @@ def chords_to_escore_notes(chords,
         dtime += chords_dtime
 
     return score
+
+###################################################################################
+
+def _median(vals: List[float]) -> float:
+    return statistics.median(vals) if vals else 0.0
+
+###################################################################################
+
+def _mad(vals: List[float], center: Optional[float] = None) -> float:
+    if not vals:
+        return 0.0
+    if center is None:
+        center = _median(vals)
+    return _median([abs(x - center) for x in vals])
+
+###################################################################################
+
+def _rep(vals: List[float], method: str) -> float:
+    if method == "mean":
+        return statistics.mean(vals)
+    if method == "mode":
+        try:
+            return statistics.mode(vals)
+        except statistics.StatisticsError:
+            return statistics.median(vals)
+    return statistics.median(vals)
+
+###################################################################################
+
+def _round_int(v: float, mode: Optional[str]) -> int:
+    if mode is None or mode == "round":
+        return int(round(v))
+    if mode == "ceil":
+        return int(math.ceil(v))
+    if mode == "floor":
+        return int(math.floor(v))
+    raise ValueError("Unknown round mode")
+
+###################################################################################
+
+def even_out_values_in_list_of_lists(
+    data: List[List[float]],
+    rep_method: str = "median",
+    z_thresh: float = 3.0,
+    local_ratio_thresh: float = 3.0,
+    gap_ratio_thresh: float = 0.45,
+    merge_factor: float = 1.0,
+    span_tol_factor: float = 1.0,
+    min_cluster_size: int = 1,
+    round_mode: Optional[str] = "round",
+    max_k_for_kmeans: int = 5
+    ) -> List[List[int]]:
+
+    # small deterministic 1D kmeans for fallback
+    def _kmeans_1d(values, k, rng_seed=42, max_iter=100):
+        n = len(values)
+        if k <= 1 or k >= n:
+            return [statistics.mean(values)]*k if k>0 else [], list(range(n))
+        rng = random.Random(rng_seed)
+        centroids = [rng.choice(values)]
+        for _ in range(1, k):
+            d2 = [min((v - c)**2 for c in centroids) for v in values]
+            total = sum(d2)
+            if total == 0:
+                centroids.append(rng.choice(values))
+                continue
+            r = rng.random() * total
+            cum = 0.0
+            for v, w in zip(values, d2):
+                cum += w
+                if cum >= r:
+                    centroids.append(v)
+                    break
+        labels = [0]*n
+        for _ in range(max_iter):
+            changed = False
+            for i, v in enumerate(values):
+                best = min(range(k), key=lambda j: abs(v - centroids[j]))
+                if labels[i] != best:
+                    labels[i] = best
+                    changed = True
+            new_centroids = []
+            for j in range(k):
+                members = [v for v, lab in zip(values, labels) if lab == j]
+                new_centroids.append(sum(members)/len(members) if members else rng.choice(values))
+            if all(abs(a-b) < 1e-12 for a,b in zip(centroids, new_centroids)):
+                break
+            centroids = new_centroids
+            if not changed:
+                break
+        return centroids, labels
+
+    def _silhouette_1d(values, labels):
+        n = len(values)
+        if n <= 1:
+            return 0.0
+        clusters = {}
+        for v, lab in zip(values, labels):
+            clusters.setdefault(lab, []).append(v)
+        if len(clusters) == 1:
+            return 0.0
+        total_s = 0.0
+        for i, v in enumerate(values):
+            lab = labels[i]
+            own = clusters[lab]
+            a = 0.0
+            if len(own) > 1:
+                a = sum(abs(v - u) for u in own if u is not v) / (len(own)-1)
+            b = float("inf")
+            for other_lab, members in clusters.items():
+                if other_lab == lab:
+                    continue
+                dist = sum(abs(v - u) for u in members) / len(members)
+                if dist < b:
+                    b = dist
+            denom = max(a, b)
+            s = 0.0 if denom == 0 else (b - a) / denom
+            total_s += s
+        return total_s / n
+
+    out: List[List[int]] = []
+
+    for row in data:
+        if not row:
+            out.append([])
+            continue
+        if len(row) == 1:
+            out.append([_round_int(float(row[0]), round_mode)])
+            continue
+
+        indexed = sorted(((float(v), idx) for idx, v in enumerate(row)), key=lambda x: x[0])
+        sorted_vals = [v for v, _ in indexed]
+        n = len(sorted_vals)
+
+        if all(v == sorted_vals[0] for v in sorted_vals):
+            rep_int = _round_int(_rep(sorted_vals, rep_method), round_mode)
+            out.append([rep_int]*n)
+            continue
+
+        # adjacent diffs and robust stats
+        diffs = [sorted_vals[i+1] - sorted_vals[i] for i in range(n-1)]
+        med = _median(diffs)
+        mad = _mad(diffs, med)
+        z_scores = [(d - med) / (mad + 1e-12) for d in diffs]
+
+        # initial cut heuristics
+        cuts = set(idx for idx, z in enumerate(z_scores) if z > z_thresh)
+        if diffs:
+            # percentile fallback
+            k_idx = max(0, min(len(diffs)-1, int(round(len(diffs)*0.9)) - 1))
+            pcut = sorted(diffs)[k_idx]
+            cuts.update(idx for idx, d in enumerate(diffs) if d >= pcut and d > 0)
+            # global gap ratio
+            maxd = max(diffs)
+            cuts.update(idx for idx, d in enumerate(diffs) if d >= maxd * gap_ratio_thresh and d > 0)
+        # local relative gap
+        for i, d in enumerate(diffs):
+            neigh = []
+            for j in range(i-2, i+3):
+                if j != i and 0 <= j < len(diffs):
+                    neigh.append(diffs[j])
+            if not neigh:
+                continue
+            local_med = _median(neigh)
+            denom = local_med if local_med > 1e-12 else (med if med > 1e-12 else 1.0)
+            if d / denom >= local_ratio_thresh and d > 0:
+                cuts.add(i)
+
+        # build clusters from cuts
+        if not cuts:
+            clusters = [sorted_vals[:]]
+        else:
+            clusters = []
+            start = 0
+            for i in range(len(diffs)):
+                if i in cuts:
+                    clusters.append(sorted_vals[start:i+1])
+                    start = i+1
+            clusters.append(sorted_vals[start:])
+
+        # --- Merge Logic (Extracted) ---
+        def _do_merges(clusters_in):
+            # compute representatives and cluster spans
+            reps = [_rep(cl, rep_method) for cl in clusters_in]
+            spans = [ (max(cl)-min(cl)) if len(cl)>1 else 0.0 for cl in clusters_in ]
+
+            # merge-adjacent rule
+            row_mad = _mad(sorted_vals, _median(sorted_vals))
+            merge_tol = max(1.0, merge_factor * row_mad)
+            
+            merged = []
+            merged_reps = []
+            merged_spans = []
+            k = 0
+            while k < len(clusters_in):
+                cur = clusters_in[k][:]
+                cur_rep = reps[k]
+                cur_span = spans[k]
+                # Merge adjacent clusters if reps are close
+                while k+1 < len(clusters_in) and abs(cur_rep - reps[k+1]) <= merge_tol:
+                    cur += clusters_in[k+1]
+                    cur_rep = _rep(cur, rep_method)
+                    cur_span = max(cur_span, spans[k+1], max(cur)-min(cur))
+                    k += 1
+                merged.append(cur)
+                merged_reps.append(cur_rep)
+                merged_spans.append(cur_span)
+                k += 1
+            
+            current_clusters = merged
+            current_reps = merged_reps
+            current_spans = merged_spans
+
+            # span-based merge
+            span_tol = max(1.0, span_tol_factor * row_mad)
+            if len(current_clusters) > 1:
+                i = 0
+                while i < len(current_clusters):
+                    if len(current_clusters[i]) < min_cluster_size or current_spans[i] <= span_tol:
+                        left = i-1 if i-1 >= 0 else None
+                        right = i+1 if i+1 < len(current_clusters) else None
+
+                        merged_flag = False
+                        # Try merge right
+                        if left is None and right is not None:
+                            if abs(current_reps[i] - current_reps[right]) <= merge_tol:
+                                current_clusters[right] = current_clusters[i] + current_clusters[right]
+                                del current_clusters[i]
+                                current_reps = [_rep(cl, rep_method) for cl in current_clusters]
+                                current_spans = [ (max(cl)-min(cl)) if len(cl)>1 else 0.0 for cl in current_clusters]
+                                merged_flag = True
+                        # Try merge left
+                        elif right is None and left is not None:
+                            if abs(current_reps[i] - current_reps[left]) <= merge_tol:
+                                current_clusters[left] = current_clusters[left] + current_clusters[i]
+                                del current_clusters[i]
+                                current_reps = [_rep(cl, rep_method) for cl in current_clusters]
+                                current_spans = [ (max(cl)-min(cl)) if len(cl)>1 else 0.0 for cl in current_clusters]
+                                merged_flag = True
+                                i -= 1 # Adjust index since we removed an element before i
+                        # Try merge closest neighbor
+                        elif left is not None and right is not None:
+                            dist_left = abs(current_reps[i] - current_reps[left])
+                            dist_right = abs(current_reps[i] - current_reps[right])
+                            
+                            target = -1
+                            if dist_left <= dist_right:
+                                if dist_left <= merge_tol:
+                                    target = left
+                            else:
+                                if dist_right <= merge_tol:
+                                    target = right
+                            
+                            if target != -1:
+                                if target == left:
+                                    current_clusters[left] = current_clusters[left] + current_clusters[i]
+                                    del current_clusters[i]
+                                    merged_flag = True
+                                    i -= 1
+                                else: # target == right
+                                    current_clusters[right] = current_clusters[i] + current_clusters[right]
+                                    del current_clusters[i]
+                                    merged_flag = True
+                                
+                                current_reps = [_rep(cl, rep_method) for cl in current_clusters]
+                                current_spans = [ (max(cl)-min(cl)) if len(cl)>1 else 0.0 for cl in current_clusters]
+
+                        if not merged_flag:
+                            i += 1
+                    else:
+                        i += 1
+            return current_clusters
+
+        # Apply merges to initial heuristic clusters
+        clusters = _do_merges(clusters)
+
+        # final fallback: kmeans
+        # Check condition again because merges might have reduced cluster count
+        if len(clusters) <= 2 and n >= 4:
+            best_score = -1.0
+            best_labels = None
+            best_k = 1
+            max_k = min(max_k_for_kmeans, n)
+            for k_try in range(1, max_k+1):
+                _, labels = _kmeans_1d(sorted_vals, k_try)
+                score = 0.0 if k_try==1 else _silhouette_1d(sorted_vals, labels)
+                if score > best_score + 1e-12:
+                    best_score = score
+                    best_labels = labels[:]
+                    best_k = k_try
+            
+            if best_labels is not None and best_k > 1 and best_score > 0:
+                clusters_k = []
+                cur_lab = best_labels[0]
+                cur_cl = [sorted_vals[0]]
+                for v, lab in zip(sorted_vals[1:], best_labels[1:]):
+                    if lab == cur_lab:
+                        cur_cl.append(v)
+                    else:
+                        clusters_k.append(cur_cl)
+                        cur_cl = [v]
+                        cur_lab = lab
+                clusters_k.append(cur_cl)
+                
+                # Only replace if Kmeans found more clusters than we currently have
+                # AND crucially, run the merge logic on these new clusters
+                if len(clusters_k) > len(clusters):
+                    clusters = _do_merges(clusters_k)
+
+        # compute final reps and round to ints, map back to original order
+        final_reps = [_rep(cl, rep_method) for cl in clusters]
+        rep_values_sorted = []
+        for rep, cl in zip(final_reps, clusters):
+            rep_int = _round_int(rep, round_mode)
+            rep_values_sorted.extend([rep_int] * len(cl))
+
+        row_ints = [0]*n
+        for (_, orig_idx), rep_int in zip(indexed, rep_values_sorted):
+            row_ints[orig_idx] = rep_int
+
+        out.append(row_ints)
+
+    return out
+
+###################################################################################
+
+def even_out_durations_in_escore_notes(escore_notes, min_notes_gap=0):
+    
+    escore_notes = fix_escore_notes_durations(escore_notes,
+                                              min_notes_gap=min_notes_gap
+                                             )
+
+    score = [e for e in escore_notes if e[3] != 9]
+    drums = [e for e in escore_notes if e[3] == 9]
+    
+    cscore = chordify_score([1000, score])
+
+    durs = []
+
+    for c in cscore:
+        durs.append([e[2] for e in c])
+
+    ndurs = even_out_values_in_list_of_lists(durs)
+
+    output_score = []
+    
+    for i, c in enumerate(cscore):
+        cc = copy.deepcopy(c)
+        ndur = ndurs[i]
+    
+        for j, e in enumerate(cc):
+            e[2] = ndur[j]
+    
+        output_score.extend(cc)
+
+    return sorted(output_score + drums, key=lambda x: (x[1], -x[4]))
+
+###################################################################################
+
+def even_out_velocities_in_escore_notes(escore_notes, use_pitches=False):
+
+    score = [e for e in escore_notes if e[3] != 9]
+    drums = [e for e in escore_notes if e[3] == 9]
+    
+    cscore = chordify_score([1000, score])
+
+    vels = []
+
+    for c in cscore:
+        if use_pitches:
+            vels.append([max(40, e[4]) for e in c])
+
+        else:
+            vels.append([e[5] for e in c])
+
+    nvels = even_out_values_in_list_of_lists(vels)
+
+    output_score = []
+    
+    for i, c in enumerate(cscore):
+        cc = copy.deepcopy(c)
+        nvel = nvels[i]
+    
+        for j, e in enumerate(cc):
+            e[5] = nvel[j]
+    
+        output_score.extend(cc)
+
+    return sorted(output_score + drums, key=lambda x: (x[1], -x[4]))
+
+###################################################################################
+
+# Most probable MIDI velocity per GM instrument (0-127) + drums (128)
+INSTRUMENTS_VELOCITIES_MAP = {
+    
+    # 0–7 Pianos
+    0: 82, 1: 82, 2: 84, 3: 84, 4: 86, 5: 86, 6: 88, 7: 88,
+
+    # 8–15 Chromatic Percussion
+    8: 78, 9: 78, 10: 80, 11: 80, 12: 82, 13: 82, 14: 84, 15: 84,
+
+    # 16–23 Organs
+    16: 76, 17: 76, 18: 78, 19: 78, 20: 78, 21: 78, 22: 80, 23: 80,
+
+    # 24–31 Guitars
+    24: 80, 25: 80, 26: 82, 27: 82, 28: 84, 29: 84, 30: 86, 31: 86,
+
+    # 32–39 Basses
+    32: 84, 33: 84, 34: 86, 35: 86, 36: 88, 37: 88, 38: 90, 39: 90,
+
+    # 40–47 Strings
+    40: 74, 41: 74, 42: 74, 43: 74, 44: 76, 45: 76, 46: 76, 47: 76,
+
+    # 48–55 Ensemble
+    48: 76, 49: 76, 50: 78, 51: 78, 52: 78, 53: 78, 54: 80, 55: 80,
+
+    # 56–63 Brass
+    56: 86, 57: 86, 58: 88, 59: 88, 60: 90, 61: 90, 62: 92, 63: 92,
+
+    # 64–71 Reed
+    64: 74, 65: 74, 66: 76, 67: 76, 68: 76, 69: 76, 70: 78, 71: 78,
+
+    # 72–79 Pipe
+    72: 72, 73: 72, 74: 74, 75: 74, 76: 74, 77: 74, 78: 76, 79: 76,
+
+    # 80–87 Synth Lead
+    80: 88, 81: 88, 82: 90, 83: 90, 84: 90, 85: 90, 86: 92, 87: 92,
+
+    # 88–95 Synth Pad
+    88: 70, 89: 70, 90: 72, 91: 72, 92: 74, 93: 74, 94: 74, 95: 74,
+
+    # 96–103 Synth Effects
+    96: 76, 97: 76, 98: 78, 99: 78, 100: 80, 101: 80, 102: 82, 103: 82,
+
+    # 104–111 Ethnic
+    104: 74, 105: 74, 106: 76, 107: 76, 108: 76, 109: 76, 110: 78, 111: 78,
+
+    # 112–119 Percussive
+    112: 86, 113: 86, 114: 88, 115: 88, 116: 88, 117: 88, 118: 90, 119: 90,
+
+    # 120–127 Sound Effects
+    120: 72, 121: 72, 122: 74, 123: 74, 124: 74, 125: 74, 126: 76, 127: 76,
+
+    # 128 Drums (GM Channel 10)
+    128: 92,
+}
 
 ###################################################################################
 
