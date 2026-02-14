@@ -15502,27 +15502,29 @@ def even_out_durations_in_escore_notes(escore_notes, min_notes_gap=0):
     score = [e for e in escore_notes if e[3] != 9]
     drums = [e for e in escore_notes if e[3] == 9]
     
-    cscore = chordify_score([1000, score])
-
-    durs = []
-
-    for c in cscore:
-        durs.append([e[2] for e in c])
-
-    ndurs = even_out_values_in_list_of_lists(durs)
-
     output_score = []
     
-    for i, c in enumerate(cscore):
-        cc = copy.deepcopy(c)
-        ndur = ndurs[i]
+    if score:
     
-        for j, e in enumerate(cc):
-            e[2] = ndur[j]
-    
-        output_score.extend(cc)
+        cscore = chordify_score([1000, score])
 
-    return sorted(output_score + drums, key=lambda x: (x[1], -x[4]))
+        durs = []
+
+        for c in cscore:
+            durs.append([e[2] for e in c])
+
+        ndurs = even_out_values_in_list_of_lists(durs)
+
+        for i, c in enumerate(cscore):
+            cc = copy.deepcopy(c)
+            ndur = ndurs[i]
+        
+            for j, e in enumerate(cc):
+                e[2] = ndur[j]
+        
+            output_score.extend(cc)
+
+    return sorted(output_score + drums, key=lambda x: (x[1], -x[4], x[6]))
 
 ###################################################################################
 
@@ -15531,31 +15533,32 @@ def even_out_velocities_in_escore_notes(escore_notes, use_pitches=False):
     score = [e for e in escore_notes if e[3] != 9]
     drums = [e for e in escore_notes if e[3] == 9]
     
-    cscore = chordify_score([1000, score])
-
-    vels = []
-
-    for c in cscore:
-        if use_pitches:
-            vels.append([max(40, e[4]) for e in c])
-
-        else:
-            vels.append([e[5] for e in c])
-
-    nvels = even_out_values_in_list_of_lists(vels)
-
     output_score = []
     
-    for i, c in enumerate(cscore):
-        cc = copy.deepcopy(c)
-        nvel = nvels[i]
-    
-        for j, e in enumerate(cc):
-            e[5] = nvel[j]
-    
-        output_score.extend(cc)
+    if score:
+        cscore = chordify_score([1000, score])
 
-    return sorted(output_score + drums, key=lambda x: (x[1], -x[4]))
+        vels = []
+
+        for c in cscore:
+            if use_pitches:
+                vels.append([max(40, e[4]) for e in c])
+
+            else:
+                vels.append([e[5] for e in c])
+
+        nvels = even_out_values_in_list_of_lists(vels)
+
+        for i, c in enumerate(cscore):
+            cc = copy.deepcopy(c)
+            nvel = nvels[i]
+        
+            for j, e in enumerate(cc):
+                e[5] = nvel[j]
+        
+            output_score.extend(cc)
+
+    return sorted(output_score + drums, key=lambda x: (x[1], -x[4], x[6]))
 
 ###################################################################################
 
