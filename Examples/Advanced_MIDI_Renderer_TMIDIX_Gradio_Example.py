@@ -133,7 +133,7 @@ def Render_MIDI(input_midi,
     output_score = copy.deepcopy(escore)
 
     if render_type == "Extract melody":
-        output_score = TMIDIX.add_melody_to_enhanced_score_notes(escore, return_melody=True)
+        output_score = TMIDIX.add_expressive_melody_to_enhanced_score_notes(escore, return_melody=True)
         output_score = TMIDIX.recalculate_score_timings(output_score)
 
     elif render_type == "Flip":
@@ -144,6 +144,8 @@ def Render_MIDI(input_midi,
 
     elif render_type == 'Repair Durations':
         output_score = TMIDIX.fix_escore_notes_durations(escore, min_notes_gap=0)
+        output_score = TMIDIX.even_out_durations_in_escore_notes(output_score)
+        output_score = TMIDIX.fix_escore_notes_durations(output_score, min_notes_gap=0)
     
     elif render_type == 'Repair Chords':
         fixed_cscore = TMIDIX.advanced_check_and_fix_chords_in_chordified_score(cscore)[0]
@@ -151,6 +153,9 @@ def Render_MIDI(input_midi,
 
     elif render_type == 'Remove Duplicate Pitches':
         output_score = TMIDIX.remove_duplicate_pitches_from_escore_notes(escore)
+
+    elif render_type == 'Humanize Velocities':
+        output_score = TMIDIX.humanize_velocities_in_escore_notes(escore)
     
     elif render_type == "Add Drum Track":
         nd_escore = [e for e in escore if e[3] != 9]
@@ -355,8 +360,7 @@ if __name__ == "__main__":
         gr.Markdown("<h1 style='text-align: center; margin-bottom: 1rem'>Advanced MIDI Renderer</h1>")
         gr.Markdown("<h1 style='text-align: center; margin-bottom: 1rem'>Transform and render any MIDI</h1>")
         
-        gr.Markdown("![Visitors](https://api.visitorbadge.io/api/visitors?path=asigalov61.Advanced-MIDI-Renderer&style=flat)\n\n"
-                    "This is a demo for tegridy-tools\n\n"
+        gr.Markdown("This is a demo for tegridy-tools\n\n"
                     "Please see [tegridy-tools](https://github.com/asigalov61/tegridy-tools) GitHub repo for more information\n\n"
                    )
         
@@ -399,6 +403,7 @@ if __name__ == "__main__":
                                 "Longest Repeating Phrase",
                                 "Multi-Instrumental Summary",
                                 "Solo Piano Summary",
+                                "Humanize Velocities",
                                 "Add Drum Track"
                                ], 
                                label="Render type", 
