@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.2.16"
+__version__ = "26.2.17"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -16091,6 +16091,391 @@ def squash_monophonic_escore_notes_pitches(escore_notes,
                                                  )
 
     return output_score
+
+###################################################################################
+
+def humanize_velocities_in_escore_notes(escore_notes):
+    
+    if not escore_notes:
+        return []
+
+    notes = [list(n) for n in escore_notes]
+    notes.sort(key=lambda x: (x[1], x[4])) # Sort by time, then pitch
+
+    # -----------------------------------------------------------
+    # 1. GLOBAL ANALYSIS (Grid, Phrases, Arcs)
+    # -----------------------------------------------------------
+    
+    onset_times = sorted(list(set([n[1] for n in notes])))
+    
+    # --- Grid Estimation ---
+    estimated_grid = 120
+    if len(onset_times) > 1:
+        intervals = [onset_times[i+1] - onset_times[i] for i in range(len(onset_times)-1)]
+        active_intervals = [i for i in intervals if i > 0 and i < 960] 
+        if active_intervals:
+            rounded_intervals = [round(i / 10) * 10 for i in active_intervals]
+            valid_intervals = [r for r in rounded_intervals if r > 0]
+            if valid_intervals:
+                estimated_grid = max(set(valid_intervals), key=valid_intervals.count)
+
+    # --- Beat Grid Calculation ---
+    if estimated_grid <= 120:
+        beat_grid = estimated_grid * 4 
+    elif estimated_grid <= 240:
+        beat_grid = estimated_grid * 2
+    else:
+        beat_grid = estimated_grid
+
+    # --- Phrase Detection ---
+    melodic_onsets = sorted(list(set([n[1] for n in notes if n[3] != 9])))
+    phrase_gap_threshold = beat_grid * 3
+    
+    phrases = []
+    current_phrase = []
+    
+    if not melodic_onsets: melodic_onsets = onset_times
+
+    for i, t in enumerate(melodic_onsets):
+        if not current_phrase:
+            current_phrase.append(t)
+        else:
+            prev_t = melodic_onsets[i-1]
+            if t - prev_t > phrase_gap_threshold:
+                phrases.append(current_phrase)
+                current_phrase = [t]
+            else:
+                current_phrase.append(t)
+    if current_phrase:
+        phrases.append(current_phrase)
+
+    # --- Global Arc Calculation ---
+    total_duration = onset_times[-1] - onset_times[0] if onset_times else 0
+    global_progress_map = {}
+    for t in onset_times:
+        progress = (t - onset_times[0]) / total_duration if total_duration > 0 else 0
+        global_arc = math.cos((progress - 0.5) * math.pi) * 6 # Range -6 to +6
+        global_progress_map[t] = global_arc
+
+    # -----------------------------------------------------------
+    # 2. INSTRUMENT SEPARATION & PROCESSING
+    # -----------------------------------------------------------
+
+    instrument_tracks = defaultdict(list)
+    for n in notes:
+        instrument_tracks[(n[3], n[6])].append(n)
+
+    # Main Loop
+    for key, track_notes in instrument_tracks.items():
+        channel, inst_num = key
+        
+        # --- Instrument Classification ---
+        is_drum = (channel == 9) or (inst_num == 128)
+        is_bass = (32 <= inst_num <= 39)
+        is_keys = (inst_num <= 7) or (16 <= inst_num <= 23)
+        is_plucked = (24 <= inst_num <= 31)
+        is_solo_string = (40 <= inst_num <= 47)
+        is_ensemble = (48 <= inst_num <= 55)
+        is_synth_lead = (80 <= inst_num <= 87)
+        is_synth_pad = (88 <= inst_num <= 95)
+        
+        track_notes.sort(key=lambda x: (x[1], x[4]))
+
+        # ==========================================================
+        # LOGIC A: DRUMS (UNIFORM & SEPARATED)
+        # ==========================================================
+        if is_drum:
+            for n in track_notes:
+                t, pitch = n[1], n[4]
+                
+                is_kick = pitch in [35, 36]
+                is_snare = pitch in [38, 40]
+                is_hat = pitch in [42, 44, 46]
+                is_tom = 41 <= pitch <= 50 and not is_hat and not is_snare
+                
+                if is_kick:
+                    target_vel = 115
+                elif is_snare:
+                    target_vel = 112
+                elif is_hat:
+                    target_vel = 90 
+                elif is_tom:
+                    target_vel = 105
+                else:
+                    target_vel = 100
+
+                position_in_beat = t % beat_grid
+                if position_in_beat == 0:
+                    metric_mod = 0 
+                elif position_in_beat == (beat_grid // 2):
+                    metric_mod = -2 
+                else:
+                    metric_mod = -6 
+                
+                closest_t = min(onset_times, key=lambda x: abs(x - t))
+                global_mod = global_progress_map.get(closest_t, 0)
+
+                final_vel = target_vel + metric_mod + global_mod + random.gauss(0, 2.0)
+                n[5] = max(30, min(127, int(final_vel)))
+            
+            continue
+
+        # ==========================================================
+        # LOGIC B: BASS
+        # ==========================================================
+        elif is_bass:
+            last_vel = 100
+            for n in track_notes:
+                t = n[1]
+                
+                position_in_grid = t % beat_grid
+                metric_strength = 4 if position_in_grid == 0 else (1 if position_in_grid == (beat_grid // 2) else -2)
+                
+                target = 100 + metric_strength
+                
+                smoothed = (target * 0.3) + (last_vel * 0.7)
+                last_vel = smoothed
+                
+                final_vel = smoothed + random.gauss(0, 2)
+                n[5] = max(30, min(115, int(final_vel)))
+            continue
+
+        # ==========================================================
+        # LOGIC C: MELODIC INSTRUMENTS
+        # ==========================================================
+        else:
+            # --- Role Detection (Base Velocity Target) ---
+            # Determine the 'floor' velocity for this track
+            
+            base_vel_target = 90 # Default
+            
+            if is_solo_string or is_synth_lead:
+                base_vel_target = 105 # Lead
+            elif is_ensemble or is_synth_pad:
+                base_vel_target = 80  # Pad/Backing
+            elif is_plucked:
+                # Check density for Guitar Solo vs Rhythm
+                unique_onsets = set(nn[1] for nn in track_notes)
+                avg_poly = len(track_notes) / len(unique_onsets) if unique_onsets else 1
+                base_vel_target = 105 if avg_poly < 1.3 else 95
+            elif is_keys:
+                # Check if it looks like a Solo Piano piece or just a Piano track
+                # If the whole score is basically this track -> Solo
+                if len(track_notes) > (len(notes) * 0.8): 
+                    base_vel_target = 100
+                else:
+                    base_vel_target = 90
+
+            # --- Dispatch to specific logic ---
+            
+            # CASE 1: PIANO / KEYS (RESTORED ORIGINAL LOGIC)
+            if is_keys:
+                last_vel_lh = base_vel_target
+                last_vel_rh = base_vel_target
+                prev_melody_pitch = None
+                
+                time_slices = defaultdict(list)
+                for n in track_notes:
+                    time_slices[n[1]].append(n)
+                sorted_times = sorted(time_slices.keys())
+                
+                for t_idx, t in enumerate(sorted_times):
+                    slice_notes = time_slices[t]
+                    slice_notes.sort(key=lambda x: x[4])
+                    
+                    # Context Mods
+                    phrase_arc_mod = 0
+                    for p_times in phrases:
+                        if t in p_times:
+                            p_len = p_times[-1] - p_times[0]
+                            if p_len > 0:
+                                progress = (t - p_times[0]) / p_len
+                                phrase_arc_mod = math.cos((1.0 - progress) * math.pi) * 0.5 + 0.5
+                                phrase_arc_mod = (phrase_arc_mod - 0.5) * 10
+                            break
+                    
+                    global_arc = global_progress_map.get(t, 0)
+                    
+                    position_in_grid = t % beat_grid
+                    if position_in_grid == 0: metric_strength = 6
+                    elif position_in_grid == (beat_grid // 2): metric_strength = 2
+                    else: metric_strength = -3
+                    
+                    # Hand Splitting Logic
+                    pitches = [n[4] for n in slice_notes]
+                    split_idx = 0
+                    max_gap = 0
+                    
+                    if len(pitches) > 1:
+                        for i in range(len(pitches)-1):
+                            gap = pitches[i+1] - pitches[i]
+                            if gap > max_gap:
+                                max_gap = gap
+                                split_idx = i + 1
+                    
+                    if max_gap < 12:
+                        avg_pitch = sum(pitches) / len(pitches)
+                        split_idx = 0 if avg_pitch >= 60 else len(pitches)
+                    
+                    lh_notes = slice_notes[:split_idx]
+                    rh_notes = slice_notes[split_idx:]
+                    
+                    # LH Processing
+                    if lh_notes:
+                        target_lh = base_vel_target + metric_strength + global_arc + phrase_arc_mod - 3
+                        smoothed_lh = (target_lh * 0.25) + (last_vel_lh * 0.75)
+                        last_vel_lh = smoothed_lh
+                        
+                        for i, n in enumerate(lh_notes):
+                            offset = 0 if i == 0 else -5
+                            if n[2] < estimated_grid / 2: offset += 2
+                            vel = smoothed_lh + offset + random.gauss(0, 2)
+                            n[5] = max(30, min(115, int(vel)))
+
+                    # RH Processing
+                    if rh_notes:
+                        target_rh = base_vel_target + metric_strength + global_arc + phrase_arc_mod + 3
+                        smoothed_rh = (target_rh * 0.35) + (last_vel_rh * 0.65)
+                        last_vel_rh = smoothed_rh
+                        
+                        current_top_pitch = rh_notes[-1][4]
+                        num_rh = len(rh_notes)
+                        is_dense = num_rh >= 3
+                        
+                        for i, n in enumerate(rh_notes):
+                            pitch = n[4]
+                            offset = 0
+                            
+                            if i == num_rh - 1: # Top note melody
+                                offset = 12 if is_dense else 5
+                                if prev_melody_pitch is not None:
+                                    diff = pitch - prev_melody_pitch
+                                    if diff > 4: offset += 6
+                                    elif diff > 0: offset += 3
+                                    elif diff < -4: offset -= 4
+                                if pitch > 72: offset += (pitch - 72) * 0.2
+                                prev_melody_pitch = pitch
+                            elif i == 0:
+                                offset = -1
+                            else:
+                                offset = -8
+                            
+                            if n[2] < estimated_grid / 2: offset += 2
+                            vel = smoothed_rh + offset + random.gauss(0, 2)
+                            n[5] = max(35, min(120, int(vel)))
+
+            # CASE 2: OTHER MELODIC (Generic Role-Based Logic)
+            else:
+                last_vel = base_vel_target
+                prev_melody_pitch = None
+                
+                time_slices = defaultdict(list)
+                for n in track_notes:
+                    time_slices[n[1]].append(n)
+                sorted_times = sorted(time_slices.keys())
+                
+                for t_idx, t in enumerate(sorted_times):
+                    slice_notes = time_slices[t]
+                    slice_notes.sort(key=lambda x: x[4])
+                    
+                    # Context
+                    phrase_arc_mod = 0
+                    for p_times in phrases:
+                        if t in p_times:
+                            p_len = p_times[-1] - p_times[0]
+                            if p_len > 0:
+                                progress = (t - p_times[0]) / p_len
+                                phrase_arc_mod = math.sin(progress * math.pi) * 6
+                            break
+                    
+                    global_arc = global_progress_map.get(t, 0)
+                    
+                    position_in_grid = t % beat_grid
+                    if position_in_grid == 0: metric_strength = 6
+                    elif position_in_grid == (beat_grid // 2): metric_strength = 2
+                    else: metric_strength = -3
+                    
+                    core_vel = base_vel_target + metric_strength + global_arc + phrase_arc_mod
+                    smoothed = (core_vel * 0.35) + (last_vel * 0.65)
+                    last_vel = smoothed
+                    
+                    num_notes = len(slice_notes)
+                    
+                    for i, n in enumerate(slice_notes):
+                        pitch = n[4]
+                        offset = 0
+                        
+                        if i == num_notes - 1:
+                            offset = 10 
+                            if prev_melody_pitch is not None:
+                                diff = pitch - prev_melody_pitch
+                                if diff > 4: offset += 5
+                            prev_melody_pitch = pitch
+                        elif i == 0:
+                            offset = 0
+                        else:
+                            offset = -6
+                        
+                        final_vel = smoothed + offset + random.gauss(0, 3)
+                        n[5] = max(30, min(127, int(final_vel)))
+
+    # -----------------------------------------------------------
+    # 3. FINAL EXPRESSIVE SCALING
+    # -----------------------------------------------------------
+    for n in notes:
+        if n[3] == 9: 
+            continue 
+
+        v = n[5]
+        center = 95
+        
+        deviation = v - center
+        final_v = center + (deviation * 1.1)
+        final_v += random.randint(-1, 1)
+        
+        n[5] = max(20, min(127, int(final_v)))
+
+    return notes
+
+###################################################################################
+
+def most_common_ordered_set(values):
+    
+    freq = Counter(values)
+    
+    top_vals = {v for v, _ in freq.most_common()}
+
+    result = []
+    seen = set()
+    
+    for v in values:
+        if v in top_vals and v not in seen:
+            result.append(v)
+            seen.add(v)
+
+    return result
+
+###################################################################################
+
+def escore_notes_velocities(escore_notes, chan_idx=3, vels_idx=5):
+
+    output_list = []
+
+    all_vels = [e[vels_idx] for e in escore_notes]
+    avg_vel = sum(all_vels) / len(all_vels)
+    vels_span = max(all_vels) - min(all_vels)
+
+    output_list.append([-1, min(all_vels), avg_vel, max(all_vels), vels_span])
+
+    chan_groups = groupby(sorted(escore_notes, key=lambda x: x[chan_idx]), key=lambda x: x[chan_idx])
+
+    for cha, group in chan_groups:
+        all_vels = [e[vels_idx] for e in list(group)]
+        avg_vel = sum(all_vels) / len(all_vels)
+        vels_span = max(all_vels) - min(all_vels)
+        output_list.append([cha, min(all_vels), avg_vel, max(all_vels), vels_span])
+
+    return output_list
 
 ###################################################################################
 
