@@ -143,8 +143,7 @@ def Render_MIDI(input_midi,
         output_score = TMIDIX.reverse_enhanced_score_notes(escore)
 
     elif render_type == 'Repair Durations':
-        output_score = TMIDIX.fix_escore_notes_durations(escore, min_notes_gap=0)
-        output_score = TMIDIX.even_out_durations_in_escore_notes(output_score)
+        output_score = TMIDIX.even_out_durations_in_escore_notes(escore)
         output_score = TMIDIX.fix_escore_notes_durations(output_score, min_notes_gap=0)
     
     elif render_type == 'Repair Chords':
@@ -153,6 +152,9 @@ def Render_MIDI(input_midi,
 
     elif render_type == 'Remove Duplicate Pitches':
         output_score = TMIDIX.remove_duplicate_pitches_from_escore_notes(escore)
+
+    elif render_type == 'Quantize':
+        output_score = TMIDIX.quantize_escore_notes(escore)
 
     elif render_type == 'Humanize Velocities':
         output_score = TMIDIX.humanize_velocities_in_escore_notes(escore)
@@ -403,6 +405,7 @@ if __name__ == "__main__":
                                 "Longest Repeating Phrase",
                                 "Multi-Instrumental Summary",
                                 "Solo Piano Summary",
+                                "Quantize",
                                 "Humanize Velocities",
                                 "Add Drum Track"
                                ], 
