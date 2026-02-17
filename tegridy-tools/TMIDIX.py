@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.2.14"
+__version__ = "26.2.16"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1522,7 +1522,7 @@ from array import array
 from pathlib import Path
 from fnmatch import fnmatch
 
-from typing import List, Optional
+from typing import List, Optional, Tuple, Dict
 
 ###################################################################################
 #
@@ -15616,6 +15616,481 @@ INSTRUMENTS_VELOCITIES_MAP = {
     # 128 Drums (GM Channel 10)
     128: 92,
 }
+
+###################################################################################
+
+def min_max_cum_low_perc_value(
+    values: List[Tuple[int, int]],
+    percentile: float = 10.0
+    ) -> Optional[int]:
+    
+    """
+    pairs: list of (value, count)
+    percentile: lower percentile of the TOTAL count (e.g., 10.0 for lower 10%)
+
+    Returns:
+      - the minimum value from the cumulative lower-percentile set that is
+        strictly greater than the maximum value among the non-included values;
+      - if none exists, returns the minimum value among the first non-included
+        count group (the next item(s) immediately after the cumulative cutoff).
+      - returns None for empty input or zero total count.
+    """
+    
+    pairs = Counter(values).most_common()
+
+    total = sum(c for _, c in pairs)
+    if total <= 0:
+        return None
+
+    threshold = (percentile / 100.0) * total
+
+    # Sort by count ascending; tie-break by value ascending for determinism
+    sorted_pairs = sorted(pairs, key=lambda vc: (vc[1], vc[0]))
+
+    # Build cumulative lower-percentile set
+    cumulative = 0
+    included_values = []
+    included_counts = []
+    cutoff_index = None
+    for i, (value, count) in enumerate(sorted_pairs):
+        cumulative += count
+        included_values.append(value)
+        included_counts.append(count)
+        if cumulative >= threshold:
+            cutoff_index = i
+            break
+
+    # If threshold never reached, include all
+    if cutoff_index is None:
+        cutoff_index = len(sorted_pairs) - 1
+
+    # Non-included are the items after cutoff_index
+    non_included_pairs = sorted_pairs[cutoff_index + 1 :]
+
+    # If there are no non-included items, nothing to compare against
+    if not non_included_pairs:
+        return None
+
+    non_included_values = [v for v, _ in non_included_pairs]
+    max_non = max(non_included_values)
+
+    # Candidates among included values strictly greater than max_non
+    candidates = [v for v in included_values if v > max_non]
+    if candidates:
+        return min(candidates)
+
+    # Fallback: return the minimum value among the first non-included count group
+    # Find the smallest count among non-included (this is the count of the first non-included item)
+    first_non_count = non_included_pairs[0][1]
+    first_group_values = [v for v, c in non_included_pairs if c == first_non_count]
+    
+    return min(first_group_values) if first_group_values else None
+
+###################################################################################
+
+def _auto_clusters(values, sensitivity=1.0, min_gap=0.0,
+                   min_cluster_size=1, debug=False):
+    
+    """
+    Auto-cluster numeric values by weighted gaps.
+
+    Gaps are scaled by the combined frequency of the two adjacent values:
+        weighted_gap = (b - a) / (freq[a] + freq[b])
+
+    Smaller weighted_gap -> less likely to split.
+    Larger weighted_gap -> more likely to split.
+
+    sensitivity multiplies the robust weighted-gap statistic (Q1) to form
+    the split threshold.
+    """
+    
+    if not values:
+        return []
+
+    freq = Counter(values)
+    uniq = sorted(set(values))
+    if len(uniq) <= 1:
+        return [uniq]
+
+    # compute weighted gaps between adjacent unique values
+    weighted_gaps = []
+    pairs = list(zip(uniq, uniq[1:]))
+    for a, b in pairs:
+        gap = b - a
+        combined = freq.get(a, 0) + freq.get(b, 0)
+        if combined <= 0:
+            combined = 1
+        weighted_gaps.append(gap / combined)
+
+    # --- FIX: robust lower-percentile (Q1) weighted-gap statistic ---
+    if weighted_gaps:
+        sorted_wg = sorted(weighted_gaps)
+        q1_index = max(0, int(0.25 * (len(sorted_wg) - 1)))
+        med_wgap = sorted_wg[q1_index]
+    else:
+        med_wgap = 0.0
+
+    # normalize sensitivity
+    sensitivity = 1.0 if sensitivity is None else float(sensitivity)
+    eps = 1e-12
+    if sensitivity <= 0:
+        sensitivity = eps
+
+    # threshold in weighted-gap units
+    threshold = med_wgap * sensitivity
+
+    # respect explicit min_gap by converting to weighted units
+    max_combined = max((freq.get(a, 0) + freq.get(b, 0)) or 1
+                       for a, b in pairs) if pairs else 1
+    min_wgap = float(min_gap) / max_combined
+    threshold = max(threshold, min_wgap)
+
+    clusters = []
+    current = [uniq[0]]
+    for (a, b), wgap in zip(pairs, weighted_gaps):
+        if wgap > threshold:
+            clusters.append(current)
+            current = [b]
+        else:
+            current.append(b)
+    clusters.append(current)
+
+    # merge tiny clusters into nearest neighbor by gap
+    if min_cluster_size > 1 and len(clusters) > 1:
+        i = 0
+        while i < len(clusters):
+            c = clusters[i]
+            if len(c) < min_cluster_size:
+                if i == 0:
+                    clusters[i + 1] = c + clusters[i + 1]
+                    del clusters[i]
+                elif i == len(clusters) - 1:
+                    clusters[i - 1].extend(c)
+                    del clusters[i]
+                    i -= 1
+                else:
+                    left_gap = c[0] - clusters[i - 1][-1]
+                    right_gap = clusters[i + 1][0] - c[-1]
+                    if left_gap <= right_gap:
+                        clusters[i - 1].extend(c)
+                        del clusters[i]
+                        i -= 1
+                    else:
+                        clusters[i + 1] = c + clusters[i + 1]
+                        del clusters[i]
+            else:
+                i += 1
+
+    if debug:
+        print("auto_clusters -> uniq:", uniq)
+        print("auto_clusters -> weighted_gaps:", weighted_gaps)
+        print("auto_clusters -> threshold:", threshold)
+        print("auto_clusters -> clusters:", clusters)
+
+    return clusters
+
+###################################################################################
+
+def _choose_rep_from_cluster(cluster_values, global_freq,
+                             prefer='median', debug=False):
+    if not cluster_values:
+        return None
+
+    local_counts = {v: global_freq.get(v, 0) for v in cluster_values}
+
+    if prefer == 'local_mode':
+        rep = max(cluster_values, key=lambda v: (local_counts.get(v, 0), -v))
+        if debug:
+            print("local_mode cluster:", cluster_values,
+                  "local_counts:", local_counts, "rep:", rep)
+        return rep
+
+    if prefer == 'global_mode':
+        rep = max(cluster_values,
+                  key=lambda v: (global_freq.get(v, 0), -v))
+        if debug:
+            print("global_mode cluster:", cluster_values,
+                  "global_counts:",
+                  {v: global_freq.get(v, 0) for v in cluster_values},
+                  "rep:", rep)
+        return rep
+
+    if prefer == 'weighted_mean':
+        weights = [global_freq.get(v, 0) for v in cluster_values]
+        total_weight = sum(weights)
+        if total_weight:
+            target = sum(w * v for v, w in zip(cluster_values, weights)) / total_weight
+        else:
+            target = statistics.mean(cluster_values)
+    else:  # median or fallback
+        target = statistics.median(cluster_values)
+
+    best = None
+    best_key = None
+    for v in cluster_values:
+        dist = abs(v - target)
+        key = (dist, -global_freq.get(v, 0), v)
+        if best is None or key < best_key:
+            best = v
+            best_key = key
+
+    if debug:
+        print(f"{prefer} cluster:", cluster_values,
+              "target:", target, "rep:", best)
+
+    return best
+
+###################################################################################
+
+def quantize_median_existing(lst, sensitivity=1.0, prefer='median',
+                             min_gap=0.0, min_cluster_size=1, debug=False):
+    
+    if not lst:
+        return []
+
+    freq = Counter(lst)
+    clusters = _auto_clusters(
+        lst,
+        sensitivity=sensitivity,
+        min_gap=min_gap,
+        min_cluster_size=min_cluster_size,
+        debug=debug
+    )
+
+    reps = {}
+    for cluster in clusters:
+        rep = _choose_rep_from_cluster(cluster, freq,
+                                       prefer=prefer, debug=debug)
+        for v in cluster:
+            reps[v] = rep
+
+    if debug:
+        print("representatives mapping:", reps)
+
+    return [reps[v] for v in lst]
+
+###################################################################################
+
+def _candidates_in_span(p: int, base: int, width: int) -> List[int]:
+    
+    top = base + width - 1
+    k_min = math.ceil((base - p) / 12)
+    k_max = math.floor((top - p) / 12)
+    
+    return [p + 12 * k for k in range(k_min, k_max + 1)]
+
+###################################################################################
+
+def _viterbi_with_jump_penalty(pitches: List[int],
+                               candidates: List[List[int]],
+                               shift_weight: float,
+                               smooth_weight: float,
+                               max_jump: int,
+                               jump_penalty: float) -> Tuple[List[int], float]:
+    
+    n = len(pitches)
+    dp: List[Dict[int, Tuple[float, int]]] = [dict() for _ in range(n)]
+    
+    # init
+    for vi, val in enumerate(candidates[0]):
+        dp[0][vi] = (shift_weight * abs(val - pitches[0]), -1)
+        
+    # forward
+    for i in range(1, n):
+        for vi, val in enumerate(candidates[i]):
+            best_cost = float('inf')
+            best_prev = -1
+            shift_cost = shift_weight * abs(val - pitches[i])
+            for u, (prev_cost, _) in dp[i-1].items():
+                prev_val = candidates[i-1][u]
+                diff = abs(val - prev_val)
+                smooth_cost = smooth_weight * diff
+                if diff > max_jump:
+                    smooth_cost += jump_penalty
+                cost = prev_cost + shift_cost + smooth_cost
+                if cost < best_cost:
+                    best_cost = cost
+                    best_prev = u
+            dp[i][vi] = (best_cost, best_prev)
+            
+    # backtrack
+    last_index, best_final_cost = min(((vi, data[0]) for vi, data in dp[-1].items()), key=lambda x: x[1])
+    seq = [0] * n
+    idx = last_index
+    for i in range(n-1, -1, -1):
+        seq[i] = candidates[i][idx]
+        _, idx = dp[i][idx]
+        
+    return seq, best_final_cost
+
+###################################################################################
+
+def squash_pitches_to_octaves(pitches: List[int],
+                              num_octaves: int,
+                              shift_weight: float = 1.0,
+                              smooth_weight: float = 2.0,
+                              max_jump: int = 6,
+                              jump_penalty: float = 200.0
+                             ) -> List[int]:
+    
+    """
+    Squash MIDI pitches into a contiguous span of num_octaves octaves,
+    preserving average pitch and avoiding large jumps between consecutive notes.
+
+    Parameters
+    - pitches: list of integer MIDI pitches (0..127)
+    - num_octaves: positive integer
+    - shift_weight: weight for per-note shift (higher -> prefer nearest-octave)
+    - smooth_weight: weight for adjacent-step size (higher -> smoother)
+    - max_jump: threshold in semitones above which a large penalty is applied
+    - jump_penalty: large penalty added when a jump exceeds max_jump
+
+    Returns:
+    - list of integer MIDI pitches (0..127)
+    """
+    
+    if not isinstance(num_octaves, int) or num_octaves <= 0:
+        raise ValueError("num_octaves must be a positive integer")
+        
+    if not pitches:
+        return []
+
+    width = 12 * num_octaves
+    orig_mean = sum(pitches) / len(pitches)
+
+    base_min = int(math.floor(orig_mean - width))
+    base_max = int(math.ceil(orig_mean))
+
+    best_result = None
+    best_mean_diff = float('inf')
+    best_cost = float('inf')
+
+    for base in range(base_min, base_max + 1):
+        candidates = []
+        valid = True
+        for p in pitches:
+            cands = _candidates_in_span(p, base, width)
+            if not cands:
+                valid = False
+                break
+            candidates.append(cands)
+        if not valid:
+            continue
+
+        seq, dp_cost = _viterbi_with_jump_penalty(
+            pitches, candidates,
+            shift_weight=shift_weight,
+            smooth_weight=smooth_weight,
+            max_jump=max_jump,
+            jump_penalty=jump_penalty
+        )
+
+        mapped_mean = sum(seq) / len(seq)
+        mean_diff = abs(mapped_mean - orig_mean)
+
+        # primary: minimize mean difference; tie-break: dp cost
+        if (mean_diff < best_mean_diff - 1e-9) or (math.isclose(mean_diff, best_mean_diff, rel_tol=1e-9) and dp_cost < best_cost):
+            best_mean_diff = mean_diff
+            best_cost = dp_cost
+            best_result = seq
+
+    if best_result is None:
+        # fallback: nearest-octave mapping into centered span
+        base = int(round(orig_mean - width / 2))
+        top = base + width - 1
+        best_result = []
+        for p in pitches:
+            k_min = math.ceil((base - p) / 12)
+            k_max = math.floor((top - p) / 12)
+            if k_min <= k_max:
+                if k_min <= 0 <= k_max:
+                    k = 0
+                else:
+                    k = k_min if abs(k_min) <= abs(k_max) else k_max
+                best_result.append(p + 12 * k)
+            else:
+                if p < base:
+                    k = math.ceil((base - p) / 12)
+                    best_result.append(p + 12 * k)
+                else:
+                    k = math.floor((top - p) / 12)
+                    best_result.append(p + 12 * k)
+
+    # clamp to MIDI range and return ints
+    return [max(0, min(127, int(round(x)))) for x in best_result]
+
+###################################################################################
+
+def quantize_escore_notes(escore_notes,
+                          timings_clip_value=4000,
+                          min_notes_gap=0,
+                          **kwargs
+                         ):
+    
+    dscore = delta_score_notes(escore_notes,
+                               timings_clip_value=timings_clip_value
+                              )
+
+    cscore = chordify_score([d[1:] for d in dscore])
+    
+    dtimes = [c[0][0] for c in cscore]
+    
+    qdtimes = quantize_median_existing(dtimes, **kwargs)
+
+    output_score = []
+    
+    for i, c in enumerate(cscore):
+        c[0][0] = qdtimes[i]
+        output_score.extend(c)
+
+    output_score = delta_score_to_abs_score([['note'] + e for e in output_score])
+    
+    output_score = fix_escore_notes_durations(output_score,
+                                              min_notes_gap=min_notes_gap
+                                             )
+
+    return output_score
+
+###################################################################################
+
+def squash_monophonic_escore_notes_pitches(escore_notes,
+                                           num_octaves=2,
+                                           use_high_tone=False,
+                                           extend_durs=True,
+                                           min_notes_gap=1,
+                                           **kwargs):
+
+    cscore = chordify_score([1000, escore_notes])
+
+    pitches = [d[0][4] for d in cscore]
+    
+    sptcs = squash_pitches_to_octaves(pitches,
+                                      num_octaves,
+                                      **kwargs
+                                     )
+
+    output_score = []
+    
+    for i, c in enumerate(cscore):
+
+        if use_high_tone:
+            tones_chord = sorted(set([e[4] % 12 for e in c]))
+            high_tone = tones_chord[-1]
+            high_tone_ev = [e for e in c if e[4] % 12 == high_tone][0]
+            ev = copy.deepcopy(high_tone_ev)
+
+        else:        
+            ev = copy.deepcopy(c[0])
+            
+        ev[4] = sptcs[i]
+        output_score.append(ev)
+
+    output_score = fix_monophonic_score_durations(output_score,
+                                                  extend_durs=extend_durs,
+                                                  min_notes_gap=min_notes_gap
+                                                 )
+
+    return output_score
 
 ###################################################################################
 
