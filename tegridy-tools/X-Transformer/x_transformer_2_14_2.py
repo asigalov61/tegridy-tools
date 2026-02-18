@@ -5351,6 +5351,229 @@ class GPTVAE(Module):
 
         return total_loss, losses, acc
 
+class GPTVAEAdvanced(Module):
+    def __init__(
+        self,
+        *,
+        num_tokens,
+        dim,
+        depth,
+        enc_depth,
+        max_seq_len,
+        dim_latent=None,
+        attn_dim_head=64,
+        heads=8,
+        enc_kwargs: dict = dict(),
+        dec_kwargs: dict = dict(),
+        vae_kl_loss_weight=1.,
+        vae_kl_div_floor=0.,      # KL floor
+        latents_dropout_prob=0.5, # % of time to drop latents
+        pad_id=-1,
+        encoder: Module | None = None,
+
+        # similarity / control features (all default to baseline behavior)
+        deterministic_latents=False,   # use mean instead of sampling
+        latent_noise_scale=1.0,        # scale latent sampling noise
+        num_latent_tokens=1,           # number of latent tokens to prepend
+
+        **kwargs
+    ):
+        super().__init__()
+        dim_latent = default(dim_latent, dim)
+
+        self.deterministic_latents = deterministic_latents
+        self.latent_noise_scale = latent_noise_scale
+        self.num_latent_tokens = num_latent_tokens
+
+        # encoder
+        if not exists(encoder):
+            encoder = TransformerWrapper(
+                num_tokens=num_tokens,
+                max_seq_len=max_seq_len + 1,
+                return_only_embed=True,
+                average_pool_embed=True,
+                attn_layers=Encoder(
+                    dim=dim,
+                    depth=enc_depth,
+                    attn_dim_head=attn_dim_head,
+                    heads=heads,
+                    **kwargs,
+                    **enc_kwargs
+                ),
+            )
+
+        self.encoder = encoder
+
+        # latent mean/logvar head
+        self.to_latent_mean_log_variance = nn.Sequential(
+            nn.Linear(dim, dim_latent * 2),
+            Rearrange('b (two d) -> two b d', two=2)
+        )
+
+        # latent -> prepend token(s)
+        self.from_latent_to_prepend_token = nn.Sequential(
+            nn.Linear(dim_latent, dim * self.num_latent_tokens),
+            Rearrange('b (k d) -> b k d', k=self.num_latent_tokens)
+        )
+
+        # decoder
+        self.decoder = TransformerWrapper(
+            num_tokens=num_tokens,
+            max_seq_len=max_seq_len,
+            attn_layers=Decoder(
+                dim=dim,
+                depth=depth,
+                attn_dim_head=attn_dim_head,
+                heads=heads,
+                **kwargs,
+                **dec_kwargs
+            ),
+        )
+
+        self.ar_wrapped_decoder = AutoregressiveWrapper(self.decoder, ignore_index=pad_id)
+
+        self.pad_id = pad_id
+        self.vae_kl_div_floor = vae_kl_div_floor
+        self.vae_kl_loss_weight = vae_kl_loss_weight
+        self.latents_dropout_prob = latents_dropout_prob
+
+    @property
+    def device(self):
+        return next(self.parameters()).device
+
+    def encode_to_latents(
+        self,
+        seq,
+        return_mean_log_var=False,
+        deterministic=None,
+        noise_scale=None
+    ):
+        """
+        Encode a sequence to latents.
+
+        deterministic: if True, use mean only (no sampling).
+                       defaults to self.deterministic_latents.
+        noise_scale:   scales sampling noise; defaults to self.latent_noise_scale.
+        """
+        deterministic = default(deterministic, self.deterministic_latents)
+        noise_scale = default(noise_scale, self.latent_noise_scale)
+
+        mask = seq != self.pad_id
+        pooled = self.encoder(seq, mask=mask)
+
+        latents_mean, latents_log_var = self.to_latent_mean_log_variance(pooled)
+
+        if deterministic:
+            latents = latents_mean
+        else:
+            latents_std = (0.5 * latents_log_var).exp()
+            latents = latents_mean + noise_scale * latents_std * torch.randn_like(latents_mean)
+
+        if not return_mean_log_var:
+            return latents
+
+        return latents, (latents_mean, latents_log_var)
+
+    @torch.inference_mode()
+    def generate(
+        self,
+        prompts,
+        seq_len,
+        latents=None,
+        seq_for_latents=None,
+        temperature=1.0,
+        **generate_kwargs
+    ):
+        """
+        prompts: (B, T) or (T,)
+        seq_for_latents: optional sequence to derive latents from.
+        latents: optional precomputed latents.
+        """
+        assert prompts.ndim in {1, 2}
+        batch = prompts.shape[0] if prompts.ndim == 2 else 1
+
+        # derive latents if needed
+        if exists(seq_for_latents):
+            assert not exists(latents), 'latents should not be passed if seq_for_latents is given'
+            latents = self.encode_to_latents(seq_for_latents)
+
+        # prepend latent tokens
+        prepend_embeds = None
+        if exists(latents):
+            if not is_tensor(latents):
+                latents = tensor(latents, device=self.device)
+
+            if latents.ndim == 1:
+                single = self.from_latent_to_prepend_token(latents.unsqueeze(0))
+                prepend_embeds = single.expand(batch, -1, -1)
+            else:
+                prepend_embeds = self.from_latent_to_prepend_token(latents)
+
+        generated = self.ar_wrapped_decoder.generate(
+            prompts,
+            seq_len,
+            prepend_embeds=prepend_embeds,
+            temperature=temperature,
+            **generate_kwargs
+        )
+
+        return generated
+
+    def forward(
+        self,
+        seq,
+        seq_for_latents=None,
+        return_all_losses=False,
+        latents_dropout_override=None
+    ):
+        """
+        seq: target sequence for AR loss.
+        seq_for_latents: sequence used to derive latents (defaults to seq).
+        latents_dropout_override: optional override for latent dropout prob.
+        """
+        batch, device = seq.shape[0], seq.device
+
+        seq_for_latents = default(seq_for_latents, seq)
+
+        latents, (latents_mean, latents_log_var) = self.encode_to_latents(
+            seq_for_latents,
+            return_mean_log_var=True
+        )
+
+        # latent dropout
+        dropout_prob = default(latents_dropout_override, self.latents_dropout_prob)
+        dropped_latents = torch.rand(batch, device=device) < dropout_prob
+
+        prepend_embeds = self.from_latent_to_prepend_token(latents)
+
+        ar_loss, acc = self.ar_wrapped_decoder(
+            seq,
+            prepend_embeds=prepend_embeds,
+            seq_start_pos=dropped_latents.long()
+        )
+
+        # KL loss
+        vae_kl_loss = 0.5 * (
+            latents_log_var.exp()
+            + latents_mean ** 2
+            - latents_log_var
+            - 1.
+        )
+
+        vae_kl_loss = F.relu(vae_kl_loss - self.vae_kl_div_floor)
+        vae_kl_loss = vae_kl_loss.sum(dim=-1).mean()
+
+        total_loss = (
+            ar_loss +
+            vae_kl_loss * self.vae_kl_loss_weight
+        )
+
+        if not return_all_losses:
+            return total_loss, acc
+
+        losses = (ar_loss, vae_kl_loss)
+        return total_loss, losses, acc
+
 #=================================================================================================================================
 # Binary classifier fuctions
 # https://github.com/lucidrains/x-transformers/pull/264
