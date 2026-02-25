@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 7.0
+# Version 8.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -5190,7 +5190,9 @@ def build_cls_model(num_tokens=18819,
         squeeze_out_last_dim = squeeze_out_last_dim,
         attn_layers=Encoder(dim=dim,
                             depth=depth,
-                            heads=heads
+                            heads=heads,
+                            attn_flash=True,
+                            rotary_pos_emb=True
                            )
     )
 
@@ -6290,6 +6292,1206 @@ def calculate_training_run_eta(
         }
 
     return eta
+
+#=================================================================================================================================
+# Autoregressive embeddings retrieval functions
+#=================================================================================================================================
+
+import torch
+import torch.nn.functional as F
+from typing import Optional, Dict, List, Union, Set
+import numpy as np
+from tqdm import tqdm
+from contextlib import nullcontext
+
+#===================================================================================================================
+# Advanced Embeddings Retrieval Function for Autoregressive X-Transformers
+#===================================================================================================================
+
+def get_embeddings(
+    model,
+    inputs: torch.Tensor,
+    pooling: str = 'mean',
+    mask: Optional[torch.Tensor] = None,
+    token_ids: Optional[List[int]] = None,
+    token_weights: Optional[Dict[int, float]] = None,
+    layer_index: int = -1,
+    normalize: bool = False,
+    device: Optional[torch.device] = None,
+    dtype: torch.dtype = torch.bfloat16,
+    pad_idx: int = 18819,
+    use_amp: bool = True,
+    verbose: bool = True,
+    _max_concat_tokens: Optional[int] = None,
+    ) -> np.ndarray:
+    
+    """
+    Get embeddings for a single batch of inputs.
+    
+    Parameters
+    ----------
+    model : AutoregressiveWrapper
+        Your trained transformer model
+    inputs : torch.Tensor
+        Input token sequences of shape (batch, seq_len)
+    pooling : str
+        Pooling strategy: 'mean' or 'concat'
+    mask : Optional[torch.Tensor]
+        Boolean mask, True for valid tokens. Auto-generated if None
+    token_ids : Optional[List[int]]
+        Token IDs to include. Works independently or with token_weights.
+    token_weights : Optional[Dict[int, float]]
+        Token ID to weight/priority mapping:
+        - 'mean': weights for weighted average
+        - 'concat': priority scores for selection when limiting count
+        - If provided WITHOUT token_ids: keys become the filter
+        - If provided WITH token_ids: only tokens in BOTH are used (intersection)
+    layer_index : int
+        Which layer's hidden states to use (-1 for last)
+    normalize : bool
+        L2-normalize output embeddings
+    device : Optional[torch.device]
+        Device for inference
+    dtype : torch.dtype
+        Dtype for autocast
+    pad_idx : int
+        Padding token index
+    use_amp : bool
+        Use automatic mixed precision
+    verbose : bool
+        Print warnings and info
+    _max_concat_tokens : Optional[int]
+        Internal: pre-computed max tokens for concat mode
+    
+    Returns
+    -------
+    np.ndarray
+        Embeddings array:
+        - 'mean': (batch, dim)
+        - 'concat': (batch, max_tokens * dim)
+    """
+    
+    model.eval()
+    
+    if device is None:
+        device = next(model.parameters()).device
+    
+    inputs = inputs.to(device)
+    
+    if inputs.ndim == 1:
+        inputs = inputs.unsqueeze(0)
+    
+    batch_size, seq_len = inputs.shape
+    
+    if mask is None:
+        mask = (inputs != pad_idx)
+    else:
+        mask = mask.to(device)
+    
+    if mask.dtype != torch.bool:
+        mask = mask.bool()
+    
+    if hasattr(model, 'net'):
+        net_model = model.net
+    else:
+        net_model = model
+    
+    if use_amp and device.type == 'cuda':
+        ctx = torch.amp.autocast(device_type='cuda', dtype=dtype)
+    else:
+        ctx = nullcontext()
+    
+    try:
+        with torch.no_grad():
+            with ctx if use_amp else nullcontext():
+                output = net_model(
+                    inputs,
+                    mask=mask if mask.ndim == 2 else mask.squeeze(),
+                    return_intermediates=True,
+                )
+                
+                if isinstance(output, tuple) and len(output) == 2:
+                    _, intermediates = output
+                else:
+                    intermediates = None
+                
+                hidden = _extract_hidden_states(intermediates, layer_index, verbose=verbose)
+                
+                if hidden is None:
+                    raise ValueError("Could not extract hidden states")
+                
+    except Exception as e:
+        if verbose:
+            print(f"Warning: Could not extract hidden states, using token embeddings. Error: {e}")
+        hidden = _get_token_embeddings(net_model, inputs)
+    
+    seq_mask = (inputs != pad_idx)
+    seq_mask_expanded = seq_mask.unsqueeze(-1)
+    hidden = hidden * seq_mask_expanded.float()
+    
+    # Compute effective token IDs with INTUITIVE logic
+    effective_token_ids = _compute_effective_token_ids(token_ids, token_weights)
+    
+    if pooling == 'mean':
+        emb = _mean_pooling(hidden, inputs, seq_mask, effective_token_ids, token_weights, verbose=verbose)
+    elif pooling == 'concat':
+        emb = _concat_pooling(hidden, inputs, seq_mask, effective_token_ids, token_weights, 
+                             max_tokens=_max_concat_tokens, verbose=verbose)
+    else:
+        raise ValueError(f"Unknown pooling strategy: {pooling}. Use 'mean' or 'concat'")
+    
+    if normalize:
+        emb = F.normalize(emb, p=2, dim=-1)
+    
+    return emb.cpu().detach().numpy()
+
+
+#===================================================================================================================
+# Batched Processing Function
+#===================================================================================================================
+
+def get_embeddings_batched(
+    model,
+    sequences: List[List[int]],
+    pooling: str = 'mean',
+    token_ids: Optional[List[int]] = None,
+    token_weights: Optional[Dict[int, float]] = None,
+    max_seq_len: int = 8192,
+    pad_idx: int = 18819,
+    batch_size: int = 8,
+    use_amp: bool = True,
+    dtype: torch.dtype = torch.bfloat16,
+    verbose: bool = True,
+    show_progress: bool = True,
+    normalize: bool = False,
+    ) -> np.ndarray:
+    
+    """
+    Process multiple sequences in TRUE batches for memory efficiency.
+    
+    Parameters
+    ----------
+    model : AutoregressiveWrapper
+        Your trained transformer model
+    sequences : List[List[int]]
+        List of token sequences (list of lists)
+    pooling : str
+        Pooling strategy: 'mean' or 'concat'
+    token_ids : Optional[List[int]]
+        Token IDs to include
+    token_weights : Optional[Dict[int, float]]
+        Token ID to weight/priority mapping
+    max_seq_len : int
+        Maximum sequence length
+    pad_idx : int
+        Padding token index
+    batch_size : int
+        Batch size for processing
+    use_amp : bool
+        Use automatic mixed precision
+    dtype : torch.dtype
+        Dtype for autocast
+    verbose : bool
+        Print messages
+    show_progress : bool
+        Show tqdm progress bar
+    normalize : bool
+        L2-normalize output embeddings
+    
+    Returns
+    -------
+    np.ndarray
+        Embeddings array with consistent dimensions
+    """
+    
+    model.eval()
+    
+    num_sequences = len(sequences)
+    
+    if verbose:
+        print(f"Processing {num_sequences} sequences in batches of {batch_size}...")
+    
+    # For concat mode: pre-scan to find max matching tokens across ALL sequences
+    max_concat_tokens = None
+    if pooling == 'concat':
+        effective_token_ids = _compute_effective_token_ids(token_ids, token_weights)
+        max_concat_tokens = _scan_max_matching_tokens(sequences, effective_token_ids, pad_idx, max_seq_len)
+        if verbose and max_concat_tokens is not None:
+            print(f"Auto-detected max matching tokens: {max_concat_tokens}")
+        elif verbose and max_concat_tokens == 0:
+            print("Warning: No sequences contain matching token IDs, using 1 token placeholder")
+            max_concat_tokens = 1
+    
+    all_embeddings = []
+    num_batches = (num_sequences + batch_size - 1) // batch_size
+    
+    batch_iterator = tqdm(range(num_batches), desc="Extracting embeddings", disable=not (show_progress and verbose)) if show_progress and verbose else range(num_batches)
+    
+    for batch_idx in batch_iterator:
+        start_idx = batch_idx * batch_size
+        end_idx = min((batch_idx + 1) * batch_size, num_sequences)
+        
+        batch_sequences = sequences[start_idx:end_idx]
+        max_len_in_batch = min(max_seq_len, max(len(seq) for seq in batch_sequences))
+        
+        padded_batch = []
+        for seq in batch_sequences:
+            if len(seq) > max_len_in_batch:
+                seq = seq[:max_len_in_batch]
+            else:
+                seq = seq + [pad_idx] * (max_len_in_batch - len(seq))
+            padded_batch.append(seq)
+        
+        batch_inputs = torch.tensor(padded_batch, dtype=torch.long)
+        
+        batch_embeddings = get_embeddings(
+            model,
+            batch_inputs,
+            pooling=pooling,
+            token_ids=token_ids,
+            token_weights=token_weights,
+            pad_idx=pad_idx,
+            use_amp=use_amp,
+            dtype=dtype,
+            verbose=verbose and batch_idx == 0,
+            normalize=normalize,
+            _max_concat_tokens=max_concat_tokens,
+        )
+        
+        all_embeddings.append(batch_embeddings)
+    
+    final_embeddings = np.concatenate(all_embeddings, axis=0)
+    
+    if verbose:
+        print(f"Final embeddings shape: {final_embeddings.shape}")
+    
+    return final_embeddings
+
+#===================================================================================================================
+# Helper Functions
+#===================================================================================================================
+
+def _compute_effective_token_ids(token_ids: Optional[List[int]], token_weights: Optional[Dict[int, float]]) -> Optional[Set[int]]:
+    """
+    Compute effective token IDs with INTUITIVE logic:
+    
+    - token_ids=None, token_weights=None → None (all valid tokens)
+    - token_ids=[...], token_weights=None → token_ids
+    - token_ids=None, token_weights={...} → keys from token_weights
+    - token_ids=[...], token_weights={...} → INTERSECTION (only tokens in BOTH)
+    
+    This ensures token_weights acts as a filter when provided, not just weights.
+    """
+    if token_ids is None and token_weights is None:
+        return None
+    
+    token_ids_set = set(token_ids) if token_ids is not None else None
+    weights_keys_set = set(token_weights.keys()) if token_weights is not None else None
+    
+    if token_ids_set is None and weights_keys_set is not None:
+        # Only token_weights provided: use its keys as filter
+        return weights_keys_set
+    elif token_ids_set is not None and weights_keys_set is None:
+        # Only token_ids provided: use token_ids as filter
+        return token_ids_set
+    elif token_ids_set is not None and weights_keys_set is not None:
+        # Both provided: INTERSECTION (only tokens in BOTH lists)
+        # This is the key fix for intuitive behavior
+        intersection = token_ids_set & weights_keys_set
+        if len(intersection) == 0:
+            # Warn but fall back to token_ids (more permissive)
+            print(f"Warning: token_ids and token_weights have no overlap. Using token_ids only.")
+            return token_ids_set
+        return intersection
+    else:
+        return None
+
+def _scan_max_matching_tokens(sequences: List[List[int]], 
+                              token_ids: Optional[Set[int]], 
+                              pad_idx: int, 
+                              max_seq_len: int) -> int:
+    """
+    Scan all sequences to find maximum number of tokens matching token_ids.
+    """
+    if token_ids is None:
+        return max(min(len(seq), max_seq_len) for seq in sequences) if sequences else 0
+    
+    max_count = 0
+    for seq in sequences:
+        truncated = seq[:max_seq_len]
+        count = sum(1 for tok in truncated if tok in token_ids and tok != pad_idx)
+        max_count = max(max_count, count)
+    
+    return max_count
+
+def _extract_hidden_states(intermediates, layer_index: int = -1, verbose: bool = True):
+    """Extract hidden states from LayerIntermediates object."""
+    if intermediates is None:
+        if verbose:
+            print("Warning: intermediates is None")
+        return None
+    
+    if hasattr(intermediates, 'layer_hiddens') and intermediates.layer_hiddens is not None:
+        if len(intermediates.layer_hiddens) > 0:
+            return intermediates.layer_hiddens[layer_index]
+    
+    if hasattr(intermediates, 'hiddens') and intermediates.hiddens is not None:
+        if len(intermediates.hiddens) > 0:
+            return intermediates.hiddens[layer_index]
+    
+    if hasattr(intermediates, 'attn_intermediates') and intermediates.attn_intermediates is not None:
+        if len(intermediates.attn_intermediates) > 0:
+            attn_int = intermediates.attn_intermediates[layer_index]
+            if hasattr(attn_int, 'values') and attn_int.values is not None:
+                return attn_int.values
+    
+    if verbose:
+        print("Warning: Could not find layer_hiddens in intermediates")
+    
+    return None
+
+
+def _get_token_embeddings(net_model, inputs: torch.Tensor):
+    """Get token embeddings directly from embedding layer."""
+    if hasattr(net_model, 'token_emb'):
+        if hasattr(net_model.token_emb, 'emb'):
+            return net_model.token_emb.emb(inputs)
+        else:
+            return net_model.token_emb(inputs)
+    elif hasattr(net_model, 'emb'):
+        return net_model.emb(inputs)
+    else:
+        raise ValueError("Could not find embedding layer in model")
+
+def _mean_pooling(
+    hidden: torch.Tensor, 
+    inputs: torch.Tensor,
+    mask: torch.Tensor, 
+    token_ids: Optional[Set[int]],
+    token_weights: Optional[Dict[int, float]],
+    verbose: bool = True
+) -> torch.Tensor:
+    """
+    Mean pooling with token ID filtering and weighted averaging.
+    """
+    batch_size, seq_len, dim = hidden.shape
+    device = hidden.device
+    
+    if mask.ndim > 2:
+        mask = mask.squeeze()
+    
+    effective_mask = mask.clone()
+    
+    if token_ids is not None:
+        token_mask = torch.zeros_like(mask, dtype=torch.bool, device=device)
+        for tid in token_ids:
+            token_mask = token_mask | (inputs == tid)
+        effective_mask = effective_mask & token_mask
+        
+        if verbose and effective_mask.sum() == 0:
+            print(f"Warning: No tokens match filter, falling back to all valid tokens")
+            effective_mask = mask
+    
+    if token_weights is not None:
+        weights = torch.zeros_like(effective_mask, dtype=torch.float32, device=device)
+        
+        for token_id, weight in token_weights.items():
+            id_mask = (inputs == token_id) & effective_mask
+            weights = weights.masked_fill(id_mask, float(weight))
+        
+        weights = weights.masked_fill(effective_mask & (weights == 0), 1.0)
+        
+        weighted_hidden = hidden * weights.unsqueeze(-1)
+        sum_weighted = weighted_hidden.sum(dim=1)
+        sum_weights = weights.sum(dim=1, keepdim=True).clamp(min=1e-9)
+        return sum_weighted / sum_weights
+    else:
+        masked_hidden = hidden * effective_mask.unsqueeze(-1).float()
+        sum_hidden = masked_hidden.sum(dim=1)
+        count = effective_mask.sum(dim=1, keepdim=True).clamp(min=1e-9)
+        return sum_hidden / count
+
+def _concat_pooling(
+    hidden: torch.Tensor, 
+    inputs: torch.Tensor,
+    mask: torch.Tensor, 
+    token_ids: Optional[Set[int]],
+    token_weights: Optional[Dict[int, float]],
+    max_tokens: Optional[int],
+    verbose: bool = True
+) -> torch.Tensor:
+    """
+    Concat pooling with token ID filtering and weight-based priority selection.
+    """
+    batch_size, seq_len, dim = hidden.shape
+    device = hidden.device
+    
+    if max_tokens is None:
+        max_tokens = 1
+    
+    output_dim = max_tokens * dim
+    
+    all_token_embs = []
+    
+    for i in range(batch_size):
+        seq_mask = mask[i]
+        seq_inputs = inputs[i]
+        
+        if token_ids is not None:
+            matching_mask = torch.zeros(seq_len, dtype=torch.bool, device=device)
+            for tid in token_ids:
+                matching_mask = matching_mask | ((seq_inputs == tid) & seq_mask)
+            valid_indices = matching_mask.nonzero(as_tuple=True)[0]
+        else:
+            valid_indices = seq_mask.nonzero(as_tuple=True)[0]
+        
+        if len(valid_indices) == 0:
+            emb = torch.zeros(dim, device=device)
+            emb = F.pad(emb, (0, output_dim - dim))
+            all_token_embs.append(emb)
+            continue
+        
+        matching_embs = hidden[i, valid_indices, :]
+        
+        if token_weights is not None and len(valid_indices) > max_tokens:
+            weights_list = []
+            for idx in valid_indices:
+                tok_id = seq_inputs[idx].item()
+                weights_list.append(token_weights.get(tok_id, 1.0))
+            
+            sorted_pairs = sorted(zip(range(len(valid_indices)), weights_list), 
+                                key=lambda x: x[1], reverse=True)
+            top_indices = [valid_indices[p[0]] for p in sorted_pairs[:max_tokens]]
+            matching_embs = hidden[i, torch.tensor(top_indices, device=device), :]
+        elif len(valid_indices) > max_tokens:
+            matching_embs = matching_embs[:max_tokens]
+        
+        if len(valid_indices) < max_tokens:
+            padding_needed = max_tokens - len(valid_indices)
+            padding = torch.zeros(padding_needed, dim, device=device)
+            matching_embs = torch.cat([matching_embs, padding], dim=0)
+        
+        emb = matching_embs.reshape(-1)
+        all_token_embs.append(emb)
+    
+    return torch.stack(all_token_embs, dim=0)
+
+#=================================================================================================================================
+# Non-Autoregressive Encoder Embeddings Retrieval Functions
+#=================================================================================================================================
+
+def get_enc_embeddings(
+    model,
+    sequences: List[List[int]],
+    seq_len: Optional[int] = 3072,
+    seq_pad_idx: int = 385,
+    batch_size: int = 64,
+    save_every_num_batches: int = -1,
+    save_file_path: str = "saved_embeddings.npy",
+    device: Optional[torch.device] = None,
+    normalize: bool = False,
+    pooling: str = "auto",  # "auto" | "mean" | "weighted_mean"
+    token_type_weights: Optional[Tuple[float, float, float]] = None,  # (onset_w, duration_w, pitch_w)
+    use_bfloat16: bool = True,  # enable bfloat16 autocast when possible
+    return_dtype: str = "float32",  # "float32" or "float16" for returned embeddings
+    return_numpy: bool = False,
+    verbose: bool = True,
+    show_progress_bar: bool = True
+    ) -> Union[Tensor, np.ndarray]:
+
+    """
+    Compute embeddings for a list of token sequences using a PyTorch model with optional bfloat16/autocast,
+    pooling, normalization, and periodic saving.
+    
+    This function batches input token id sequences, pads/truncates them to a fixed length, runs the model
+    in evaluation mode under `torch.no_grad()` and optional mixed-precision autocast, and returns a single
+    tensor (or NumPy array) containing per-sequence embeddings. The model is expected to accept a LongTensor
+    of token ids `x` and a boolean mask `mask` and to return either:
+      - a 2-D tensor `(B, D)` of already-pooled embeddings, or
+      - a 3-D tensor `(B, L, D)` of per-token embeddings (which will be pooled according to `pooling`).
+    
+    Key behaviors:
+    - Sequences are padded with `seq_pad_idx` and masked so padding does not affect pooling.
+    - If `seq_len` is provided, sequences longer than `seq_len` are truncated; otherwise the batch max length is used.
+    - Mixed-precision autocast is used when `use_bfloat16` is True and supported by the device; the function
+      falls back to the default autocast or no autocast if unavailable.
+    - Supports three pooling modes for per-token embeddings:
+        - `"auto"` or `"mean"`: simple masked mean pooling across tokens.
+        - `"weighted_mean"`: weighted mean pooling by token type (onset/duration/pitch) inferred from token ids;
+          weights are provided via `token_type_weights` and padding tokens are ignored.
+    - Optionally L2-normalizes embeddings (in float32) when `normalize=True`.
+    - Returned embeddings can be cast to `float16` for storage/transfer via `return_dtype`.
+    - Embeddings are collected on CPU; intermediate results can be periodically saved to `save_file_path`.
+    - If `return_numpy=True`, a NumPy array is returned; otherwise a CPU `torch.Tensor` is returned.
+    
+    Args:
+        model (torch.nn.Module):
+            PyTorch model used to compute embeddings. The model will be moved to `device` (or its current
+            parameter device if `device` is None) and set to `eval()` for inference. The forward call must
+            accept `x` (LongTensor) and `mask` (BoolTensor) and return embeddings when called with
+            `return_embeddings=True`.
+        sequences (List[List[int]]):
+            Batch of token id sequences (each sequence is a list of ints). Can be empty; an empty result
+            with shape `(0, 0)` will be returned in that case.
+        seq_len (Optional[int], default=3072):
+            Target sequence length for truncation/padding. If None, the maximum sequence length in the
+            current batch is used.
+        seq_pad_idx (int, default=385):
+            Token id used for padding positions.
+        batch_size (int, default=64):
+            Number of sequences processed per forward pass.
+        save_every_num_batches (int, default=-1):
+            If > 0, the function will save accumulated embeddings to `save_file_path` every
+            `save_every_num_batches` batches. A non-positive value disables periodic saving.
+        save_file_path (str, default="saved_embeddings.npy"):
+            File path used by `np.save` when periodic saving is enabled.
+        device (Optional[torch.device], default=None):
+            Device to run the model and tensors on. If None, the device of the model parameters is used.
+        normalize (bool, default=False):
+            If True, L2-normalize each embedding vector (done in float32 for numerical stability).
+        pooling (str, default="auto"):
+            Pooling strategy applied when model returns per-token embeddings:
+              - "auto" or "mean": masked mean pooling.
+              - "weighted_mean": weighted mean pooling by token type using `token_type_weights`.
+            Any other value raises `ValueError`.
+        token_type_weights (Optional[Tuple[float, float, float]], default=None):
+            Per-token-type weights `(onset_w, duration_w, pitch_w)` used when `pooling="weighted_mean"`.
+            If None, defaults to `(1.0, 1.0, 1.0)`. Token type ranges are inferred as:
+              onset:   token_id in [0, 127]
+              duration:token_id in [128, 255]
+              pitch:   token_id in [256, 383]
+        use_bfloat16 (bool, default=True):
+            If True, attempts to use `torch.bfloat16` autocast for the device; falls back gracefully if not supported.
+        return_dtype (str, default="float32"):
+            Data type for returned embeddings: `"float32"` or `"float16"`. Internally embeddings are normalized
+            in float32; casting to float16 happens just before collecting results if requested.
+        return_numpy (bool, default=False):
+            If True, the final result is returned as a NumPy array; otherwise a CPU `torch.Tensor` is returned.
+        verbose (bool, default=True):
+            If True, prints progress and short diagnostic messages via `tqdm`.
+        show_progress_bar (bool, default=True)
+            If True, displays tqdm progress bar.
+    
+    Returns:
+        Union[torch.Tensor, numpy.ndarray]:
+            - If `return_numpy` is False: a CPU `torch.Tensor` of shape `(N, D)` and dtype `torch.float32`
+              or `torch.float16` depending on `return_dtype`.
+            - If `return_numpy` is True: a NumPy array of shape `(N, D)` and dtype `np.float32` or `np.float16`.
+            `N` is the total number of input sequences and `D` is the embedding dimensionality produced by the model.
+    
+    Raises:
+        AssertionError:
+            If `return_dtype` is not one of `"float32"` or `"float16"`.
+        RuntimeError:
+            If the model returns `None` for embeddings (indicates incorrect forward flags or model behavior).
+        ValueError:
+            If the model returns an embedding tensor with unexpected dimensionality or if `pooling` is unsupported.
+    
+    Notes:
+        - The function uses `pad_and_mask` to produce `x` (LongTensor) and `mask` (BoolTensor). Padding tokens
+          are ignored by pooling operations.
+        - When `pooling="weighted_mean"`, if `token_ids` are not available or the model returns a 2-D tensor,
+          the function falls back to masked mean pooling.
+        - Periodic saving concatenates all embeddings collected so far and writes them with `np.save`. Save
+          failures are caught and reported when `verbose=True` but do not abort processing.
+        - The function runs the model under `torch.no_grad()` and sets `model.eval()`; it will move the model
+          to `device` if provided.
+        - For reproducible numeric behavior across devices, ensure the model and device support the requested
+          autocast dtype (bfloat16) and that any randomness is controlled externally.
+    
+    Example:
+        >>> # simple usage
+        >>> embs = get_embeddings_bf16(model, sequences, seq_len=1024, batch_size=32, pooling="mean",
+        ...                           normalize=True, return_dtype="float32", return_numpy=False)
+    """
+
+    assert return_dtype in ("float32", "float16"), "return_dtype must be 'float32' or 'float16'"
+
+    model_device = next(model.parameters()).device if device is None else device
+    model.to(model_device)
+    model.eval()
+
+    all_embs: List[Tensor] = []
+    total_batches = math.ceil(len(sequences) / batch_size) if batch_size > 0 else 0
+
+    if verbose:
+        tqdm.write(
+            f"[get_embeddings_bf16] sequences={len(sequences)}, batch_size={batch_size}, "
+            f"batches={total_batches}, device={model_device}, seq_len={seq_len}, pooling={pooling}"
+        )
+        
+    # Prepare autocast context using torch.amp.autocast
+    autocast_ctx = None
+    if use_bfloat16:
+        try:
+            autocast_ctx = torch.amp.autocast(device_type=model_device.type, dtype=torch.bfloat16)
+        except Exception:
+            try:
+                autocast_ctx = torch.amp.autocast(device_type=model_device.type)
+            except Exception:
+                autocast_ctx = None
+    else:
+        try:
+            autocast_ctx = torch.amp.autocast(device_type=model_device.type)
+        except Exception:
+            autocast_ctx = None
+
+    with torch.inference_mode():
+        batch_iter = range(0, len(sequences), batch_size)
+        pbar = tqdm(batch_iter, disable=not show_progress_bar, total=total_batches, desc="Embedding batches")
+        for batch_idx, i in enumerate(pbar):
+            batch_seqs = sequences[i : i + batch_size]
+            x, mask = pad_and_mask(batch_seqs, pad_idx=seq_pad_idx, seq_len=seq_len, device=model_device, verbose=verbose)
+            # x: (B, L) LongTensor token ids, mask: (B, L) boolean
+
+            # Run forward under autocast if available
+            if autocast_ctx is not None:
+                with autocast_ctx:
+                    out = model(x, return_embeddings=True, mask=mask)
+            else:
+                out = model(x, return_embeddings=True, mask=mask)
+
+            if out is None:
+                raise RuntimeError("model returned None for embeddings. Check forward flags.")
+
+            # Handle shapes
+            if out.dim() == 2:
+                # already pooled: (B, D)
+                emb = out
+            elif out.dim() == 3:
+                # per-token embeddings: (B, L, D)
+                if pooling in ("mean", "auto"):
+                    emb = masked_mean_pool(out, mask, dim=1, verbose=verbose)
+                elif pooling == "weighted_mean":
+                    # Use token ids to compute per-token weights; fallback to mean if token ids missing
+                    emb = masked_weighted_mean_pool(out, mask, token_ids=x, token_type_weights=token_type_weights, dim=1, verbose=verbose)
+                else:
+                    raise ValueError(f"unsupported pooling: {pooling}")
+            else:
+                raise ValueError(f"unexpected embedding tensor shape: {out.shape}")
+
+            # Ensure embeddings are float32 for stable normalization/indexing
+            if emb.dtype != torch.float32:
+                emb = emb.float()
+
+            # L2 normalize in float32
+            if normalize:
+                emb = F.normalize(emb, p=2, dim=-1)
+
+            # Optionally cast to float16 for return/storage
+            if return_dtype == "float16":
+                emb = emb.half()
+
+            all_embs.append(emb.cpu())
+
+            # Update progress bar postfix with shapes and dtype
+            if verbose:
+                pbar.set_postfix({"batch": batch_idx + 1, "emb_shape": f"{emb.shape}", "dtype": str(emb.dtype)})
+
+            # Save intermediate results periodically
+            if save_every_num_batches > 0:
+                # compute 0-based batch number
+                bnum = batch_idx
+                if (bnum + 1) % save_every_num_batches == 0:
+                    try:
+                        concatenated = torch.cat(all_embs, dim=0).numpy()
+                        np.save(save_file_path, concatenated)
+                        if verbose:
+                            tqdm.write(f"[get_embeddings_bf16] saved {concatenated.shape[0]} embeddings to {save_file_path}")
+                    except Exception as e:
+                        # Do not crash the whole run for a save failure; report if verbose
+                        if verbose:
+                            tqdm.write(f"[get_embeddings_bf16] warning: failed to save embeddings: {e}")
+
+    if len(all_embs) == 0:
+        # return empty tensor/array with shape (0, 0)
+        empty = torch.empty((0, 0), dtype=(torch.float16 if return_dtype == "float16" else torch.float32))
+        if verbose:
+            tqdm.write("[get_embeddings_bf16] no embeddings were produced; returning empty tensor")
+        return empty.numpy() if return_numpy else empty
+
+    result = torch.cat(all_embs, dim=0)  # (N, D) on CPU
+
+    if verbose:
+        tqdm.write(f"[get_embeddings_bf16] finished: total_embeddings={result.shape[0]}, dim={result.shape[1]}, dtype={result.dtype}")
+
+    if return_numpy:
+        return result.numpy()
+
+    return result
+
+###################################################################################
+
+def masked_mean_pool(
+    token_embeddings: Tensor,
+    mask: Tensor,
+    dim: int = 1,
+    eps: float = 1e-9,
+    verbose: bool = True,
+    ) -> Tensor:
+    
+    """
+    Compute a masked mean pooling over a specified dimension.
+
+    This function computes the mean of `token_embeddings` along `dim`, ignoring
+    positions where `mask` is False. The mask is cast to the same dtype as the
+    embeddings to allow safe multiplication. A small epsilon is used to avoid
+    division by zero for sequences that are entirely masked out.
+
+    Args:
+        token_embeddings: Tensor of shape (B, L, D) or similar where `dim` indexes
+            the sequence length. Embeddings dtype can be float16/float32/bfloat16.
+        mask: Boolean tensor of shape broadcastable to the sequence dimension
+            (e.g., (B, L)). True indicates valid tokens; False indicates padding.
+        dim: Dimension along which to pool (default: 1, the sequence length).
+        eps: Small value to avoid division by zero when a row has zero valid tokens.
+        verbose: If True, prints a short summary about the pooling operation.
+
+    Returns:
+        Tensor of pooled embeddings with the sequence dimension removed, typically
+        shape (B, D). The returned dtype matches `token_embeddings.dtype`.
+    """
+    
+    mask_f = mask.to(token_embeddings.dtype)  # (B, L)
+    summed = (token_embeddings * mask_f.unsqueeze(-1)).sum(dim=dim)  # (B, D)
+    counts = mask_f.sum(dim=dim).clamp_min(eps).unsqueeze(-1)  # (B, 1)
+    pooled = summed / counts  # (B, D)
+
+    if verbose:
+        # Use tqdm.write so it doesn't interfere with progress bars
+        valid_counts = counts.squeeze(-1)
+        tqdm.write(
+            f"[masked_mean_pool] pooled shape={pooled.shape}, "
+            f"counts min={valid_counts.min().item():.3f}, max={valid_counts.max().item():.3f}"
+        )
+
+    return pooled
+
+###################################################################################
+
+def masked_weighted_mean_pool(
+    token_embs: Tensor,
+    valid_mask: Tensor,
+    token_ids: Optional[Tensor] = None,
+    token_type_weights: Optional[Tuple[float, float, float]] = None,
+    dim: int = 1,
+    verbose: bool = False,
+    ) -> Tensor:
+    
+    """
+    Weighted mean pooling across tokens. If token_ids is provided, token types are
+    inferred using the same ranges as the reference code:
+      - onset:   token_id in [0, 127]
+      - duration:token_id in [128, 255]
+      - pitch:   token_id in [256, 383]
+    token_type_weights: (onset_w, duration_w, pitch_w). If None, defaults to (1.0,1.0,1.0)
+    The function multiplies each token embedding by its scalar weight and divides
+    by the sum of weights for valid tokens per sequence.
+    """
+    
+    B, L, D = token_embs.shape
+    device = token_embs.device
+    dtype = token_embs.dtype
+
+    if token_ids is None:
+        # No token-level ids available: fallback to simple masked mean
+        if verbose:
+            tqdm.write("[masked_weighted_mean_pool] token_ids is None, falling back to masked_mean_pool")
+        return masked_mean_pool(token_embs, valid_mask, dim=dim, verbose=verbose)
+
+    # Default weights
+    if token_type_weights is None:
+        onset_w, duration_w, pitch_w = 1.0, 1.0, 1.0
+    else:
+        onset_w, duration_w, pitch_w = token_type_weights
+
+    # Build per-type boolean masks based on token id values (same ranges as reference)
+    onset_mask = (token_ids >= 0) & (token_ids < 128)
+    duration_mask = (token_ids >= 128) & (token_ids < 256)
+    pitch_mask = (token_ids >= 256) & (token_ids < 384)
+
+    # Combine with valid_mask to ignore padding positions
+    onset_mask = onset_mask & valid_mask
+    duration_mask = duration_mask & valid_mask
+    pitch_mask = pitch_mask & valid_mask
+
+    # Build per-token scalar weight tensor (B, L)
+    w = torch.ones((B, L), device=device, dtype=dtype)
+    if onset_w != 1.0:
+        w = torch.where(onset_mask, torch.tensor(onset_w, device=device, dtype=dtype), w)
+    if duration_w != 1.0:
+        w = torch.where(duration_mask, torch.tensor(duration_w, device=device, dtype=dtype), w)
+    if pitch_w != 1.0:
+        w = torch.where(pitch_mask, torch.tensor(pitch_w, device=device, dtype=dtype), w)
+
+    # Zero out weights for padding positions
+    valid_mask_f = valid_mask.to(dtype)  # (B, L)
+    w = w * valid_mask_f  # (B, L)
+
+    # Weighted sum and normalization
+    denom = w.sum(dim=1, keepdim=True).clamp(min=1e-6)  # (B, 1)
+    w_exp = w.unsqueeze(-1)  # (B, L, 1)
+    summed = (token_embs * w_exp).sum(dim=dim)  # (B, D)
+    pooled = summed / denom  # (B, D)
+
+    return pooled
+
+###################################################################################
+
+def pad_and_mask(
+    sequences: List[List[int]],
+    pad_idx: int = 385,
+    seq_len: Optional[int] = None,
+    device: Optional[torch.device] = None,
+    verbose: bool = False,
+    ) -> Tuple[Tensor, Tensor]:
+    
+    """
+    Pad and create a boolean mask for a batch of integer token sequences.
+
+    This utility converts a list of variable-length integer sequences into a
+    padded LongTensor and a corresponding boolean mask indicating valid token
+    positions. Sequences longer than `seq_len` are truncated. If `seq_len` is
+    None, the function uses the maximum sequence length in the batch.
+
+    Args:
+        sequences: List of token id sequences (each a list of ints).
+        pad_idx: Integer token id used for padding positions (default: 385).
+        seq_len: Optional target sequence length. If provided, sequences are
+            truncated or padded to this length. If None, the maximum length in
+            `sequences` is used.
+        device: Optional torch.device where the returned tensors will be placed.
+            If None, tensors are created on the default device.
+        verbose: If True, shows a small progress bar while processing sequences
+            and prints a summary.
+
+    Returns:
+        A tuple (x, mask):
+            - x: LongTensor of shape (B, T) containing padded token ids.
+            - mask: BoolTensor of shape (B, T) where True indicates a real token.
+    """
+    
+    # Fast path for empty batch
+    if not sequences:
+        empty = torch.empty((0, 0), dtype=torch.long, device=device)
+        empty_mask = torch.empty((0, 0), dtype=torch.bool, device=device)
+        return empty, empty_mask
+
+    # Compute lengths and the batch maximum length
+    lengths = [len(s) for s in sequences]
+    batch_max = max(lengths)
+
+    # If seq_len is given, only use it to cap lengths; but if the batch max is smaller,
+    # use the smaller value to avoid extra allocation/work.
+    if seq_len is None:
+        target_len = batch_max
+    else:
+        target_len = min(seq_len, batch_max)
+
+    b = len(sequences)
+    if target_len == 0:
+        x = torch.full((b, 0), pad_idx, dtype=torch.long, device=device)
+        mask = torch.zeros((b, 0), dtype=torch.bool, device=device)
+        return x, mask
+
+    x = torch.full((b, target_len), pad_idx, dtype=torch.long, device=device)
+    mask = torch.zeros((b, target_len), dtype=torch.bool, device=device)
+
+    # iterate with optional progress display
+    iterator = enumerate(sequences)
+    if verbose:
+        iterator = enumerate(tqdm(sequences, disable=not verbose, desc="Pad & mask"))
+
+    for i, seq in iterator:
+        if not seq:
+            continue
+        # Only truncate if seq is longer than the chosen target_len
+        L = len(seq)
+        if L > target_len:
+            L = target_len
+            # slice once to avoid creating a larger tensor then slicing
+            seq_slice = seq[:L]
+            seq_tensor = torch.tensor(seq_slice, dtype=torch.long, device=device)
+        else:
+            seq_tensor = torch.tensor(seq, dtype=torch.long, device=device)
+
+        x[i, :L] = seq_tensor[:L]
+        mask[i, :L] = True
+
+    if verbose:
+        tqdm.write(
+            f"[pad_and_mask] batch_size={b}, target_len={target_len}, "
+            f"min_len={min(lengths)}, max_len={max(lengths)}"
+        )
+
+    return x, mask
+
+#=================================================================================================================================
+# Embeddings similarity comparison functions
+#=================================================================================================================================
+
+import torch
+import torch.nn.functional as F
+from tqdm import tqdm
+from typing import Optional, Union, Tuple
+
+def topk_cosine_neighbors(embeddings: torch.Tensor,
+                          k: int = 10,
+                          key_embeddings: Optional[torch.Tensor] = None,
+                          row_batch: Optional[int] = None,
+                          col_batch: Optional[int] = None,
+                          device: Optional[Union[str, torch.device]] = None,
+                          normalize: bool = True,
+                          dtype: Optional[torch.dtype] = None,
+                          show_progress: bool = True) -> Tuple[torch.Tensor, torch.Tensor]:
+    
+    """
+    For each query embedding, find the indices and similarities of its top-k neighbors
+    from a set of key embeddings, sorted by descending similarity.
+    
+    Supports both self-similarity (single array, excludes self) and pairwise 
+    retrieval (two arrays, no exclusion).
+    
+    Optimized for maximum speed and memory efficiency across CPU, CUDA, and MPS.
+    Uses a streaming batched approach to handle datasets larger than GPU memory.
+
+    Args:
+        embeddings (torch.Tensor): Query embeddings, shape (N_q, D).
+        k (int): How many neighbors to return.
+        key_embeddings (torch.Tensor, optional): Database/Key embeddings, shape (N_k, D).
+                                                 If None, defaults to 'embeddings' (self-search).
+        row_batch (int, optional): Number of query rows to process at once. Auto-tuned if None.
+        col_batch (int, optional): Number of key columns to process at once. Auto-tuned if None.
+        device (str or torch.device, optional): Target device. If None, uses embeddings.device.
+        normalize (bool): If True, L2-normalize embeddings. Skip if already normalized.
+        dtype (torch.dtype, optional): Compute dtype (e.g., torch.float16, torch.bfloat16).
+                                       If None, uses embeddings.dtype.
+        show_progress (bool): Show tqdm progress bar.
+
+    Returns:
+        top_idx (torch.Tensor): shape (N_q, k), int32 indices of nearest neighbors (indices into key_embeddings).
+        top_sim (torch.Tensor): shape (N_q, k), float32 cosine similarities.
+    """
+    
+    # 1. Determine Search Mode (Self vs. Pairwise)
+    is_self_search = (key_embeddings is None)
+    if is_self_search:
+        key_embeddings = embeddings
+    
+    # 2. Device & Dtype Setup
+    if device is None:
+        device = embeddings.device
+    else:
+        device = torch.device(device)
+    
+    # Determine compute dtype
+    if dtype is None:
+        dtype = embeddings.dtype
+    else:
+        assert dtype.is_floating_point, "dtype must be a floating point type"
+    
+    # Move and cast embeddings
+    # Ensure contiguous for efficient matmul
+    query_embeddings = embeddings.to(device=device, dtype=dtype).contiguous()
+    key_embeddings = key_embeddings.to(device=device, dtype=dtype).contiguous()
+    
+    N_q, D = query_embeddings.shape
+    N_k, D_k = key_embeddings.shape
+    
+    if D != D_k:
+        raise ValueError(f"Query and Key embeddings must have same dimension. Got {D} and {D_k}")
+    
+    # Validation
+    if k < 1:
+        raise ValueError(f"k must be >= 1; got {k}")
+    
+    if is_self_search:
+        if k >= N_q:
+            raise ValueError(f"For self-search, k must be < N (to exclude self). Got N={N_q}, k={k}")
+    else:
+        if k > N_k:
+            raise ValueError(f"For pairwise search, k must be <= N_k. Got N_k={N_k}, k={k}")
+
+    # 3. Auto-tune batch sizes based on device and memory
+    # Heuristics adjusted for potentially different N_q and N_k
+    if row_batch is None:
+        if device.type == 'cuda':
+            row_batch = 16384
+        elif device.type == 'mps':
+            row_batch = 8192
+        else:
+            row_batch = 4096  # CPU
+    
+    if col_batch is None:
+        if device.type == 'cuda':
+            col_batch = 16384
+        elif device.type == 'mps':
+            col_batch = 8192
+        else:
+            col_batch = 4096  # CPU
+
+    # Clamp batch sizes to actual dimensions
+    row_batch = min(row_batch, N_q)
+    col_batch = min(col_batch, N_k)
+
+    # 4. Optional Normalization
+    if normalize:
+        # Normalize in-place if possible, or reassign
+        query_embeddings = F.normalize(query_embeddings, p=2, dim=1)
+        # Only normalize keys if they are distinct from queries to avoid redundant work 
+        # in self-search case (already normalized above)
+        if not is_self_search:
+            key_embeddings = F.normalize(key_embeddings, p=2, dim=1)
+
+    # 5. Initialize Result Tensors (always float32 for precision in output)
+    top_sim = torch.empty((N_q, k), dtype=torch.float32, device=device)
+    top_idx = torch.empty((N_q, k), dtype=torch.int, device=device)
+    
+    # Pre-allocate reusable buffers for inner loop (memory efficiency)
+    # Buffers for top-k merge (size 2k)
+    merge_sim_buffer = torch.empty((row_batch, 2 * k), dtype=dtype, device=device)
+    merge_idx_buffer = torch.empty((row_batch, 2 * k), dtype=torch.int, device=device)
+    
+    # Buffer for column batch similarities
+    sim_buffer = torch.empty((row_batch, col_batch), dtype=dtype, device=device)
+    
+    # Value for masking (minimum possible float for the dtype)
+    min_val = -torch.finfo(dtype).max
+
+    # 6. Inference Context
+    with torch.no_grad():
+        iterator = range(0, N_q, row_batch)
+        if show_progress:
+            desc = "Query Batches" if not is_self_search else "Row Batches"
+            iterator = tqdm(iterator, desc=desc, leave=True)
+        
+        for i in iterator:
+            i_end = min(i + row_batch, N_q)
+            rb = i_end - i
+            
+            rows = query_embeddings[i:i_end]  # (rb, D)
+            
+            # Initialize current batch top-k
+            # Use a tensor that persists across column batches for the current row batch
+            curr_sim = torch.full((rb, k), min_val, dtype=dtype, device=device)
+            curr_idx = torch.full((rb, k), -1, dtype=torch.int, device=device)
+            
+            for j in range(0, N_k, col_batch):
+                j_end = min(j + col_batch, N_k)
+                cb = j_end - j
+                
+                cols = key_embeddings[j:j_end]  # (cb, D)
+                
+                # Compute similarities in-place into buffer
+                # sim_block shape: (rb, cb)
+                sim_block = sim_buffer[:rb, :cb]
+                torch.matmul(rows, cols.T, out=sim_block)
+                
+                # Mask self-similarity ONLY if self-search
+                if is_self_search:
+                    offset = i - j
+                    r_start = max(0, -offset)
+                    r_end = min(rb, cb - offset)
+                    
+                    if r_start < r_end:
+                        # Vectorized masking of the diagonal
+                        r_range = torch.arange(r_start, r_end, dtype=torch.long, device=device)
+                        c_range = r_range + offset
+                        sim_block[r_range, c_range] = min_val
+                
+                # Top-k in block
+                if cb >= k:
+                    blk_s, blk_p = torch.topk(sim_block, k, dim=1, largest=True, sorted=True)
+                    blk_i = blk_p + j
+                else:
+                    # Pad block to k if remaining keys are fewer than k
+                    pad_size = k - cb
+                    pad_vals = torch.full((rb, pad_size), min_val, dtype=dtype, device=device)
+                    sims_padded = torch.cat([sim_block, pad_vals], dim=1)
+                    blk_s, blk_p = torch.topk(sims_padded, k, dim=1, largest=True, sorted=True)
+                    blk_i = blk_p + j
+                    # Invalidate padded indices
+                    blk_i[blk_s == min_val] = -1
+                
+                # Merge with current best
+                # Layout: [curr_sim (k), blk_s (k)] -> topk(2k) -> keep k
+                merge_sim_buffer[:rb, :k] = curr_sim
+                merge_sim_buffer[:rb, k:2*k] = blk_s
+                merge_idx_buffer[:rb, :k] = curr_idx
+                merge_idx_buffer[:rb, k:2*k] = blk_i
+                
+                curr_sim, top_p = torch.topk(merge_sim_buffer[:rb, :2*k], k, dim=1, largest=True, sorted=True)
+                curr_idx = torch.gather(merge_idx_buffer[:rb, :2*k], dim=1, index=top_p)
+            
+            # Write results (convert to float32 for consistency)
+            top_sim[i:i_end] = curr_sim.to(torch.float32)
+            top_idx[i:i_end] = curr_idx
+
+    # 7. Post-processing return format
+    if k == 1:
+        return top_idx.view(-1), top_sim.view(-1)
+    
+    return top_idx, top_sim
+
+#=================================================================================================================================
+# Embeddings visualization functions
+#=================================================================================================================================
+
+try:
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import pairwise_distances
+
+except:
+    pass
+
+def plot_emb_cosine_similarity(embeddings, 
+                               clip=2.0,
+                               gamma=0.55,
+                               cmap="inferno",
+                               figsize=(20, 20),
+                               dpi=300,
+                               output_fname='embeddings_similarity_plot.png',
+                               return_sims=False
+                              ):
+    
+    """
+    Produces a crisp, high-contrast cosine similarity heatmap.
+    - clip: percentile clipping (1–5 recommended)
+    - gamma: nonlinear contrast (0.4–0.8 recommended)
+
+    -----------
+    Use Example
+    -----------
+
+    tok_emb = model.net.token_emb.emb.weight.detach().cpu()
+
+    plot_cosine_similarity(tok_emb)
+    """
+
+    # 1. Compute cosine similarity (not distance)
+    cos_dist = pairwise_distances(embeddings, metric="cosine")
+    cos_sim = 1 - cos_dist
+
+    # 2. Gamma correction for contrast
+    sim = np.sign(cos_sim) * (np.abs(cos_sim) ** gamma)
+
+    # 3. Percentile clipping to remove flat tails
+    vmin, vmax = np.percentile(sim, [clip, 100 - clip])
+
+    # 4. Plot
+    plt.figure(figsize=figsize, dpi=dpi)
+    plt.imshow(sim, cmap=cmap, vmin=vmin, vmax=vmax, interpolation="nearest")
+    plt.colorbar(fraction=0.046, pad=0.04)
+    plt.title("Embeddings Pairwise Cosine Similarity")
+    plt.xlabel("Embedding Index")
+    plt.ylabel("Embeddings Index")
+    plt.tight_layout()
+    plt.savefig(output_fname)
+    plt.show()
+
+    if return_sims:
+        return sim
 
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
