@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.2.17"
+__version__ = "26.2.26"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -16452,6 +16452,8 @@ def most_common_ordered_set(values, top_k):
         if v in top_vals and v not in seen:
             result.append(v)
             seen.add(v)
+            if len(result) >= top_k:
+                break
 
     return result
 
@@ -16476,6 +16478,147 @@ def escore_notes_velocities(escore_notes, chan_idx=3, vels_idx=5):
         output_list.append([cha, min(all_vels), avg_vel, max(all_vels), vels_span])
 
     return output_list
+
+###################################################################################
+
+Patch2octave = {
+ 'Acoustic Grand': 60,
+ 'Bright Acoustic': 60,
+ 'Electric Grand': 60,
+ 'Honky-Tonk': 60,
+ 'Electric Piano 1': 60,
+ 'Electric Piano 2': 60,
+ 'Harpsichord': 60,
+ 'Clav': 60,
+ 'Celesta': 72,
+ 'Glockenspiel': 84,
+ 'Music Box': 72,
+ 'Vibraphone': 60,
+ 'Marimba': 48,
+ 'Xylophone': 72,
+ 'Tubular Bells': 72,
+ 'Dulcimer': 72,
+ 'Drawbar Organ': 60,
+ 'Percussive Organ': 60,
+ 'Rock Organ': 60,
+ 'Church Organ': 48,
+ 'Reed Organ': 60,
+ 'Accordion': 60,
+ 'Harmonica': 60,
+ 'Tango Accordion': 60,
+ 'Acoustic Guitar(nylon)': 48,
+ 'Acoustic Guitar(steel)': 48,
+ 'Electric Guitar(jazz)': 48,
+ 'Electric Guitar(clean)': 48,
+ 'Electric Guitar(muted)': 48,
+ 'Overdriven Guitar': 48,
+ 'Distortion Guitar': 48,
+ 'Guitar Harmonics': 60,
+ 'Acoustic Bass': 36,
+ 'Electric Bass(finger)': 36,
+ 'Electric Bass(pick)': 36,
+ 'Fretless Bass': 36,
+ 'Slap Bass 1': 36,
+ 'Slap Bass 2': 36,
+ 'Synth Bass 1': 36,
+ 'Synth Bass 2': 36,
+ 'Violin': 72,
+ 'Viola': 60,
+ 'Cello': 48,
+ 'Contrabass': 36,
+ 'Tremolo Strings': 60,
+ 'Pizzicato Strings': 60,
+ 'Orchestral Harp': 60,
+ 'Timpani': 36,
+ 'String Ensemble 1': 60,
+ 'String Ensemble 2': 60,
+ 'SynthStrings 1': 60,
+ 'SynthStrings 2': 60,
+ 'Choir Aahs': 60,
+ 'Voice Oohs': 60,
+ 'Synth Voice': 60,
+ 'Orchestra Hit': 60,
+ 'Trumpet': 60,
+ 'Trombone': 48,
+ 'Tuba': 36,
+ 'Muted Trumpet': 60,
+ 'French Horn': 48,
+ 'Brass Section': 48,
+ 'SynthBrass 1': 60,
+ 'SynthBrass 2': 60,
+ 'Soprano Sax': 72,
+ 'Alto Sax': 60,
+ 'Tenor Sax': 48,
+ 'Baritone Sax': 36,
+ 'Oboe': 72,
+ 'English Horn': 60,
+ 'Bassoon': 48,
+ 'Clarinet': 60,
+ 'Piccolo': 84,
+ 'Flute': 72,
+ 'Recorder': 72,
+ 'Pan Flute': 72,
+ 'Blown Bottle': 60,
+ 'Skakuhachi': 60,
+ 'Whistle': 72,
+ 'Ocarina': 60,
+ 'Lead 1 (square)': 60,
+ 'Lead 2 (sawtooth)': 60,
+ 'Lead 3 (calliope)': 60,
+ 'Lead 4 (chiff)': 60,
+ 'Lead 5 (charang)': 60,
+ 'Lead 6 (voice)': 60,
+ 'Lead 7 (fifths)': 60,
+ 'Lead 8 (bass+lead)': 60,
+ 'Pad 1 (new age)': 60,
+ 'Pad 2 (warm)': 60,
+ 'Pad 3 (polysynth)': 60,
+ 'Pad 4 (choir)': 60,
+ 'Pad 5 (bowed)': 60,
+ 'Pad 6 (metallic)': 60,
+ 'Pad 7 (halo)': 60,
+ 'Pad 8 (sweep)': 60,
+ 'FX 1 (rain)': 72,
+ 'FX 2 (soundtrack)': 72,
+ 'FX 3 (crystal)': 72,
+ 'FX 4 (atmosphere)': 72,
+ 'FX 5 (brightness)': 72,
+ 'FX 6 (goblins)': 72,
+ 'FX 7 (echoes)': 72,
+ 'FX 8 (sci-fi)': 72,
+ 'Sitar': 60,
+ 'Banjo': 60,
+ 'Shamisen': 60,
+ 'Koto': 60,
+ 'Kalimba': 60,
+ 'Bagpipe': 60,
+ 'Fiddle': 72,
+ 'Shanai': 60,
+ 'Tinkle Bell': 84,
+ 'Agogo': 60,
+ 'Steel Drums': 72,
+ 'Woodblock': 72,
+ 'Taiko Drum': 36,
+ 'Melodic Tom': 48,
+ 'Synth Drum': 48,
+ 'Reverse Cymbal': 72,
+ 'Guitar Fret Noise': 60,
+ 'Breath Noise': 60,
+ 'Seashore': 60,
+ 'Bird Tweet': 84,
+ 'Telephone Ring': 72,
+ 'Helicopter': 60,
+ 'Applause': 60,
+ 'Gunshot': 60
+}
+
+###################################################################################
+
+reverse_dict_grouped = lambda dic: {v: [k for k, _v in dic.items() if _v == v] for v in set(dic.values())}
+
+###################################################################################
+
+reverse_dict = lambda dic: {v: k for k, v in dic.items()}
 
 ###################################################################################
 
