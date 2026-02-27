@@ -4,6 +4,8 @@
 
 ## Main example applications: [Advanced MIDI Renderer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Advanced_MIDI_Renderer_TMIDIX_Gradio_Example.py) and [MIDI Melody](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/MIDI_Melody_Gradio_App_Example.py)
 
+## Advanced example application: [Orpheus Music Transformer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Orpheus__Music_Transformer_Gradio_App_Example.py)
+
 ***
 
 ## Make sure to check out [Jupyter/Google Colab Notebooks](https://github.com/asigalov61/tegridy-tools/tree/main/tegridy-tools/notebooks) for many useful and practical examples and applications
