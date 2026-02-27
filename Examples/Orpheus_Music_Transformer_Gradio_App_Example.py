@@ -625,11 +625,17 @@ def generate_music_and_state(input_midi,
     outro_seq = []
  
     if final_composition:
+
+        if add_drums or add_outro:
+            final_composition = final_composition[: next((i for i in range(len(final_composition)-1, -1, -1)
+                                                          if 16768 <= final_composition[i] < 18816), -1) + 1
+            ]    
+        
         if add_drums:
             drum_pitches = random.sample([35, 36, 41, 43, 45], k=1)
             for dp in drum_pitches:
                 drum_seq.append((128*128)+dp+256) # Drum patch/pitch token
-                drum_seq.append((8*16)+7+16768) # Dur/vel
+                drum_seq.append((8*16)+7+16768) # Dur/vel token
                 
         if add_outro:
             outro_seq.append(18817) # Outro token
