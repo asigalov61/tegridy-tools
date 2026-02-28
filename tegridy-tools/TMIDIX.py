@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.2.26"
+__version__ = "26.2.27"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -16619,6 +16619,42 @@ reverse_dict_grouped = lambda dic: {v: [k for k, _v in dic.items() if _v == v] f
 ###################################################################################
 
 reverse_dict = lambda dic: {v: k for k, v in dic.items()}
+
+###################################################################################
+
+def trim_list_trail_range(lst, low, high):
+    return lst[: next((i for i in range(len(lst)-1, -1, -1) if low <= lst[i] <= high), -1) + 1]
+
+###################################################################################
+
+def merge_text_files(files,
+                     output_path,
+                     title,
+                     sep_char='=',
+                     sep_len=120,
+                     verbose=False
+                    ):
+    
+    sep = sep_char * sep_len
+
+    if os.path.exists(output_path):
+        os.remove(output_path)
+
+    with open(output_path, "w", encoding="utf-8") as out:
+        out.write(f"{sep} {title} {sep}\n\n")
+
+        for path in files:
+            name = os.path.basename(path)
+            out.write(f"{sep} {name} {sep}\n\n")
+
+            with open(path, "r", encoding="utf-8") as inp:
+                for line in inp:
+                    out.write(line.rstrip("\n") + "\n")
+                    
+            out.write("\n")
+            
+    if verbose:
+        print(f"Merged {len(files)} files into {output_path}")
 
 ###################################################################################
 
