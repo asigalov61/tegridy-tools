@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.2.27"
+__version__ = "26.3.1"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1503,7 +1503,7 @@ import statistics
 import math
 from math import gcd
 
-from functools import reduce
+from functools import reduce, lru_cache
 
 import matplotlib.pyplot as plt
 
@@ -16656,6 +16656,257 @@ def merge_text_files(files,
     if verbose:
         print(f"Merged {len(files)} files into {output_path}")
 
+###################################################################################
+        
+def chord_cost(input_pc,
+               candidate,
+               del_white=5.0,
+               del_black=1.0,
+               ins_white=1.0,
+               ins_black=5.0,
+               col_change_w2b=3.0,
+               col_change_b2w=0.5
+               ):
+    
+    """
+    Compute minimal cost to transform input_pc into candidate.
+    Costs are tuned to preserve white notes and avoid introducing black notes.
+    """
+    
+    m, n = len(input_pc), len(candidate)
+
+    # Circular distance matrix
+    dist = [[min(abs(a - b), 12 - abs(a - b)) for b in candidate] for a in input_pc]
+
+    # Color: 1 for black, 0 for white
+    col_in = [1 if note in BLACK_NOTES else 0 for note in input_pc]
+    col_cand = [1 if note in BLACK_NOTES else 0 for note in candidate]
+
+    # Cost parameters
+    DEL_WHITE = del_white      # deleting a white note is very undesirable
+    DEL_BLACK = del_black      # deleting a black note is cheap
+    INS_WHITE = ins_white      # adding a white note is acceptable
+    INS_BLACK = ins_black      # adding a black note is heavily penalised
+    COL_CHANGE_W2B = col_change_w2b # white → black is bad
+    COL_CHANGE_B2W = col_change_b2w # black → white is slightly encouraged
+
+    @lru_cache(maxsize=None)
+    def dfs(i, used_mask):
+        if i == m:
+            # All input processed: add insertion cost for any unused candidate notes
+            cost = 0.0
+            for j in range(n):
+                if not (used_mask >> j) & 1:
+                    cost += INS_WHITE if col_cand[j] == 0 else INS_BLACK
+            return cost
+
+        # Option 1: delete current input note
+        best = (DEL_WHITE if col_in[i] == 0 else DEL_BLACK) + dfs(i + 1, used_mask)
+
+        # Option 2: match to an unused candidate
+        for j in range(n):
+            if not (used_mask >> j) & 1:
+                d = dist[i][j]
+                # Color change penalty
+                if col_in[i] == 1 and col_cand[j] == 0:
+                    d += COL_CHANGE_B2W
+                elif col_in[i] == 0 and col_cand[j] == 1:
+                    d += COL_CHANGE_W2B
+                best = min(best, d + dfs(i + 1, used_mask | (1 << j)))
+        return best
+
+    return dfs(0, 0)
+        
+###################################################################################
+
+def expert_check_and_fix_tones_chord(tones_chord, use_full_chords=False, **kwargs):
+    
+    """
+    Given a list of pitch classes (0-11), return the closest valid chord
+    from the selected list using a musically informed cost function.
+    
+    ------
+    KWARGS
+    ------
+    
+    # Cost parameters
+    del_white = 5.0      # deleting a white note is very undesirable
+    del_black = 1.0      # deleting a black note is cheap
+    ins_white = 1.0      # adding a white note is acceptable
+    ins_black = 5.0      # adding a black note is heavily penalised
+    col_change_w2b = 3.0 # white → black is bad
+    col_change_b2w = 0.5 # black → white is slightly encouraged
+    """
+    
+    tones_chord = sorted(set(tones_chord))
+    
+    if not tones_chord:
+        return []
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    # Exact match
+    if tones_chord in CHORDS:
+        return tones_chord
+
+    best_chord = None
+    best_cost = float('inf')
+
+    for chord in CHORDS:
+        cost = chord_cost(tones_chord, chord, **kwargs)
+        if cost < best_cost:
+            best_cost = cost
+            best_chord = chord
+        elif cost == best_cost and best_chord is not None:
+            # Tie‑breaker: prefer chord with fewer black notes
+            black_best = sum(1 for n in best_chord if n in BLACK_NOTES)
+            black_curr = sum(1 for n in chord if n in BLACK_NOTES)
+            if black_curr < black_best:
+                best_chord = chord
+
+    return sorted(best_chord) if best_chord else []
+        
+###################################################################################
+
+def expert_check_and_fix_pitches_chord(pitches_chord, use_full_chords=False, **kwargs):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+    
+    pitches = sorted(set(pitches_chord), reverse=True)
+    
+    fixed_tones_chord = tones_chord = sorted(set([p % 12 for p in pitches]))
+
+    if tones_chord not in CHORDS:
+        fixed_tones_chord = expert_check_and_fix_tones_chord(tones_chord,
+                                                             use_full_chords=use_full_chords,
+                                                             **kwargs
+                                                             )
+        
+    same_tones = sorted(set(tones_chord) & set(fixed_tones_chord))
+    new_tones = sorted(set(same_tones) ^ set(fixed_tones_chord))
+
+    good_pitches = [p for p in pitches if p % 12 in same_tones]
+    bad_pitches = [p for p in pitches if p % 12 not in same_tones]
+
+    new_pitches = []
+    
+    for p in pitches:
+        if p not in bad_pitches:
+            new_pitches.append(p)
+    
+        else:
+            octave = (p // 12)
+
+            if octave > 4:
+                octave -= 1
+
+            else:
+                octave += 1
+                
+            tone = p % 12
+    
+            if new_tones:
+                ntone = find_closest_tone(new_tones, tone)
+        
+                new_pitch = (octave * 12)+ntone
+        
+                while new_pitch in good_pitches or new_pitch in new_pitches:
+                    octave -= 1
+                    new_pitch = (octave * 12)+ntone
+        
+                new_pitches.append(new_pitch)
+    
+            else:
+    
+                ntone = find_closest_tone(same_tones, tone) 
+                
+                new_pitch = (octave * 12)+ntone
+        
+                while new_pitch in good_pitches or new_pitch in new_pitches:
+                    octave -= 1
+                    new_pitch = (octave * 12)+ntone
+        
+                new_pitches.append(new_pitch)
+    
+    return sorted(new_pitches, reverse=True)
+        
+###################################################################################
+
+def split_escore_notes_by_channel(escore_notes, chan_idx=3):
+
+    chan_groups = groupby(sorted(escore_notes, key=lambda x: x[chan_idx]), key=lambda x: x[chan_idx])
+
+    return {k: list(v) for k, v in chan_groups}
+        
+###################################################################################
+
+def split_escore_notes_by_patch(escore_notes, pat_idx=6):
+
+    chan_groups = groupby(sorted(escore_notes, key=lambda x: x[pat_idx]), key=lambda x: x[pat_idx])
+
+    return {k: list(v) for k, v in chan_groups}
+        
+###################################################################################
+
+def expert_check_and_fix_chords_in_escore_notes(escore_notes,
+                                                use_full_chords=False,
+                                                split_by_channel=False,
+                                                **kwargs
+                                                ):
+
+    cscore = chordify_score([1000, escore_notes])
+
+    fixed_score = []
+
+    for c in cscore:
+        
+        if split_by_channel:
+            pat_groups = split_escore_notes_by_channel(c)
+            drumsg = 9
+            
+        else:
+            pat_groups = split_escore_notes_by_patch(c)
+            drumsg = 128
+
+        for pat, evs in pat_groups.items():
+
+            if pat != drumsg:
+                evs_set = []
+                seen = set()
+                
+                for e in evs:
+                    if e[4] not in seen:
+                        evs_set.append(e)
+                        seen.add(e[4])
+
+                evs_set = sorted(evs_set, key=lambda x: -x[4])
+                
+                pitches_chord = [e[4] for e in evs_set]
+
+                fixed_pitches_chord = expert_check_and_fix_pitches_chord(pitches_chord,
+                                                                         use_full_chords=use_full_chords,
+                                                                         **kwargs
+                                                                         )
+
+                fixed_chord = []
+
+                for i, e in enumerate(evs_set):
+                    ee = copy.deepcopy(e)
+
+                    ee[4] = fixed_pitches_chord[i]
+                    fixed_score.append(ee)
+
+            else:
+                fixed_score.extend(evs)
+            
+    return sorted(fixed_score, key=lambda x: (x[1], -x[4], x[6]) if x[6] != 128 else (x[1], x[6], -x[4]))
+        
 ###################################################################################
 
 print('Module loaded!')
