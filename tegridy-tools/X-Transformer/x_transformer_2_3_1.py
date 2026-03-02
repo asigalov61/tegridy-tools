@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 8.0
+# Version 9.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -7492,6 +7492,285 @@ def plot_emb_cosine_similarity(embeddings,
 
     if return_sims:
         return sim
+    
+#=================================================================================================================================
+# Fine-tuning functions
+#=================================================================================================================================
+
+def unfreeze_last_n_blocks_and_norms(model,
+                                     n_last=2,
+                                     verbose=True
+                                     ):
+
+    """
+    2-3 unfrozen layers usually produce good results. Default is 2
+
+    Returns: configured model and optimizer
+    """
+    
+    # freeze everything first
+    for p in model.parameters():
+        p.requires_grad = False
+
+    # unfreeze head
+    for p in model.net.to_logits.parameters():
+        p.requires_grad = True
+
+    # unfreeze last n blocks' params and any LayerNorms inside them that have params
+    layers = model.net.attn_layers.layers  # ModuleList of blocks
+    last_blocks = list(layers)[-n_last:]
+    for block in last_blocks:
+        for name, p in block.named_parameters():
+            p.requires_grad = True
+
+    # unfreeze final norm if it has parameters
+    final_norm = getattr(model.net.attn_layers, "final_norm", None)
+    if final_norm is not None:
+        for p in final_norm.parameters():
+            p.requires_grad = True
+
+    # verify counts
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total = sum(p.numel() for p in model.parameters())
+    
+    if verbose:
+        print(f"Trainable params {trainable:,} / {total:,}")
+    
+    # collect ids for head params
+    head_params = list(model.net.to_logits.parameters())
+    head_param_ids = {id(p) for p in head_params}
+    
+    # group trainable params into two buckets without tensor comparisons
+    pretrained_params = []
+    head_only = []
+    
+    for p in model.parameters():
+        if not p.requires_grad:
+            continue
+        if id(p) in head_param_ids:
+            head_only.append(p)
+        else:
+            pretrained_params.append(p)
+    
+    # sanity checks
+    trainable = sum(p.numel() for p in pretrained_params) + sum(p.numel() for p in head_only)
+    total_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
+    assert trainable == total_trainable, "Mismatch in grouped trainable params"
+
+    if verbose:
+        print(f"Pretrained params: {sum(p.numel() for p in pretrained_params):,}")
+        print(f"Head params: {sum(p.numel() for p in head_only):,}")
+        print(f"Total trainable: {total_trainable:,}")
+
+    optim = torch.optim.Adam([
+        {"params": pretrained_params, "lr": 1e-5},
+        {"params": head_params, "lr": 5e-5}
+    ])
+
+    return model, optim
+
+def unfreeze_last_n_blocks_and_norms_full(model,
+                                          n_last_encoder=1,
+                                          n_last_decoder=2,
+                                          verbose=True
+                                         ):
+    
+    """
+    Freeze entire XTransformer, then unfreeze:
+      - Last `n_last_encoder` encoder blocks (including all parameters in those blocks, e.g., LayerNorms)
+      - Last `n_last_decoder` decoder blocks (including all parameters in those blocks)
+      - Final encoder/decoder LayerNorms (if present and has params)
+      - Decoder's output head (`to_logits`)
+      
+    """
+    
+    from x_transformer_2_3_1 import LayerNorm, RMSNorm, ScaleNorm, AdaptiveLayerNorm, AdaptiveRMSNorm
+
+    # 1. Freeze everything
+    for p in model.parameters():
+        p.requires_grad = False
+
+    # 2. Unfreeze decoder head
+    for p in model.decoder.net.to_logits.parameters():
+        p.requires_grad = True
+
+    # 3. Helper to detect if a module is a parameterized LayerNorm-like module
+    def is_parametrized_norm(module):
+        # Custom norms from x-transformers
+        norm_types = (LayerNorm, RMSNorm, ScaleNorm, AdaptiveLayerNorm, AdaptiveRMSNorm)
+        if isinstance(module, norm_types):
+            return True
+        # Also include PyTorch built-in LayerNorm if used
+        if isinstance(module, torch.nn.LayerNorm):
+            return True
+        return False
+
+    # 4. Helper to unfreeze last N blocks + norms inside them + final norm
+    def unfreeze_last_blocks(transformer_wrapper, n_last):
+        if n_last <= 0:
+            return
+
+        # The actual AttentionLayers module
+        attn_layers = transformer_wrapper.attn_layers
+        layers = attn_layers.layers  # ModuleList of blocks
+        last_blocks = list(layers)[-n_last:]
+
+        for block in last_blocks:
+            # Unfreeze all parameters in the block (includes attention, FFN, and any embedded LayerNorms)
+            for p in block.parameters():
+                p.requires_grad = True
+
+            # Additionally, explicitly unfreeze any LayerNorm-like submodules with params (defensive)
+            for submodule in block.modules():
+                if is_parametrized_norm(submodule):
+                    for p in submodule.parameters():
+                        p.requires_grad = True
+
+        # Unfreeze final norm (if exists and has params)
+        final_norm = getattr(attn_layers, 'final_norm', None)
+        if final_norm is not None and list(final_norm.parameters()):
+            for p in final_norm.parameters():
+                p.requires_grad = True
+
+    # 5. Apply to encoder and decoder
+    unfreeze_last_blocks(model.encoder, n_last_encoder)
+    unfreeze_last_blocks(model.decoder.net, n_last_decoder)  # note: .net because of AutoregressiveWrapper
+
+    # ======================
+    # Parameter grouping (same as before)
+    # ======================
+    head_params = list(model.decoder.net.to_logits.parameters())
+    head_param_ids = {id(p) for p in head_params}
+    
+    pretrained_params = []
+    head_only = []
+    
+    for p in model.parameters():
+        if not p.requires_grad:
+            continue
+        if id(p) in head_param_ids:
+            head_only.append(p)
+        else:
+            pretrained_params.append(p)
+    
+    # Sanity check
+    trainable = sum(p.numel() for p in pretrained_params) + sum(p.numel() for p in head_only)
+    total_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    assert trainable == total_trainable, "Mismatch in grouped trainable params"
+    
+    if verbose:
+        print(f"Trainable params {trainable:,} / {total_trainable:,}")
+        print(f"Pretrained (enc/dec): {sum(p.numel() for p in pretrained_params):,}")
+        print(f"Head: {sum(p.numel() for p in head_only):,}")
+        print(f"Total trainable: {total_trainable:,}")
+    
+    # Optimizer
+    optim = torch.optim.Adam([
+        {"params": pretrained_params, "lr": 1e-5},
+        {"params": head_only, "lr": 5e-5}
+    ])
+
+    return model, optim
+
+#=================================================================================================================================
+# Merging functions
+#=================================================================================================================================
+
+def merge_encoder_and_decoder(model,
+                              encoder_ckpt,
+                              decoder_ckpt,
+                              print_keys=False,
+                              verbose=True
+                             ):
+
+    if verbose:
+        print('=' * 70)
+        print('Merging...')
+        print('=' * 70)
+
+    if print_keys:
+        print('=' * 70)
+        print('Merged model keys:', model.state_dict().keys())
+        print('=' * 70)
+
+    if verbose:
+        print('=' * 70)
+        print('Loading encoder model...')
+        print('=' * 70)
+
+    enc_ckpt   = torch.load(decoder_ckpt, map_location='cpu')
+    enc_pre_sd = enc_ckpt.get('state_dict', enc_ckpt)
+
+    if print_keys:
+        print('=' * 70)
+        print('Encoder model keys:', enc_pre_sd.keys())
+        print('=' * 70)
+
+    if verbose:
+        print('=' * 70)
+        print('Loading decoder model...')
+        print('=' * 70)
+    
+    dec_ckpt   = torch.load(encoder_ckpt, map_location='cpu')
+    dec_pre_sd = dec_ckpt.get('state_dict', dec_ckpt)
+
+    if print_keys:
+        print('=' * 70)
+        print('Decoder model keys', dec_pre_sd.keys())
+        print('=' * 70)
+
+    if verbose:
+        print('=' * 70)
+        print('Prepping merged model...')
+        print('=' * 70)
+    
+    model_new_sd = model.state_dict()
+
+    for old_key, tensor in enc_pre_sd.items():
+    
+        new_key = 'encoder.' + old_key
+        if new_key in model_new_sd:
+            model_new_sd[new_key] = tensor
+    
+    for old_key, tensor in dec_pre_sd.items():
+    
+        new_key = old_key.replace('net.', 'decoder.net.')
+        if new_key in model_new_sd:
+            model_new_sd[new_key] = tensor
+
+    if verbose:
+        print('=' * 70)
+        print('Final integrity check...')
+        print('=' * 70)
+
+    # new_sd is your merged/updated state_dict
+    incompat = model.load_state_dict(model_new_sd, strict=False)
+
+    if verbose:
+        # incompat is an IncompatibleKeys(namedtuple)
+        print("Missing keys:    ", incompat.missing_keys)
+        print("Unexpected keys: ", incompat.unexpected_keys)
+
+    try:
+        if verbose:
+            print('=' * 70)
+            print('Loading merged model...')
+            
+        model.load_state_dict(model_new_sd, strict=True)
+
+        if verbose:
+            print('Done!')
+            print('=' * 70)
+            
+        return model
+
+    except:
+        if verbose:
+            print('Failed to create merged model!')
+            print('=' * 70)
+            
+        return incompat
 
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
