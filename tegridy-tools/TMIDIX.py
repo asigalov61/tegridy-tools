@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.3.1"
+__version__ = "26.3.2"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1505,6 +1505,8 @@ from math import gcd
 
 from functools import reduce, lru_cache
 
+import struct
+
 import matplotlib.pyplot as plt
 
 import psutil
@@ -1522,7 +1524,7 @@ from array import array
 from pathlib import Path
 from fnmatch import fnmatch
 
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Any
 
 ###################################################################################
 #
@@ -16907,6 +16909,684 @@ def expert_check_and_fix_chords_in_escore_notes(escore_notes,
             
     return sorted(fixed_score, key=lambda x: (x[1], -x[4], x[6]) if x[6] != 128 else (x[1], x[6], -x[4]))
         
+###################################################################################
+
+def sparse_random_int_list(length, sparsity=0.01, value_range=(1, 100)):
+    
+    """
+    Create a highly sparse list of random integers.
+    
+    length: total length of the list
+    sparsity: probability that a given index contains a non-zero value (0.01 = 1%)
+    value_range: (min, max) range for random integers
+    """
+    
+    low, high = value_range
+    
+    return [
+        random.randint(low, high) if random.random() < sparsity else 0
+        for _ in range(length)
+    ]
+
+###################################################################################
+
+def detect_list_values_type(values):
+    
+    """
+    Detect the most specific type that can represent all values in the list.
+    Returns one of:
+      'bool', 'byte', 'int8', 'int16', 'int32', 'int64',
+      'float32', 'float64', 'object'
+    """
+
+    if not values:
+        return None
+
+    # --- BOOL CHECK ---
+    if all(isinstance(v, bool) for v in values):
+        return "bool"
+
+    # --- INT CHECK ---
+    if all(isinstance(v, int) and not isinstance(v, bool) for v in values):
+        mn, mx = min(values), max(values)
+
+        # byte (unsigned 8-bit)
+        if 0 <= mn and mx <= 255:
+            return "byte"
+
+        # int8 (signed 8-bit)
+        if -128 <= mn and mx <= 127:
+            return "int8"
+
+        # int16
+        if -32768 <= mn and mx <= 32767:
+            return "int16"
+
+        # int32
+        if -2147483648 <= mn and mx <= 2147483647:
+            return "int32"
+
+        # otherwise int64
+        return "int64"
+
+    # --- FLOAT CHECK ---
+    if all(isinstance(v, float) for v in values):
+
+        def to_float32(x):
+            return struct.unpack("!f", struct.pack("!f", x))[0]
+
+        if all(abs(to_float32(v) - v) < 1e-7 for v in values):
+            return "float32"
+
+        return "float64"
+
+    # --- MIXED TYPES ---
+    return "object"
+
+###################################################################################
+
+# ---------- VarInt helpers (operate on bytearray) ----------
+def _write_varint_to_bytearray(n: int, out: bytearray) -> None:
+    """Append a VarInt (LE 7-bit groups, MSB continuation) to out."""
+    if n < 0:
+        raise ValueError("VarInt only works with non-negative integers")
+    while True:
+        byte = n & 0x7F
+        n >>= 7
+        if n:
+            byte |= 0x80
+        out.append(byte)
+        if not n:
+            break
+        
+###################################################################################
+
+def _read_varint_from_bytearray(data: bytearray, pos: int) -> Tuple[int, int]:
+    """Read a VarInt from data starting at pos; returns (value, new_pos)."""
+    value = 0
+    shift = 0
+    start = pos
+    while True:
+        if pos >= len(data):
+            raise ValueError("Unexpected end of data while reading VarInt")
+        b = data[pos]
+        pos += 1
+        value |= (b & 0x7F) << shift
+        shift += 7
+        if not (b & 0x80):
+            break
+        if shift > 10 * 7:  # arbitrary safety for extremely large varints
+            raise ValueError("VarInt too large or malformed (excessive length)")
+    return value, pos
+
+###################################################################################
+
+# ---------- ZigZag (signed ↔ unsigned) ----------
+def _zigzag_encode(n: int) -> int:
+    """ZigZag encode arbitrary Python int to non-negative int."""
+    if n >= 0:
+        return n << 1
+    else:
+        return ((-n) << 1) - 1
+    
+###################################################################################
+
+def _zigzag_decode(n: int) -> int:
+    """Decode ZigZag-encoded non-negative int back to signed int."""
+    return (n >> 1) if (n & 1) == 0 else -((n >> 1) + 1)
+
+###################################################################################
+# ---------- Helpers ----------
+def _fits_in_signed(bits: int, v: int) -> bool:
+    lo = -(1 << (bits - 1))
+    hi = (1 << (bits - 1)) - 1
+    return lo <= v <= hi
+
+###################################################################################
+
+def _fits_in_unsigned(bits: int, v: int) -> bool:
+    return 0 <= v <= (1 << bits) - 1
+
+###################################################################################
+
+def _choose_fixed_type(values: List[int]) -> str:
+    """Choose smallest fixed-width type that fits all values.
+    Prefers unsigned types when all values >= 0.
+    Returns one of: 'bool','byte'/'uint8','int8','int16','int32','int64'"""
+    if not values:
+        return 'int32'  # default when no non-zeros
+    all_nonneg = all(v >= 0 for v in values)
+    if all(v in (0, 1) for v in values):
+        return 'bool'
+    if all_nonneg and all(_fits_in_unsigned(8, v) for v in values):
+        return 'byte'  # alias for uint8
+    if all(_fits_in_signed(8, v) for v in values):
+        return 'int8'
+    if all(_fits_in_signed(16, v) for v in values):
+        return 'int16'
+    if all(_fits_in_signed(32, v) for v in values):
+        return 'int32'
+    return 'int64'
+
+###################################################################################
+
+# ---------- Public API ----------
+def encode_sparse_list(lst: List[int], value_type: Optional[str] = None) -> List[int]:
+    """
+    Compress a sparse list of integers into a list of bytes (ints 0-255).
+
+    Parameters:
+        lst: input list of integers.
+        value_type:
+            None -> auto ZigZag+VarInt for values (best for arbitrary signed ints)
+            'auto' -> pick smallest fixed-width type (or bool) based on values
+            'bool' -> store only positions (value implicitly 1)
+            'byte' or 'uint8' -> store unsigned 8-bit value per non-zero
+            'int8','int16','int32','int64' -> store fixed-width signed values
+
+    Returns:
+        List[int] of bytes (0-255).
+    """
+    non_zeros = [(i, val) for i, val in enumerate(lst) if val != 0]
+    k = len(non_zeros)
+    n = len(lst)
+
+    # If auto, decide based on values
+    if value_type == 'auto':
+        values = [val for _, val in non_zeros]
+        value_type = _choose_fixed_type(values)
+
+    out = bytearray()
+    _write_varint_to_bytearray(n, out)
+    _write_varint_to_bytearray(k, out)
+
+    prev_idx = 0
+    for idx, val in non_zeros:
+        delta = idx - prev_idx
+        if delta <= 0:
+            raise ValueError("Indices must be strictly increasing")
+        _write_varint_to_bytearray(delta, out)
+
+        if value_type is None:
+            # ZigZag + VarInt
+            _write_varint_to_bytearray(_zigzag_encode(val), out)
+        elif value_type == 'bool':
+            # no value bytes stored; value implicitly 1
+            pass
+        elif value_type in ('byte', 'uint8'):
+            if not _fits_in_unsigned(8, val):
+                raise ValueError(f"value {val} out of range for uint8")
+            out.append(val & 0xFF)
+        elif value_type == 'int8':
+            out.extend(struct.pack('<b', val))
+        elif value_type == 'int16':
+            out.extend(struct.pack('<h', val))
+        elif value_type == 'int32':
+            out.extend(struct.pack('<i', val))
+        elif value_type == 'int64':
+            out.extend(struct.pack('<q', val))
+        else:
+            raise ValueError(f"Unsupported value_type: {value_type}")
+
+        prev_idx = idx
+
+    # Return as list[int] for compatibility
+    return list(out)
+
+###################################################################################
+
+def decode_sparse_list(encoded: List[int], value_type: Optional[str] = None) -> List[int]:
+    """
+    Decompress a list of bytes (ints) back into the original integer list.
+
+    Parameters:
+        encoded: list of bytes (ints 0-255) produced by encode_sparse_list.
+        value_type: must match the type used during encoding. Use 'auto' only if
+                    you encoded with 'auto' and stored the chosen type separately.
+
+    Returns:
+        The reconstructed list of integers.
+    """
+    data = bytearray(encoded)
+    pos = 0
+
+    n, pos = _read_varint_from_bytearray(data, pos)
+    k, pos = _read_varint_from_bytearray(data, pos)
+
+    result = [0] * n
+    prev_idx = 0
+
+    for _ in range(k):
+        delta, pos = _read_varint_from_bytearray(data, pos)
+        if delta <= 0:
+            raise ValueError("Invalid delta (must be >= 1)")
+        idx = prev_idx + delta
+
+        if value_type is None:
+            zigzag_val, pos = _read_varint_from_bytearray(data, pos)
+            val = _zigzag_decode(zigzag_val)
+        elif value_type == 'bool':
+            val = 1
+        elif value_type in ('byte', 'uint8'):
+            if pos >= len(data):
+                raise ValueError("Unexpected end of data while reading uint8")
+            val = data[pos]
+            pos += 1
+        elif value_type == 'int8':
+            if pos + 1 > len(data):
+                raise ValueError("Unexpected end of data while reading int8")
+            val = struct.unpack('<b', bytes([data[pos]]))[0]
+            pos += 1
+        elif value_type == 'int16':
+            if pos + 2 > len(data):
+                raise ValueError("Unexpected end of data while reading int16")
+            val = struct.unpack('<h', bytes(data[pos:pos+2]))[0]
+            pos += 2
+        elif value_type == 'int32':
+            if pos + 4 > len(data):
+                raise ValueError("Unexpected end of data while reading int32")
+            val = struct.unpack('<i', bytes(data[pos:pos+4]))[0]
+            pos += 4
+        elif value_type == 'int64':
+            if pos + 8 > len(data):
+                raise ValueError("Unexpected end of data while reading int64")
+            val = struct.unpack('<q', bytes(data[pos:pos+8]))[0]
+            pos += 8
+        else:
+            raise ValueError(f"Unsupported value_type: {value_type}")
+
+        if not (0 <= idx < n):
+            raise IndexError("Decoded index out of range")
+        result[idx] = val
+        prev_idx = idx
+
+    return result
+
+###################################################################################
+
+def shift_to_smallest_integer_type(values: List[Any]) -> Dict[str, Any]:
+    
+    """
+    Attempt to shift a list of numeric values by a single integer offset so that
+    all shifted values fit into the smallest standard integer type among:
+      - "byte"  : unsigned 8-bit  (0 .. 255)
+      - "int8"  : signed 8-bit    (-128 .. 127)
+      - "int16" : signed 16-bit   (-32768 .. 32767)
+      - "int32" : signed 32-bit   (-2147483648 .. 2147483647)
+      - "int64" : signed 64-bit   (-2**63 .. 2**63 - 1)
+
+    Rules:
+    - Accepts Python `int` and `float` values that are exact integers (e.g., 3.0).
+    - Rejects booleans and non-integer floats (returns original list).
+    - For an empty list returns {"type":"byte","values":[], "offset": 0}.
+    - Chooses the smallest type (in the order above) for which an integer offset k exists
+      satisfying tmin <= v + k <= tmax for all v.
+    - If multiple offsets are valid for a type, prefer k = 0 if possible; otherwise pick
+      the offset inside the valid interval with the smallest absolute value (tie -> smaller numeric).
+    - Return shape when shifted: {"type": <type_name>, "values": <shifted_list>, "offset": <int>}
+      When not shifted/invalid: {"type": "original", "values": <original_list>}
+    """
+    
+    # Validate list
+    if not isinstance(values, list):
+        return {"type": "original", "values": values, "offset": 0}
+
+    # Normalize: accept exact-integer floats by converting them to ints
+    normalized: List[int] = []
+    for v in values:
+        # exclude booleans explicitly
+        if isinstance(v, bool):
+            return {"type": "original", "values": values, "offset": 0}
+        if isinstance(v, int):
+            normalized.append(int(v))
+        elif isinstance(v, float):
+            if v.is_integer():
+                normalized.append(int(v))
+            else:
+                return {"type": "original", "values": values, "offset": 0}
+        else:
+            return {"type": "original", "values": values, "offset": 0}
+
+    # Empty list fits in smallest type
+    if len(normalized) == 0:
+        return {"type": "byte", "values": [], "offset": 0}
+
+    vmin = min(normalized)
+    vmax = max(normalized)
+
+    # type definitions: (name, min_allowed, max_allowed)
+    types = [
+        ("byte", 0, 255),
+        ("int8", -128, 127),
+        ("int16", -32768, 32767),
+        ("int32", -2147483648, 2147483647),
+        ("int64", -2**63, 2**63 - 1),
+    ]
+
+    for name, tmin, tmax in types:
+        # k must satisfy: tmin <= v + k <= tmax for all v
+        # so k in [tmin - vmin, tmax - vmax]
+        low = tmin - vmin
+        high = tmax - vmax
+        if low <= high:
+            # prefer 0 if possible
+            if low <= 0 <= high:
+                k = 0
+            else:
+                # choose value in [low, high] with smallest absolute value
+                # tie-breaker: choose the smaller numeric value
+                if abs(low) < abs(high):
+                    k = low
+                elif abs(high) < abs(low):
+                    k = high
+                else:
+                    k = min(low, high)
+            k = int(k)
+            shifted = [v + k for v in normalized]
+            return {"type": name, "values": shifted, "offset": k}
+
+    return {"type": "original", "values": values, "offset": 0}
+
+###################################################################################
+
+def encode_row_zero_counts(row: List[int],
+                           chunk: int = 128,
+                           verbose: bool = True
+                          ) -> List[int]:
+    
+    """
+    Encode a binary row as counts of zeros between ones.
+    - For rows with ones: returns [zc0, zc1, ..., zc_last].
+    - For all-zero rows: returns chunk-sized parts plus remainder (e.g., [128] for 128 zeros).
+    
+    Configuration: for 128-column rows use CHUNK = 128 and SHIFT > 128 (e.g., 256)
+    """
+    
+    if row is None:
+        if verbose:
+            print("row is None")
+            
+    n = len(row)
+    
+    if n == 0:
+        return [0]
+        
+    zeros = 0
+    zero_counts: List[int] = []
+    seen_one = False
+    
+    for bit in row:
+        if bit not in (0, 1):
+            if verbose:
+                print("row must contain only 0 or 1")
+            
+        if bit == 0:
+            zeros += 1
+            
+        else:
+            zero_counts.append(zeros)
+            zeros = 0
+            seen_one = True
+            
+    if not seen_one:
+
+        parts: List[int] = []
+        remaining = n
+        
+        while remaining >= chunk:
+            parts.append(chunk)
+            remaining -= chunk
+            
+        if remaining > 0:
+            parts.append(remaining)
+            
+        return parts
+        
+    return zero_counts
+
+###################################################################################
+
+def decode_row_zero_counts(zero_counts: List[int],
+                           n_cols: int,
+                           chunk: int = 128,
+                           verbose: bool = True
+                          ) -> List[int]:
+    
+    """
+    Decode zero_counts into a binary row of length n_cols.
+    Handles chunked all-zero representation (sum(zero_counts) == n_cols).
+    Otherwise decodes as zeros/ones/zeros pattern.
+
+    Configuration: for 128-column rows use CHUNK = 128 and SHIFT > 128 (e.g., 256)
+    """
+    
+    if not zero_counts:
+        if verbose:
+            print("zero_counts must be non-empty")
+            
+    if any((not isinstance(x, int) or x < 0) for x in zero_counts):
+        if verbose:
+            print("zero_counts must be nonnegative integers")
+
+    total_zeros = sum(zero_counts)
+
+    if total_zeros == n_cols:
+        return [0] * n_cols
+
+    ones = len(zero_counts)
+    if ones < 0:
+        if verbose:
+            print("invalid zero_counts for non-all-zero row")
+            
+    if (total_zeros + ones) + (n_cols - (total_zeros + ones)) != n_cols:
+        if verbose:
+            print(total_zeros + ones, (n_cols - (total_zeros + ones)))
+            print(f"zero_counts do not match expected row length: sum={total_zeros}, ones={ones}, n_cols={n_cols}")
+            
+    row: List[int] = []
+    
+    for i in range(ones):
+        row.extend([0] * zero_counts[i])
+        row.append(1)
+
+    row += [0] * (n_cols - len(row))
+    
+    return row
+
+###################################################################################
+
+def encode_matrix_marker_prefixed(matrix: List[List[int]],
+                                  shift: int = 129,
+                                  chunk: int = 128,
+                                  verbose: bool = True
+                                 ) -> Dict[str, Any]:
+    
+    """
+    Encode matrix into a list of entries where each entry is:
+      [marker, zc0, zc1, ...]
+    marker = shift + (repeat_count - 1)
+    - For a single row (no repeats) repeat_count = 1 -> marker = shift + 0 = shift
+    - For k repeated rows repeat_count = k -> marker = shift + (k - 1)
+    Validation ensures all zero_counts < shift so marker is unambiguous.
+    Returns {'shape': (n_rows, n_cols), 'rows': [...]}
+
+    Configuration: for 128-column rows use CHUNK = 128 and SHIFT > 128 (e.g., 256)
+    """
+    
+    if matrix is None or len(matrix) == 0:
+        return {'shape': (0, 0), 'rows': []}
+        
+    n_rows = len(matrix)
+    n_cols = len(matrix[0])
+    encoded_rows: List[List[int]] = []
+
+    prev_zc = None
+    prev_count = 0
+
+    for row in matrix:
+        if len(row) != n_cols:
+            if verbose:
+                print("All rows must have the same number of columns")
+                return encoded_rows
+                
+        zc = encode_row_zero_counts(row, chunk=chunk)
+
+        if any(x >= shift for x in zc):
+            if verbose:
+                print(f"zero_count value >= shift ({shift}). Increase SHIFT or reduce CHUNK. zc={zc}")
+                return encoded_rows
+
+        if prev_zc is None:
+            prev_zc = zc
+            prev_count = 1
+            
+        elif zc == prev_zc:
+            prev_count += 1
+            
+        else:
+            marker = shift + (prev_count - 1)
+            encoded_rows.append([marker] + prev_zc)
+            prev_zc = zc
+            prev_count = 1
+
+    if prev_zc is not None:
+        marker = shift + (prev_count - 1)
+        encoded_rows.append([marker] + prev_zc)
+
+    return {'shape': (n_rows, n_cols), 'rows': encoded_rows}
+
+###################################################################################
+
+def decode_matrix_marker_prefixed(encoded: Dict[str, Any],
+                                  shift: int = 129,
+                                  chunk: int = 128,
+                                  verbose: bool = True
+                                 ) -> List[List[int]]:
+    
+    """
+    Decode the structure produced by encode_matrix_marker_prefixed.
+    Each entry must be [marker, zc0, zc1, ...] where marker >= shift.
+    The repeat count is (marker - shift + 1).
+
+    Configuration: for 128-column rows use CHUNK = 128 and SHIFT > 128 (e.g., 256)
+    """
+    
+    if 'shape' not in encoded or 'rows' not in encoded:
+        if verbose:
+            print("encoded must contain 'shape' and 'rows'")
+            return None
+            
+    n_rows, n_cols = encoded['shape']
+    rows_encoded = encoded['rows']
+    matrix: List[List[int]] = []
+    total_rows = 0
+
+    for entry in rows_encoded:
+        if not isinstance(entry, list) or len(entry) == 0:
+            print("each encoded entry must be a non-empty list")
+            
+        marker = int(entry[0])
+        
+        if marker < shift:
+            if verbose:
+                print(f"marker {marker} < shift {shift}; encoded entries must start with marker")
+            
+        repeat_count = (marker - shift) + 1
+        
+        if repeat_count < 1:
+            if verbose:
+                print("computed repeat_count < 1")
+            
+        zero_counts = entry[1:]
+        
+        if any((not isinstance(x, int) or x < 0) for x in zero_counts):
+            if verbose:
+                print("zero_counts must be nonnegative integers")
+                
+        if any(x >= shift for x in zero_counts):
+            if verbose:
+                print("zero_counts contain value >= shift; ambiguous marker")
+
+        row = decode_row_zero_counts(zero_counts, n_cols, chunk=chunk)
+
+        for _ in range(repeat_count):
+            matrix.append(list(row))
+            
+        total_rows += repeat_count
+
+    if total_rows != n_rows:
+        if verbose:
+            print(f"Decoded row count {total_rows} does not match shape {n_rows}")
+            
+    return matrix
+
+###################################################################################
+
+def escore_notes_to_rle_tokens(escore_notes,
+                               shift=129,
+                               chunk=128,
+                               verbose=False
+                               ):
+    
+    bmatrix = escore_notes_to_binary_matrix(escore_notes)
+
+    enc = encode_matrix_marker_prefixed(bmatrix,
+                                        verbose=verbose
+                                        )
+    
+    return flatten(enc['rows'])
+
+###################################################################################
+
+def rle_tokens_to_escore_notes(rle_tokens_list,
+                               shift=129,
+                               chunk=128,
+                               return_bmatrix=False,
+                               return_enc_dic=False,
+                               verbose=False
+                              ):
+
+    rows = []
+    row = []
+    row_count = 0
+
+    if rle_tokens_list[0] < shift:
+        row.append(shift+1)
+    
+    for t in rle_tokens_list:
+        if t >= shift:
+            if row:
+                rows.append(row)
+                row_count += (row[0]-shift+1)
+    
+            row = [t]
+    
+        else:
+            row.append(t)
+    
+    if row:
+        rows.append(row)
+        row_count += (row[0]-shift+1)
+    
+    enc_dic = {}
+    
+    enc_dic['shape'] = row_count, chunk
+    enc_dic['rows'] = rows
+    
+    if return_enc_dic:
+        return enc_dic
+        
+    bmatrix = decode_matrix_marker_prefixed(enc_dic,
+                                            shift=shift,
+                                            chunk=chunk,
+                                            verbose=verbose
+                                            )
+
+    if return_bmatrix:
+        return bmatrix
+    
+    return binary_matrix_to_original_escore_notes(bmatrix)  
+
 ###################################################################################
 
 print('Module loaded!')
