@@ -18,6 +18,7 @@ Using one large optimized model which was trained for 4 full epochs"
 # !pip install matplotlib
 # !pip install gradio
 # !pip install huggingface_hub
+# !pip install hf-transfer
 # !pip install torch
 # !pip install einops
 # !pip install einx
@@ -824,17 +825,29 @@ with gr.Blocks() as orpheus_app:
     - **Natural Composition Endings**: Outro tokens that help generate smooth and natural musical conclusions.
     """)
 
+    gr.Markdown("## Best Practices Tips")
+    gr.Markdown("""
+    - Good prime seed MIDI is everything!!!
+    - Trim the seed MIDI to exact (or at least - approximate) musical phrase.
+    - 30sec-1min (1024-1536 tokens) run time is ideal.
+    - Remove excessive instruments. 4-5 most pronounced instruments work best.
+    - Do not be discouraged by generated contunuations! Sometimes you need several tries to get it right!
+    - Do not strive for perfection! Instead, try to have fun and enjoy the music!
+    """)
+
     # Global state variables for composition
     final_composition = gr.State([])
     generated_batches = gr.State([])
     block_lines = gr.State([])
 
-    gr.Markdown("## Upload seed MIDI or click 'Generate' for random output")
-    
-    gr.Markdown("### PLEASE NOTE:")
-    gr.Markdown("* Orpheus Music Transformer is a primarily music continuation/co-composition model!")
-    gr.Markdown("* The model works best if given some music context to work with")
-    gr.Markdown("* Random generation from SOS token/embeddings may not always produce good results")
+    gr.Markdown("## Upload seed MIDI or select prime instruments or simply click 'Generate' button for random output")
+
+    gr.Markdown("""
+    ### PLEASE NOTE:
+    - Orpheus Music Transformer is a primarily music continuation/co-composition model!"
+    - The model works best if given some music context to work with
+    - Random generation from SOS token/embeddings may not always produce good results
+    """)
     
     input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
     input_midi.upload(reset, [final_composition, generated_batches, block_lines],
