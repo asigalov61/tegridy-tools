@@ -3,25 +3,27 @@
 #===================================================================
 
 """
-Orpheus Music Transformer Gradio App - Single Model, Simplified Version
+Orpheus Music Transformer Gradio App
 SOTA 8k multi-instrumental music transformer trained on 2.31M+ high-quality MIDIs
-Using one large optimized model which was trained for 4 full epochs"
+Using one large optimized model which was trained for 5.64 epochs"
 """
 
 #===================================================================
 # pip requirements (fully cross platform compatible and minimal)
-#===================================================================
+#-------------------------------------------------------------------
 # !pip install tqdm
 # !pip install numpy
-# !pip install soundfile
-# !pip install midirenderer
 # !pip install matplotlib
 # !pip install gradio
-# !pip install huggingface_hub
 # !pip install hf-transfer
+# !pip install huggingface_hub
 # !pip install torch
 # !pip install einops
 # !pip install einx
+#===================================================================
+# apt requirements (fully cross platform compatible and minimal)
+#-------------------------------------------------------------------
+# !sudo apt install fluidsynth -y
 #===================================================================
 # Required modules (fully cross platform compatible and minimal)
 #-------------------------------------------------------------------
@@ -29,6 +31,7 @@ Using one large optimized model which was trained for 4 full epochs"
 #-------------------------------------------------------------------
 # TMIDIX.py
 # x_transformer_2_3_1.py
+# midi_to_colab_audio.py
 #===================================================================
 
 # -----------------------------
@@ -81,11 +84,9 @@ import gradio as gr
 
 import TMIDIX
 
-import matplotlib.pyplot as plt
+from midi_to_colab_audio import midi_to_colab_audio
 
-import numpy as np
-import soundfile as sf
-import midirenderer
+import matplotlib.pyplot as plt
 
 from huggingface_hub import hf_hub_download
 
@@ -134,13 +135,14 @@ args = parse_local_args() if not RUNNING_IN_SPACE else None
 PDT = timezone('US/Pacific')
 
 SMALL_MODEL_CHECKPOINT = 'Orpheus_Music_Transformer_Trained_Model_128497_steps_0.6934_loss_0.7927_acc.pth'
-LARGE_MODEL_CHECKPOINT = 'Orpheus_Music_Transformer_Large_Trained_Model_31087_steps_0.6878_loss_0.7889_acc.pth'
+LARGE_MODEL_CHECKPOINT = 'Orpheus_Music_Transformer_Large_Trained_Model_43860_steps_0.6682_loss_0.8054_acc.pth'
 
 MODEL_SIZE = args.model_size if args else "large"
 MODEL_DEVICE = 'cuda'
 MODEL_DTYPE = torch.bfloat16
 
 SOUNDFONT_BANK = args.soundfont_name if args else'SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2'
+AUDIO_SAMPLE_RATE = 16000
 
 NUM_OUT_BATCHES = 10
 PREVIEW_LENGTH = 120  # in tokens
@@ -362,49 +364,36 @@ def save_midi(tokens):
 
             song_f.append(['note', time, dur, channel, pitch, vel, patch])
 
-    song_f = TMIDIX.remove_duplicate_pitches_from_escore_notes(song_f)
+    if song_f is not None and song_f:
 
-    song_f = TMIDIX.fix_escore_notes_durations(song_f, 
-                                               min_notes_gap=0
-                                              )
-
-    output_score, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(song_f)
-
-    fname = f"Orpheus-Music-Transformer-Composition"
-    fname += "-"+datetime.datetime.now(PDT).strftime("%Y-%m-%d-%H-%M-%S")
+        song_f = TMIDIX.remove_duplicate_pitches_from_escore_notes(song_f)
     
-    TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(
-        output_score,
-        output_signature='Orpheus Music Transformer',
-        output_file_name=fname,
-        track_name='Project Los Angeles',
-        list_of_MIDI_patches=patches,
-        verbose=False
-    )
-    return fname, output_score
+        song_f = TMIDIX.fix_escore_notes_durations(song_f, 
+                                                   min_notes_gap=0
+                                                  )
+    
+        output_score, patches, overflow_patches = TMIDIX.patch_enhanced_score_notes(song_f)
+    
+        now = datetime.datetime.now(PDT)
+        ms4 = now.strftime("%f")[:4]  # first four digits of microseconds
+        
+        fname = (
+            "Orpheus-Music-Transformer-Composition-"
+            + now.strftime(f"%Y-%m-%d-%H-%M-%S-{ms4}")
+        )
+        
+        TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(
+            output_score,
+            output_signature='Orpheus Music Transformer',
+            output_file_name=fname,
+            track_name='Project Los Angeles',
+            list_of_MIDI_patches=patches,
+            verbose=False
+        )
+        return fname, output_score
 
-# -----------------------------
-# MIDI RENDERING FUNCTIONS
-# -----------------------------
-
-def render_midi_for_gradio(midi_path: str | Path,
-                           soundfont_path: str | Path
-                          ) -> tuple[int, np.ndarray]:
-
-    midi_bytes = Path(midi_path).read_bytes()
-    sf_bytes = Path(soundfont_path).read_bytes()
-
-    wav_bytes = midirenderer.render_wave_from(sf_bytes, midi_bytes)
-
-    with BytesIO(wav_bytes) as bio:
-        audio, sr = sf.read(bio, dtype="float32")
-
-    audio = np.asarray(audio, dtype=np.float32)
-    np.clip(audio, -1.0, 1.0, out=audio)
-
-    audio_int16 = (audio * 32767.0).round().astype(np.int16)
-
-    return sr, audio_int16
+    else:
+        return None, None
 
 # -----------------------------
 # TOKENS SANITIZER FUNCTIONS
@@ -628,9 +617,7 @@ def generate_music_and_state(input_midi,
     if final_composition:
 
         if add_drums or add_outro:
-            final_composition = final_composition[: next((i for i in range(len(final_composition)-1, -1, -1)
-                                                          if 16768 <= final_composition[i] < 18816), -1) + 1
-            ]    
+            final_composition = TMIDIX.trim_list_trail_range(final_composition, 16768, 18815)
         
         if add_drums:
             drum_pitches = random.sample([35, 36, 41, 43, 45], k=1)
@@ -683,11 +670,12 @@ def generate_music_and_state(input_midi,
                                         **plot_kwargs
                                        )
 
-        gradio_audio = render_midi_for_gradio(midi_fname + '.mid',
-                                              SOUNDFONT_PATH
-                                             )
+        gradio_audio = midi_to_colab_audio(midi_fname + '.mid',
+                                         soundfont_path=SOUNDFONT_PATH,
+                                         sample_rate=AUDIO_SAMPLE_RATE,
+                                         output_for_gradio=True)
         
-        output_batches.append([gradio_audio, midi_plot, tokens, midi_fname + '.mid'])
+        output_batches.append([(AUDIO_SAMPLE_RATE, gradio_audio), midi_plot, tokens, midi_fname + '.mid'])
 
     # Update generated_batches (for use by add/remove functions)
     generated_batches = batched_gen_tokens
@@ -724,12 +712,14 @@ def add_batch(batch_number, final_composition, generated_batches, block_lines):
             block_lines_times_list=block_lines[:-1],
             return_plt=True
         )
-        gradio_audio = render_midi_for_gradio(midi_fname + '.mid',
-                                              SOUNDFONT_PATH
-                                             )
+        gradio_audio = midi_to_colab_audio(midi_fname + '.mid',
+                                         soundfont_path=SOUNDFONT_PATH,
+                                         sample_rate=AUDIO_SAMPLE_RATE,
+                                         output_for_gradio=True)
         print("Added batch #", batch_number)
         print_sep()
-        return gradio_audio, midi_plot, midi_fname + '.mid', final_composition, generated_batches, block_lines
+        return (AUDIO_SAMPLE_RATE, gradio_audio), midi_plot, midi_fname + '.mid', final_composition, generated_batches, block_lines
+        
     else:
         return None, None, None, [], [], []
 
@@ -740,20 +730,23 @@ def remove_batch(batch_number, num_tokens, final_composition, generated_batches,
         if block_lines:
             block_lines.pop()
         midi_fname, midi_score = save_midi(final_composition)
-        midi_plot = TMIDIX.plot_ms_SONG(
-            midi_score,
-            plot_title='Orpheus Music Transformer Composition',
-            block_lines_times_list=block_lines[:-1],
-            return_plt=True
-        )
-        gradio_audio = render_midi_for_gradio(midi_fname + '.mid',
-                                              SOUNDFONT_PATH
-                                             )
-        print("Removed batch #", batch_number)
-        print_sep()
-        return gradio_audio, midi_plot, midi_fname + '.mid', final_composition, generated_batches, block_lines
-    else:
-        return None, None, None, [], [], []
+
+        if midi_fname and midi_score:
+            midi_plot = TMIDIX.plot_ms_SONG(
+                midi_score,
+                plot_title='Orpheus Music Transformer Composition',
+                block_lines_times_list=block_lines[:-1],
+                return_plt=True
+            )
+            gradio_audio = midi_to_colab_audio(midi_fname + '.mid',
+                                             soundfont_path=SOUNDFONT_PATH,
+                                             sample_rate=AUDIO_SAMPLE_RATE,
+                                             output_for_gradio=True)
+            print("Removed batch #", batch_number)
+            print_sep()
+            return (AUDIO_SAMPLE_RATE, gradio_audio), midi_plot, midi_fname + '.mid', final_composition, generated_batches, block_lines
+
+    return None, None, None, [], [], []
 
 # -----------------------------
 # MISC FUNCTIONS
