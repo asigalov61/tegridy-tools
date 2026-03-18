@@ -5,11 +5,12 @@
 """
 Orpheus Music Transformer Gradio App
 SOTA 8k multi-instrumental music transformer trained on 2.31M+ high-quality MIDIs
-Using one large optimized model which was trained for 5.64 epochs"
 """
 
 #===================================================================
-# pip requirements (fully cross platform compatible and minimal)
+# Environment requirements (fully cross platform and minimal)
+#===================================================================
+# pip requirements 
 #-------------------------------------------------------------------
 # !pip install tqdm
 # !pip install numpy
@@ -21,11 +22,11 @@ Using one large optimized model which was trained for 5.64 epochs"
 # !pip install einops
 # !pip install einx
 #===================================================================
-# apt requirements (fully cross platform compatible and minimal)
+# apt requirements
 #-------------------------------------------------------------------
 # !sudo apt install fluidsynth -y
 #===================================================================
-# Required modules (fully cross platform compatible and minimal)
+# Required modules
 #-------------------------------------------------------------------
 # Download modules from https://github.com/asigalov61/tegridy-tools
 #-------------------------------------------------------------------
@@ -48,7 +49,7 @@ print_sep()
 print("Loading modules...")
 
 # -----------------------------
-# MODULES IMPORTS
+# ENVIRONMENT & MODULES IMPORTS
 # -----------------------------
 
 import os
@@ -91,7 +92,7 @@ import matplotlib.pyplot as plt
 from huggingface_hub import hf_hub_download
 
 # -----------------------------
-# ENVIRONMENT & PyTorch
+# PyTorch
 # -----------------------------
 
 import torch
@@ -123,7 +124,6 @@ print_sep()
 
 def parse_local_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-size", type=str, default="large")
     parser.add_argument("--soundfont-name", type=str, default="SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2")
     return parser.parse_args()
 
@@ -134,10 +134,9 @@ args = parse_local_args() if not RUNNING_IN_SPACE else None
 # -----------------------------
 PDT = timezone('US/Pacific')
 
-SMALL_MODEL_CHECKPOINT = 'Orpheus_Music_Transformer_Trained_Model_128497_steps_0.6934_loss_0.7927_acc.pth'
+medium_model_CHECKPOINT = 'Orpheus_Music_Transformer_Trained_Model_128497_steps_0.6934_loss_0.7927_acc.pth'
 LARGE_MODEL_CHECKPOINT = 'Orpheus_Music_Transformer_Large_Trained_Model_43860_steps_0.6682_loss_0.8054_acc.pth'
 
-MODEL_SIZE = args.model_size if args else "large"
 MODEL_DEVICE = 'cuda'
 MODEL_DTYPE = torch.bfloat16
 
@@ -148,40 +147,34 @@ NUM_OUT_BATCHES = 10
 PREVIEW_LENGTH = 120  # in tokens
 
 # -----------------------------
-# MODEL INIT FUNCTIONS
+# MODELS INIT
 # -----------------------------
 print_sep()
+
+#------------------------------------------------------------------------
 
 SEQ_LEN = 8192
 PAD_IDX = 18819
 
-if "large" in MODEL_SIZE.lower().strip():
-    depth = 16
-    heads = 16
-    MODEL_CHECKPOINT = LARGE_MODEL_CHECKPOINT
-    print("Instantiating large model...")
+#------------------------------------------------------------------------
 
-else:
-    depth = 8
-    heads = 32
-    MODEL_CHECKPOINT = SMALL_MODEL_CHECKPOINT
-    print(f"Instantiating small model...")
+print('Instantiating large model...')
 
-model = TransformerWrapper(
+large_model = TransformerWrapper(
     num_tokens=PAD_IDX + 1,
     max_seq_len=SEQ_LEN,
     attn_layers=Decoder(
         dim=2048,
-        depth=depth,
-        heads=heads,
+        depth=16,
+        heads=16,
         rotary_pos_emb=True,
         attn_flash=True
     )
 )
-model = AutoregressiveWrapper(model,
-                              ignore_index=PAD_IDX,
-                              pad_value=PAD_IDX
-                             )
+large_model = AutoregressiveWrapper(large_model,
+                                    ignore_index=PAD_IDX,
+                                    pad_value=PAD_IDX
+                                   )
 
 print('Done!')
 print_sep()
@@ -191,18 +184,65 @@ print_sep()
 print("Loading model checkpoint...")
 print_sep()
 
-checkpoint = hf_hub_download(
+large_checkpoint = hf_hub_download(
     repo_id='asigalov61/Orpheus-Music-Transformer',
-    filename=MODEL_CHECKPOINT
+    filename=LARGE_MODEL_CHECKPOINT
 )
 
-model.load_state_dict(torch.load(checkpoint, map_location=MODEL_DEVICE))
+large_model.load_state_dict(torch.load(large_checkpoint, map_location='cpu'))
 
-model.eval()
+large_model.eval()
 
-model.to(MODEL_DEVICE)
+large_model.cpu()
 
-model = torch.compile(model, mode='max-autotune')
+large_model = torch.compile(large_model, mode='max-autotune')
+
+print_sep()
+print("Done!")
+print_sep()
+
+#------------------------------------------------------------------------
+
+print('Instantiating small model...')
+
+medium_model = TransformerWrapper(
+    num_tokens=PAD_IDX + 1,
+    max_seq_len=SEQ_LEN,
+    attn_layers=Decoder(
+        dim=2048,
+        depth=8,
+        heads=32,
+        rotary_pos_emb=True,
+        attn_flash=True
+    )
+)
+medium_model = AutoregressiveWrapper(medium_model,
+                                     ignore_index=PAD_IDX,
+                                     pad_value=PAD_IDX
+                                    )
+
+print('Done!')
+print_sep()
+print("Model will use", MODEL_DTYPE.__repr__().split('.')[-1], "precision...")
+print("Model will use", MODEL_DEVICE, "device...")
+print_sep()
+print("Loading model checkpoint...")
+print_sep()
+
+medium_checkpoint = hf_hub_download(
+    repo_id='asigalov61/Orpheus-Music-Transformer',
+    filename=medium_model_CHECKPOINT
+)
+
+medium_model.load_state_dict(torch.load(medium_checkpoint, map_location='cpu'))
+
+medium_model.eval()
+
+medium_model.cpu()
+
+medium_model = torch.compile(medium_model, mode='max-autotune')
+
+#------------------------------------------------------------------------
 
 ctx = torch.amp.autocast(device_type=MODEL_DEVICE,
                          dtype=MODEL_DTYPE
@@ -213,7 +253,7 @@ print("Done!")
 print_sep()
 
 # -----------------------------
-# SOUNDFONT LOADING FUNCTIONS
+# SOUNDFONT LOADING FUNCTION
 # -----------------------------
 print('Loading SoundFont...')
 print_sep()
@@ -230,11 +270,7 @@ print('=' * 70)
 # -----------------------------
 # MIDI PROCESSING FUNCTIONS
 # -----------------------------
-def load_midi(input_midi, 
-              apply_sustains=True, 
-              remove_duplicate_pitches=True, 
-              remove_overlapping_durations=True
-             ):
+def load_midi(input_midi):
     
     """Process the input MIDI file and create a token sequence."""
 
@@ -242,7 +278,7 @@ def load_midi(input_midi,
     
     escore_notes = TMIDIX.advanced_score_processor(raw_score, 
                                                    return_enhanced_score_notes=True, 
-                                                   apply_sustain=apply_sustains
+                                                   apply_sustain=True
                                                   )
 
     if escore_notes and escore_notes[0]:
@@ -251,13 +287,11 @@ def load_midi(input_midi,
                                                            sort_drums_last=True
                                                           )
 
-        if remove_duplicate_pitches:
-            escore_notes = TMIDIX.remove_duplicate_pitches_from_escore_notes(escore_notes)
+        escore_notes = TMIDIX.remove_duplicate_pitches_from_escore_notes(escore_notes)
 
-        if remove_overlapping_durations:
-            escore_notes = TMIDIX.fix_escore_notes_durations(escore_notes, 
-                                                             min_notes_gap=0
-                                                            )
+        escore_notes = TMIDIX.fix_escore_notes_durations(escore_notes, 
+                                                         min_notes_gap=0
+                                                        )
         
         dscore = TMIDIX.delta_score_notes(escore_notes)
         
@@ -480,7 +514,13 @@ def sanitize_tokens(tokens):
 # MUSIC GENERATION FUNCTIONS
 # -----------------------------
 @GPU
-def generate_music(prime, num_gen_tokens, num_gen_batches, model_temperature, model_top_p):
+def generate_music(prime,
+                   num_gen_tokens,
+                   num_gen_batches,
+                   model_temperature,
+                   model_top_p,
+                   model_selector
+                  ):
     
     """Generate music tokens given prime tokens and parameters."""
 
@@ -488,6 +528,19 @@ def generate_music(prime, num_gen_tokens, num_gen_batches, model_temperature, mo
         prime = [18816] + prime[-6656:]
     
     inputs = prime
+
+    print(f'Will use {model_selector[0]}...')
+
+    if model_selector[0] == 'Large Base Model':
+        model = large_model
+
+    elif model_selector[0] == 'Medium Base Model':
+        model = medium_model
+
+    else:
+        model = large_model
+
+    model.to(MODEL_DEVICE)
     
     print("Generating...")
     inp = torch.LongTensor([inputs] * num_gen_batches).to(MODEL_DEVICE)
@@ -515,15 +568,14 @@ def generate_music(prime, num_gen_tokens, num_gen_batches, model_temperature, mo
                 return_prime=False,
                 verbose=False
             )
+
+    model.cpu()
             
     print("Done!")
     print_sep()
     return out.tolist()
 
-def generate_music_and_state(input_midi, 
-                             apply_sustains,
-                             remove_duplicate_pitches,
-                             remove_overlapping_durations,
+def generate_music_and_state(input_midi,
                              prime_instruments, 
                              num_prime_tokens, 
                              num_gen_tokens, 
@@ -533,7 +585,8 @@ def generate_music_and_state(input_midi,
                              add_outro,
                              final_composition, 
                              generated_batches, 
-                             block_lines
+                             block_lines,
+                             model_selector
                             ):
     
     """
@@ -546,13 +599,12 @@ def generate_music_and_state(input_midi,
     start_time = reqtime.time()
 
     print_sep()
+    print('Requested model:', model_selector[0])
+    
     if input_midi is not None:
         fn = os.path.basename(input_midi.name)
         fn1 = fn.split('.')[0]
         print('Input file name:', fn)
-        print('Apply sustains:', apply_sustains)
-        print('Remove duplicate pitches:', remove_duplicate_pitches)
-        print('Remove overlapping duriations', remove_overlapping_durations)
 
     print('Prime instruments:', prime_instruments)
     print('Num prime tokens:', num_prime_tokens)
@@ -563,15 +615,12 @@ def generate_music_and_state(input_midi,
     
     print('Add drums:', add_drums)
     print('Add outro:', add_outro)
+
     print_sep()
     
     # Load seed from MIDI if there is no existing composition.
     if not final_composition and input_midi is not None:
-        final_composition = load_midi(input_midi, 
-                                      apply_sustains=apply_sustains, 
-                                      remove_duplicate_pitches=remove_duplicate_pitches, 
-                                      remove_overlapping_durations=remove_overlapping_durations
-                                     )
+        final_composition = load_midi(input_midi)
 
         if num_prime_tokens < 6656:
             final_composition = final_composition[:num_prime_tokens]
@@ -635,8 +684,13 @@ def generate_music_and_state(input_midi,
     print('Composition has', len(final_composition+drum_seq+outro_seq), 'tokens')
     print_sep()
     
-    batched_gen_tokens = generate_music(final_composition+drum_seq+outro_seq, num_gen_tokens,
-                                        NUM_OUT_BATCHES, model_temperature, model_top_p)
+    batched_gen_tokens = generate_music(final_composition+drum_seq+outro_seq,
+                                        num_gen_tokens,
+                                        NUM_OUT_BATCHES,
+                                        model_temperature,
+                                        model_top_p,
+                                        model_selector
+                                       )
 
     batched_gen_tokens_san = []
 
@@ -766,6 +820,14 @@ def reset(final_composition=[], generated_batches=[], block_lines=[]):
     print_sep()
     return [], [], []
 
+def update_state_from_dropdown(choice, state):
+    """Store the dropdown value inside the global state list"""
+    state.append(choice)
+    print_sep()
+    print('Requested', choice)
+    print_sep()
+    return state
+
 Patch2number = TMIDIX.reverse_dict(TMIDIX.Number2patch)
 Patch2number['Drums'] = 128
 
@@ -832,12 +894,13 @@ with gr.Blocks() as orpheus_app:
     final_composition = gr.State([])
     generated_batches = gr.State([])
     block_lines = gr.State([])
+    model_selector = gr.State(['Large Base Model'])
 
     gr.Markdown("## Upload seed MIDI or select prime instruments or simply click 'Generate' button for random output")
 
     gr.Markdown("""
     ### PLEASE NOTE:
-    - Orpheus Music Transformer is a primarily music continuation/co-composition model!"
+    - Orpheus Music Transformer is a primarily continuation/co-composition model!"
     - The model works best if given some music context to work with
     - Random generation from SOS token/embeddings may not always produce good results
     """)
@@ -845,9 +908,6 @@ with gr.Blocks() as orpheus_app:
     input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
     input_midi.upload(reset, [final_composition, generated_batches, block_lines],
                       [final_composition, generated_batches, block_lines])
-    apply_sustains = gr.Checkbox(value=True, label="Apply sustains (if present)")
-    remove_duplicate_pitches = gr.Checkbox(value=True, label="Remove duplicate pitches (if present)")
-    remove_overlapping_durations = gr.Checkbox(value=True, label="Trim overlapping durations (if present)")
 
     gr.Markdown("## Generation options")
     prime_instruments = gr.Dropdown(label="Prime instruments (select up to 5)", choices=list(Patch2number.keys()),
@@ -860,10 +920,17 @@ with gr.Blocks() as orpheus_app:
     
     num_prime_tokens = gr.Slider(16, 6656, value=6656, step=1, label="Number of prime tokens")
     num_gen_tokens = gr.Slider(16, 1024, value=512, step=1, label="Number of tokens to generate")
+    requested_model = gr.Dropdown(label="Model to use",
+                                  choices=['Large Base Model',
+                                           'Small Base Model'
+                                          ],
+                                  value='Large Base Model'
+                                 )
     model_temperature = gr.Slider(0.1, 1, value=0.9, step=0.01, label="Model temperature")
     model_top_p = gr.Slider(0.1, 1.0, value=0.96, step=0.01, label="Model sampling top p value", info="1 == Disabled")
     add_drums = gr.Checkbox(value=False, label="Add drums")
     add_outro = gr.Checkbox(value=False, label="Add an outro")
+    
     generate_btn = gr.Button("Generate", variant="primary")
 
     gr.Markdown("## Batch Previews")
@@ -875,13 +942,16 @@ with gr.Blocks() as orpheus_app:
             plot_output = gr.Plot(label=f"Batch # {i} MIDI Plot")
             midi_file = gr.File(label=f"Batch # {i} MIDI File")
             outputs.extend([audio_output, plot_output, midi_file])
+
+    requested_model.change(
+        fn=update_state_from_dropdown,
+        inputs=[requested_model, model_selector],
+        outputs=model_selector
+    )
             
     generate_btn.click(
         generate_music_and_state,
-        [input_midi, 
-         apply_sustains,
-         remove_duplicate_pitches,
-         remove_overlapping_durations,
+        [input_midi,
          prime_instruments, 
          num_prime_tokens, 
          num_gen_tokens, 
@@ -891,7 +961,8 @@ with gr.Blocks() as orpheus_app:
          add_outro,
          final_composition, 
          generated_batches, 
-         block_lines
+         block_lines,
+         model_selector
         ],
         outputs
     )
