@@ -36,6 +36,46 @@ SOTA 8k multi-instrumental music transformer trained on 2.31M+ high-quality MIDI
 #===================================================================
 
 # -----------------------------
+# CONFIGURATION & GLOBALS
+# -----------------------------
+TIME_ZONE = 'US/Pacific'
+
+SEQ_LEN = 8192
+PAD_IDX = 18819
+
+MODELS_CHECKPOINTS = [
+    {
+        'checkpoint_tag': 'Medium Base Model',
+        'checkpoint_name': 'Orpheus_Music_Transformer_Trained_Model_128497_steps_0.6934_loss_0.7927_acc.pth',
+        'checkpoint_depth': 8,
+        'checkpoint_heads': 32
+    },
+    {
+        'checkpoint_tag': 'Large Base Model',
+        'checkpoint_name': 'Orpheus_Music_Transformer_Large_Trained_Model_43860_steps_0.6682_loss_0.8054_acc.pth',
+        'checkpoint_depth': 16,
+        'checkpoint_heads': 16
+    },
+    {
+        'checkpoint_tag': 'Large Fine-Tuned Model',
+        'checkpoint_name': 'Orpheus_Music_Transformer_Large_Quality_Fine_Tuned_Model_2027_steps_1.2913_loss_0.6263_acc.pth',
+        'checkpoint_depth': 16,
+        'checkpoint_heads': 16
+    }
+]
+
+MODEL_DEVICE = 'cuda'
+
+SOUNDFONT_BANK = 'SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2'
+AUDIO_SAMPLE_RATE = 16000
+AUDIO_FORMAT = 'mp3'
+
+NUM_OUT_BATCHES = 10
+PREVIEW_LENGTH = 120  # in tokens
+
+OUTPUT_MIDIS_DIR = 'output_midis'
+
+# -----------------------------
 # START-UP INFO FUNCTIONS
 # -----------------------------
 SEP = '=' * 70
@@ -70,6 +110,9 @@ from io import BytesIO
 import time as reqtime
 import datetime
 from pytz import timezone
+
+PDT = timezone(TIME_ZONE)
+
 import random
 
 if RUNNING_IN_SPACE:
@@ -107,6 +150,8 @@ torch.backends.cuda.enable_math_sdp(True)
 torch.backends.cuda.enable_flash_sdp(True)
 torch.backends.cuda.enable_cudnn_sdp(True)
 
+MODEL_DTYPE = torch.bfloat16
+
 # -----------------------------
 # X-Transformer
 # -----------------------------
@@ -129,118 +174,71 @@ def parse_local_args():
 
 args = parse_local_args() if not RUNNING_IN_SPACE else None
 
-# -----------------------------
-# CONFIGURATION & GLOBALS
-# -----------------------------
-PDT = timezone('US/Pacific')
-
-medium_model_CHECKPOINT = 'Orpheus_Music_Transformer_Trained_Model_128497_steps_0.6934_loss_0.7927_acc.pth'
-LARGE_MODEL_CHECKPOINT = 'Orpheus_Music_Transformer_Large_Trained_Model_43860_steps_0.6682_loss_0.8054_acc.pth'
-
-MODEL_DEVICE = 'cuda'
-MODEL_DTYPE = torch.bfloat16
-
-SOUNDFONT_BANK = args.soundfont_name if args else'SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2'
-AUDIO_SAMPLE_RATE = 16000
-
-NUM_OUT_BATCHES = 10
-PREVIEW_LENGTH = 120  # in tokens
+if args:
+    SOUNDFONT_BANK = args.soundfont_name
 
 # -----------------------------
-# MODELS INIT
+# MODELS INIT FUNCTIONS
 # -----------------------------
 print_sep()
 
 #------------------------------------------------------------------------
 
-SEQ_LEN = 8192
-PAD_IDX = 18819
+def load_model(model_dic):
 
-#------------------------------------------------------------------------
-
-print('Instantiating large model...')
-
-large_model = TransformerWrapper(
-    num_tokens=PAD_IDX + 1,
-    max_seq_len=SEQ_LEN,
-    attn_layers=Decoder(
-        dim=2048,
-        depth=16,
-        heads=16,
-        rotary_pos_emb=True,
-        attn_flash=True
+    print('Instantiating model...')
+    
+    model = TransformerWrapper(
+        num_tokens=PAD_IDX + 1,
+        max_seq_len=SEQ_LEN,
+        attn_layers=Decoder(
+            dim=2048,
+            depth=model_dic['checkpoint_depth'],
+            heads=model_dic['checkpoint_heads'],
+            rotary_pos_emb=True,
+            attn_flash=True
+        )
     )
-)
-large_model = AutoregressiveWrapper(large_model,
-                                    ignore_index=PAD_IDX,
-                                    pad_value=PAD_IDX
-                                   )
+    model = AutoregressiveWrapper(model,
+                                  ignore_index=PAD_IDX,
+                                  pad_value=PAD_IDX
+                                 )
+    
+    print('Done!')
+    print_sep()
+    print("Model will use", MODEL_DTYPE.__repr__().split('.')[-1], "precision...")
+    print("Model will use", MODEL_DEVICE, "device...")
+    print_sep()
+    print("Loading model checkpoint...")
+    print('Checkpoint name:', model_dic['checkpoint_name'])
+    print_sep()
+    
+    checkpoint = hf_hub_download(
+        repo_id='asigalov61/Orpheus-Music-Transformer',
+        filename=model_dic['checkpoint_name']
+    )
+    
+    model.load_state_dict(torch.load(checkpoint, map_location='cpu'))
+    
+    model.eval()
+    
+    model.cpu()
+    
+    model = torch.compile(model, mode='max-autotune')
+    
+    print_sep()
+    print("Done!")
+    print_sep()
 
-print('Done!')
-print_sep()
-print("Model will use", MODEL_DTYPE.__repr__().split('.')[-1], "precision...")
-print("Model will use", MODEL_DEVICE, "device...")
-print_sep()
-print("Loading model checkpoint...")
-print_sep()
-
-large_checkpoint = hf_hub_download(
-    repo_id='asigalov61/Orpheus-Music-Transformer',
-    filename=LARGE_MODEL_CHECKPOINT
-)
-
-large_model.load_state_dict(torch.load(large_checkpoint, map_location='cpu'))
-
-large_model.eval()
-
-large_model.cpu()
-
-large_model = torch.compile(large_model, mode='max-autotune')
-
-print_sep()
-print("Done!")
-print_sep()
+    return model_dic['checkpoint_tag'], model
 
 #------------------------------------------------------------------------
 
-print('Instantiating small model...')
+models_dict = {}
 
-medium_model = TransformerWrapper(
-    num_tokens=PAD_IDX + 1,
-    max_seq_len=SEQ_LEN,
-    attn_layers=Decoder(
-        dim=2048,
-        depth=8,
-        heads=32,
-        rotary_pos_emb=True,
-        attn_flash=True
-    )
-)
-medium_model = AutoregressiveWrapper(medium_model,
-                                     ignore_index=PAD_IDX,
-                                     pad_value=PAD_IDX
-                                    )
-
-print('Done!')
-print_sep()
-print("Model will use", MODEL_DTYPE.__repr__().split('.')[-1], "precision...")
-print("Model will use", MODEL_DEVICE, "device...")
-print_sep()
-print("Loading model checkpoint...")
-print_sep()
-
-medium_checkpoint = hf_hub_download(
-    repo_id='asigalov61/Orpheus-Music-Transformer',
-    filename=medium_model_CHECKPOINT
-)
-
-medium_model.load_state_dict(torch.load(medium_checkpoint, map_location='cpu'))
-
-medium_model.eval()
-
-medium_model.cpu()
-
-medium_model = torch.compile(medium_model, mode='max-autotune')
+for model_dic in MODELS_CHECKPOINTS:
+    tag, model = load_model(model_dic)
+    models_dict[tag] = model
 
 #------------------------------------------------------------------------
 
@@ -415,16 +413,20 @@ def save_midi(tokens):
             "Orpheus-Music-Transformer-Composition-"
             + now.strftime(f"%Y-%m-%d-%H-%M-%S-{ms4}")
         )
+
+        os.makedirs(OUTPUT_MIDIS_DIR, exist_ok=True)
+
+        output_fname = os.path.join(OUTPUT_MIDIS_DIR, fname)
         
         TMIDIX.Tegridy_ms_SONG_to_MIDI_Converter(
             output_score,
             output_signature='Orpheus Music Transformer',
-            output_file_name=fname,
+            output_file_name=output_fname,
             track_name='Project Los Angeles',
             list_of_MIDI_patches=patches,
             verbose=False
         )
-        return fname, output_score
+        return output_fname, output_score
 
     else:
         return None, None
@@ -531,14 +533,7 @@ def generate_music(prime,
 
     print(f'Will use {model_selector[0]}...')
 
-    if model_selector[0] == 'Large Base Model':
-        model = large_model
-
-    elif model_selector[0] == 'Medium Base Model':
-        model = medium_model
-
-    else:
-        model = large_model
+    model = models_dict[model_selector[0]]
 
     model.to(MODEL_DEVICE)
     
@@ -822,10 +817,10 @@ def reset(final_composition=[], generated_batches=[], block_lines=[]):
 
 def update_state_from_dropdown(choice, state):
     """Store the dropdown value inside the global state list"""
-    state.append(choice)
     print_sep()
-    print('Requested', choice)
+    print('Changed model from', state[0], 'to', choice)
     print_sep()
+    state[0] = choice
     return state
 
 Patch2number = TMIDIX.reverse_dict(TMIDIX.Number2patch)
@@ -841,6 +836,14 @@ with gr.Blocks() as orpheus_app:
     gr.Markdown("<h1 style='text-align: left; margin-bottom: 1rem'>🔥[2026]🔥 Now featuring large optimized model!</h1>")
     
     with gr.Row(elem_classes="duplicate-row"):
+        gr.Button(
+            value="🪬 User Guide 🪬",
+            variant="huggingface",
+            size="md",
+            link="https://asigalov61.github.io/Orpheus-Music-Transformer-User-Guide/",
+            link_target="_blank"
+        )
+        
         gr.DuplicateButton(
             value="🤗 Duplicate 🤗",
             variant="huggingface",
@@ -857,6 +860,14 @@ with gr.Blocks() as orpheus_app:
             link_target="_blank"
         )
 
+        gr.Button(
+            value="🚀 Spaces 🚀",
+            variant="huggingface",
+            size="md",
+            link="https://huggingface.co/collections/asigalov61/orpheus-music-transformer",
+            link_target="_blank"
+        )
+        
         gr.Button(
             value="🦖 Dataset 🦖",
             variant="huggingface",
@@ -894,7 +905,7 @@ with gr.Blocks() as orpheus_app:
     final_composition = gr.State([])
     generated_batches = gr.State([])
     block_lines = gr.State([])
-    model_selector = gr.State(['Large Base Model'])
+    model_selector = gr.State([list(models_dict.keys())[0]])
 
     gr.Markdown("## Upload seed MIDI or select prime instruments or simply click 'Generate' button for random output")
 
@@ -921,13 +932,16 @@ with gr.Blocks() as orpheus_app:
     num_prime_tokens = gr.Slider(16, 6656, value=6656, step=1, label="Number of prime tokens")
     num_gen_tokens = gr.Slider(16, 1024, value=512, step=1, label="Number of tokens to generate")
     requested_model = gr.Dropdown(label="Model to use",
-                                  choices=['Large Base Model',
-                                           'Small Base Model'
-                                          ],
-                                  value='Large Base Model'
+                                  choices=list(models_dict.keys()),
+                                  value=list(models_dict.keys())[0],
+                                  info="Use medium model when speed is important, use large models when quality is important"
                                  )
-    model_temperature = gr.Slider(0.1, 1, value=0.9, step=0.01, label="Model temperature")
-    model_top_p = gr.Slider(0.1, 1.0, value=0.96, step=0.01, label="Model sampling top p value", info="1 == Disabled")
+    model_temperature = gr.Slider(0.1, 1, value=0.9, step=0.01, label="Model temperature",
+                                  info="Increase for more creative output, decrease for more repetitive output"
+                                 )
+    model_top_p = gr.Slider(0.1, 1.0, value=0.96, step=0.01, label="Model sampling top p value",
+                            info="1 == Disabled"
+                           )
     add_drums = gr.Checkbox(value=False, label="Add drums")
     add_outro = gr.Checkbox(value=False, label="Add an outro")
     
@@ -938,7 +952,7 @@ with gr.Blocks() as orpheus_app:
     # Two outputs (audio and plot) for each batch
     for i in range(NUM_OUT_BATCHES):
         with gr.Tab(f"Batch # {i}"):
-            audio_output = gr.Audio(label=f"Batch # {i} MIDI Audio", format="mp3")
+            audio_output = gr.Audio(label=f"Batch # {i} MIDI Audio", format=AUDIO_FORMAT)
             plot_output = gr.Plot(label=f"Batch # {i} MIDI Plot")
             midi_file = gr.File(label=f"Batch # {i} MIDI File")
             outputs.extend([audio_output, plot_output, midi_file])
@@ -973,7 +987,7 @@ with gr.Blocks() as orpheus_app:
     remove_btn = gr.Button("Remove batch", variant="stop")
     clear_btn = gr.ClearButton()
 
-    final_audio_output = gr.Audio(label="Final MIDI audio", format="mp3")
+    final_audio_output = gr.Audio(label="Final MIDI audio", format=AUDIO_FORMAT)
     final_plot_output = gr.Plot(label="Final MIDI plot")
     final_file_output = gr.File(label="Final MIDI file")
 
