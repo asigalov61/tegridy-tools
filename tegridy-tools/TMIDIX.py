@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.3.2"
+__version__ = "26.3.24"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1483,10 +1483,13 @@ import tqdm
 
 import multiprocessing
 
+import bisect
+
 from itertools import zip_longest
 from itertools import groupby
 from itertools import cycle
 from itertools import product
+from itertools import accumulate
 
 from collections import Counter
 from collections import defaultdict
@@ -1494,6 +1497,7 @@ from collections import OrderedDict
 from collections import deque
 
 from operator import itemgetter
+from operator import ne as _ne
 
 from abc import ABC, abstractmethod
 
@@ -9201,6 +9205,135 @@ def find_lrno_pattern_fast(lst):
 
 ###################################################################################
 
+def find_fuzzy_lrno_pattern_fast(lst, threshold=0, prefix_suffix_len=1):
+    
+    """
+    Find the longest repeating non-overlapping fuzzy pattern in a list of ints.
+
+    Parameters
+    ----------
+    lst               : list[int]
+    threshold         : int  — max element mismatches allowed in the *middle*
+                               segment (0 = exact, delegates to fast solver).
+    prefix_suffix_len : int  — p; prefix lst[i:i+p] and suffix lst[i+L-p:i+L]
+                               must match exactly in both occurrences.
+
+    Returns
+    -------
+    list[int]  — first occurrence of the longest fuzzy pattern, or [].
+    """
+    
+    # ── validation / fast paths ───────────────────────────────────────────────
+    if threshold == 0:
+        return find_lrno_pattern_fast(lst)
+
+    p = int(prefix_suffix_len)
+    n = len(lst)
+    min_len = p + p or 1     # max(2p, 1);  "or 1" handles p=0
+
+    if n < min_len + min_len:
+        return []
+
+    # ── local aliases — eliminates repeated global dict look-ups ─────────────
+    _br  = bisect.bisect_right
+    _ac  = accumulate
+    _p   = p
+    _pp  = p + p             # constant used in the hot loop
+
+    best_len   = 0
+    best_start = 0
+
+    # ── group starting positions by their exact p-element prefix ─────────────
+    # Positions are appended 0 … limit-1, so each group list is sorted.
+    limit = n - min_len + 1
+
+    if _p:
+        groups: dict = defaultdict(list)
+        for i in range(limit):
+            groups[tuple(lst[i : i + _p])].append(i)
+        group_iter = groups.values()
+    else:
+        # p == 0: no prefix constraint; one implicit group over all positions.
+        group_iter = [range(limit)]
+
+    # ── main pair search ──────────────────────────────────────────────────────
+    for positions in group_iter:
+        m = len(positions)
+        if m < 2:
+            continue
+
+        # Materialise to a list for O(1) indexed access
+        pos = list(positions) if not isinstance(positions, list) else positions
+
+        for a in range(m - 1):
+            i = pos[a]
+
+            # Upper-bound: best possible pattern length anchored at i is ⌊(n-i)/2⌋.
+            # pos is sorted → all later a have larger i → safe to break.
+            if (n - i) >> 1 <= best_len:
+                break
+
+            for b in range(a + 1, m):
+                j = pos[b]        # j > i (positions are sorted)
+
+                nj = n - j
+                if nj <= best_len:
+                    break         # j grows → nj shrinks; no further j can help
+
+                # Non-overlap + right-fit: max pattern length for this pair
+                max_L = j - i if (j - i) < nj else nj
+                if max_L <= best_len:
+                    continue      # this j too close; a larger j might still work
+
+                mid_len = max_L - _pp
+                if mid_len < 0:
+                    continue      # pair too close to fit even a 2p-length pattern
+
+                # ── zero-length middle (max_L == 2p exactly) ─────────────────
+                if mid_len == 0:
+                    # Only a prefix+suffix exists; suffix is lst[i+p : i+2p]
+                    if _pp > best_len and lst[i + _p : i + _pp] == lst[j + _p : j + _pp]:
+                        best_len   = _pp
+                        best_start = i
+                    continue
+
+                # ── middle mismatch array + cumulative sum (all C-level) ──────
+                #   diff[k]  = (lst[i+p+k] != lst[j+p+k])   k = 0 … mid_len-1
+                #   cum[k]   = Σ diff[0:k]                   k = 0 … mid_len
+                ip = i + _p
+                jp = j + _p
+                diff = list(map(_ne, lst[ip : ip + mid_len], lst[jp : jp + mid_len]))
+                cum  = list(_ac(diff, initial=0))   # len = mid_len + 1
+
+                # ── binary search: largest middle length ≤ threshold errors ───
+                #   cum is non-decreasing; bisect_right gives the insertion point
+                #   for threshold+1, so -1 gives the last index ≤ threshold.
+                k = _br(cum, threshold) - 1         # k ∈ [0, mid_len]
+                cand_L = k + _pp                    # = k + 2p
+                if cand_L <= best_len:
+                    continue
+
+                # ── suffix scan (typically 1-2 iterations) ───────────────────
+                # For any L ≤ cand_L:  cum[L-2p] ≤ cum[k] ≤ threshold  ✓
+                # Only the exact suffix match needs to be verified.
+                if not _p:
+                    # p == 0 → no suffix constraint; k is the answer directly.
+                    best_len   = cand_L             # = k when p=0
+                    best_start = i
+                else:
+                    for L in range(cand_L, best_len, -1):
+                        if L < _pp:
+                            break                   # below minimum pattern length
+                        lp = L - _p
+                        if lst[i + lp : i + L] == lst[j + lp : j + L]:
+                            best_len   = L
+                            best_start = i
+                            break
+
+    return lst[best_start : best_start + best_len]
+
+###################################################################################
+
 def find_chunk_indexes(original_list, chunk, ignore_index=-1):
 
   chunk_length = len(chunk)
@@ -9231,31 +9364,55 @@ def find_chunk_indexes(original_list, chunk, ignore_index=-1):
 def escore_notes_lrno_pattern_fast(escore_notes, 
                                    channels_index=3, 
                                    pitches_index=4, 
-                                   zero_start_time=True
+                                   zero_start_time=True,
+                                   use_full_chords=True,
+                                   skip_pitches=False,
+                                   fuzzy_matching=False,
+                                   fuzzy_thres=5,
+                                   fuzzy_ps_len=3                                   
                                   ):
+    
+  if use_full_chords:
+      CHORDS = ALL_CHORDS_FULL
+      
+  else:
+      CHORDS = ALL_CHORDS_SORTED
 
   cscore = chordify_score([1000, escore_notes])
 
   score_chords = []
 
   for c in cscore:
-
-    tchord = sorted(set([e[pitches_index] % 12 for e in c if e[channels_index] != 9]))
-
+    
+    pitches = sorted(set([e[pitches_index] for e in c if e[channels_index] != 9]))
+    
     chord_tok = -1
+    tchord = []
+    
+    if (skip_pitches and len(pitches) > 1) or not skip_pitches:
+    
+        tchord = sorted(set([p % 12 for p in pitches]))
 
     if tchord:
 
-      if tchord not in ALL_CHORDS_FULL:
-        tchord = check_and_fix_tones_chord(tchord)
+      if tchord not in ALL_CHORDS_SORTED:
+        tchord = check_and_fix_tones_chord(tchord,
+                                           use_full_chords=use_full_chords
+                                           )
 
-      chord_tok = ALL_CHORDS_FULL.index(tchord)
+      chord_tok = ALL_CHORDS_SORTED.index(tchord)
 
     score_chords.append(chord_tok)
 
   schords = [c for c in score_chords if c != -1]
-
-  lrno = find_lrno_pattern_fast(schords)
+  
+  if fuzzy_matching:
+      lrno = find_fuzzy_lrno_pattern_fast(schords,
+                                          fuzzy_thres,
+                                          fuzzy_ps_len
+                                          )
+  else:
+      lrno = find_lrno_pattern_fast(schords)
 
   if lrno:
 
