@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 4.0
+# Version 5.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -22,6 +22,9 @@
 # !pip install torch
 # !pip install einops
 # !pip install einx
+# !pip install numpy
+# !pip install scikit-learn
+# !pip install matplotlib
 #
 #===================================================================================================================
 
@@ -9524,13 +9527,9 @@ def topk_cosine_neighbors(embeddings: torch.Tensor,
 # Embeddings visualization functions
 #=================================================================================================================================
 
-try:
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from sklearn.metrics import pairwise_distances
-
-except:
-    pass
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import pairwise_distances
 
 def plot_emb_cosine_similarity(embeddings, 
                                clip=2.0,
@@ -9579,7 +9578,613 @@ def plot_emb_cosine_similarity(embeddings,
 
     if return_sims:
         return sim
+    
+#=================================================================================================================================
+# Fine-tuning functions
+#=================================================================================================================================
 
+def unfreeze_last_n_blocks_and_norms(model,
+                                     n_last=2,
+                                     verbose=True
+                                     ):
+
+    """
+    2-3 unfrozen layers usually produce good results. Default is 2
+
+    Returns: configured model and optimizer
+    """
+    
+    # freeze everything first
+    for p in model.parameters():
+        p.requires_grad = False
+
+    # unfreeze head
+    for p in model.net.to_logits.parameters():
+        p.requires_grad = True
+
+    # unfreeze last n blocks' params and any LayerNorms inside them that have params
+    layers = model.net.attn_layers.layers  # ModuleList of blocks
+    last_blocks = list(layers)[-n_last:]
+    for block in last_blocks:
+        for name, p in block.named_parameters():
+            p.requires_grad = True
+
+    # unfreeze final norm if it has parameters
+    final_norm = getattr(model.net.attn_layers, "final_norm", None)
+    if final_norm is not None:
+        for p in final_norm.parameters():
+            p.requires_grad = True
+
+    # verify counts
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total = sum(p.numel() for p in model.parameters())
+    
+    if verbose:
+        print(f"Trainable params {trainable:,} / {total:,}")
+    
+    # collect ids for head params
+    head_params = list(model.net.to_logits.parameters())
+    head_param_ids = {id(p) for p in head_params}
+    
+    # group trainable params into two buckets without tensor comparisons
+    pretrained_params = []
+    head_only = []
+    
+    for p in model.parameters():
+        if not p.requires_grad:
+            continue
+        if id(p) in head_param_ids:
+            head_only.append(p)
+        else:
+            pretrained_params.append(p)
+    
+    # sanity checks
+    trainable = sum(p.numel() for p in pretrained_params) + sum(p.numel() for p in head_only)
+    total_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
+    assert trainable == total_trainable, "Mismatch in grouped trainable params"
+
+    if verbose:
+        print(f"Pretrained params: {sum(p.numel() for p in pretrained_params):,}")
+        print(f"Head params: {sum(p.numel() for p in head_only):,}")
+        print(f"Total trainable: {total_trainable:,}")
+
+    optim = torch.optim.Adam([
+        {"params": pretrained_params, "lr": 1e-5},
+        {"params": head_params, "lr": 5e-5}
+    ])
+
+    return model, optim
+
+def unfreeze_last_n_blocks_and_norms_full(model,
+                                          n_last_encoder=1,
+                                          n_last_decoder=2,
+                                          verbose=True
+                                         ):
+    
+    """
+    Freeze entire XTransformer, then unfreeze:
+      - Last `n_last_encoder` encoder blocks (including all parameters in those blocks, e.g., LayerNorms)
+      - Last `n_last_decoder` decoder blocks (including all parameters in those blocks)
+      - Final encoder/decoder LayerNorms (if present and has params)
+      - Decoder's output head (`to_logits`)
+      
+    """
+    
+    from x_transformer_2_3_1 import LayerNorm, RMSNorm, ScaleNorm, AdaptiveLayerNorm, AdaptiveRMSNorm
+
+    # 1. Freeze everything
+    for p in model.parameters():
+        p.requires_grad = False
+
+    # 2. Unfreeze decoder head
+    for p in model.decoder.net.to_logits.parameters():
+        p.requires_grad = True
+
+    # 3. Helper to detect if a module is a parameterized LayerNorm-like module
+    def is_parametrized_norm(module):
+        # Custom norms from x-transformers
+        norm_types = (LayerNorm, RMSNorm, ScaleNorm, AdaptiveLayerNorm, AdaptiveRMSNorm)
+        if isinstance(module, norm_types):
+            return True
+        # Also include PyTorch built-in LayerNorm if used
+        if isinstance(module, torch.nn.LayerNorm):
+            return True
+        return False
+
+    # 4. Helper to unfreeze last N blocks + norms inside them + final norm
+    def unfreeze_last_blocks(transformer_wrapper, n_last):
+        if n_last <= 0:
+            return
+
+        # The actual AttentionLayers module
+        attn_layers = transformer_wrapper.attn_layers
+        layers = attn_layers.layers  # ModuleList of blocks
+        last_blocks = list(layers)[-n_last:]
+
+        for block in last_blocks:
+            # Unfreeze all parameters in the block (includes attention, FFN, and any embedded LayerNorms)
+            for p in block.parameters():
+                p.requires_grad = True
+
+            # Additionally, explicitly unfreeze any LayerNorm-like submodules with params (defensive)
+            for submodule in block.modules():
+                if is_parametrized_norm(submodule):
+                    for p in submodule.parameters():
+                        p.requires_grad = True
+
+        # Unfreeze final norm (if exists and has params)
+        final_norm = getattr(attn_layers, 'final_norm', None)
+        if final_norm is not None and list(final_norm.parameters()):
+            for p in final_norm.parameters():
+                p.requires_grad = True
+
+    # 5. Apply to encoder and decoder
+    unfreeze_last_blocks(model.encoder, n_last_encoder)
+    unfreeze_last_blocks(model.decoder.net, n_last_decoder)  # note: .net because of AutoregressiveWrapper
+
+    # ======================
+    # Parameter grouping (same as before)
+    # ======================
+    head_params = list(model.decoder.net.to_logits.parameters())
+    head_param_ids = {id(p) for p in head_params}
+    
+    pretrained_params = []
+    head_only = []
+    
+    for p in model.parameters():
+        if not p.requires_grad:
+            continue
+        if id(p) in head_param_ids:
+            head_only.append(p)
+        else:
+            pretrained_params.append(p)
+    
+    # Sanity check
+    trainable = sum(p.numel() for p in pretrained_params) + sum(p.numel() for p in head_only)
+    total_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    assert trainable == total_trainable, "Mismatch in grouped trainable params"
+    
+    if verbose:
+        print(f"Trainable params {trainable:,} / {total_trainable:,}")
+        print(f"Pretrained (enc/dec): {sum(p.numel() for p in pretrained_params):,}")
+        print(f"Head: {sum(p.numel() for p in head_only):,}")
+        print(f"Total trainable: {total_trainable:,}")
+    
+    # Optimizer
+    optim = torch.optim.Adam([
+        {"params": pretrained_params, "lr": 1e-5},
+        {"params": head_only, "lr": 5e-5}
+    ])
+
+    return model, optim
+
+#=================================================================================================================================
+# Merging functions
+#=================================================================================================================================
+
+def merge_encoder_and_decoder(model,
+                              encoder_ckpt,
+                              decoder_ckpt,
+                              print_keys=False,
+                              verbose=True
+                             ):
+
+    if verbose:
+        print('=' * 70)
+        print('Merging...')
+        print('=' * 70)
+
+    if print_keys:
+        print('=' * 70)
+        print('Merged model keys:', model.state_dict().keys())
+        print('=' * 70)
+
+    if verbose:
+        print('=' * 70)
+        print('Loading encoder model...')
+        print('=' * 70)
+
+    enc_ckpt   = torch.load(decoder_ckpt, map_location='cpu')
+    enc_pre_sd = enc_ckpt.get('state_dict', enc_ckpt)
+
+    if print_keys:
+        print('=' * 70)
+        print('Encoder model keys:', enc_pre_sd.keys())
+        print('=' * 70)
+
+    if verbose:
+        print('=' * 70)
+        print('Loading decoder model...')
+        print('=' * 70)
+    
+    dec_ckpt   = torch.load(encoder_ckpt, map_location='cpu')
+    dec_pre_sd = dec_ckpt.get('state_dict', dec_ckpt)
+
+    if print_keys:
+        print('=' * 70)
+        print('Decoder model keys', dec_pre_sd.keys())
+        print('=' * 70)
+
+    if verbose:
+        print('=' * 70)
+        print('Prepping merged model...')
+        print('=' * 70)
+    
+    model_new_sd = model.state_dict()
+
+    for old_key, tensor in enc_pre_sd.items():
+    
+        new_key = 'encoder.' + old_key
+        if new_key in model_new_sd:
+            model_new_sd[new_key] = tensor
+    
+    for old_key, tensor in dec_pre_sd.items():
+    
+        new_key = old_key.replace('net.', 'decoder.net.')
+        if new_key in model_new_sd:
+            model_new_sd[new_key] = tensor
+
+    if verbose:
+        print('=' * 70)
+        print('Final integrity check...')
+        print('=' * 70)
+
+    # new_sd is your merged/updated state_dict
+    incompat = model.load_state_dict(model_new_sd, strict=False)
+
+    if verbose:
+        # incompat is an IncompatibleKeys(namedtuple)
+        print("Missing keys:    ", incompat.missing_keys)
+        print("Unexpected keys: ", incompat.unexpected_keys)
+
+    try:
+        if verbose:
+            print('=' * 70)
+            print('Loading merged model...')
+            
+        model.load_state_dict(model_new_sd, strict=True)
+
+        if verbose:
+            print('Done!')
+            print('=' * 70)
+            
+        return model
+
+    except:
+        if verbose:
+            print('Failed to create merged model!')
+            print('=' * 70)
+            
+        return incompat
+
+#=================================================================================================================================
+# Boundary Classifier functions
+#=================================================================================================================================
+
+import os
+import time
+from collections import deque
+from math import ceil
+import numpy as np
+import torch
+from torch.utils.data import Dataset
+from torch import nn
+from typing import List, Tuple, Optional, Callable, Sequence
+
+class BoundaryDataset(Dataset):
+    def __init__(self, inputs_list, labels_list):
+        self.inputs = inputs_list
+        self.labels = labels_list
+
+    def __len__(self):
+        return len(self.inputs)
+
+    def __getitem__(self, idx):
+        return self.inputs[idx], self.labels[idx], None
+
+class BoundaryClassifier(nn.Module):
+    def __init__(self, num_tokens: int, max_seq_len: int, dim: int = 512,
+                 depth: int = 12, heads: int = 16, num_labels: int = 2,
+                 pad_token_id: int = 384, dropout: float = 0.1):
+        super().__init__()
+        self.pad_token_id = pad_token_id
+
+        self.backbone = TransformerWrapper(
+            num_tokens=num_tokens,
+            max_seq_len=max_seq_len,
+            attn_layers=Encoder(dim=dim, depth=depth, heads=heads,
+                                rotary_pos_emb=True, attn_flash=True)
+        )
+
+        self.classifier = nn.Sequential(
+            nn.LayerNorm(dim),
+            nn.Linear(dim, dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(dim, dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(dim, num_labels)
+        )
+
+    def forward(self, input_ids, attn_mask=None):
+        hidden = self.backbone(input_ids, mask=attn_mask, return_embeddings=True)
+        logits = self.classifier(hidden)
+        return logits
+
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2.0, alpha=None, ignore_index=384):
+        super().__init__()
+        self.gamma = gamma
+        self.alpha = alpha  # Tensor of shape [num_classes]
+        self.ignore_index = ignore_index
+
+    def forward(self, logits, targets, mask=None):
+        B, N, C = logits.shape
+        logits_flat = logits.view(B * N, C)
+        targets_flat = targets.view(B * N)
+
+        # 1. Create valid mask (ignore PAD and any explicit mask)
+        if mask is not None:
+            valid_mask = (targets_flat != self.ignore_index) & mask.view(-1)
+        else:
+            valid_mask = (targets_flat != self.ignore_index)
+
+        if valid_mask.sum() == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        # 2. Numerically stable log_softmax
+        log_probs = torch.log_softmax(logits_flat, dim=-1)
+
+        # 3. CRITICAL FIX: Clamp targets to valid range [0, C-1] before indexing
+        # This prevents CUDA assert when targets contain PAD_IDX (e.g., 384)
+        targets_clamped = targets_flat.clamp(0, C - 1)
+
+        # 4. Gather probabilities safely
+        p_t = log_probs[torch.arange(len(logits_flat), device=logits.device), targets_clamped]
+        p_t = torch.exp(p_t)  # Convert back to probability for focal factor
+
+        # 5. Calculate NLL Loss
+        nll_loss = -log_probs[torch.arange(len(logits_flat), device=logits.device), targets_clamped]
+
+        # 6. Focal Factor
+        focal_factor = (1.0 - p_t) ** self.gamma
+        loss = focal_factor * nll_loss
+
+        # 7. Apply Class Weights (Alpha)
+        if self.alpha is not None:
+            # Alpha must also be gathered using clamped indices
+            alpha_t = self.alpha[targets_clamped]
+            loss = alpha_t * loss
+
+        # 8. Apply Mask (Zero out loss for PAD tokens)
+        loss = loss * valid_mask.float()
+
+        return loss.sum() / valid_mask.sum().clamp(min=1.0)
+
+Logger = Optional[Callable[[str], None]]
+
+def filter_balanced_sequences(
+    sequences: List[List[int]],
+    token_types: List[List[int]],
+    tol: float = 0.1,
+    min_len: int = 1,
+    max_len: Optional[int] = None,
+    balance_target: float = 0.5,
+    return_indices: bool = False,
+    verbose: int = 2,
+    logger: Logger = None,
+    progress_chunk: int = 50000
+    ) -> Tuple[List[List[int]], List[List[int]], Optional[List[int]]]:
+    
+    """
+    Filter sequence/token-type pairs to those whose token-type distribution is near-balanced,
+    with verbosity and lightweight progress reporting.
+
+    Parameters
+    ----------
+    sequences : List[List[int]]
+        Token sequences (not used for balance computation).
+    token_types : List[List[int]]
+        Binary token-type lists (0/1) corresponding to sequences.
+    tol : float
+        Allowed absolute deviation from balance_target.
+    min_len : int
+        Minimum token_types length to consider.
+    max_len : Optional[int]
+        Maximum token_types length to consider.
+    balance_target : float
+        Target proportion of 1s (0..1).
+    return_indices : bool
+        If True, also return kept indices.
+    verbose : int
+        0 = silent, 1 = concise, 2 = detailed chunk diagnostics.
+    logger : callable or None
+        If provided, called with status strings instead of/in addition to printing.
+    progress_chunk : int
+        Emit chunk updates every `progress_chunk` items when verbose >= 1.
+
+    Returns
+    -------
+    filtered_sequences, filtered_token_types, indices_or_none
+    """
+    
+    def _log(msg: str):
+        if logger:
+            try:
+                logger(msg)
+            except Exception:
+                pass
+        if verbose >= 1:
+            print(msg)
+
+    if len(sequences) != len(token_types):
+        raise ValueError("`sequences` and `token_types` must have the same length.")
+
+    n = len(token_types)
+    if n == 0:
+        _log("Input empty: nothing to do.")
+        return [], [], ([] if return_indices else None)
+
+    start_all = time.perf_counter()
+    _log(f"Starting filter: {n} pairs; tol={tol}; target={balance_target}; min_len={min_len}; max_len={max_len}")
+
+    # Compute lengths and counts using Python builtins (fast for lists of ints)
+    # We iterate once and optionally emit chunk diagnostics to avoid storing huge intermediate lists.
+    lengths = np.empty(n, dtype=np.int32)
+    counts = np.empty(n, dtype=np.int32)
+
+    t0 = time.perf_counter()
+    for i, tlist in enumerate(token_types):
+        lengths[i] = len(tlist)
+        # sum on list of ints is C-optimized and fast
+        counts[i] = sum(tlist)
+        # chunked progress logging to avoid I/O overhead
+        if verbose >= 2 and (i + 1) % progress_chunk == 0:
+            elapsed = time.perf_counter() - t0
+            _log(f"  scanned {i+1}/{n} token_types (elapsed {elapsed:.2f}s)")
+
+    scan_time = time.perf_counter() - t0
+    _log(f"Scanned counts and lengths in {scan_time:.2f}s")
+
+    # Mask length constraints and nonzero lengths
+    nonzero_mask = lengths > 0
+    mask = nonzero_mask.copy()
+    if min_len > 1:
+        mask &= (lengths >= min_len)
+    if max_len is not None:
+        mask &= (lengths <= max_len)
+
+    candidates = int(mask.sum())
+    _log(f"Candidates after length filtering: {candidates}/{n}")
+
+    if candidates == 0:
+        _log("No candidates after length filtering. Exiting.")
+        return [], [], ([] if return_indices else None)
+
+    # Compute proportions for candidates only
+    lengths_f = lengths.astype(np.float32)
+    proportions = np.empty_like(lengths_f)
+    # safe division only for masked entries
+    proportions[mask] = counts[mask].astype(np.float32) / lengths_f[mask]
+    proportions[~mask] = -1.0  # sentinel
+
+    # Balanced criterion
+    balance_mask = np.abs(proportions - float(balance_target)) <= float(tol)
+    final_mask = mask & balance_mask
+    kept = int(final_mask.sum())
+    elapsed_total = time.perf_counter() - start_all
+    _log(f"Kept {kept}/{n} sequences (elapsed total {elapsed_total:.2f}s)")
+
+    if kept == 0:
+        _log("No sequences met the balance criterion. Exiting.")
+        return [], [], ([] if return_indices else None)
+
+    # Get indices to keep
+    keep_idx = np.nonzero(final_mask)[0].tolist()
+
+    # Build filtered lists (list comprehension over kept indices)
+    # This is the only place we materialize the filtered lists.
+    t_build = time.perf_counter()
+    filtered_sequences = [sequences[i] for i in keep_idx]
+    filtered_token_types = [token_types[i] for i in keep_idx]
+    build_time = time.perf_counter() - t_build
+
+    _log(f"Built filtered lists: {kept} items (build time {build_time:.2f}s)")
+
+    # Optional detailed stats
+    if verbose >= 1:
+        # compute some quick stats on proportions of kept items
+        kept_props = proportions[final_mask]
+        mean_prop = float(np.mean(kept_props))
+        std_prop = float(np.std(kept_props))
+        min_prop = float(np.min(kept_props))
+        max_prop = float(np.max(kept_props))
+        _log(f"Kept proportions stats: mean={mean_prop:.4f}, std={std_prop:.4f}, min={min_prop:.4f}, max={max_prop:.4f}")
+
+    if return_indices:
+        return filtered_sequences, filtered_token_types, keep_idx
+    else:
+        return filtered_sequences, filtered_token_types, None
+
+def compute_class_counts_from_list(labels_list: Sequence[Sequence[int]],
+                                   num_labels: int = 2,
+                                   pad_idx: int = 384) -> torch.LongTensor:
+    if len(labels_list) == 0:
+        return torch.zeros(num_labels, dtype=torch.long)
+
+    counts = [0] * num_labels
+    for lbl in range(num_labels):
+        counts[lbl] = sum(seq.count(lbl) for seq in labels_list)
+
+    if 0 <= pad_idx < num_labels:
+        pad_total = sum(seq.count(pad_idx) for seq in labels_list)
+        counts[pad_idx] = max(0, counts[pad_idx] - pad_total)
+
+    return torch.tensor(counts, dtype=torch.long)
+
+def compute_class_weights(
+    labels_list,
+    num_labels=2,
+    pad_idx=384,
+    smoothing=0.0,
+    power=1.0,
+    max_ratio=50.0
+    ):
+    
+    """
+    Stable, imbalance-preserving class weights.
+    - No renormalization that destroys imbalance
+    - Optional smoothing (default 0)
+    - Optional exponent scaling (power)
+    - Optional cap on extreme ratios
+    """
+    
+    # Count tokens
+    counts = compute_class_counts_from_list(labels_list, num_labels, pad_idx).float()
+    counts = torch.clamp(counts, min=1.0)
+
+    # Inverse frequency
+    inv = 1.0 / counts
+
+    # Optional smoothing
+    if smoothing > 0:
+        inv = inv + smoothing
+
+    # Optional exponent scaling
+    if power != 1.0:
+        inv = inv ** power
+
+    # Normalize so smallest class = 1.0
+    inv = inv / inv.min()
+
+    # Cap extreme ratios
+    inv = torch.clamp(inv, max=max_ratio)
+
+    return inv
+
+def collate_fn_from_lists(batch, pad_token_id=384):
+    input_seqs = [list(x[0]) for x in batch]
+    label_seqs = [list(x[1]) for x in batch]
+    
+    # Get actual lengths
+    lengths = [len(s) for s in input_seqs]
+    max_len = max(lengths) if lengths else 0
+    B = len(input_seqs)
+
+    input_ids = torch.full((B, max_len), pad_token_id, dtype=torch.long)
+    labels = torch.full((B, max_len), pad_token_id, dtype=torch.long)
+    attn_mask = torch.zeros((B, max_len), dtype=torch.bool)
+
+    for i, (xseq, yseq, length) in enumerate(zip(input_seqs, label_seqs, lengths)):
+        if length > 0:
+            input_ids[i, :length] = torch.LongTensor(xseq)
+            labels[i, :length] = torch.LongTensor(yseq[:length])
+            # IMPROVEMENT: Mask based on length, not token ID content
+            attn_mask[i, :length] = True 
+
+    return input_ids, labels, attn_mask
         
 #=================================================================================================================================
 # This is the end of x_transformer_2_14_2 Python module
