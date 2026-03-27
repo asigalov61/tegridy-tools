@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.3.24"
+__version__ = "26.3.27"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -9335,37 +9335,46 @@ def find_fuzzy_lrno_pattern_fast(lst, threshold=0, prefix_suffix_len=1):
 ###################################################################################
 
 def find_chunk_indexes(original_list, chunk, ignore_index=-1):
+    
+    results = []
+    chunk_length = len(chunk)
+    i = 0
 
-  chunk_length = len(chunk)
+    while i <= len(original_list) - chunk_length:
+        chunk_index = 0
+        start_index = ignore_index
 
-  for i in range(len(original_list) - chunk_length + 1):
+        for j in range(i, len(original_list)):
+            if original_list[j] == chunk[chunk_index]:
 
-    chunk_index = 0
-    start_index = ignore_index
+                if start_index == ignore_index:
+                    start_index = j
 
-    for j in range(i, len(original_list)):
-      if original_list[j] == chunk[chunk_index]:
+                chunk_index += 1
 
-        if start_index == ignore_index:
-          start_index = j
+                if chunk_index == chunk_length:
+                    results.append([start_index, j])
+                    i = j + 1
+                    break
 
-        chunk_index += 1
+            elif original_list[j] != ignore_index:
+                i += 1
+                break
+        else:
+            i += 1
 
-        if chunk_index == chunk_length:
-          return [start_index, j]
-
-      elif original_list[j] != ignore_index:
-        break
-
-  return None
+    return results if results else None
 
 ###################################################################################
 
 def escore_notes_lrno_pattern_fast(escore_notes, 
                                    channels_index=3, 
-                                   pitches_index=4, 
+                                   pitches_index=4,
+                                   patches_index=6,
+                                   patches_list=[],
                                    zero_start_time=True,
                                    use_full_chords=True,
+                                   use_dtimes=True,
                                    skip_pitches=False,
                                    fuzzy_matching=False,
                                    fuzzy_thres=5,
@@ -9378,31 +9387,55 @@ def escore_notes_lrno_pattern_fast(escore_notes,
   else:
       CHORDS = ALL_CHORDS_SORTED
 
+  if not patches_list:
+      patches_list = sorted(range(128))
+
   cscore = chordify_score([1000, escore_notes])
 
   score_chords = []
-
+  pc = cscore[0]
   for c in cscore:
-    
-    pitches = sorted(set([e[pitches_index] for e in c if e[channels_index] != 9]))
-    
-    chord_tok = -1
-    tchord = []
-    
-    if (skip_pitches and len(pitches) > 1) or not skip_pitches:
-    
-        tchord = sorted(set([p % 12 for p in pitches]))
+   dtime = c[0][1]-pc[0][1]
+   if use_dtimes:
+       pitches = sorted(set([e[pitches_index] for e in c if e[channels_index] != 9 and e[6] in patches_list]))
+       if skip_pitches:
+           
+           if len(pitches) > 1:
+               score_chords.append(dtime)
+               pc = c
 
-    if tchord:
+           else:
+               score_chords.append(-1)
 
-      if tchord not in ALL_CHORDS_SORTED:
-        tchord = check_and_fix_tones_chord(tchord,
-                                           use_full_chords=use_full_chords
-                                           )
+       else:
+           if pitches:
+               score_chords.append(dtime)
+               pc = c
 
-      chord_tok = ALL_CHORDS_SORTED.index(tchord)
+           else:
+               score_chords.append(-1)
 
-    score_chords.append(chord_tok)
+   else:
+    
+        pitches = sorted(set([e[pitches_index] for e in c if e[channels_index] != 9 and e[6] in patches_list]))
+        
+        chord_tok = -1
+        tchord = []
+        
+        if (skip_pitches and len(pitches) > 1) or not skip_pitches:
+        
+            tchord = sorted(set([p % 12 for p in pitches]))
+    
+        if tchord:
+    
+          if tchord not in CHORDS:
+            tchord = check_and_fix_tones_chord(tchord,
+                                               use_full_chords=use_full_chords
+                                               )
+    
+          chord_tok = CHORDS.index(tchord)
+    
+        score_chords.append(chord_tok)
 
   schords = [c for c in score_chords if c != -1]
   
@@ -9416,7 +9449,7 @@ def escore_notes_lrno_pattern_fast(escore_notes,
 
   if lrno:
 
-    sidx, eidx = find_chunk_indexes(score_chords, lrno)
+    sidx, eidx = find_chunk_indexes(score_chords, lrno)[0]
 
     escore_notes_lrno_pattern = flatten(cscore[sidx:eidx+1])
 
@@ -17743,6 +17776,78 @@ def rle_tokens_to_escore_notes(rle_tokens_list,
         return bmatrix
     
     return binary_matrix_to_original_escore_notes(bmatrix)  
+
+###################################################################################
+
+def find_chords_chunk_in_escore_notes(escore_notes,
+                                      chords_chunk,
+                                      use_full_chords=False,
+                                      skip_pitches=False,
+                                      zero_start_times=False
+                                     ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+      
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+          
+    cscore = chordify_score([1000, escore_notes])
+
+    if cscore:
+
+        score_chords = []
+    
+        for c in cscore:
+            pitches = sorted(set([e[4] for e in c if e[3] != 9]))
+            
+            chord_tok = -1
+            tchord = []
+            
+            if (skip_pitches and len(pitches) > 1) or not skip_pitches:
+            
+                tchord = sorted(set([p % 12 for p in pitches]))
+        
+            if tchord:
+        
+              if tchord not in CHORDS:
+                tchord = check_and_fix_tones_chord(tchord,
+                                                   use_full_chords=use_full_chords
+                                                   )
+        
+              chord_tok = CHORDS.index(tchord)
+        
+            score_chords.append(chord_tok)
+    
+        if score_chords:
+        
+            chunk_indexes = find_chunk_indexes(score_chords, chords_chunk)
+        
+            if chunk_indexes:
+        
+                all_scores = []
+            
+                for sidx, eidx in chunk_indexes:
+            
+                    score = flatten(cscore[sidx:eidx+1])
+            
+                    if zero_start_times:
+                        score = recalculate_score_timings(score)
+
+                    all_scores.append(score)
+
+                return all_scores
+
+    return None
+
+###################################################################################
+
+def distribute_k_values(k: float, n: int):
+    if n < 2:
+        return [float(k)]
+    
+    step = (k - 1) / (n - 1)
+    return [1 + i * step for i in range(n)]
 
 ###################################################################################
 
