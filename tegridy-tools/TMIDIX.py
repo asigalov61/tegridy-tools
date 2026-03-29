@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.3.27"
+__version__ = "26.3.28"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -1511,6 +1511,8 @@ from functools import reduce, lru_cache
 
 import struct
 
+import heapq
+
 import matplotlib.pyplot as plt
 
 import psutil
@@ -1528,7 +1530,7 @@ from array import array
 from pathlib import Path
 from fnmatch import fnmatch
 
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any, Optional, Iterable, Set
 
 ###################################################################################
 #
@@ -17848,6 +17850,377 @@ def distribute_k_values(k: float, n: int):
     
     step = (k - 1) / (n - 1)
     return [1 + i * step for i in range(n)]
+
+###################################################################################
+
+def binary_rle_encoder(bits):
+
+    deltas = []
+    last_pos = -1
+
+    for i, b in enumerate(bits):
+        if b == 1:
+            if last_pos == -1:
+                deltas.append(i)
+                
+            else:
+                deltas.append(i - last_pos - 1)
+                
+            last_pos = i
+
+    return deltas
+
+###################################################################################
+
+def binary_rle_decoder(deltas):
+
+    if not deltas:
+        return []
+
+    positions = []
+    pos = -1
+    
+    for d in deltas:
+        pos = pos + d + 1
+        positions.append(pos)
+
+    length = (((positions[-1] + 1) // 128)+1) * 128
+    
+    bits = [0] * length
+
+    for p in positions:
+        bits[p] = 1
+
+    return bits
+
+###################################################################################
+
+class _Node:
+    __slots__ = ("token", "prev", "next", "seq_idx")
+    def __init__(self, token: int, seq_idx: int):
+        self.token = token
+        self.prev: Optional["_Node"] = None
+        self.next: Optional["_Node"] = None
+        self.seq_idx = seq_idx
+    def __repr__(self):
+        return f"_Node(tok={self.token},seq={self.seq_idx})"
+    # Use default object identity hashing (fast and unique)
+    def __hash__(self):
+        return id(self)
+    def __eq__(self, other):
+        return self is other
+
+###################################################################################
+
+def train_bpe(
+    corpus: List[List[int]],
+    target_vocab_size: int,
+    min_frequency: int = 2,
+    start_token_id: Optional[int] = None,
+    verbose: bool = False,
+    show_progress: bool = True
+    ) -> Tuple[List[Tuple[int,int,int]], Dict[Any,int], Dict[int,Any]]:
+    
+    """
+    Fast BPE trainer using node-based occurrences and incremental updates.
+
+    Returns:
+      merges: list of (left_id, right_id, new_id)
+      token_to_id: mapping from original token or structured rep -> id
+      id_to_token: mapping from id -> structured rep
+    """
+    
+    seqs: List[List[int]] = [list(s) for s in corpus]
+
+    orig_vocab = sorted({tok for s in seqs for tok in s})
+    base_id = 0 if start_token_id is None else start_token_id
+    orig_to_compact: Dict[int, int] = {tok: base_id + i for i, tok in enumerate(orig_vocab)}
+    compact_to_orig: Dict[int, int] = {cid: tok for tok, cid in orig_to_compact.items()}
+
+    for i, s in enumerate(seqs):
+        seqs[i] = [orig_to_compact[t] for t in s]
+
+    current_vocab_size = len(orig_vocab)
+    
+    if target_vocab_size <= current_vocab_size:
+        id_to_token = {cid: ('orig', compact_to_orig[cid]) for cid in compact_to_orig}
+        token_to_id = {compact_to_orig[cid]: cid for cid in compact_to_orig}
+        return [], token_to_id, id_to_token
+
+    next_id = base_id + current_vocab_size
+
+    merges: List[Tuple[int,int,int]] = []
+    id_to_token: Dict[int, Any] = {cid: ('orig', compact_to_orig[cid]) for cid in compact_to_orig}
+    token_to_id: Dict[Any, int] = {compact_to_orig[cid]: cid for cid in compact_to_orig}
+
+    pair_counts: Counter = Counter()
+    occurrences: Dict[Tuple[int,int], Set[_Node]] = defaultdict(set)
+    seq_nodes: List[List[_Node]] = []
+
+    for si, s in enumerate(seqs):
+        
+        nodes = [ _Node(tok, si) for tok in s ]
+        
+        for i in range(len(nodes)):
+            if i > 0:
+                nodes[i].prev = nodes[i-1]
+                
+            if i + 1 < len(nodes):
+                nodes[i].next = nodes[i+1]
+                
+        seq_nodes.append(nodes)
+
+        for i in range(len(nodes)-1):
+            left = nodes[i]
+            pair = (left.token, left.next.token)
+            pair_counts[pair] += 1
+            occurrences[pair].add(left)
+
+    heap: List[Tuple[int, Tuple[int,int]]] = [(-cnt, pair) for pair, cnt in pair_counts.items()]
+    heapq.heapify(heap)
+
+    merges_needed = target_vocab_size - current_vocab_size
+    pbar = tqdm.tqdm(total=merges_needed, desc="BPE merges", disable=not show_progress)
+
+    def _repr_struct(cid):
+        rep = id_to_token.get(cid)
+        
+        if rep is None:
+            return str(cid)
+            
+        def _fmt(r):
+            if r[0] == 'orig':
+                return str(r[1])
+                
+            return "(" + _fmt(r[1]) + "," + _fmt(r[2]) + ")"
+            
+        return _fmt(rep)
+
+    def _dec_count(pair: Tuple[int,int], node: Optional[_Node] = None):
+        """Decrement count for pair and remove node from occurrences if provided."""
+        c = pair_counts.get(pair, 0)
+        
+        if c <= 1:
+            pair_counts.pop(pair, None)
+            
+            if pair in occurrences:
+                if node is None:
+                    occurrences.pop(pair, None)
+                    
+                else:
+                    occ = occurrences.get(pair)
+                    if occ:
+                        occ.discard(node)
+                        if not occ:
+                            occurrences.pop(pair, None)
+        
+        else:
+            pair_counts[pair] = c - 1
+            if node is not None:
+                occ = occurrences.get(pair)
+                if occ:
+                    occ.discard(node)
+                    if not occ:
+                        occurrences.pop(pair, None)
+
+    def _inc_count(pair: Tuple[int,int], node: Optional[_Node] = None):
+        """Increment count for pair and add node to occurrences if provided."""
+        pair_counts[pair] += 1
+        
+        if node is not None:
+            occurrences[pair].add(node)
+
+        heapq.heappush(heap, (-pair_counts[pair], pair))
+
+    merges_done = 0
+    
+    while current_vocab_size < target_vocab_size and heap:
+        while heap:
+            negcnt, pair = heap[0]
+            cnt = -negcnt
+            
+            if pair not in pair_counts or pair_counts[pair] != cnt:
+                heapq.heappop(heap)
+                continue
+                
+            break
+            
+        if not heap:
+            break
+
+        negcnt, pair = heapq.heappop(heap)
+        freq = -negcnt
+        
+        if freq < min_frequency:
+            break
+
+        a, b = pair
+        new_id = next_id
+        next_id += 1
+
+        if verbose:
+            print(f"Merging pair ({_repr_struct(a)},{_repr_struct(b)}) -> {new_id} (freq={freq})")
+
+        merges.append((a, b, new_id))
+
+        left_repr = id_to_token[a]
+        right_repr = id_to_token[b]
+        new_repr = ('pair', left_repr, right_repr)
+        id_to_token[new_id] = new_repr
+        token_to_id[new_repr] = new_id
+
+        occ_set = occurrences.get(pair)
+        
+        if not occ_set:
+            pair_counts.pop(pair, None)
+            occurrences.pop(pair, None)
+            continue
+
+        affected_nodes = list(occ_set)
+
+        occurrences.pop(pair, None)
+        pair_counts.pop(pair, None)
+
+        for left_node in affected_nodes:
+
+            if left_node.token != a:
+                continue
+                
+            right = left_node.next
+            
+            if right is None or right.token != b:
+                continue
+
+            prev_node = left_node.prev
+            next_node = right.next
+
+            if prev_node is not None:
+                _dec_count((prev_node.token, left_node.token), prev_node)
+
+            if next_node is not None:
+                _dec_count((right.token, next_node.token), right)
+
+            left_node.token = new_id
+
+            left_node.next = next_node
+            if next_node is not None:
+                next_node.prev = left_node
+
+            if prev_node is not None:
+                _inc_count((prev_node.token, left_node.token), prev_node)
+
+            if next_node is not None:
+                _inc_count((left_node.token, next_node.token), left_node)
+
+        current_vocab_size += 1
+        merges_done += 1
+        pbar.update(1)
+
+    pbar.close()
+    
+    return merges, token_to_id, id_to_token
+
+###################################################################################
+
+def bpe_encode(
+    seq: List[int],
+    merges: List[Tuple[int,int,int]],
+    token_to_id: Optional[Dict[Any,int]] = None,
+    show_progress: bool = True
+    ) -> List[int]:
+    
+    """
+    Encode a single sequence using merges applied in order.
+    This implementation uses a simple left-to-right scan per merge (same semantics as original).
+    """
+    
+    if token_to_id is not None:
+        s = [token_to_id.get(t, t) for t in seq]
+        
+    else:
+        s = list(seq)
+
+    if not merges or not s:
+        return s
+
+    for a, b, new_tok in tqdm.tqdm(merges, disable=not show_progress):
+        if len(s) < 2:
+            break
+            
+        out = []
+        i = 0
+        n = len(s)
+        ai = a; bi = b; nt = new_tok
+        
+        while i < n:
+            if i + 1 < n and s[i] == ai and s[i+1] == bi:
+                out.append(nt)
+                i += 2
+                
+            else:
+                out.append(s[i])
+                i += 1
+        s = out
+        
+    return s
+
+###################################################################################
+
+def encode_bpe_corpus(
+    corpus: Iterable[List[int]],
+    merges: List[Tuple[int,int,int]],
+    token_to_id: Optional[Dict[Any,int]] = None,
+    show_corpus_progress: bool = False,
+    show_seq_progress: bool = True
+    ) -> List[List[int]]:
+
+    encoded_corpus = []
+
+    for seq in tqdm.tqdm(corpus, disable=not show_corpus_progress):
+        encoded = bpe_encode(seq, merges, token_to_id=token_to_id, show_progress=show_seq_progress)
+        encoded_corpus.append(encoded)
+
+    return encoded_corpus
+
+###################################################################################
+
+def bpe_decode(encoded_seq: List[int], id_to_token: Dict[int, Any]) -> List[int]:
+    """
+    Decode encoded sequence back to original integer tokens using explicit stack.
+    """
+    out: List[int] = []
+    stack = list(reversed(encoded_seq))
+    
+    while stack:
+        tok = stack.pop()
+        
+        if isinstance(tok, int) and tok in id_to_token:
+            rep = id_to_token[tok]
+            
+        else:
+            rep = tok if isinstance(tok, tuple) else None
+
+        if rep is None:
+            out.append(tok)
+            continue
+
+        tag = rep[0]
+        if tag == 'orig':
+            out.append(rep[1])
+            
+        elif tag == 'pair':
+            stack.append(rep[2])
+            stack.append(rep[1])
+            
+        else:
+            out.append(rep)
+            
+    return out
+
+###################################################################################
+
+def decode_bpe_corpus(encoded_corpus: Iterable[List[int]], id_to_token: Dict[int, Any]) -> List[List[int]]:
+    return [bpe_decode(seq, id_to_token) for seq in encoded_corpus]
 
 ###################################################################################
 
