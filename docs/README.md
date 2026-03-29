@@ -2,6 +2,11 @@
 
 ***
 
+## [TMIDIX API Reference](https://asigalov61.github.io/tegridy-tools/TMIDIX_API_Reference.html)
+## [TMIDIX API Reference List](https://github.com/asigalov61/tegridy-tools/blob/main/docs/TMIDIX_API_Reference_List.md)
+
+***
+
 ## [TMIDIX](https://asigalov61.github.io/tegridy-tools/TMIDIX.html)
 
 ## (DEPRECIATED) [TMIDI](https://asigalov61.github.io/tegridy-tools/TMIDI.html)
