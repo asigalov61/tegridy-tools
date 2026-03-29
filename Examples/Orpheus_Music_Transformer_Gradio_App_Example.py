@@ -21,6 +21,7 @@ SOTA 8k multi-instrumental music transformer trained on 2.31M+ high-quality MIDI
 # !pip install torch
 # !pip install einops
 # !pip install einx
+# !pip install scikit-learn
 #===================================================================
 # apt requirements
 #-------------------------------------------------------------------
@@ -1007,11 +1008,10 @@ with gr.Blocks() as orpheus_app:
 # -----------------------------
 # APP LAUNCHER
 # -----------------------------
-
 if __name__ == "__main__":
     orpheus_app.launch(
         mcp_server=RUNNING_IN_SPACE,   # MCP only on HF
         share=not RUNNING_IN_SPACE,    # Share only locally
         server_name="0.0.0.0",
-        server_port=7860,
+        server_port=7860
     )
