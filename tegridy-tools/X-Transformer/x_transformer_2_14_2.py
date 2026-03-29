@@ -5607,6 +5607,8 @@ def build_cls_model(num_tokens=18819,
                     dim=1024,
                     depth=8,
                     heads=8,
+                    attn_flash=True,
+                    rotary_pos_emb=False,
                     device='cuda'
                    ):
 
@@ -5622,7 +5624,9 @@ def build_cls_model(num_tokens=18819,
         squeeze_out_last_dim = squeeze_out_last_dim,
         attn_layers=Encoder(dim=dim,
                             depth=depth,
-                            heads=heads
+                            heads=heads,
+                            attn_flash=attn_flash,
+                            rotary_pos_emb=rotary_pos_emb
                            )
     )
 
