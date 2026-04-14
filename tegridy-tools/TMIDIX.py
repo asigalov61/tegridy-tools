@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.3.28"
+__version__ = "26.4.13"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -18221,6 +18221,103 @@ def bpe_decode(encoded_seq: List[int], id_to_token: Dict[int, Any]) -> List[int]
 
 def decode_bpe_corpus(encoded_corpus: Iterable[List[int]], id_to_token: Dict[int, Any]) -> List[List[int]]:
     return [bpe_decode(seq, id_to_token) for seq in encoded_corpus]
+
+###################################################################################
+
+closest_avg_val = lambda lst: (lambda m: min(lst, key=lambda x: abs(x - m)))(sum(lst)/len(lst))
+
+###################################################################################
+
+def binary_matrix_to_rle_toks(binary_matrix,
+                              marker_sidx=256,
+                              marker_clip_val=127,
+                              encode_vels=True,
+                              vels_sidx=128
+                             ):
+
+    pmat = binary_matrix[0]
+
+    mcount = 0
+
+    seq = []
+    
+    for mat in binary_matrix:
+        if pmat != mat:
+            seq.append(min(marker_clip_val, mcount)+marker_sidx)
+            if all(t == 0 for t in pmat):
+                seq.append(0)
+                
+                if encode_vels:
+                    seq.append(0+vels_sidx)
+
+            else:
+                if any(t > 1 for t in pmat):
+                    seq.extend(TMIDIX.flatten(zip([i for i in range(128) if pmat[i] != 0], [pmat[i]+vels_sidx for i in range(128) if pmat[i] != 0])))
+
+                else:
+                    seq.extend([i for i in range(128) if pmat[i] != 0])
+                
+            mcount = 1
+
+        else:
+            mcount += 1
+
+        pmat = mat
+
+    seq.append(min(marker_clip_val, mcount)+marker_sidx)
+    if all(t == 0 for t in pmat):
+        seq.append(0)
+        
+        if encode_vels:
+            seq.append(0+vels_sidx)
+
+    else:
+        if any(t > 1 for t in pmat):
+            seq.extend(TMIDIX.flatten(zip([i for i in range(128) if pmat[i] != 0], [pmat[i]+vels_sidx for i in range(128) if pmat[i] > 1 ])))
+
+        else:
+            seq.extend([i for i in range(128) if pmat[i] != 0])
+
+    return seq
+
+###################################################################################
+
+def rle_toks_to_binary_matrix(rle_toks,
+                              marker_sidx=256,
+                              vels_sidx=128
+                             ):
+
+    rows = []
+    row = []
+    
+    for t in rle_toks:
+        if t >= marker_sidx:
+            if row:
+                rows.append(row)
+
+            row = [t]
+            
+        else:
+            row.append(t)
+
+    if row:
+        rows.append(row)
+
+    matrix = []
+    
+
+    for row in rows:
+        mat = [0] * 128
+        marker = row[0]-marker_sidx
+
+        for p, v in [row[i:i+2] for i in range(1, len(row)-1, 2)]:
+
+            if p != 0 and v-vels_sidx != 0:
+                mat[p] = v-vels_sidx
+
+        matrix.extend([mat] * marker)
+
+    return matrix
 
 ###################################################################################
 
