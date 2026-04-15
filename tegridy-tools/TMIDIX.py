@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.4.13"
+__version__ = "26.4.15"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -18318,6 +18318,204 @@ def rle_toks_to_binary_matrix(rle_toks,
         matrix.extend([mat] * marker)
 
     return matrix
+
+###################################################################################
+
+class SAM:
+    def __init__(self):
+        self.len = [0]
+        self.link = [-1]
+        self.next = [dict()]
+        self.last = 0
+
+    def add(self, c):
+        cur = len(self.len)
+        self.len.append(self.len[self.last] + 1)
+        self.link.append(0)
+        self.next.append(dict())
+        p = self.last
+        while p != -1 and c not in self.next[p]:
+            self.next[p][c] = cur
+            p = self.link[p]
+        if p == -1:
+            self.link[cur] = 0
+        else:
+            q = self.next[p][c]
+            if self.len[p] + 1 == self.len[q]:
+                self.link[cur] = q
+            else:
+                clone = len(self.len)
+                self.len.append(self.len[p] + 1)
+                self.link.append(self.link[q])
+                self.next.append(self.next[q].copy())
+                while p != -1 and self.next[p].get(c) == q:
+                    self.next[p][c] = clone
+                    p = self.link[p]
+                self.link[q] = self.link[cur] = clone
+        self.last = cur
+
+###################################################################################
+
+def common_subpatterns(lists):
+    if not lists:
+        return []
+    # Build SAM from first list
+    sam = SAM()
+    for x in lists[0]:
+        sam.add(x)
+
+    m = len(sam.len)
+    # For each state, store minimal matched length across all other lists
+    min_match = [sam.len[i] for i in range(m)]
+
+    # For each other list, compute for every state the longest match ending at that state
+    for arr in lists[1:]:
+        cur = 0
+        l = 0
+        best = [0]*m
+        for x in arr:
+            if x in sam.next[cur]:
+                cur = sam.next[cur][x]
+                l += 1
+            else:
+                while cur != -1 and x not in sam.next[cur]:
+                    cur = sam.link[cur]
+                if cur == -1:
+                    cur = 0
+                    l = 0
+                else:
+                    l = sam.len[cur] + 1
+                    cur = sam.next[cur][x]
+            best[cur] = max(best[cur], l)
+        # propagate best values along suffix links in decreasing len order
+        order = sorted(range(m), key=lambda i: sam.len[i], reverse=True)
+        for v in order:
+            p = sam.link[v]
+            if p != -1:
+                best[p] = max(best[p], min(best[v], sam.len[p]))
+        for i in range(m):
+            min_match[i] = min(min_match[i], best[i])
+
+    # collect all distinct substrings: each state contributes lengths (link.len+1 .. min_match[state])
+    res = set()
+    for v in range(1, m):
+        low = sam.len[sam.link[v]] + 1
+        high = min_match[v]
+        for L in range(low, high+1):
+            # recover one substring of length L ending at this state by walking back from a position:
+            # To avoid expensive reconstruction for every L, we reconstruct by scanning the first list.
+            pass
+
+    # Efficient reconstruction: collect all end positions for each state by walking the first list
+    # Build transitions to find substrings by scanning first list and recording (state, length) pairs
+    cur = 0; l = 0
+    pos_states = []
+    for x in lists[0]:
+        if x in sam.next[cur]:
+            cur = sam.next[cur][x]; l += 1
+        else:
+            while cur != -1 and x not in sam.next[cur]:
+                cur = sam.link[cur]
+            if cur == -1:
+                cur = 0; l = 0
+            else:
+                l = sam.len[cur] + 1
+                cur = sam.next[cur][x]
+        pos_states.append((cur, l))
+
+    # For each position, enumerate valid substring lengths and add actual slices
+    n0 = len(lists[0])
+    for i,(state, length) in enumerate(pos_states):
+        maxlen = min(length, min_match[state])
+        minlen = sam.len[sam.link[state]] + 1
+        for L in range(minlen, maxlen+1):
+            start = i - L + 1
+            res.add(tuple(lists[0][start:start+L]))
+
+    return [list(t) for t in sorted(res, key=lambda x:(len(x), x))]
+
+###################################################################################
+
+def extract_non_overlapping_chords(escore_notes, max_dur=-1):
+
+    cscore = chordify_score([1000, escore_notes])
+
+    no_chords = []
+    
+    for i, c in enumerate(cscore[:-1]):
+        ntime = cscore[i+1][0][1]
+        
+        if max_dur > 0:
+            cval = max_dur
+    
+        else:
+            cval = closest_avg_val([e[2] for e in c])
+            
+        if c[0][1]+cval <= ntime:
+            no_chords.append(c)
+    
+    no_chords.append(cscore[-1])
+
+    return no_chords
+
+###################################################################################
+
+def escore_chord_to_chord_token(escore_chord,
+                                use_full_chords=False,
+                                shift_chords=False
+                               ):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    pitches = sorted(set([e[4] for e in escore_chord if e[3] != 9]))
+
+    if len(pitches) > 1:
+        tones_chord = sorted(set([p % 12 for p in pitches]))
+
+        if tones_chord not in CHORDS:
+            tones_chord = check_and_fix_tones_chord(tones_chord, use_full_chords=use_full_chords)
+
+        if shift_chords:
+            return CHORDS.index(tones_chord)+12
+
+        else:
+            return CHORDS.index(tones_chord)
+
+    elif len(pitches) == 1:
+        if shift_chords:
+            return pitches[0] % 12
+
+        else:
+            return CHORDS.index([pitches[0] % 12])
+        
+    else:
+        return -1
+
+###################################################################################
+
+def transpose_chord_token(chord_token, transpose_value, use_full_chords=False):
+
+    if use_full_chords:
+        CHORDS = ALL_CHORDS_FULL
+
+    else:
+        CHORDS = ALL_CHORDS_SORTED
+
+    if 0 <= chord_token < len(CHORDS):
+        tchord = CHORDS[chord_token]
+    
+        t_tchord = transpose_tones_chord(tchord, transpose_value)
+
+        if t_tchord in CHORDS:
+            return CHORDS.index(t_tchord)
+
+        return chord_token
+
+    return chord_token
 
 ###################################################################################
 
