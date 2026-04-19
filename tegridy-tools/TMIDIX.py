@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.4.15"
+__version__ = "26.4.19"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -10076,12 +10076,12 @@ def escore_notes_to_text_description(escore_notes,
 
     #==============================================================================
         
-    feat_dict['rythm'] = None
+    feat_dict['rhythm'] = None
     feat_dict['tempo'] = None
     feat_dict['tone'] = None
     feat_dict['dynamics'] = None
 
-    feat_dict_vals['rythm'] = -1
+    feat_dict_vals['rhythm'] = -1
     feat_dict_vals['tempo'] = -1
     feat_dict_vals['tone'] = -1
     feat_dict_vals['dynamics'] = -1
@@ -10091,15 +10091,15 @@ def escore_notes_to_text_description(escore_notes,
         escore_averages = escore_notes_averages(escore_notes, return_ptcs_and_vels=True)
 
         if escore_averages[0] < (128 / timings_divider):
-            rythm = 'fast'
+            rhythm = 'fast'
             ryv = 0
         
         elif (128 / timings_divider) <= escore_averages[0] <= (192 / timings_divider):
-            rythm = 'average'
+            rhythm = 'average'
             ryv = 1
         
         elif escore_averages[0] > (192 / timings_divider):
-            rythm = 'slow'
+            rhythm = 'slow'
             ryv = 2
         
         if escore_averages[1] < (256 / timings_divider):
@@ -10138,12 +10138,12 @@ def escore_notes_to_text_description(escore_notes,
             dynamics = 'loud'
             dyn = 2
             
-        feat_dict['rythm'] = rythm.title()
+        feat_dict['rhythm'] = rhythm.title()
         feat_dict['tempo'] = tempo.title()
         feat_dict['tone'] = tone.title()
         feat_dict['dynamics'] = dynamics.title()
         
-        feat_dict_vals['rythm'] = ryv
+        feat_dict_vals['rhythm'] = ryv
         feat_dict_vals['tempo'] = tev
         feat_dict_vals['tone'] = tov
         feat_dict_vals['dynamics'] = dyn
@@ -10237,7 +10237,7 @@ def escore_notes_to_text_description(escore_notes,
         else:
             description += 'TThis drum track has '
             
-        description += rythm + ' rythm, '
+        description += rhythm + ' rhythm, '
         description += tempo + ' tempo, '
         description += tone + ' tone and '
         description += dynamics + ' dynamics.'
