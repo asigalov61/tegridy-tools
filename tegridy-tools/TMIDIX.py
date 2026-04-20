@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.4.19"
+__version__ = "26.4.20"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -18516,6 +18516,71 @@ def transpose_chord_token(chord_token, transpose_value, use_full_chords=False):
         return chord_token
 
     return chord_token
+
+###################################################################################
+
+ALL_CHORDS_DELTAS = [
+ [2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 4], [2, 2, 2, 3, 3], [2, 2, 2, 6],
+ [2, 2, 3, 5], [2, 2, 4, 4], [2, 2, 8], [2, 3, 3, 4], [2, 3, 7], [2, 4, 6],
+ [2, 5, 5], [2, 10], [3, 3, 3, 3], [3, 3, 6], [3, 4, 5], [3, 9], [4, 4, 4],
+ [4, 8], [5, 7], [6, 6]
+ ]
+
+###################################################################################
+
+def encode_delta_chord_tok(tones_chord):
+    if len(tones_chord) > 1:
+        return (ALL_CHORDS_DELTAS.index(
+                    list(sorted([(12 - tones_chord[-1] + tones_chord[0])] + [b-a
+                           for a, b in zip(tones_chord[:-1], 
+                                           tones_chord[1:])
+                          ]))) * 12) + tones_chord[0]
+
+    else:
+        return (len(ALL_CHORDS_DELTAS) * 12) + tones_chord[0]
+
+###################################################################################
+    
+def encode_delta_chord_tok_raw(tones_chord):
+    if len(tones_chord) > 1:
+        return ALL_CHORDS_DELTAS.index(
+                    list(sorted([(12 - tones_chord[-1] + tones_chord[0])] + [b-a
+                           for a, b in zip(tones_chord[:-1], 
+                                           tones_chord[1:])
+                          ])))
+
+    else:
+        return len(ALL_CHORDS_DELTAS)
+
+###################################################################################
+    
+def decode_delta_chord_tok(delta_chord_tok):
+
+    cho_tok = delta_chord_tok // 12
+    base_tone = delta_chord_tok % 12
+
+    if cho_tok < len(ALL_CHORDS_DELTAS):
+        delta_cho = ALL_CHORDS_DELTAS[cho_tok]
+    
+        tones_chord = [base_tone]
+    
+        for d in delta_cho:
+            tones_chord.append((tones_chord[-1]+d) % 12)
+        
+        return sorted(set(tones_chord))
+
+    else:
+        return [base_tone]
+
+###################################################################################
+    
+def decode_delta_chord_tok_raw(delta_chord_tok):
+
+    if delta_chord_tok < len(ALL_CHORDS_DELTAS):
+        return ALL_CHORDS_DELTAS[delta_chord_tok]
+
+    else:
+        return [0]
 
 ###################################################################################
 
