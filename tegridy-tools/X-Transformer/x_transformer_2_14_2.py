@@ -10203,7 +10203,7 @@ def predict_masked_tokens(
     mask_prob=None,
     mask_positions=None,
     topk=5,
-    device=DEVICE
+    device='cuda'
 ):
     """
     Predict masked token indices in an input sequence.
@@ -10331,7 +10331,7 @@ def print_masked_predictions_ids(
     results,
     topk=1,
     mask_token='[M]',
-    mask_idx=MASK_IDX
+    mask_idx=384
 ):
     """
     Prints aligned views for token-ID–based prediction results:
@@ -10403,7 +10403,7 @@ def predict_masked_text(
     mask_prob=None, 
     mask_positions=None, 
     topk=5, 
-    device=DEVICE
+    device='cuda'
 ):
     """
     Predict masked tokens in input text with flexible masking options.
