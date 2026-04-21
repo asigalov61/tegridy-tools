@@ -51,7 +51,7 @@ r'''############################################################################
 
 ###################################################################################
 
-__version__ = "26.4.20"
+__version__ = "26.4.21"
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -18581,6 +18581,30 @@ def decode_delta_chord_tok_raw(delta_chord_tok):
 
     else:
         return [0]
+
+###################################################################################
+
+def values_percentile(data, p):
+    """
+    Return the p-th percentile of a list of ints using pure Python.
+    Uses linear interpolation (same definition as NumPy).
+    """
+    if not data:
+        raise ValueError("data must not be empty")
+    if not (0 <= p <= 100):
+        raise ValueError("p must be between 0 and 100")
+
+    xs = sorted(data)
+    n = len(xs)
+
+    # fractional index
+    k = (p / 100) * (n - 1)
+    i = int(k)
+    f = k - i
+
+    if f == 0:
+        return xs[i]
+    return xs[i] + f * (xs[i + 1] - xs[i])
 
 ###################################################################################
 
