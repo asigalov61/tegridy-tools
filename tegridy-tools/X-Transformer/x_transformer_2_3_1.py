@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 10.0
+# Version 11.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -8100,7 +8100,405 @@ def collate_fn_from_lists(batch, pad_token_id=384):
             attn_mask[i, :length] = True 
 
     return input_ids, labels, attn_mask
+
+#=================================================================================================================================
+# Masked Encoder functions
+#=================================================================================================================================
+
+import torch
+import torch.nn.functional as F
+
+def predict_masked_tokens(
+    model,
+    input_ids,
+    mask_prob=None,
+    mask_positions=None,
+    topk=5,
+    device=DEVICE
+):
+    """
+    Predict masked token indices in an input sequence.
+
+    Args:
+        model: Trained transformer model accepting token IDs.
+        input_ids: List or 1D tensor of token indices (length ≤ SEQ_LEN).
+        mask_prob: Float in [0,1] for random masking probability.
+                   Ignored if mask_positions is provided.
+        mask_positions: List of integer positions to mask explicitly.
+                        If provided, random masking is skipped.
+        topk: Number of top predictions to return per masked position.
+        device: torch device for computation.
+
+    Returns:
+        {
+            'original_ids': List of original token IDs (truncated to SEQ_LEN),
+            'masked_ids':   List of token IDs after masking,
+            'predictions': [
+                {
+                    'position': int,            # index in the sequence
+                    'original_id': int,         # true token ID at that position
+                    'predicted_id': int,        # top‐1 predicted ID
+                    'topk': [(id, prob), …]     # topk predictions with their probabilities
+                }, …
+            ]
+        }
+    """
+    # Ensure input_ids is a Python list
+    if isinstance(input_ids, torch.Tensor):
+        input_ids = input_ids.tolist()
+
+    # Truncate or pad to SEQ_LEN
+    seq = input_ids[:SEQ_LEN]
+    n = len(seq)
+    if n < SEQ_LEN:
+        seq += [PAD_IDX] * (SEQ_LEN - n)
+
+    # Build batch tensor and move to device
+    batch = torch.tensor([seq], dtype=torch.long, device=device)
+
+    # Prepare labels and masked_input
+    if mask_positions is not None:
+        # Explicit masking at given positions
+        labels = batch.clone()
+        mask = torch.zeros_like(batch, dtype=torch.bool, device=device)
+        for pos in mask_positions:
+            if 0 <= pos < n:
+                mask[0, pos] = True
+        labels[~mask] = -100  # ignore non‐masked tokens
+
+        masked_input = batch.clone()
+
+        # 80% MASK, 10% random, 10% keep original
+        replace_mask = mask & (torch.rand_like(batch.float()) < 0.8)
+        random_mask  = mask & ~replace_mask & (torch.rand_like(batch.float()) < 0.5)
+
+        masked_input[replace_mask] = MASK_IDX
+        rand_tokens = torch.randint(0, VOCAB_SIZE, batch.shape, device=device)
+        masked_input[random_mask] = rand_tokens[random_mask]
+
+        # masked_input[mask] = MASK_IDX 
+
+    else:
+        # Random masking across the sequence
+        prob = mask_prob if mask_prob is not None else MASK_PROB
+        labels = batch.clone()
+        prob_matrix = torch.full(labels.shape, prob, device=device)
+        prob_matrix[batch == PAD_IDX] = 0.0
+        mask = torch.bernoulli(prob_matrix).bool()
+        labels[~mask] = -100
+
+        masked_input = batch.clone()
+        replace_mask = mask & (torch.rand_like(batch.float()) < 0.8)
+        random_mask  = mask & ~replace_mask & (torch.rand_like(batch.float()) < 0.5)
+
+        masked_input[replace_mask] = MASK_IDX
+        rand_tokens = torch.randint(0, VOCAB_SIZE, batch.shape, device=device)
+        masked_input[random_mask] = rand_tokens[random_mask]
+
+    # Attention mask: ignore padding
+    attn_mask = (masked_input != PAD_IDX).to(device)
+
+    # Inference
+    model.eval()
+    with torch.no_grad():
+        with autocast(device_type=DEVICE, dtype=DTYPE):
+            logits = model(masked_input, mask=attn_mask)    # [1, SEQ_LEN, VOCAB_SIZE]
+    probs = F.softmax(logits, dim=-1)                  # [1, SEQ_LEN, VOCAB_SIZE]
+
+    masked_ids = masked_input[0].cpu().tolist()
+    labels_ids = labels[0].cpu().tolist()
+
+    predictions = []
+    for pos, label_id in enumerate(labels_ids[:n]):
+        if label_id == -100:
+            continue
+
+        token_probs = probs[0, pos]                   # [VOCAB_SIZE]
+        topk_probs, topk_ids = torch.topk(token_probs, k=topk)
+
+        topk_list = list(zip(topk_ids.cpu().tolist(),
+                             topk_probs.cpu().tolist()))
+
+        predictions.append({
+            'position': pos,
+            'original_id': label_id,
+            'predicted_id': topk_list[0][0],
+            'topk': topk_list
+        })
+
+    # Build a “filled‐in” version of your input
+    predicted_ids = seq.copy()   # start from the (truncated) original
+    for pred in predictions:
+        predicted_ids[pred['position']] = pred['predicted_id']
+
+    return {
+        'original_ids':    seq[:n],         # your un-masked inputs
+        'masked_ids':      masked_ids[:n],  # what the model actually saw
+        'predicted_ids':   predicted_ids[:n],
+        'predictions':     predictions
+    }
+
+def print_masked_predictions_ids(
+    results,
+    topk=1,
+    mask_token='[M]',
+    mask_idx=MASK_IDX
+):
+    """
+    Prints aligned views for token-ID–based prediction results:
+      • Original      (token IDs)
+      • Masked        (token IDs or mask_token placeholder)
+      • Predicted     (mask slots filled with colored top-1 IDs)
+      • Reconstructed (mask slots filled with plain top-1 IDs)
+
+    Then prints a per-position breakdown of top-k predictions by ID.
+
+    Args:
+        results: dict from predict_masked_tokens, with keys
+                 'original_ids', 'masked_ids', 'predictions'
+        topk: how many of the top predictions to list in the detail section
+        mask_token: printed placeholder for a masked slot
+        mask_idx: integer ID used to represent the mask in masked_ids
+    """
+    orig_ids   = results["original_ids"]
+    masked_ids = results["masked_ids"]
+    preds_map  = {p["position"]: p for p in results["predictions"]}
+    n          = len(orig_ids)
+
+    # 1) Prepare display tokens (as strings)
+    original_tokens = [str(tid) for tid in orig_ids]
+    masked_tokens   = [
+        mask_token if tid == mask_idx else str(tid)
+        for tid in masked_ids
+    ]
+
+    # 2) Build Predicted & Reconstructed views
+    predicted_tokens   = []
+    reconstructed_ids  = original_tokens.copy()
+
+    for idx in range(n):
+        if idx in preds_map:
+            top1_id, top1_prob = preds_map[idx]["topk"][0]
+            tok_str = str(top1_id)
+            # green if correct, red if wrong
+            color = "\033[92m" if top1_id == orig_ids[idx] else "\033[91m"
+            predicted_tokens.append(f"{color}{tok_str}\033[0m")
+            reconstructed_ids[idx] = tok_str
+        else:
+            predicted_tokens.append(masked_tokens[idx])
+
+    # 3) Print the three aligned lines
+    print(f"Original:      {' '.join(original_tokens)}")
+    print(f"Masked:        {' '.join(masked_tokens)}")
+    print(f"Predicted:     {' '.join(predicted_tokens)}")
+    print(f"Reconstructed: {' '.join(reconstructed_ids)}\n")
+
+    # 4) Detailed per-position breakdown
+    print("Prediction Details:")
+    for pos in sorted(preds_map):
+        orig_id      = orig_ids[pos]
+            
+        pred_id, p   = preds_map[pos]["topk"][0]
+            
+        status       = "\033[92m✓\033[0m" if pred_id == orig_id else "\033[91m✗\033[0m"
+        print(f"Position {pos:2d}: {status}"
+              f" Original {orig_id} → Predicted {pred_id} (P={p:.2%})")
+
+        if topk > 1:
+            for rank, (tid, prob) in enumerate(preds_map[pos]["topk"][:topk], start=1):
+                print(f"    Top-{rank}: {tid} (P={prob:.2%})")
+
+def predict_masked_text(
+    model,  
+    text, 
+    mask_prob=None, 
+    mask_positions=None, 
+    topk=5, 
+    device=DEVICE
+):
+    """
+    Predict masked tokens in input text with flexible masking options.
+    
+    Args:
+        model: Trained transformer model
+        tokenizer: CharTokenizer instance
+        text: Input text string
+        mask_prob: Probability for random masking (None for no random masking)
+        mask_positions: Specific positions to mask (list of indices)
+        topk: Number of top predictions to return per masked position
+        device: Device to run inference on
         
+    Returns:
+        Dictionary containing:
+        - 'original_text': Original input text
+        - 'masked_text': Text with masks applied
+        - 'predictions': List of prediction details for each masked token
+    """
+    # Convert text to tokens and handle padding
+    tokens = [ord(c) for c in text if ord(c) < 128]
+    n = len(tokens)
+    if n > SEQ_LEN:
+        tokens = tokens[:SEQ_LEN]
+        n = SEQ_LEN
+    padded_tokens = tokens + [PAD_IDX] * (SEQ_LEN - n)
+    
+    # Convert to tensor and move to device
+    input_tensor = torch.tensor([padded_tokens], dtype=torch.long).to(device)
+    
+    # Handle masking
+    if mask_positions is not None:
+        # Mask specific positions
+        labels = input_tensor.clone()
+        mask = torch.zeros_like(input_tensor, dtype=torch.bool, device=device)
+        for pos in mask_positions:
+            if pos < n:  # Only mask within actual text
+                mask[0, pos] = True
+        labels[~mask] = -100  # Ignore non-masked positions
+        
+        # Apply 80-10-10 masking strategy
+        masked_input = input_tensor.clone()
+        mask_replace = mask & (torch.rand(labels.shape, device=device) < 0.8)
+        rand_replace = mask & ~mask_replace & (torch.rand(labels.shape, device=device) < 0.5)
+        
+        masked_input[mask_replace] = MASK_IDX
+        random_tokens = torch.randint(0, VOCAB_SIZE-1, labels.shape, device=device)
+        masked_input[rand_replace] = random_tokens[rand_replace]
+    else:
+        # Apply random masking using the mask_tokens function (modified for device consistency)
+        mask_prob = mask_prob or MASK_PROB
+        labels = input_tensor.clone()
+        prob_matrix = torch.full(labels.shape, mask_prob, device=device)
+        prob_matrix[input_tensor == PAD_IDX] = 0.0
+        mask_pos = torch.bernoulli(prob_matrix).bool()
+        labels[~mask_pos] = -100
+        
+        masked_input = input_tensor.clone()
+        mask_replace = mask_pos & (torch.rand(labels.shape, device=device) < 0.8)
+        rand_replace = mask_pos & ~mask_replace & (torch.rand(labels.shape, device=device) < 0.5)
+        random_tokens = torch.randint(0, VOCAB_SIZE-1, labels.shape, device=device)
+        
+        masked_input[mask_replace] = MASK_IDX
+        masked_input[rand_replace] = random_tokens[rand_replace]
+    
+    # Create attention mask
+    attn_mask = (masked_input != PAD_IDX).to(device)
+    
+    # Run model inference
+    model.eval()
+    with torch.no_grad():
+        logits = model(masked_input, mask=attn_mask)
+    probs = F.softmax(logits, dim=-1)
+    
+    # Convert token IDs to characters
+    def token_to_char(token_id):
+        if token_id < 128:
+            return chr(token_id)
+        if token_id == MASK_IDX:
+            return "[M]"
+        if token_id == PAD_IDX:
+            return "[P]"
+        return f"[{token_id}]"
+    
+    # Process predictions
+    masked_tokens = masked_input[0, :n].cpu().tolist()
+    label_tokens = labels[0, :n].cpu().tolist()
+    
+    predictions = []
+    masked_display = []
+    
+    for i, (token, label) in enumerate(zip(masked_tokens, label_tokens)):
+        char = token_to_char(token)
+        masked_display.append(char)
+        
+        # Only process actual masked positions
+        if label != -100:
+            # Get topk predictions
+            token_probs = probs[0, i].cpu()
+            topk_probs, topk_ids = torch.topk(token_probs, k=topk)
+            
+            # Convert predictions to characters
+            topk_chars = []
+            for prob, token_id in zip(topk_probs.tolist(), topk_ids.tolist()):
+                pred_char = token_to_char(token_id)
+                topk_chars.append((pred_char, prob))
+            
+            # Get original character
+            orig_char = token_to_char(label)
+            
+            predictions.append({
+                'position': i,
+                'original_char': orig_char,
+                'predicted_char': topk_chars[0][0],
+                'topk': topk_chars
+            })
+    
+    return {
+        'original_text': [chr(c) for c in tokens],
+        'masked_text': ''.join(masked_display),
+        'predictions': predictions
+    }
+
+def print_masked_predictions(results, topk=1, mask_token='[M]'):
+    """
+    Prints three aligned views:
+      • Original text
+      • Masked text (re-parsed so each original index maps to either a char or mask_token)
+      • Predicted text    (mask slots filled in with colored predictions)
+      • Reconstructed     (mask slots filled in with plain-text predictions)
+
+    Then gives a per-position breakdown of top-k predictions.
+    """
+    original    = results['original_text']
+    masked_text = results['masked_text']
+    preds       = {p['position']: p for p in results['predictions']}
+    n           = len(original)
+
+    # 1) Turn the raw masked_text into a list of tokens, one per original character.
+    masked_tokens = []
+    i = 0
+    while i < len(masked_text):
+        if masked_text.startswith(mask_token, i):
+            masked_tokens.append(mask_token)
+            i += len(mask_token)
+        else:
+            masked_tokens.append(masked_text[i])
+            i += 1
+
+    if len(masked_tokens) != n:
+        print(f"Warning: parsed {len(masked_tokens)} tokens but original length is {n}")
+
+    # 2) Build the colored‐prediction display and the reconstructed string
+    predicted_tokens = []
+    reconstructed   = list(original)
+
+    for idx, orig_ch in enumerate(original):
+        if idx in preds:
+            pred_ch, pred_p = preds[idx]['topk'][0]
+            color = '\033[92m' if pred_ch == orig_ch else '\033[91m'
+            predicted_tokens.append(f"{color}{pred_ch}\033[0m")
+            reconstructed[idx] = pred_ch
+        else:
+            # leave it exactly as it was masked
+            predicted_tokens.append(masked_tokens[idx])
+
+    # 3) Print the three lines
+    print(f"Original:      {original}")
+    print(f"Masked:        {''.join(masked_tokens)}")
+    print(f"Predicted:     {''.join(predicted_tokens)}")
+    print(f"Reconstructed: {''.join(reconstructed)}")
+
+    # 4) Detail per position
+    print("\nPrediction Details:")
+    for pos in sorted(preds):
+        orig_ch = original[pos]
+        pred_ch, pred_p = preds[pos]['topk'][0]
+        ok = (pred_ch == orig_ch)
+        status = '\033[92m✓\033[0m' if ok else '\033[91m✗\033[0m'
+        print(f"Position {pos:2d}: {status} Original '{orig_ch}' → Predicted '{pred_ch}' (P={pred_p:.2%})")
+        if topk > 1:
+            for rank, (c, p) in enumerate(preds[pos]['topk'][:topk], start=1):
+                print(f"    Top-{rank}: {c} (P={p:.2%})")
+       
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
 #=================================================================================================================================
