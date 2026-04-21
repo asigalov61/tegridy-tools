@@ -7343,10 +7343,7 @@ def topk_cosine_neighbors(embeddings: torch.Tensor,
     if normalize:
         # Normalize in-place if possible, or reassign
         query_embeddings = F.normalize(query_embeddings, p=2, dim=1)
-        # Only normalize keys if they are distinct from queries to avoid redundant work 
-        # in self-search case (already normalized above)
-        if not is_self_search:
-            key_embeddings = F.normalize(key_embeddings, p=2, dim=1)
+        key_embeddings = F.normalize(key_embeddings, p=2, dim=1)
 
     # 5. Initialize Result Tensors (always float32 for precision in output)
     top_sim = torch.empty((N_q, k), dtype=torch.float32, device=device)
