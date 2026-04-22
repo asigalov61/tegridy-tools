@@ -8111,7 +8111,12 @@ def predict_masked_tokens(
     mask_prob=None,
     mask_positions=None,
     topk=5,
-    device='cuda'
+    seq_len=2048,
+    mask_idx=18819,
+    pad_idx=18820,
+    vocab_size=18821,
+    device='cuda',
+    dtype=torch.bfloat16
 ):
     """
     Predict masked token indices in an input sequence.
@@ -8145,60 +8150,70 @@ def predict_masked_tokens(
         input_ids = input_ids.tolist()
 
     # Truncate or pad to SEQ_LEN
-    seq = input_ids[:SEQ_LEN]
+    seq = input_ids[:seq_len]
     n = len(seq)
-    if n < SEQ_LEN:
-        seq += [PAD_IDX] * (SEQ_LEN - n)
+    if n < seq_len:
+        seq += [pad_idx] * (seq_len - n)
 
     # Build batch tensor and move to device
     batch = torch.tensor([seq], dtype=torch.long, device=device)
-
-    # Prepare labels and masked_input
+    
     if mask_positions is not None:
-        # Explicit masking at given positions
+        # Explicit masking at given positions (apply to all batch rows unless positions are per-example)
         labels = batch.clone()
         mask = torch.zeros_like(batch, dtype=torch.bool, device=device)
+    
+        # If mask_positions is a list of positions (ints) apply to every example in the batch.
+        # If you intended per-example positions, pass mask_positions as a tensor of shape (batch_size, seq_len).
         for pos in mask_positions:
-            if 0 <= pos < n:
-                mask[0, pos] = True
-        labels[~mask] = -100  # ignore non‐masked tokens
-
+            if 0 <= pos < seq_len:
+                mask[:, pos] = True
+    
+        labels[~mask] = -100  # ignore non-masked tokens
+    
         masked_input = batch.clone()
-
-        # 80% MASK, 10% random, 10% keep original
-        replace_mask = mask & (torch.rand_like(batch.float()) < 0.8)
-        random_mask  = mask & ~replace_mask & (torch.rand_like(batch.float()) < 0.5)
-
-        masked_input[replace_mask] = MASK_IDX
-        rand_tokens = torch.randint(0, VOCAB_SIZE, batch.shape, device=device)
+    
+        # Create one random matrix and split ranges to get exact 80/10/10 behavior
+        probs = torch.rand(batch.shape, device=device)
+    
+        replace_mask = mask & (probs < 0.8)            # 80% -> replace with MASK_IDX
+        random_mask  = mask & (probs >= 0.8) & (probs < 0.9)  # 10% -> random token
+        # keep_mask = mask & (probs >= 0.9)            # 10% -> keep original (no change)
+    
+        masked_input[replace_mask] = mask_idx
+        rand_tokens = torch.randint(0, vocab_size, batch.shape, device=device)
         masked_input[random_mask] = rand_tokens[random_mask]
-
-        # masked_input[mask] = MASK_IDX 
-
+    
     else:
         # Random masking across the sequence
-        prob = mask_prob if mask_prob is not None else MASK_PROB
+        prob = mask_prob if mask_prob is not None else 0.15
         labels = batch.clone()
+    
         prob_matrix = torch.full(labels.shape, prob, device=device)
-        prob_matrix[batch == PAD_IDX] = 0.0
+        prob_matrix[batch == pad_idx] = 0.0  # never mask PAD tokens
         mask = torch.bernoulli(prob_matrix).bool()
         labels[~mask] = -100
-
+    
         masked_input = batch.clone()
-        replace_mask = mask & (torch.rand_like(batch.float()) < 0.8)
-        random_mask  = mask & ~replace_mask & (torch.rand_like(batch.float()) < 0.5)
-
-        masked_input[replace_mask] = MASK_IDX
-        rand_tokens = torch.randint(0, VOCAB_SIZE, batch.shape, device=device)
+    
+        # Use one random matrix to get exact 80/10/10 split among masked positions
+        probs = torch.rand(batch.shape, device=device)
+    
+        replace_mask = mask & (probs < 0.8)
+        random_mask  = mask & (probs >= 0.8) & (probs < 0.9)
+        # keep_mask = mask & (probs >= 0.9)
+    
+        masked_input[replace_mask] = mask_idx
+        rand_tokens = torch.randint(0, vocab_size, batch.shape, device=device)
         masked_input[random_mask] = rand_tokens[random_mask]
 
     # Attention mask: ignore padding
-    attn_mask = (masked_input != PAD_IDX).to(device)
+    attn_mask = (masked_input != pad_idx).to(device)
 
     # Inference
     model.eval()
     with torch.no_grad():
-        with autocast(device_type=DEVICE, dtype=DTYPE):
+        with autocast(device_type=device, dtype=dtype):
             logits = model(masked_input, mask=attn_mask)    # [1, SEQ_LEN, VOCAB_SIZE]
     probs = F.softmax(logits, dim=-1)                  # [1, SEQ_LEN, VOCAB_SIZE]
 
@@ -8238,8 +8253,8 @@ def predict_masked_tokens(
 def print_masked_predictions_ids(
     results,
     topk=1,
-    mask_token='[M]',
-    mask_idx=384
+    mask_token='[MASK]',
+    mask_idx=18819
 ):
     """
     Prints aligned views for token-ID–based prediction results:
@@ -8311,7 +8326,12 @@ def predict_masked_text(
     mask_prob=None, 
     mask_positions=None, 
     topk=5, 
-    device='cuda'
+    seq_len=2048,
+    mask_idx=128,
+    pad_idx=129,
+    vocab_size=130,
+    device='cuda',
+    dtype=torch.bfloat16
 ):
     """
     Predict masked tokens in input text with flexible masking options.
@@ -8334,10 +8354,10 @@ def predict_masked_text(
     # Convert text to tokens and handle padding
     tokens = [ord(c) for c in text if ord(c) < 128]
     n = len(tokens)
-    if n > SEQ_LEN:
-        tokens = tokens[:SEQ_LEN]
-        n = SEQ_LEN
-    padded_tokens = tokens + [PAD_IDX] * (SEQ_LEN - n)
+    if n > seq_len:
+        tokens = tokens[:seq_len]
+        n = seq_len
+    padded_tokens = tokens + [pad_idx] * (seq_len - n)
     
     # Convert to tensor and move to device
     input_tensor = torch.tensor([padded_tokens], dtype=torch.long).to(device)
@@ -8357,28 +8377,28 @@ def predict_masked_text(
         mask_replace = mask & (torch.rand(labels.shape, device=device) < 0.8)
         rand_replace = mask & ~mask_replace & (torch.rand(labels.shape, device=device) < 0.5)
         
-        masked_input[mask_replace] = MASK_IDX
-        random_tokens = torch.randint(0, VOCAB_SIZE-1, labels.shape, device=device)
+        masked_input[mask_replace] = mask_idx
+        random_tokens = torch.randint(0, vocab_size-1, labels.shape, device=device)
         masked_input[rand_replace] = random_tokens[rand_replace]
     else:
         # Apply random masking using the mask_tokens function (modified for device consistency)
-        mask_prob = mask_prob or MASK_PROB
+        mask_prob = mask_prob or 0.15
         labels = input_tensor.clone()
         prob_matrix = torch.full(labels.shape, mask_prob, device=device)
-        prob_matrix[input_tensor == PAD_IDX] = 0.0
+        prob_matrix[input_tensor == pad_idx] = 0.0
         mask_pos = torch.bernoulli(prob_matrix).bool()
         labels[~mask_pos] = -100
         
         masked_input = input_tensor.clone()
         mask_replace = mask_pos & (torch.rand(labels.shape, device=device) < 0.8)
         rand_replace = mask_pos & ~mask_replace & (torch.rand(labels.shape, device=device) < 0.5)
-        random_tokens = torch.randint(0, VOCAB_SIZE-1, labels.shape, device=device)
+        random_tokens = torch.randint(0, vocab_size-1, labels.shape, device=device)
         
-        masked_input[mask_replace] = MASK_IDX
+        masked_input[mask_replace] = mask_idx
         masked_input[rand_replace] = random_tokens[rand_replace]
     
     # Create attention mask
-    attn_mask = (masked_input != PAD_IDX).to(device)
+    attn_mask = (masked_input != pad_idx).to(device)
     
     # Run model inference
     model.eval()
@@ -8390,9 +8410,9 @@ def predict_masked_text(
     def token_to_char(token_id):
         if token_id < 128:
             return chr(token_id)
-        if token_id == MASK_IDX:
+        if token_id == mask_idx:
             return "[M]"
-        if token_id == PAD_IDX:
+        if token_id == pad_idx:
             return "[P]"
         return f"[{token_id}]"
     
