@@ -115,7 +115,7 @@
 ## B
 <a name="b"></a>
 
-**13 entries**
+**14 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -124,6 +124,7 @@
 * `basic_enhanced_delta_score_notes_detokenizer`
 * `basic_enhanced_delta_score_notes_tokenizer`
 * `binary_matrix_to_original_escore_notes`
+* `binary_matrix_to_rle_toks`
 * `binary_rle_decoder`
 * `binary_rle_encoder`
 * `bits_to_int`
@@ -141,7 +142,7 @@
 ## C
 <a name="c"></a>
 
-**39 entries**
+**40 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -163,6 +164,7 @@
 * `chunk_list`
 * `chunks_shuffle`
 * `clean_string`
+* `common_subpatterns`
 * `compress_binary_matrix`
 * `compress_patches_in_escore_notes`
 * `compress_patches_in_escore_notes_chords`
@@ -193,12 +195,14 @@
 ## D
 <a name="d"></a>
 
-**15 entries**
+**17 entries**
 
 <details>
 <summary>Show entries</summary>
 
 * `decode_bpe_corpus`
+* `decode_delta_chord_tok`
+* `decode_delta_chord_tok_raw`
 * `decode_from_ord`
 * `decode_int_auto`
 * `decode_matrix_marker_prefixed`
@@ -221,12 +225,14 @@
 ## E
 <a name="e"></a>
 
-**53 entries**
+**57 entries**
 
 <details>
 <summary>Show entries</summary>
 
 * `encode_bpe_corpus`
+* `encode_delta_chord_tok`
+* `encode_delta_chord_tok_raw`
 * `encode_int_auto`
 * `encode_int_manual`
 * `encode_matrix_marker_prefixed`
@@ -237,6 +243,7 @@
 * `enhanced_chord_to_tones_chord`
 * `enhanced_delta_score_notes`
 * `equalize_closest_elements_dynamic`
+* `escore_chord_to_chord_token`
 * `escore_matrix_to_merged_escore_notes`
 * `escore_matrix_to_original_escore_notes`
 * `escore_notes_averages`
@@ -279,6 +286,7 @@
 * `expert_check_and_fix_pitches_chord`
 * `expert_check_and_fix_tones_chord`
 * `extract_melody`
+* `extract_non_overlapping_chords`
 
 </details>
 
@@ -548,7 +556,7 @@
 ## R
 <a name="r"></a>
 
-**12 entries**
+**13 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -565,6 +573,7 @@
 * `rle_decode_ones`
 * `rle_encode_ones`
 * `rle_tokens_to_escore_notes`
+* `rle_toks_to_binary_matrix`
 
 </details>
 
@@ -615,7 +624,7 @@
 ## T
 <a name="t"></a>
 
-**48 entries**
+**49 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -660,6 +669,7 @@
 * `top_k_list_value`
 * `top_k_list_values`
 * `train_bpe`
+* `transpose_chord_token`
 * `transpose_escore_notes`
 * `transpose_escore_notes_to_pitch`
 * `transpose_list`
@@ -676,13 +686,14 @@
 ## V
 <a name="v"></a>
 
-**4 entries**
+**5 entries**
 
 <details>
 <summary>Show entries</summary>
 
 * `validate_pitches`
 * `validate_pitches_chord`
+* `values_percentile`
 * `variance`
 * `vertical_list_search`
 
