@@ -18652,6 +18652,16 @@ def set_of_sublists(list_of_lists):
 
 ###################################################################################
 
+def escore_notes_run_time(escore_notes, time_idx=1, dur_idx=2):
+    
+    last_time = escore_notes[-1][time_idx]
+    last_notes = [e for e in escore_notes if e[time_idx] == last_time]
+    max_dur = max([e[dur_idx] for e in last_notes])
+    
+    return [last_time+max_dur, last_time]
+
+###################################################################################
+
 print('Module loaded!')
 print('=' * 70)
 print('Enjoy! :)')
