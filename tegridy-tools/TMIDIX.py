@@ -1,12 +1,11 @@
 #! /usr/bin/python3
 
-r'''###############################################################################
-###################################################################################
-#
+r'''
+###############################################################################
 #
 #	Tegridy MIDI X Module (TMIDI X / tee-midi eks)
 #
-#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1450
+#   NOTE: TMIDI X Module starts after the partial MIDI.py module @ line 1461
 #
 #	Based upon MIDI.py module v.6.7. by Peter Billam / pjb.com.au
 #
@@ -16,9 +15,8 @@ r'''############################################################################
 #
 #   https://github.com/Tegridy-Code/Project-Los-Angeles
 #
+###################################################################################
 #
-###################################################################################
-###################################################################################
 #   Copyright 2026 Project Los Angeles / Tegridy Code
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +30,7 @@ r'''############################################################################
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-###################################################################################
+#
 ###################################################################################
 #
 #	PARTIAL MIDI.py Module v.6.7. by Peter Billam
@@ -46,12 +44,13 @@ r'''############################################################################
 #	Copyright 2020 Peter Billam
 #
 ###################################################################################
-###################################################################################
 '''
 
 ###################################################################################
 
-__version__ = "26.4.21"
+__version__ = "26.4.27" # TMIDIX version
+
+###################################################################################
 
 print('=' * 70)
 print('TMIDIX Python module')
@@ -63,12 +62,24 @@ print('Loading module...')
 
 import sys, struct, copy
 
+###################################################################################
+
 Version = '6.7'
 VersionDate = '20201120'
+
+###################################################################################
 
 _previous_warning = ''  # 5.4
 _previous_times = 0     # 5.4
 _no_warning = False
+
+###################################################################################
+
+def set_no_warning(value: bool):
+    global _no_warning
+    _no_warning = value
+    
+###################################################################################
 
 #------------------------------- Encoding stuff --------------------------
 
@@ -1448,8 +1459,6 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
     return b''.join(data)
 
 ###################################################################################
-###################################################################################
-###################################################################################
 #
 #	Tegridy MIDI X Module (TMIDI X / tee-midi eks)
 #
@@ -1457,12 +1466,10 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 #	pjb.com.au
 #
 #	Project Los Angeles
-#	Tegridy Code 2025
+#	Tegridy Code 2026
 #
 #   https://github.com/Tegridy-Code/Project-Los-Angeles
 #
-###################################################################################
-###################################################################################
 ###################################################################################
 
 import os
@@ -7156,7 +7163,8 @@ def escore_notes_to_binary_matrix(escore_notes,
                                   patch=0,
                                   flip_matrix=False,
                                   reverse_matrix=False,
-                                  encode_velocities=False
+                                  encode_velocities=False,
+                                  dry_run=False
                                   ):
 
   escore = [e for e in escore_notes if e[3] == channel and e[6] == patch]
@@ -7167,44 +7175,68 @@ def escore_notes_to_binary_matrix(escore_notes,
     max_last_dur = max([e[2] for e in last_notes])
 
     time_range = last_time+max_last_dur
+    
+    if dry_run:
+        escore_matrix = [[] for _ in range(time_range)]
+        
+        for note in escore:
 
-    escore_matrix = []
+            etype, time, duration, chan, pitch, velocity, pat = note
 
-    escore_matrix = [[0] * 128 for _ in range(time_range)]
+            time = max(0, time)
+            duration = max(1, duration)
+            chan = max(0, min(15, chan))
+            pitch = max(0, min(127, pitch))
+            velocity = max(1, min(127, velocity))
+            pat = max(0, min(128, pat))
 
-    for note in escore:
+            if channel == chan and patch == pat:
 
-        etype, time, duration, chan, pitch, velocity, pat = note
+              for t in range(time, min(time + duration, time_range)):
+                if encode_velocities:
+                    escore_matrix[t].extend([pitch, velocity])
+                    
+                else:
+                    escore_matrix[t].append(pitch)
+                    
+        return escore_matrix
+        
+    else:
+        escore_matrix = [[0] * 128 for _ in range(time_range)]
 
-        time = max(0, time)
-        duration = max(1, duration)
-        chan = max(0, min(15, chan))
-        pitch = max(0, min(127, pitch))
-        velocity = max(1, min(127, velocity))
-        pat = max(0, min(128, pat))
+        for note in escore:
 
-        if channel == chan and patch == pat:
+            etype, time, duration, chan, pitch, velocity, pat = note
 
-          for t in range(time, min(time + duration, time_range)):
-            if encode_velocities:
-                escore_matrix[t][pitch] = velocity
-                
-            else:
-                escore_matrix[t][pitch] = 1
+            time = max(0, time)
+            duration = max(1, duration)
+            chan = max(0, min(15, chan))
+            pitch = max(0, min(127, pitch))
+            velocity = max(1, min(127, velocity))
+            pat = max(0, min(128, pat))
 
-    if flip_matrix:
+            if channel == chan and patch == pat:
 
-      temp_matrix = []
+              for t in range(time, min(time + duration, time_range)):
+                if encode_velocities:
+                    escore_matrix[t][pitch] = velocity
+                    
+                else:
+                    escore_matrix[t][pitch] = 1
 
-      for m in escore_matrix:
-        temp_matrix.append(m[::-1])
+        if flip_matrix:
 
-      escore_matrix = temp_matrix
+          temp_matrix = []
 
-    if reverse_matrix:
-      escore_matrix = escore_matrix[::-1]
+          for m in escore_matrix:
+            temp_matrix.append(m[::-1])
 
-    return escore_matrix
+          escore_matrix = temp_matrix
+
+        if reverse_matrix:
+          escore_matrix = escore_matrix[::-1]
+
+        return escore_matrix
 
   else:
     return None
@@ -7223,6 +7255,7 @@ def binary_matrix_to_original_escore_notes(binary_matrix,
   for j in range(len(binary_matrix[0])):
 
       count = 1
+      i = 1
 
       for i in range(1, len(binary_matrix)):
 
@@ -18605,6 +18638,17 @@ def values_percentile(data, p):
     if f == 0:
         return xs[i]
     return xs[i] + f * (xs[i + 1] - xs[i])
+
+###################################################################################
+
+def set_of_sublists(list_of_lists):
+    seen = set()
+    add = seen.add
+    
+    for sub in list_of_lists:
+        add(tuple(sub))
+        
+    return [list(t) for t in seen]
 
 ###################################################################################
 
