@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.4.27" # TMIDIX version
+__version__ = "26.5.13" # TMIDIX version
 
 ###################################################################################
 
@@ -1474,6 +1474,12 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 
 import os
 
+import platform
+
+import ctypes
+
+import time
+
 import datetime
 
 from datetime import datetime
@@ -1522,8 +1528,6 @@ import heapq
 
 import matplotlib.pyplot as plt
 
-import psutil
-
 import json
 
 from pathlib import Path
@@ -1538,6 +1542,8 @@ from pathlib import Path
 from fnmatch import fnmatch
 
 from typing import List, Optional, Tuple, Dict, Any, Optional, Iterable, Set
+
+import subprocess
 
 ###################################################################################
 #
@@ -11795,26 +11801,130 @@ def is_mostly_wide_peaks_and_valleys(values,
 ###################################################################################
 
 def system_memory_utilization(return_dict=False):
+    """
+    Cross‑platform memory utilization without psutil.
+    Works on Linux, macOS, Windows.
+    """
 
-    if return_dict:
-        return dict(psutil.virtual_memory()._asdict())
+    system = platform.system()
+
+    if system == "Linux":
+        # /proc/meminfo is the most reliable
+        meminfo = {}
+        with open("/proc/meminfo") as f:
+            for line in f:
+                key, val = line.split(":")
+                meminfo[key.strip()] = int(val.strip().split()[0]) * 1024  # kB → bytes
+
+        total = meminfo["MemTotal"]
+        available = meminfo.get("MemAvailable", meminfo["MemFree"])
+        used = total - available
+        percent = (used / total) * 100
+
+    elif system == "Darwin":  # macOS
+        import subprocess, re
+        vm = subprocess.check_output(["vm_stat"]).decode()
+        pages = {}
+        for line in vm.split("\n"):
+            m = re.match(r"(.+):\s+(\d+)\.", line)
+            if m:
+                pages[m.group(1)] = int(m.group(2))
+
+        page_size = int(subprocess.check_output(["sysctl", "-n", "hw.pagesize"]).decode())
+        total = int(subprocess.check_output(["sysctl", "-n", "hw.memsize"]).decode())
+        free = (pages["Pages free"] + pages["Pages inactive"]) * page_size
+        used = total - free
+        percent = (used / total) * 100
+
+    elif system == "Windows":
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [
+                ("dwLength", ctypes.c_ulong),
+                ("dwMemoryLoad", ctypes.c_ulong),
+                ("ullTotalPhys", ctypes.c_ulonglong),
+                ("ullAvailPhys", ctypes.c_ulonglong),
+            ]
+
+        mem = MEMORYSTATUSEX()
+        mem.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(mem))
+
+        total = mem.ullTotalPhys
+        available = mem.ullAvailPhys
+        used = total - available
+        percent = mem.dwMemoryLoad
 
     else:
-        print('RAM memory % used:', psutil.virtual_memory()[2])
-        print('RAM Used (GB):', psutil.virtual_memory()[3]/(1024**3))
+        raise NotImplementedError(f"Unsupported OS: {system}")
+
+    if return_dict:
+        return {
+            "total_bytes": total,
+            "used_bytes": used,
+            "available_bytes": available,
+            "percent_used": percent,
+        }
+
+    print(f"RAM memory % used: {percent:.2f}")
+    print(f"RAM Used (GB): {used / (1024**3):.2f}")
 
 ###################################################################################
 
 def system_cpus_utilization(return_dict=False):
+    """
+    Cross‑platform CPU utilization without psutil.
+    Uses 1‑second sampling like psutil.cpu_percent(interval=1).
+    """
 
-    if return_dict:
-        return {'num_cpus': psutil.cpu_count(),
-                'cpus_util': psutil.cpu_percent()
-                }
+    system = platform.system()
+    num_cpus = os.cpu_count()
+
+    if system == "Linux":
+        def read_cpu():
+            with open("/proc/stat") as f:
+                fields = f.readline().split()[1:]
+                return list(map(int, fields))
+
+        t1 = read_cpu()
+        time.sleep(1)
+        t2 = read_cpu()
+
+        idle1, idle2 = t1[3], t2[3]
+        total1, total2 = sum(t1), sum(t2)
+
+        idle_delta = idle2 - idle1
+        total_delta = total2 - total1
+
+        cpu_percent = 100 * (1 - idle_delta / total_delta)
+
+    elif system == "Darwin":  # macOS
+        def read_cpu():
+            out = subprocess.check_output(["ps", "-A", "-o", "%cpu"]).decode().split()
+            vals = [float(x) for x in out[1:]]
+            return sum(vals)
+
+        cpu1 = read_cpu()
+        time.sleep(1)
+        cpu2 = read_cpu()
+        cpu_percent = min(cpu2 - cpu1, 100.0)
+
+    elif system == "Windows":
+        cmd = ['typeperf', '"\\Processor(_Total)\\% Processor Time"', '-sc', '1']
+        out = subprocess.check_output(cmd).decode()
+        # Last line contains the value
+        cpu_percent = float(out.strip().split("\n")[-1].split(",")[-1].replace('"', ""))
 
     else:
-        print('Number of CPUs:', psutil.cpu_count())
-        print('CPUs utilization:', psutil.cpu_percent())
+        raise NotImplementedError(f"Unsupported OS: {system}")
+
+    if return_dict:
+        return {
+            "num_cpus": num_cpus,
+            "cpus_util": cpu_percent,
+        }
+
+    print("Number of CPUs:", num_cpus)
+    print("CPUs utilization:", cpu_percent)
 
 ###################################################################################
 
@@ -18659,6 +18769,151 @@ def escore_notes_run_time(escore_notes, time_idx=1, dur_idx=2):
     max_dur = max([e[dur_idx] for e in last_notes])
     
     return [last_time+max_dur, last_time]
+
+###################################################################################
+
+def find_best_ngram_match(
+    src_counter: Counter, 
+    counter_pool: List[Counter],
+    ngram_weights: Optional[Dict[int, float]] = None,
+    min_count: int = 2  # Filter out ngrams appearing less than this (removes noise)
+) -> Optional[Tuple[int, float, float, float]]:
+    """
+    Finds the best matching Counter using Log-Scaled Weighted Cosine Similarity,
+    with noise filtering to prevent long-tail vocabulary mismatch penalties.
+    
+    Args:
+        src_counter: The Counter object to match against.
+        counter_pool: A list of Counter objects to search through.
+        ngram_weights: A dict mapping ngram LENGTHS to importance weights.
+                       Example: {1: 1.0, 2: 2.5, 3: 4.0}. 
+                       If None, all lengths are weighted equally (1.0).
+        min_count: Minimum count required for an ngram to be included in the comparison.
+                   Setting to 2 removes "hapax legomena" (count=1 noise), drastically
+                   improving profile similarity for text/ngram data.
+        
+    Returns:
+        A tuple of (best_matching_index, best_similarity, pool_mean, pool_std) 
+        or None if no viable match is found.
+    """
+    if not counter_pool:
+        return None
+
+    # Filter out zero/negative counts
+    src = +src_counter
+    if not src:
+        return None
+
+    if ngram_weights is None:
+        ngram_weights = {}
+    
+    # --- FILTERING & LOG SCALING ---
+    # 1. Drop ngrams below min_count (removes the noisy long-tail)
+    # 2. Apply 1 + log(count) to compress the dynamic range
+    # 3. Weight by the LENGTH of the ngram key (e.g., len((1, 6)) == 2)
+    def scale_counter(counter: Counter) -> Dict[tuple, float]:
+        scaled = {}
+        for ngram_key, count in counter.items():
+            if count >= min_count:
+                weight = ngram_weights.get(len(ngram_key), 1.0)
+                scaled[ngram_key] = (1.0 + math.log(count)) * weight
+        return scaled
+
+    src_scaled = scale_counter(src)
+    
+    # If source becomes empty after filtering, we can't match
+    if not src_scaled:
+        return None
+
+    src_magnitude = math.sqrt(sum(v ** 2 for v in src_scaled.values()))
+    src_raw_total = sum(v for k, v in src.items() if k in src_scaled) # Tiebreaker magnitude
+
+    best_index = -1
+    best_similarity = -1.0
+    best_cand_raw_total = -1.0
+    best_cand_items = []
+    
+    all_similarities = []
+
+    for idx, candidate in enumerate(counter_pool):
+        cand = +candidate
+        if not cand:
+            all_similarities.append(0.0)
+            continue
+
+        cand_scaled = scale_counter(cand)
+        
+        if not cand_scaled:
+            all_similarities.append(0.0)
+            continue
+
+        # --- COSINE SIMILARITY ---
+        dot_product = 0.0
+        cand_magnitude_sq = 0.0
+        
+        # Iterate over candidate keys to find intersections and calculate magnitude
+        for ngram_key, c_val in cand_scaled.items():
+            cand_magnitude_sq += c_val ** 2
+            
+            s_val = src_scaled.get(ngram_key)
+            if s_val is not None:
+                dot_product += s_val * c_val
+                
+        cand_magnitude = math.sqrt(cand_magnitude_sq)
+        
+        # Calculate Cosine Similarity
+        if cand_magnitude == 0 or src_magnitude == 0:
+            similarity = 0.0
+        else:
+            similarity = dot_product / (src_magnitude * cand_magnitude)
+            
+        all_similarities.append(similarity)
+
+        # --- Tiebreaker: Raw Magnitude Distance ---
+        cand_raw_total = sum(v for k, v in cand.items() if k in cand_scaled)
+        magnitude_distance = abs(src_raw_total - cand_raw_total)
+
+        # --- Comparison Logic ---
+        if similarity > best_similarity:
+            best_index = idx
+            best_similarity = similarity
+            best_cand_raw_total = cand_raw_total
+            best_cand_items = sorted(cand.items())
+            
+        elif similarity == best_similarity:
+            best_mag_distance = abs(src_raw_total - best_cand_raw_total)
+            
+            if magnitude_distance < best_mag_distance:
+                best_index = idx
+                best_cand_raw_total = cand_raw_total
+                best_cand_items = sorted(cand.items())
+                
+            elif magnitude_distance == best_mag_distance:
+                current_items = sorted(cand.items())
+                if current_items < best_cand_items:
+                    best_index = idx
+                    best_cand_raw_total = cand_raw_total
+                    best_cand_items = current_items
+
+    if best_index == -1:
+        return None
+
+    # --- Calculate Overall Pool Statistics ---
+    valid_sim_count = len(all_similarities)
+    
+    if valid_sim_count > 0:
+        pool_mean = sum(all_similarities) / valid_sim_count
+        
+        if valid_sim_count > 1:
+            variance = sum((s - pool_mean) ** 2 for s in all_similarities) / (valid_sim_count - 1)
+            pool_std = math.sqrt(variance)
+        else:
+            pool_std = 0.0
+    else:
+        pool_mean = 0.0
+        pool_std = 0.0
+
+    return best_index, best_similarity, pool_mean, pool_std
 
 ###################################################################################
 
