@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 11.0
+# Version 12.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -8515,6 +8515,316 @@ def print_masked_predictions(results, topk=1, mask_token='[M]'):
         if topk > 1:
             for rank, (c, p) in enumerate(preds[pos]['topk'][:topk], start=1):
                 print(f"    Top-{rank}: {c} (P={p:.2%})")
+                
+#=================================================================================================================================
+# Cross-modal embeddings functions
+#=================================================================================================================================
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+import numpy as np
+import matplotlib.pyplot as plt
+from dataclasses import dataclass
+from typing import Tuple
+from sklearn.metrics import f1_score
+import os
+
+# ==========================================
+# 1. Configuration
+# ==========================================
+@dataclass
+class Config:
+    lyrics_dim: int = 2048      # Dimension of pre-computed lyrics embeddings
+    midi_dim: int = 2048        # Dimension of pre-computed MIDI embeddings
+    shared_dim: int = 2048      # Dimension of the shared cross-modal space
+    hidden_dim: int = 2048      # Hidden layer size in projection heads
+    
+    batch_size: int = 512
+    epochs: int = 400
+    lr: float = 1e-4
+    weight_decay: float = 1e-4
+    temperature: float = 0.07
+    
+    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
+    use_amp: bool = True       # Enable bfloat16 mixed precision
+    
+    # Plotting and Logging
+    print_every_n_steps: int = 100
+    plot_every_n_epochs: int = 1
+    plot_save_path: str = "cross_modal_training_metrics.png"
+
+# ==========================================
+# 2. Dataset
+# ==========================================
+class CrossModalDataset(Dataset):
+    def __init__(self, lyrics_embeddings: np.ndarray, midi_embeddings: np.ndarray):
+        assert len(lyrics_embeddings) == len(midi_embeddings), "Mismatched dataset lengths!"
+        self.lyrics = torch.tensor(lyrics_embeddings, dtype=torch.float32)
+        self.midi = torch.tensor(midi_embeddings, dtype=torch.float32)
+
+    def __len__(self):
+        return len(self.lyrics)
+
+    def __getitem__(self, idx):
+        return self.lyrics[idx], self.midi[idx]
+
+# ==========================================
+# 3. Model Architecture
+# ==========================================
+class ProjectionHead(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.BatchNorm1d(hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, output_dim)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+class CrossModalBridge(nn.Module):
+    def __init__(self, cfg: Config):
+        super().__init__()
+        self.lyrics_proj = ProjectionHead(cfg.lyrics_dim, cfg.hidden_dim, cfg.shared_dim)
+        self.midi_proj = ProjectionHead(cfg.midi_dim, cfg.hidden_dim, cfg.shared_dim)
+        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / cfg.temperature))
+
+    def forward(self, lyrics_emb, midi_emb):
+        lyrics_features = self.lyrics_proj(lyrics_emb)
+        midi_features = self.midi_proj(midi_emb)
+        lyrics_features = F.normalize(lyrics_features, dim=-1)
+        midi_features = F.normalize(midi_features, dim=-1)
+        return lyrics_features, midi_features
+
+# ==========================================
+# 4. Metrics & Loss
+# ==========================================
+def compute_batch_metrics(logits: torch.Tensor, labels: torch.Tensor):
+    """
+    Computes retrieval metrics for a batch.
+    logits: (batch_size, batch_size) similarity matrix
+    labels: (batch_size,) ground truth indices [0, 1, ..., batch_size-1]
+    """
+    _, top_indices = logits.topk(5, dim=1) # Get top 5 predictions
+    
+    # Recall@1 and Recall@5
+    correct_top5 = (top_indices == labels.unsqueeze(1))
+    recall_at_1 = correct_top5[:, 0].float().mean().item()
+    recall_at_5 = correct_top5.any(dim=1).float().mean().item()
+    
+    # Mean Reciprocal Rank (MRR)
+    # Find the rank of the first correct item
+    ranks = (correct_top5 == True).max(dim=1).indices.float() + 1.0
+    # If no correct item in top 5, rank is infinite (1/rank = 0)
+    has_correct = correct_top5.any(dim=1)
+    ranks[~has_correct] = float('inf')
+    mrr = (1.0 / ranks).mean().item()
+    
+    # F1 Score (Based on Top-1 predictions)
+    preds_top1 = top_indices[:, 0].cpu().numpy()
+    labels_np = labels.cpu().numpy()
+    f1 = f1_score(labels_np, preds_top1, average='macro')
+    
+    return recall_at_1, recall_at_5, mrr, f1
+
+def contrastive_loss_with_metrics(lyrics_features, midi_features, logit_scale):
+    logit_scale = logit_scale.exp()
+    logits_per_lyrics = logit_scale * lyrics_features @ midi_features.t()
+    logits_per_midi = logits_per_lyrics.t()
+
+    labels = torch.arange(logits_per_lyrics.shape[0]).to(logits_per_lyrics.device)
+
+    # Loss
+    loss_l2m = F.cross_entropy(logits_per_lyrics, labels)
+    loss_m2l = F.cross_entropy(logits_per_midi, labels)
+    loss = (loss_l2m + loss_m2l) / 2
+
+    # Metrics (Average metrics for both directions)
+    r1_l, r5_l, mrr_l, f1_l = compute_batch_metrics(logits_per_lyrics, labels)
+    r1_m, r5_m, mrr_m, f1_m = compute_batch_metrics(logits_per_midi, labels)
+    
+    metrics = {
+        'recall@1': (r1_l + r1_m) / 2,
+        'recall@5': (r5_l + r5_m) / 2,
+        'mrr': (mrr_l + mrr_m) / 2,
+        'f1': (f1_l + f1_m) / 2
+    }
+
+    return loss, metrics
+
+# ==========================================
+# 5. Plotting Utility
+# ==========================================
+def plot_training_curves(history: dict, save_path: str):
+    fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+    
+    axs[0, 0].plot(history['loss'], color='red')
+    axs[0, 0].set_title('Contrastive Loss')
+    axs[0, 0].set_xlabel('Epoch')
+    
+    axs[0, 1].plot(history['recall@1'], color='blue', label='Recall@1 (Acc)')
+    axs[0, 1].plot(history['recall@5'], color='cyan', label='Recall@5')
+    axs[0, 1].set_title('Retrieval Recall')
+    axs[0, 1].legend()
+    axs[0, 1].set_xlabel('Epoch')
+    
+    axs[1, 0].plot(history['f1'], color='green')
+    axs[1, 0].set_title('F1 Score (Top-1)')
+    axs[1, 0].set_xlabel('Epoch')
+    
+    axs[1, 1].plot(history['mrr'], color='purple')
+    axs[1, 1].set_title('Mean Reciprocal Rank (MRR)')
+    axs[1, 1].set_xlabel('Epoch')
+    
+    for ax in axs.flat:
+        ax.grid(True, linestyle='--', alpha=0.6)
+        
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+    print(f"📊 Plot saved to {save_path}")
+
+# ==========================================
+# 6. Training Loop
+# ==========================================
+def train(model, dataloader, cfg: Config):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg.epochs)
+    
+    model.to(cfg.device)
+    
+    # Determine device_type for AMP
+    device_type = 'cuda' if 'cuda' in cfg.device else 'cpu'
+    
+    history = {'loss': [], 'recall@1': [], 'recall@5': [], 'mrr': [], 'f1': []}
+
+    for epoch in range(cfg.epochs):
+        model.train()
+        epoch_loss = 0.0
+        epoch_metrics = {k: 0.0 for k in history.keys() if k != 'loss'}
+        num_batches = 0
+        
+        for batch_idx, (lyrics, midi) in enumerate(dataloader):
+            lyrics, midi = lyrics.to(cfg.device), midi.to(cfg.device)
+            
+            # --- Mixed Precision Forward Pass ---
+            with torch.autocast(device_type=device_type, dtype=torch.bfloat16, enabled=cfg.use_amp):
+                lyrics_feat, midi_feat = model(lyrics, midi)
+                loss, batch_metrics = contrastive_loss_with_metrics(lyrics_feat, midi_feat, model.logit_scale)
+            
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            
+            epoch_loss += loss.item()
+            for k, v in batch_metrics.items():
+                epoch_metrics[k] += v
+            num_batches += 1
+            
+            # Print step metrics
+            if (batch_idx + 1) % cfg.print_every_n_steps == 0:
+                print(f"  Epoch {epoch+1} | Step {batch_idx+1}/{len(dataloader)} | Step Loss: {loss.item():.4f}")
+
+        scheduler.step()
+        
+        # Epoch Averages
+        avg_loss = epoch_loss / num_batches
+        avg_metrics = {k: v / num_batches for k, v in epoch_metrics.items()}
+        
+        history['loss'].append(avg_loss)
+        for k, v in avg_metrics.items():
+            history[k].append(v)
+            
+        print(f"\n✅ Epoch {epoch+1}/{cfg.epochs} Summary:")
+        print(f"   Loss: {avg_loss:.4f} | Acc/R@1: {avg_metrics['recall@1']:.4f} | R@5: {avg_metrics['recall@5']:.4f} | F1: {avg_metrics['f1']:.4f} | MRR: {avg_metrics['mrr']:.4f}\n")
+        
+        # Plotting
+        if (epoch + 1) % cfg.plot_every_n_epochs == 0 or epoch == cfg.epochs - 1:
+            plot_training_curves(history, cfg.plot_save_path)
+
+            if epoch % 50 == 0:
+                TMIDIX.Tegridy_Any_Pickle_File_Writer([model, history], 'model.pth', verbose=False)
+
+    return model, history
+
+# ==========================================
+# 7. Evaluation & Inference
+# ==========================================
+class CrossModalRetriever:
+    def __init__(self, model: CrossModalBridge, cfg: Config):
+        self.model = model.to(cfg.device)
+        self.model.eval()
+        self.cfg = cfg
+        self.device_type = 'cuda' if 'cuda' in cfg.device else 'cpu'
+
+    @torch.no_grad()
+    def project_lyrics(self, lyrics_emb: torch.Tensor) -> torch.Tensor:
+        lyrics_emb = lyrics_emb.to(self.cfg.device)
+        with torch.autocast(device_type=self.device_type, dtype=torch.bfloat16, enabled=self.cfg.use_amp):
+            return F.normalize(self.model.lyrics_proj(lyrics_emb), dim=-1)
+
+    @torch.no_grad()
+    def project_midi(self, midi_emb: torch.Tensor) -> torch.Tensor:
+        midi_emb = midi_emb.to(self.cfg.device)
+        with torch.autocast(device_type=self.device_type, dtype=torch.bfloat16, enabled=self.cfg.use_amp):
+            return F.normalize(self.model.midi_proj(midi_emb), dim=-1)
+
+    @torch.no_grad()
+    def retrieve_midi_from_lyrics(self, query_lyrics: torch.Tensor, midi_database: torch.Tensor, top_k=5) -> Tuple[torch.Tensor, torch.Tensor]:
+        query_proj = self.project_lyrics(query_lyrics)
+        db_proj = self.project_midi(midi_database)
+        similarities = query_proj @ db_proj.t()
+        scores, indices = similarities.topk(top_k, dim=-1)
+        return scores, indices
+
+    @torch.no_grad()
+    def retrieve_lyrics_from_midi(self, query_midi: torch.Tensor, lyrics_database: torch.Tensor, top_k=5) -> Tuple[torch.Tensor, torch.Tensor]:
+        query_proj = self.project_midi(query_midi)
+        db_proj = self.project_lyrics(lyrics_database)
+        similarities = query_proj @ db_proj.t()
+        scores, indices = similarities.topk(top_k, dim=-1)
+        return scores, indices
+
+'''r
+--------------
+Usage examples
+--------------
+
+cfg = Config()
+
+# Create Mock Data
+num_samples = 1000
+print("Generating mock data...")
+mock_lyrics = np.random.randn(num_samples, cfg.lyrics_dim).astype(np.float32)
+mock_midi = np.random.randn(num_samples, cfg.midi_dim).astype(np.float32)
+
+dataset = CrossModalDataset(mock_lyrics, mock_midi)
+dataloader = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True, drop_last=True)
+
+model = CrossModalBridge(cfg)
+
+print(f"Starting training with AMP bfloat16={cfg.use_amp} on device={cfg.device}...")
+trained_model, history = train(model, dataloader, cfg)
+
+print("\nTesting Cross-Modal Inference...")
+retriever = CrossModalRetriever(trained_model, cfg)
+
+midi_db = torch.tensor(mock_midi[:100], dtype=torch.float32)
+lyrics_db = torch.tensor(mock_lyrics[:100], dtype=torch.float32)
+
+query_lyric = lyrics_db[0:1] 
+scores, indices = retriever.retrieve_midi_from_lyrics(query_lyric, midi_db, top_k=5)
+print(f"Top 5 MIDI indices matching Lyric 0: {indices.cpu().numpy()}")
+
+query_midi = midi_db[5:6] 
+scores, indices = retriever.retrieve_lyrics_from_midi(query_midi, lyrics_db, top_k=5)
+print(f"Top 5 Lyrics indices matching MIDI 5: {indices.cpu().numpy()}")
+'''
        
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
