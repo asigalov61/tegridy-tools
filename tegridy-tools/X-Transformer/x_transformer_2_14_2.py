@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 7.0
+# Version 8.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -5135,6 +5135,157 @@ class AutoregressiveWrapper(Module):
             return loss, acc
 
         return loss, acc, logits, cache
+
+    @torch.inference_mode()
+    @eval_decorator
+    def generate_infill(
+        self,
+        tokens,
+        infill_indexes,
+        temperature = 0.9,
+        filter_logits_fn = None,
+        filter_kwargs = None,
+        return_infill_only = False,
+        verbose = True,
+        **kwargs
+    ):
+        """
+        Infill tokens at specified positions in a sequence using autoregressive predictions.
+
+        Each infill position is predicted one at a time from left to right.
+        Every prediction is conditioned on all preceding context **including
+        previously infilled tokens**, yielding the best results for a causal
+        (decoder-only) model.  Cost: one forward pass per infill position.
+
+        Args:
+            tokens:           Long tensor ``(batch, seq_len)``.  Positions to
+                              be infilled should contain a placeholder (e.g.
+                              ``pad_value``).
+            infill_indexes:   List or 1-D tensor of integer positions to infill.
+                              Processed from left to right.
+            temperature:      Sampling temperature.  ``0.`` → greedy (argmax).
+            filter_logits_fn: Logit-filtering function (``top_k``, ``top_p``, …).
+                              Pass ``None`` to disable filtering.
+            filter_kwargs:    Dict of keyword arguments forwarded to
+                              ``filter_logits_fn``.  For ``top_k`` use e.g.
+                              ``dict(frac_num_tokens=0.1)`` or ``dict(k=50)``.
+                              For ``top_p`` use e.g. ``dict(thres=0.9)``.
+                              Defaults to ``dict(thres=0.9)`` for backward
+                              compatibility when ``filter_logits_fn`` is
+                              ``top_p``; otherwise ``{}``.
+            return_infill_only:
+                              If ``True``, return only the predicted tokens at
+                              the infill positions instead of the full sequence.
+            verbose:          If ``True``, print generation progress.
+            **kwargs:         Forwarded to the model's forward pass.
+
+        Returns:
+            If ``return_infill_only`` is ``False`` (default):
+                ``(batch, seq_len)`` LongTensor with infill positions filled.
+            If ``return_infill_only`` is ``True``:
+                ``(batch, num_infill_positions)`` LongTensor of predicted tokens.
+        """
+        was_training = self.training
+        self.eval()
+
+        device = tokens.device
+        batch_size, seq_len = tokens.shape
+        tokens = tokens.clone()
+
+        # ---- normalise infill_indexes -----------------------------------------
+        if isinstance(infill_indexes, torch.Tensor):
+            infill_indexes = infill_indexes.detach().cpu().sort().values.tolist()
+        elif not isinstance(infill_indexes, list):
+            infill_indexes = list(infill_indexes)
+        infill_indexes = sorted(set(int(i) for i in infill_indexes))
+
+        # drop out-of-range positions
+        infill_indexes = [i for i in infill_indexes if 0 <= i < seq_len]
+
+        num_infill = len(infill_indexes)
+
+        # ---- resolve filter_kwargs --------------------------------------------
+        if not exists(filter_kwargs):
+            # sensible default depending on the chosen filter function
+            if filter_logits_fn is top_p:
+                filter_kwargs = dict(thres = 0.9)
+            else:
+                filter_kwargs = {}
+
+        if verbose:
+            fn_name = filter_logits_fn.__name__ if exists(filter_logits_fn) else None
+            print(f'generate_infill | batch_size={batch_size} '
+                  f'| seq_len={seq_len} | num_infill_positions={num_infill} '
+                  f'| temperature={temperature} | '
+                  f'filter={fn_name} | filter_kwargs={filter_kwargs}')
+
+        if num_infill == 0:
+            if verbose:
+                print('generate_infill | no valid infill positions — returning original tokens')
+            if was_training:
+                self.train()
+            if return_infill_only:
+                return torch.empty(batch_size, 0, dtype = tokens.dtype, device = device)
+            return tokens
+
+        # ---- helper -----------------------------------------------------------
+        def _predict_from_logits(logits_vec):
+            """Filter + sample / argmax from a (batch, vocab) logit tensor."""
+            if exists(filter_logits_fn):
+                filt = filter_logits_fn(logits_vec, **filter_kwargs)
+            else:
+                filt = logits_vec
+
+            if temperature == 0.:
+                return filt.argmax(dim = -1, keepdim = True)
+            else:
+                probs = F.softmax(filt / temperature, dim = -1)
+                return torch.multinomial(probs, 1)
+
+        # ======================================================================
+        #  SEQUENTIAL INFILL  – one forward pass per infill position
+        # ======================================================================
+        if verbose:
+            print(f'generate_infill | starting {num_infill} infill steps ...')
+
+        for step_i, idx in enumerate(infill_indexes):
+            if idx < 1:
+                if verbose:
+                    print(f'  step {step_i+1}/{num_infill} | pos={idx} — '
+                          f'skipped (no causal context at position 0)')
+                continue
+
+            prefix = tokens[:, :idx]
+            prefix = prefix[:, -self.max_seq_len:]
+
+            logits = self.net(prefix, **kwargs)
+            logits = logits[:, -1, :]
+
+            sample = _predict_from_logits(logits)
+            sampled_token = sample.squeeze(-1)
+
+            tokens[:, idx] = sampled_token
+
+            if verbose and (step_i + 1) % 32 == 0:
+                tok_str = ', '.join(str(t.item()) for t in sampled_token)
+                pct = (step_i + 1) / num_infill * 100
+                print(f'  step {step_i+1}/{num_infill} ({pct:5.1f}%) | '
+                      f'pos={idx} | predicted_tokens=[{tok_str}]')
+
+        # ---- collect result ---------------------------------------------------
+        if verbose:
+            print('generate_infill | complete')
+
+        if was_training:
+            self.train()
+
+        if return_infill_only:
+            infill_tokens_list = [tokens[:, idx] for idx in infill_indexes]
+            if len(infill_tokens_list) > 0:
+                return torch.stack(infill_tokens_list, dim = 1)
+            return torch.empty(batch_size, 0, dtype = tokens.dtype, device = device)
+
+        return tokens
 
 #=================================================================================================================================
 # gpt_vae.py
@@ -10879,7 +11030,7 @@ class CrossModalRetriever:
         scores, indices = similarities.topk(top_k, dim=-1)
         return scores, indices
 
-'''r
+r'''
 --------------
 Usage examples
 --------------
@@ -10913,6 +11064,596 @@ print(f"Top 5 MIDI indices matching Lyric 0: {indices.cpu().numpy()}")
 query_midi = midi_db[5:6] 
 scores, indices = retriever.retrieve_lyrics_from_midi(query_midi, lyrics_db, top_k=5)
 print(f"Top 5 Lyrics indices matching MIDI 5: {indices.cpu().numpy()}")
+'''
+
+#=================================================================================================================================
+# MIDI PCA VQ VAE functions
+#=================================================================================================================================
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import math
+
+# ---------------------------------------------------------
+# 1. RVQ with Direct Optimization & Dead Code Revival
+# ---------------------------------------------------------
+class ResidualVQ(nn.Module):
+    def __init__(self, n_e=1024, e_dim=64, d_model=256, n_codebooks=4, beta=0.25): # Default beta == 1.0
+        super().__init__()
+        self.n_e = n_e
+        self.e_dim = e_dim
+        self.n_codebooks = n_codebooks
+        self.beta = beta
+        
+        self.proj_down = nn.Linear(d_model, e_dim)
+        self.proj_up = nn.Linear(e_dim * n_codebooks, d_model)
+        
+        self.embedding = nn.ParameterList([
+            nn.Parameter(torch.randn(n_e, e_dim) * (1.0 / math.sqrt(e_dim))) for _ in range(n_codebooks)
+        ])
+
+        # Ensures codes don't start too close to the zero-mean encoder outputs
+        for emb in self.embedding:
+            nn.init.kaiming_uniform_(emb, a=math.sqrt(5))
+
+    @torch.no_grad()
+    def _revive_dead_codes(self, i, indices, z_residual):
+        # Fixed typo here: self.n_e instead of self_n_e
+        one_hot = F.one_hot(indices, self.n_e).float()
+        usage = one_hot.sum(0)
+        dead_codes = (usage == 0)
+        n_dead = dead_codes.sum().item()
+        if n_dead > 0:
+            rand_idx = torch.randint(0, z_residual.shape[0], (n_dead,), device=z_residual.device)
+            self.embedding[i].data[dead_codes] = z_residual[rand_idx].detach().float()
+
+    def forward(self, z):
+        z_float = z.float()
+        z_flat = self.proj_down(z_float)
+        B, T, _ = z_flat.shape
+        z_flat_bt = z_flat.reshape(-1, self.e_dim)
+        
+        z_q_all = []
+        total_vq_loss = 0.0
+        all_indices = []
+        
+        z_residual = z_flat_bt
+
+        for i in range(self.n_codebooks):
+            emb = self.embedding[i]
+            
+            d = torch.sum(z_residual**2, dim=1, keepdim=True) + \
+                torch.sum(emb**2, dim=1) - 2 * (z_residual @ emb.t())
+            
+            indices = torch.argmin(d, dim=1)
+            z_q_hard = emb[indices]
+
+            if self.training:
+                self._revive_dead_codes(i, indices, z_residual.detach())
+
+            z_q_st = z_residual + (z_q_hard - z_residual).detach()
+            total_vq_loss += F.mse_loss(z_residual, z_q_hard.detach()) + self.beta * F.mse_loss(z_residual, z_q_hard.detach())
+
+            z_q_all.append(z_q_st)
+            all_indices.append(indices)
+            z_residual = z_residual - z_q_hard.detach()
+
+        z_q_cat = torch.cat(z_q_all, dim=-1)
+        z_q_up = self.proj_up(z_q_cat.reshape(B, T, -1)).to(z.dtype)
+        
+        all_indices = torch.stack(all_indices).reshape(self.n_codebooks, B, T)
+        
+        total_perplexity = 0.0
+        for cb_indices in all_indices:
+            enc = F.one_hot(cb_indices.reshape(-1), self.n_e).float()
+            probs = enc.mean(0)
+            perp = torch.exp(-torch.sum(probs * torch.log(probs + 1e-10)))
+            total_perplexity += perp
+
+        return z_q_up, total_vq_loss, all_indices, total_perplexity
+
+# ---------------------------------------------------------
+# 2. Symmetric Encoder
+# ---------------------------------------------------------
+class MVV_Encoder(nn.Module):
+    def __init__(self, vocab_size=18820, d_model=256, downsample_factor=16, pad_idx=0):
+        super().__init__()
+        self.emb = nn.Embedding(vocab_size, d_model, padding_idx=pad_idx)
+        self.n_layers = int(math.log2(downsample_factor))
+        
+        max_channels = 1024
+        out_channels = []
+        
+        curr = d_model
+        for i in range(self.n_layers):
+            if i < self.n_layers // 2:
+                curr = min(curr * 2, max_channels)
+            elif i == self.n_layers - 1:
+                curr = d_model
+            else:
+                curr = max(curr // 2, d_model)
+            out_channels.append(curr)
+            
+        in_channels = [d_model] + out_channels[:-1]
+        
+        layers = []
+        for i in range(self.n_layers):
+            layers.append(nn.Conv1d(in_channels[i], out_channels[i], kernel_size=4, stride=2, padding=1))
+            if i < self.n_layers - 1:
+                layers.append(nn.GELU())
+                
+        self.conv_net = nn.Sequential(*layers)
+        
+        # Increased depth and heads
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=8, batch_first=True, activation='gelu')
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=4)
+
+    def forward(self, x):
+        x = self.emb(x)              
+        x = x.transpose(1, 2)        
+        x = self.conv_net(x)         
+        x = x.transpose(1, 2)        
+        # x = self.transformer(x) # Uncomment this for full Encoder recon      
+        return x
+
+# ---------------------------------------------------------
+# 3. Symmetric Decoder
+# ---------------------------------------------------------
+class MVV_Decoder(nn.Module):
+    def __init__(self, vocab_size=18820, d_model=256, upsample_factor=16):
+        super().__init__()
+        self.n_layers = int(math.log2(upsample_factor))
+        
+        # Increased depth and heads
+        decoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=8, batch_first=True, activation='gelu')
+        self.transformer = nn.TransformerEncoder(decoder_layer, num_layers=4)
+        
+        max_channels = 1024
+        out_channels = []
+        
+        curr = d_model
+        for i in range(self.n_layers):
+            if i < self.n_layers // 2:
+                curr = min(curr * 2, max_channels)
+            elif i == self.n_layers - 1:
+                curr = d_model
+            else:
+                curr = max(curr // 2, d_model)
+            out_channels.append(curr)
+            
+        in_channels = [d_model] + out_channels[:-1]
+        
+        dec_in_channels = out_channels[::-1]
+        dec_out_channels = in_channels[::-1]
+        
+        layers = []
+        for i in range(self.n_layers):
+            layers.append(nn.ConvTranspose1d(dec_in_channels[i], dec_out_channels[i], kernel_size=4, stride=2, padding=1))
+            if i < self.n_layers - 1:
+                layers.append(nn.GELU())
+            
+        self.conv_net = nn.Sequential(*layers)
+        self.head = nn.Linear(d_model, vocab_size)
+
+    def forward(self, x):
+        x = self.transformer(x)      
+        x = x.transpose(1, 2)        
+        x = self.conv_net(x)         
+        x = x.transpose(1, 2)        
+        logits = self.head(x)        
+        return logits
+
+# ---------------------------------------------------------
+# 4. Complete MIDI VQ-VAE Autoencoder
+# ---------------------------------------------------------
+class MidiVQVAE(nn.Module):
+    def __init__(self, vocab_size=18820, d_model=256, downsample_factor=16, codebook_size=1024, pad_idx=0, vq_dim=64, n_codebooks=4):
+        super().__init__()
+        if downsample_factor & (downsample_factor - 1):
+            raise ValueError("downsample_factor must be a power of 2")
+            
+        self.downsample_factor = downsample_factor
+        self.pad_idx = pad_idx
+        
+        self.encoder = MVV_Encoder(vocab_size, d_model, downsample_factor, pad_idx)
+        self.quantizer = ResidualVQ(n_e=codebook_size, e_dim=vq_dim, d_model=d_model, n_codebooks=n_codebooks)
+        self.decoder = MVV_Decoder(vocab_size, d_model, downsample_factor)
+        
+        # Tie input and output embeddings for faster convergence
+        self.decoder.head.weight = self.encoder.emb.weight
+
+    def pad_to_factor(self, x):
+        seq_len = x.size(1)
+        pad_len = (self.downsample_factor - (seq_len % self.downsample_factor)) % self.downsample_factor
+        if pad_len > 0:
+            x = F.pad(x, (0, pad_len), value=self.pad_idx)
+        return x, pad_len
+
+    def forward(self, x):
+        original_len = x.size(1)
+        x, _ = self.pad_to_factor(x)
+        
+        z = self.encoder(x)                       
+        z_q, vq_loss, discrete_tokens, perplexity = self.quantizer(z) 
+        
+        logits = self.decoder(z_q)
+        logits = logits[:, :original_len, :]
+            
+        return logits, vq_loss, discrete_tokens, z, perplexity
+
+    def encode_to_tokens(self, x):
+        x, _ = self.pad_to_factor(x)
+        z = self.encoder(x)
+        _, _, discrete_tokens, _ = self.quantizer(z)
+        return discrete_tokens
+
+    def decode_from_tokens(self, discrete_tokens, target_len=8000):
+        z_q_all = []
+        for i in range(self.quantizer.n_codebooks):
+            emb = self.quantizer.embedding[i]
+            z_q_all.append(emb[discrete_tokens[i]].float())
+        
+        z_q_cat = torch.cat(z_q_all, dim=-1)
+        z_q = self.quantizer.proj_up(z_q_cat)
+        
+        logits = self.decoder(z_q)
+        logits = logits[:, :target_len, :] 
+        return torch.argmax(logits, dim=-1)
+
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torch.nn.utils.rnn import pad_sequence
+
+# 1. Define the Dataset
+class SequenceDataset(Dataset):
+    def __init__(self, data, seq_len=8192):
+        """
+        Args:
+            data: A list of tuples where x[0] is metadata (e.g., label, id) 
+                  and x[1] is the sequence (list, numpy array, or tensor).
+        """
+        self.data = data
+        self.seq_len = seq_len
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        # Extract the sequence and convert to tensor
+        seq = torch.tensor(self.data[idx][:self.seq_len], dtype=torch.long)
+        
+        return seq 
+
+# 2. Define the Custom Collate Function
+def pad_collate_fn(batch, pad_idx=0):
+    """
+    This function is called by the DataLoader to merge a list of samples 
+    into a mini-batch of Tensors.
+    
+    Args:
+        batch: A list of tensors returned by __getitem__
+        pad_idx: The value to use for padding (defaults to 0)
+    """
+    # batch is a list of tensors: [tensor([1, 2, 3]), tensor([4, 5])]
+    padded_seqs = pad_sequence(batch, batch_first=True, padding_value=pad_idx)
+    
+    return padded_seqs
+
+import tqdm
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+from IPython.display import clear_output
+
+# ---------------------------------------------------------
+# Training Logger & Plotter
+# ---------------------------------------------------------
+class TrainingLogger:
+    def __init__(self):
+        self.metrics = {
+            'Total Loss': [],
+            'Recon Loss': [],
+            'VQ Loss': [],
+            'Perplexity': [],
+            'Latent Length': []
+        }
+        self.steps = []
+        
+    def log(self, step, loss, recon_loss, vq_loss, perplexity, latent_len):
+        self.steps.append(step)
+        self.metrics['Total Loss'].append(loss)
+        self.metrics['Recon Loss'].append(recon_loss)
+        self.metrics['VQ Loss'].append(vq_loss)
+        self.metrics['Perplexity'].append(perplexity)
+        self.metrics['Latent Length'].append(latent_len)
+        
+    def plot(self, epoch, step, total_steps):
+        # Clear previous output (works great in Jupyter/Colab)
+        clear_output(wait=True)
+        
+        # Create figure with pure white background and no frame
+        fig, axes = plt.subplots(2, 3, figsize=(18, 10), facecolor='white')
+        fig.suptitle(f'Training Metrics | Epoch: {epoch} | Step: {step}/{total_steps}', 
+                     fontsize=16, fontweight='bold', color='black')
+        
+        # Flatten axes for easy iteration
+        axes = axes.flatten()
+        
+        # Plot each metric
+        for idx, (name, values) in enumerate(self.metrics.items()):
+            ax = axes[idx]
+            
+            # White background, no frame (spines)
+            ax.set_facecolor('white')
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+                
+            # Plot the data
+            ax.plot(self.steps, values, color='#1f77b4', linewidth=2)
+            
+            # Add light grid for readability
+            ax.grid(True, color='#cccccc', linestyle='--', linewidth=0.5, alpha=0.7)
+            
+            # Labels and styling
+            ax.set_title(name, fontsize=12, fontweight='bold', color='black')
+            ax.tick_params(colors='black', which='both')
+            ax.xaxis.label.set_color('black')
+            ax.yaxis.label.set_color('black')
+            
+            # Add a subtle fill below the line for aesthetic
+            ax.fill_between(self.steps, values, alpha=0.1, color='#1f77b4')
+        
+        # Hide the unused 6th subplot
+        axes[-1].set_visible(False)
+        
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        plt.savefig('metrics_plot.png')
+        plt.show()
+
+r'''
+--------------
+Usage examples
+--------------
+
+# Instantiate the logger
+logger = TrainingLogger()
+
+# ---------------------------------------------------------
+# 5. AMP Training Loop Example (Optimized)
+# ---------------------------------------------------------
+VOCAB_SIZE = 18820
+PAD_IDX = 18819          
+BATCH_SIZE = 24
+SEQ_LEN = 8192
+DOWN_FACTOR = 32
+D_MODEL = 512
+CODEBOOK_SIZE = 256
+VQ_DIM = 128       
+N_CODEBOOKS = 1
+NUM_EPOCHS = 5
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+dtype = torch.float32 # torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+
+model = MidiVQVAE(
+    vocab_size=VOCAB_SIZE, 
+    d_model=D_MODEL, 
+    downsample_factor=DOWN_FACTOR, 
+    codebook_size=CODEBOOK_SIZE, 
+    pad_idx=PAD_IDX,
+    vq_dim=VQ_DIM,
+    n_codebooks=N_CODEBOOKS
+).to(device)
+
+optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
+criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX) 
+
+scaler = torch.amp.GradScaler('cuda', enabled=(dtype == torch.float16))
+
+# Instantiate Dataset and DataLoader
+dataset = SequenceDataset(data)
+dataloader = DataLoader(
+    dataset, 
+    batch_size=BATCH_SIZE,  
+    collate_fn=lambda batch: pad_collate_fn(batch, pad_idx=PAD_IDX),
+    shuffle=True,
+    drop_last=True
+)
+
+model.train()
+global_step = 0
+
+for epoch in range(NUM_EPOCHS):
+    # Initialize the tqdm progress bar with an empty description that we will update
+    pbar = tqdm.tqdm(dataloader, total=len(dataloader), desc="Initializing...")
+    
+    for i, batch in enumerate(pbar):
+        x = batch.cuda()
+        
+        optimizer.zero_grad(set_to_none=True) # Slight memory optimization
+        
+        with torch.amp.autocast('cuda', dtype=dtype):
+            logits, vq_loss, discrete_tokens, continuous_latents, perplexity = model(x)
+            recon_loss = criterion(logits.reshape(-1, VOCAB_SIZE), x.reshape(-1))
+            loss = recon_loss + vq_loss
+        
+        scaler.scale(loss).backward()
+        scaler.unscale_(optimizer)
+        
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        
+        scaler.step(optimizer)
+        scaler.update()
+        
+        reduced_len = discrete_tokens.shape[2] # [n_codebooks, B, T]
+
+        # --- UPDATE TQDM METRICS HERE ---
+        if global_step % 100 == 0:
+            pbar.set_description(
+                f"Epoch {epoch} | Step: {i}/{len(dataloader)} | "
+                f"Loss: {loss.item():.4f} | Recon: {recon_loss.item():.4f} | "
+                f"VQ: {vq_loss.item():.4f} | Perp: {perplexity.item():.0f} | "
+                f"Latent/Repr Length: {reduced_len}"
+            )
+
+        # Log metrics every step to ensure smooth graphs
+        logger.log(
+            step=global_step, 
+            loss=loss.item(), 
+            recon_loss=recon_loss.item(), 
+            vq_loss=vq_loss.item(), 
+            perplexity=perplexity.item(), 
+            latent_len=reduced_len
+        )
+
+        # Plot every 50 steps (skipping step 0)
+        if global_step > 0 and global_step % 1000 == 0:
+            logger.plot(epoch=epoch, step=global_step, total_steps=len(dataloader))
+            # Keep the model in train mode just in case clear_output causes any weirdness
+            model.train()
+
+            if global_step % 2000 == 0:
+                torch.save(model.state_dict(), 'model.pth')
+            
+        global_step += 1
+
+import torch
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, TensorDataset
+import time
+
+    # --- 1. Configuration ---
+    VOCAB_SIZE = 18820
+    PAD_IDX = 18819          
+    BATCH_SIZE = 24
+    SEQ_LEN = 8192
+    DOWN_FACTOR = 32
+    D_MODEL = 512
+    CODEBOOK_SIZE = 256
+    VQ_DIM = 128       
+    N_CODEBOOKS = 1
+    NUM_EPOCHS = 5
+    MODEL_PATH = "model.pth"
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+
+    # --- 2. FORCE RE-INSTANTIATION ---
+    # This guarantees we are using the fresh class definition above, 
+    # destroying any ghost methods attached to a previously created `model` variable.
+    model = MidiVQVAE(
+        vocab_size=VOCAB_SIZE, 
+        d_model=D_MODEL, 
+        downsample_factor=DOWN_FACTOR, 
+        codebook_size=CODEBOOK_SIZE, 
+        pad_idx=PAD_IDX,
+        vq_dim=VQ_DIM,
+        n_codebooks=N_CODEBOOKS
+    ).to(device)
+
+    # --- 3. Load Trained Weights ---
+    try:
+        checkpoint = torch.load(MODEL_PATH, map_location=device)
+        if 'model_state_dict' in checkpoint:
+            state_dict = checkpoint['model_state_dict']
+        else:
+            state_dict = checkpoint
+            
+        # Prevent state dict from injecting corrupted ghost parameters
+        expected_params = set(model.state_dict().keys())
+        clean_state_dict = {k: v for k, v in state_dict.items() if k in expected_params}
+        model.load_state_dict(clean_state_dict, strict=False)
+        print(f"✅ Successfully loaded weights from {MODEL_PATH}")
+    except FileNotFoundError:
+        print(f"⚠️ Warning: {MODEL_PATH} not found. Running with random weights for demonstration.")
+
+    model.eval() 
+
+    # --- 4. Create Mock Validation Data ---
+    print("\nPreparing mock validation data...")
+    mock_data = batch.cuda()
+    
+    # --- 5. Forward Pass: End-to-End Reconstruction ---
+    print("\n" + "="*50)
+    print("1. END-TO-END FORWARD PASS")
+    print("="*50)
+    
+    with torch.no_grad():
+        start_time = time.time()
+        logits, vq_loss, discrete_tokens, continuous_latents, perplexity = model(mock_data)
+        inference_time = time.time() - start_time
+        
+        predictions = torch.argmax(logits, dim=-1) 
+        
+        mask = (mock_data != PAD_IDX)
+        correct_preds = (predictions == mock_data) & mask
+        accuracy = correct_preds.sum().item() / mask.sum().item()
+        
+        ce_loss = F.cross_entropy(
+            logits.reshape(-1, VOCAB_SIZE), 
+            mock_data.reshape(-1), 
+            ignore_index=PAD_IDX
+        )
+
+    print(f"\n⏱️ Inference Time: {inference_time:.4f} seconds")
+    print(f"📝 Metrics:")
+    print(f"   - Reconstruction CE Loss: {ce_loss.item():.4f}")
+    print(f"   - VQ Loss:                {vq_loss.item():.4f}")
+    print(f"   - Codebook Perplexity:    {perplexity.item():.0f} / {CODEBOOK_SIZE * N_CODEBOOKS}")
+    print(f"   - Token Accuracy:         {accuracy * 100:.2f}% (Excluding PAD tokens)")
+    
+    print(f"\n🔢 Tensor Shapes:")
+    print(f"   - Input Tokens:           {list(mock_data.shape)}")
+    print(f"   - Encoder Latents (z):    {list(continuous_latents.shape)}")
+    print(f"   - Discrete Tokens:        {list(discrete_tokens.shape)}  <-- [N_CODEBOOKS, BATCH, LATENT_T]")
+    print(f"   - Output Logits:          {list(logits.shape)}")
+    print(f"   - Output Predictions:     {list(predictions.shape)}")
+    
+    original_tokens = mock_data.shape[1]
+    latent_tokens = discrete_tokens.shape[2]
+    compression_ratio = (original_tokens / latent_tokens) * N_CODEBOOKS
+    print(f"\n📉 Compression Info:")
+    print(f"   - Original Sequence Length:  {original_tokens}")
+    print(f"   - Compressed Latent Length:  {latent_tokens} (Downsample factor: {original_tokens//latent_tokens})")
+    print(f"   - Effective Compression:     {compression_ratio:.2f}x")
+
+    # --- 6. Round-Trip Tokenization Test ---
+    print("\n" + "="*50)
+    print("2. DISCRETE ROUND-TRIP TEST (ENCODE -> DECODE)")
+    print("="*50)
+    
+    target_reconstruct_len = mock_data.shape[1]
+    
+    with torch.no_grad():
+        discrete_tokens_rt = model.encode_to_tokens(mock_data)
+        reconstructed_tokens_rt = model.decode_from_tokens(discrete_tokens_rt, target_len=target_reconstruct_len)
+        
+        rt_mask = (mock_data != PAD_IDX)
+        rt_correct = (reconstructed_tokens_rt == mock_data) & rt_mask
+        rt_accuracy = rt_correct.sum().item() / rt_mask.sum().item()
+
+    print(f"\n🔢 Round-Trip Shapes:")
+    print(f"   - Encoded Discrete Tokens: {list(discrete_tokens_rt.shape)}")
+    print(f"   - Decoded MIDI Tokens:     {list(reconstructed_tokens_rt.shape)}")
+    
+    print(f"\n📝 Round-Trip Metrics:")
+    print(f"   - Round-Trip Accuracy:     {rt_accuracy * 100:.2f}%")
+    print(f"   - Matches End-to-End?      {'Yes ✅' if torch.equal(predictions, reconstructed_tokens_rt) else 'No ❌ (Check implementation)'}")
+
+    # --- 7. Codebook Usage Analysis ---
+    print("\n" + "="*50)
+    print("3. CODEBOOK USAGE ANALYSIS")
+    print("="*50)
+    
+    for i in range(N_CODEBOOKS):
+        cb_indices = discrete_tokens[i].reshape(-1) 
+        unique_codes = torch.unique(cb_indices).shape[0]
+        utilization = (unique_codes / CODEBOOK_SIZE) * 100
+        print(f"   - Codebook {i}: {unique_codes}/{CODEBOOK_SIZE} codes used ({utilization:.1f}% utilization)")
+
+    print("\nInference complete.")
 '''
         
 #=================================================================================================================================
