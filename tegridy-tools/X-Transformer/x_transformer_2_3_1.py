@@ -9256,7 +9256,11 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-from IPython.display import clear_output
+
+try:
+    from IPython.display import clear_output
+except:
+    pass
 
 # ---------------------------------------------------------
 # Training Logger & Plotter
@@ -9282,7 +9286,10 @@ class TrainingLogger:
         
     def plot(self, epoch, step, total_steps):
         # Clear previous output (works great in Jupyter/Colab)
-        clear_output(wait=True)
+        try:
+            clear_output(wait=True)
+        except:
+            pass
         
         # Create figure with pure white background and no frame
         fig, axes = plt.subplots(2, 3, figsize=(18, 10), facecolor='white')
