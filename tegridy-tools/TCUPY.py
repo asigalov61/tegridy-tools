@@ -35,7 +35,7 @@ r'''############################################################################
 #
 #       Critical dependencies
 #
-#       !pip install cupy-cuda12x
+#       !pip install cupy-cuda13x
 #       !pip install numpy==1.26.4
 #
 ################################################################################
@@ -1230,6 +1230,115 @@ def find_matches_fast(src_array, trg_array, seed: int = 0) -> int:
 
     # count matches
     return int(cp.isin(src_fp, trg_fp).sum())
+
+###################################################################################
+
+def find_repeating_non_overlapping_patterns(arr, min_len):
+    """
+    Finds all repeating non-overlapping patterns of min_len and longer.
+    GPU-Accelerated using CuPy with O(N) memory per length.
+    """
+    n = len(arr)
+    if n < min_len * 2:
+        return {}
+
+    arr_cpu = np.asarray(arr, dtype=np.int64)
+    arr_gpu = cp.asarray(arr_cpu)
+    max_len = n // 2
+
+    consumed = [False] * n
+    result = {}
+
+    # Use a large prime base. We intentionally let np.int64 overflow naturally 
+    # (modulo 2^64), which cancels out perfectly in the subtraction below.
+    BASE = np.int64(1000000007)
+    
+    # Pre-compute rolling powers (suppress the expected overflow warning)
+    powers_cpu = np.ones(max_len + 1, dtype=np.int64)
+    with np.errstate(over='ignore'):
+        for i in range(1, max_len + 1):
+            powers_cpu[i] = powers_cpu[i-1] * BASE
+            
+    powers_gpu = cp.asarray(powers_cpu)
+
+    # Prefix sum array allows O(1) hash retrieval for any length
+    pref = cp.zeros(n + 1, dtype=cp.int64)
+    pref[1:] = arr_gpu
+    for i in range(1, n + 1):
+        pref[i] = pref[i-1] * BASE + arr_gpu[i-1]
+
+    for L in range(max_len, min_len - 1, -1):
+        n_hashes = n - L + 1
+        if n_hashes <= 0:
+            continue
+
+        # 1. O(1) Space Hashing on GPU
+        # Subtracting two overflowed sums perfectly cancels out the overflow, 
+        # yielding the exact polynomial hash difference.
+        raw = pref[L:L + n_hashes] - (pref[:n_hashes] * powers_gpu[L])
+        
+        # XOR the upper and lower 32 bits to guarantee a positive, uniformly distributed hash
+        hash_l = raw ^ (raw >> 32)
+
+        # 2. Group matching hashes via Global Sort
+        sort_idx = cp.argsort(hash_l)
+        sorted_hash = hash_l[sort_idx]
+        
+        # Find boundaries where hashes change
+        diff_idx = cp.where(sorted_hash[1:] != sorted_hash[:-1])[0]
+        start_idx = cp.concatenate([cp.array([0]), diff_idx + 1])
+        end_idx = cp.concatenate([diff_idx + 1, cp.array([n_hashes])])
+        
+        # Keep only hashes that appear 2 or more times
+        valid_mask = (end_idx - start_idx) >= 2
+        start_idx_cpu = cp.asnumpy(start_idx[valid_mask])
+        end_idx_cpu = cp.asnumpy(end_idx[valid_mask])
+        
+        if len(start_idx_cpu) == 0:
+            continue
+
+        # 3. Extract all candidate indices to CPU in ONE fast transfer
+        sort_cpu = cp.asnumpy(sort_idx)
+        indices_flat = sort_cpu[np.concatenate([np.arange(s, e) for s, e in zip(start_idx_cpu, end_idx_cpu)])]
+        
+        # 4. Group by EXACT sub-array content using tobytes() to enforce 100% correctness
+        groups = {}
+        for idx in indices_flat:
+            pat_key = bytes(arr_cpu[idx:idx+L].tobytes())
+            if pat_key not in groups:
+                groups[pat_key] = []
+            groups[pat_key].append(idx)
+          
+        # 5. Process each pattern (Sequential greedy interval selection)
+        for pat_key, indices in groups.items():
+            count = 0
+            last_end = -1
+            
+            valid_indices = []
+            for i in indices:
+                if consumed[i]:
+                    continue
+                if i >= last_end:
+                    count += 1
+                    last_end = i + L
+                    valid_indices.append(i)
+            
+            if count >= 2:
+                # Reconstruct the tuple pattern, casting to native Python int
+                pat = tuple(int(x) for x in arr_cpu[valid_indices[0]:valid_indices[0]+L])
+                result[pat] = count
+                
+                # Re-iterate to mark consumed indices
+                last_end = -1
+                for i in indices:
+                    if consumed[i]:
+                        continue
+                    if i >= last_end:
+                        for k in range(i, i + L):
+                            consumed[k] = True
+                        last_end = i + L
+
+    return result
 
 ###################################################################################
 
