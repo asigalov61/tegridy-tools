@@ -1068,9 +1068,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TCUPY.SPIKE_SIG">SPIKE_SIG</a></li>
     <li class="mono"><a href="#TCUPY.SPIKE_SIGMA">SPIKE_SIGMA</a></li>
     <li class="mono"><a href="#TCUPY.SPIKE_STRENGTH">SPIKE_STRENGTH</a></li>
-    <li class="mono"><a href="#TCUPY.fused_kernel">fused_kernel</a></li>
     <li class="mono"><a href="#TCUPY.fused_merge_kernel_code">fused_merge_kernel_code</a></li>
-    <li class="mono"><a href="#TCUPY.merge_kernel">merge_kernel</a></li>
     <li class="mono"><a href="#TCUPY.merge_kernel_code">merge_kernel_code</a></li>
   </ul>
 
@@ -1091,6 +1089,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TCUPY.ensure_triplet">ensure_triplet</a></li>
     <li class="mono"><a href="#TCUPY.find_matches_fast">find_matches_fast</a></li>
     <li class="mono"><a href="#TCUPY.find_numpy_array">find_numpy_array</a></li>
+    <li class="mono"><a href="#TCUPY.find_repeating_non_overlapping_patterns">find_repeating_non_overlapping_patterns</a></li>
     <li class="mono"><a href="#TCUPY.generate_sequence_optimized">generate_sequence_optimized</a></li>
     <li class="mono"><a href="#TCUPY.learn_bpe_codes_gpu">learn_bpe_codes_gpu</a></li>
     <li class="mono"><a href="#TCUPY.minkowski_distance_vector_to_matrix">minkowski_distance_vector_to_matrix</a></li>
@@ -1152,7 +1151,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="_18"></h1>
 <h1 id="critical-dependencies">Critical dependencies</h1>
 <h1 id="_19"></h1>
-<h1 id="pip-install-cupy-cuda12x">!pip install cupy-cuda12x</h1>
+<h1 id="pip-install-cupy-cuda13x">!pip install cupy-cuda13x</h1>
 <h1 id="pip-install-numpy1264">!pip install numpy==1.26.4</h1>
 <h1 id="_20"></h1>
 <h6 id="_21"></h6>
@@ -1196,7 +1195,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">#</span>
 <span class="sd">#       Critical dependencies</span>
 <span class="sd">#</span>
-<span class="sd">#       !pip install cupy-cuda12x</span>
+<span class="sd">#       !pip install cupy-cuda13x</span>
 <span class="sd">#       !pip install numpy==1.26.4</span>
 <span class="sd">#</span>
 <span class="sd">################################################################################</span>
@@ -1219,7 +1218,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CuPy is found!&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Will use CuPy and GPU for processing!&#39;</span><span class="p">)</span>
@@ -1425,7 +1424,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="s1">    }</span>
 <span class="s1">}</span>
 <span class="s1">&#39;&#39;&#39;</span>
-<span class="n">merge_kernel</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">RawKernel</span><span class="p">(</span><span class="n">merge_kernel_code</span><span class="p">,</span> <span class="s1">&#39;merge_pair_kernel&#39;</span><span class="p">)</span>
+<span class="c1"># merge_kernel = cp.RawKernel(merge_kernel_code, &#39;merge_pair_kernel&#39;)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -1555,7 +1554,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="s1">    }</span>
 <span class="s1">}</span>
 <span class="s1">&#39;&#39;&#39;</span>
-<span class="n">fused_kernel</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">RawKernel</span><span class="p">(</span><span class="n">fused_merge_kernel_code</span><span class="p">,</span> <span class="s1">&#39;fused_merge_kernel&#39;</span><span class="p">)</span>
+<span class="c1"># fused_kernel = cp.RawKernel(fused_merge_kernel_code, &#39;fused_merge_kernel&#39;)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -1682,12 +1681,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">    Ensure the given parameter is returned as a triplet.</span>
 <span class="sd">    If provided as a scalar, promote it to a triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">val</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be a scalar or a sequence of 3 numbers.&quot;</span><span class="p">)</span>
+    <span class="c1">#if np.isscalar(val):</span>
+    <span class="c1">#    return (float(val), float(val), float(val))</span>
+    <span class="c1"># elif isinstance(val, (list, tuple)) and len(val) == 3:</span>
+    <span class="c1">#    return tuple(float(x) for x in val)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#    raise ValueError(f&quot;{name} must be a scalar or a sequence of 3 numbers.&quot;)</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -2142,14 +2141,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the Minkowski distance between a 1D CuPy array &#39;x&#39; and each row of a 2D CuPy array &#39;X&#39;.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.</span>
-<span class="sd">        X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.</span>
+<span class="sd">        x (np.ndarray): A 1D array with shape (n_features,) representing a single vector.</span>
+<span class="sd">        X (np.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.</span>
 <span class="sd">        p (float): The order of the Minkowski distance.</span>
 <span class="sd">                   For instance:</span>
 <span class="sd">                     - p=1 yields the Manhattan distance,</span>
@@ -2158,7 +2157,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">                     - p=∞ (or cp.inf) gives the Chebyshev distance.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between &#39;x&#39; </span>
+<span class="sd">        np.ndarray: A 1D array of length n_samples containing the Minkowski distance between &#39;x&#39; </span>
 <span class="sd">                    and the corresponding row in &#39;X&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2182,13 +2181,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes pairwise Minkowski distances for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.</span>
+<span class="sd">        X (np.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.</span>
 <span class="sd">        p (float): The order of the Minkowski distance.</span>
 <span class="sd">                   For example:</span>
 <span class="sd">                     - p=1 is the Manhattan distance,</span>
@@ -2196,7 +2195,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">                     - p=∞ (e.g., float(&#39;inf&#39;) or cp.inf) is the Chebyshev distance.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</span>
+<span class="sd">        np.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Use broadcasting to compute the absolute difference between every pair of vectors.</span>
@@ -2214,17 +2213,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the pairwise cosine similarity for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.</span>
+<span class="sd">        X (np.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.</span>
 <span class="sd">        eps (float): A small constant added to the denominator to prevent division by zero.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</span>
+<span class="sd">        np.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Compute the dot product between every pair of rows.</span>
@@ -2275,14 +2274,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="sd">    excluding itself, sorted by descending similarity.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        embeddings (cp.ndarray): shape (N, D), float32 on GPU.</span>
+<span class="sd">        embeddings (np.ndarray): shape (N, D), float32 on GPU.</span>
 <span class="sd">        k (int): how many neighbors to return (must be &lt; N).</span>
 <span class="sd">        row_batch (int): number of rows to process at once.</span>
 <span class="sd">        col_batch (int): number of columns to process at once.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.</span>
-<span class="sd">        top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.</span>
+<span class="sd">        top_idx (np.ndarray): shape (N, k), int32 indices of nearest neighbors.</span>
+<span class="sd">        top_sim (np.ndarray): shape (N, k), float32 cosine similarities.</span>
 <span class="sd">                             Each row is sorted descending.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -2394,6 +2393,115 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span><span class="w"> </span><span class="nf">find_repeating_non_overlapping_patterns</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">min_len</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds all repeating non-overlapping patterns of min_len and longer.</span>
+<span class="sd">    GPU-Accelerated using CuPy with O(N) memory per length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">min_len</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">arr_cpu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">arr_gpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arr_cpu</span><span class="p">)</span>
+    <span class="n">max_len</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="n">consumed</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Use a large prime base. We intentionally let np.int64 overflow naturally </span>
+    <span class="c1"># (modulo 2^64), which cancels out perfectly in the subtraction below.</span>
+    <span class="n">BASE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mi">1000000007</span><span class="p">)</span>
+    
+    <span class="c1"># Pre-compute rolling powers (suppress the expected overflow warning)</span>
+    <span class="n">powers_cpu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">max_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">powers_cpu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">powers_cpu</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BASE</span>
+            
+    <span class="n">powers_gpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">powers_cpu</span><span class="p">)</span>
+
+    <span class="c1"># Prefix sum array allows O(1) hash retrieval for any length</span>
+    <span class="n">pref</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">pref</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">arr_gpu</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">pref</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BASE</span> <span class="o">+</span> <span class="n">arr_gpu</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">min_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">n_hashes</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">L</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">n_hashes</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 1. O(1) Space Hashing on GPU</span>
+        <span class="c1"># Subtracting two overflowed sums perfectly cancels out the overflow, </span>
+        <span class="c1"># yielding the exact polynomial hash difference.</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="n">L</span><span class="p">:</span><span class="n">L</span> <span class="o">+</span> <span class="n">n_hashes</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">pref</span><span class="p">[:</span><span class="n">n_hashes</span><span class="p">]</span> <span class="o">*</span> <span class="n">powers_gpu</span><span class="p">[</span><span class="n">L</span><span class="p">])</span>
+        
+        <span class="c1"># XOR the upper and lower 32 bits to guarantee a positive, uniformly distributed hash</span>
+        <span class="n">hash_l</span> <span class="o">=</span> <span class="n">raw</span> <span class="o">^</span> <span class="p">(</span><span class="n">raw</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">)</span>
+
+        <span class="c1"># 2. Group matching hashes via Global Sort</span>
+        <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">hash_l</span><span class="p">)</span>
+        <span class="n">sorted_hash</span> <span class="o">=</span> <span class="n">hash_l</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
+        
+        <span class="c1"># Find boundaries where hashes change</span>
+        <span class="n">diff_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sorted_hash</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">sorted_hash</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">diff_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">diff_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n_hashes</span><span class="p">])])</span>
+        
+        <span class="c1"># Keep only hashes that appear 2 or more times</span>
+        <span class="n">valid_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+        <span class="n">start_idx_cpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asnumpy</span><span class="p">(</span><span class="n">start_idx</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">])</span>
+        <span class="n">end_idx_cpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asnumpy</span><span class="p">(</span><span class="n">end_idx</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">start_idx_cpu</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 3. Extract all candidate indices to CPU in ONE fast transfer</span>
+        <span class="n">sort_cpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asnumpy</span><span class="p">(</span><span class="n">sort_idx</span><span class="p">)</span>
+        <span class="n">indices_flat</span> <span class="o">=</span> <span class="n">sort_cpu</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">start_idx_cpu</span><span class="p">,</span> <span class="n">end_idx_cpu</span><span class="p">)])]</span>
+        
+        <span class="c1"># 4. Group by EXACT sub-array content using tobytes() to enforce 100% correctness</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices_flat</span><span class="p">:</span>
+            <span class="n">pat_key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">arr_cpu</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">L</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">pat_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+                <span class="n">groups</span><span class="p">[</span><span class="n">pat_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">groups</span><span class="p">[</span><span class="n">pat_key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+          
+        <span class="c1"># 5. Process each pattern (Sequential greedy interval selection)</span>
+        <span class="k">for</span> <span class="n">pat_key</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">last_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            
+            <span class="n">valid_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">consumed</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">last_end</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">last_end</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">L</span>
+                    <span class="n">valid_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># Reconstruct the tuple pattern, casting to native Python int</span>
+                <span class="n">pat</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arr_cpu</span><span class="p">[</span><span class="n">valid_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">valid_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">L</span><span class="p">])</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">pat</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+                
+                <span class="c1"># Re-iterate to mark consumed indices</span>
+                <span class="n">last_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">consumed</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">last_end</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">L</span><span class="p">):</span>
+                            <span class="n">consumed</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">last_end</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">L</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Module is loaded!&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Enjoy! :)&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
@@ -2474,23 +2582,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       </div>
       <div class="item">
-      <p id="TCUPY.fused_kernel" class="name">var <span class="ident">fused_kernel</span></p>
-      
-  
-  <div class="source_cont">
-</div>
-
-      </div>
-      <div class="item">
       <p id="TCUPY.fused_merge_kernel_code" class="name">var <span class="ident">fused_merge_kernel_code</span></p>
-      
-  
-  <div class="source_cont">
-</div>
-
-      </div>
-      <div class="item">
-      <p id="TCUPY.merge_kernel" class="name">var <span class="ident">merge_kernel</span></p>
       
   
   <div class="source_cont">
@@ -2953,7 +3045,7 @@ repeated until no more merges are possible.</p></div>
       
   <div class="item">
     <div class="name def" id="TCUPY.build_ngram_mapping">
-    <p>def <span class="ident">build_ngram_mapping</span>(</p><p>data: cupy.ndarray, memory_len: int)</p>
+    <p>def <span class="ident">build_ngram_mapping</span>(</p><p>data: numpy.ndarray, memory_len: int)</p>
     </div>
     
 
@@ -3001,7 +3093,7 @@ repeated until no more merges are possible.</p></div>
       
   <div class="item">
     <div class="name def" id="TCUPY.build_training_sequences_set">
-    <p>def <span class="ident">build_training_sequences_set</span>(</p><p>data: cupy.ndarray)</p>
+    <p>def <span class="ident">build_training_sequences_set</span>(</p><p>data: numpy.ndarray)</p>
     </div>
     
 
@@ -3123,13 +3215,13 @@ adjacent pair (encoded as: pair_val = first * factor + second) on GPU.</p></div>
     <div class="desc"><p>For each embedding, find the indices and similarities of its top-k neighbors,
 excluding itself, sorted by descending similarity.</p>
 <p>Args:
-    embeddings (cp.ndarray): shape (N, D), float32 on GPU.
+    embeddings (np.ndarray): shape (N, D), float32 on GPU.
     k (int): how many neighbors to return (must be &lt; N).
     row_batch (int): number of rows to process at once.
     col_batch (int): number of columns to process at once.</p>
 <p>Returns:
-    top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.
-    top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.
+    top_idx (np.ndarray): shape (N, k), int32 indices of nearest neighbors.
+    top_sim (np.ndarray): shape (N, k), float32 cosine similarities.
                          Each row is sorted descending.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.embeddings_topk_cosine_neighbors', this);">Show source &equiv;</a></p>
@@ -3145,14 +3237,14 @@ excluding itself, sorted by descending similarity.</p>
 <span class="sd">    excluding itself, sorted by descending similarity.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        embeddings (cp.ndarray): shape (N, D), float32 on GPU.</span>
+<span class="sd">        embeddings (np.ndarray): shape (N, D), float32 on GPU.</span>
 <span class="sd">        k (int): how many neighbors to return (must be &lt; N).</span>
 <span class="sd">        row_batch (int): number of rows to process at once.</span>
 <span class="sd">        col_batch (int): number of columns to process at once.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        top_idx (cp.ndarray): shape (N, k), int32 indices of nearest neighbors.</span>
-<span class="sd">        top_sim (cp.ndarray): shape (N, k), float32 cosine similarities.</span>
+<span class="sd">        top_idx (np.ndarray): shape (N, k), int32 indices of nearest neighbors.</span>
+<span class="sd">        top_sim (np.ndarray): shape (N, k), float32 cosine similarities.</span>
 <span class="sd">                             Each row is sorted descending.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -3247,12 +3339,12 @@ If provided as a scalar, promote it to a triplet.</p></div>
 <span class="sd">    Ensure the given parameter is returned as a triplet.</span>
 <span class="sd">    If provided as a scalar, promote it to a triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">val</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be a scalar or a sequence of 3 numbers.&quot;</span><span class="p">)</span>
+    <span class="c1">#if np.isscalar(val):</span>
+    <span class="c1">#    return (float(val), float(val), float(val))</span>
+    <span class="c1"># elif isinstance(val, (list, tuple)) and len(val) == 3:</span>
+    <span class="c1">#    return tuple(float(x) for x in val)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#    raise ValueError(f&quot;{name} must be a scalar or a sequence of 3 numbers.&quot;)</span>
 </pre></div>
 
   </div>
@@ -3349,8 +3441,135 @@ Uses a non-linear 64-bit FNV-1a hash over raw bytes to avoid collisions.</p></di
   
       
   <div class="item">
+    <div class="name def" id="TCUPY.find_repeating_non_overlapping_patterns">
+    <p>def <span class="ident">find_repeating_non_overlapping_patterns</span>(</p><p>arr, min_len)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Finds all repeating non-overlapping patterns of min_len and longer.
+GPU-Accelerated using CuPy with O(N) memory per length.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.find_repeating_non_overlapping_patterns', this);">Show source &equiv;</a></p>
+  <div id="source-TCUPY.find_repeating_non_overlapping_patterns" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">find_repeating_non_overlapping_patterns</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">min_len</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds all repeating non-overlapping patterns of min_len and longer.</span>
+<span class="sd">    GPU-Accelerated using CuPy with O(N) memory per length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">min_len</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">arr_cpu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">arr_gpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arr_cpu</span><span class="p">)</span>
+    <span class="n">max_len</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="n">consumed</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Use a large prime base. We intentionally let np.int64 overflow naturally </span>
+    <span class="c1"># (modulo 2^64), which cancels out perfectly in the subtraction below.</span>
+    <span class="n">BASE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mi">1000000007</span><span class="p">)</span>
+    
+    <span class="c1"># Pre-compute rolling powers (suppress the expected overflow warning)</span>
+    <span class="n">powers_cpu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">max_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">powers_cpu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">powers_cpu</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BASE</span>
+            
+    <span class="n">powers_gpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">powers_cpu</span><span class="p">)</span>
+
+    <span class="c1"># Prefix sum array allows O(1) hash retrieval for any length</span>
+    <span class="n">pref</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">pref</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">arr_gpu</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">pref</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BASE</span> <span class="o">+</span> <span class="n">arr_gpu</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">min_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">n_hashes</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">L</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">n_hashes</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 1. O(1) Space Hashing on GPU</span>
+        <span class="c1"># Subtracting two overflowed sums perfectly cancels out the overflow, </span>
+        <span class="c1"># yielding the exact polynomial hash difference.</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="n">L</span><span class="p">:</span><span class="n">L</span> <span class="o">+</span> <span class="n">n_hashes</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">pref</span><span class="p">[:</span><span class="n">n_hashes</span><span class="p">]</span> <span class="o">*</span> <span class="n">powers_gpu</span><span class="p">[</span><span class="n">L</span><span class="p">])</span>
+        
+        <span class="c1"># XOR the upper and lower 32 bits to guarantee a positive, uniformly distributed hash</span>
+        <span class="n">hash_l</span> <span class="o">=</span> <span class="n">raw</span> <span class="o">^</span> <span class="p">(</span><span class="n">raw</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">)</span>
+
+        <span class="c1"># 2. Group matching hashes via Global Sort</span>
+        <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">hash_l</span><span class="p">)</span>
+        <span class="n">sorted_hash</span> <span class="o">=</span> <span class="n">hash_l</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
+        
+        <span class="c1"># Find boundaries where hashes change</span>
+        <span class="n">diff_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sorted_hash</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">sorted_hash</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">diff_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">diff_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n_hashes</span><span class="p">])])</span>
+        
+        <span class="c1"># Keep only hashes that appear 2 or more times</span>
+        <span class="n">valid_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+        <span class="n">start_idx_cpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asnumpy</span><span class="p">(</span><span class="n">start_idx</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">])</span>
+        <span class="n">end_idx_cpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asnumpy</span><span class="p">(</span><span class="n">end_idx</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">start_idx_cpu</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 3. Extract all candidate indices to CPU in ONE fast transfer</span>
+        <span class="n">sort_cpu</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asnumpy</span><span class="p">(</span><span class="n">sort_idx</span><span class="p">)</span>
+        <span class="n">indices_flat</span> <span class="o">=</span> <span class="n">sort_cpu</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">start_idx_cpu</span><span class="p">,</span> <span class="n">end_idx_cpu</span><span class="p">)])]</span>
+        
+        <span class="c1"># 4. Group by EXACT sub-array content using tobytes() to enforce 100% correctness</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices_flat</span><span class="p">:</span>
+            <span class="n">pat_key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">arr_cpu</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">L</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">pat_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+                <span class="n">groups</span><span class="p">[</span><span class="n">pat_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">groups</span><span class="p">[</span><span class="n">pat_key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+          
+        <span class="c1"># 5. Process each pattern (Sequential greedy interval selection)</span>
+        <span class="k">for</span> <span class="n">pat_key</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">last_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            
+            <span class="n">valid_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">consumed</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">last_end</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">last_end</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">L</span>
+                    <span class="n">valid_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># Reconstruct the tuple pattern, casting to native Python int</span>
+                <span class="n">pat</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arr_cpu</span><span class="p">[</span><span class="n">valid_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">valid_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">L</span><span class="p">])</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">pat</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+                
+                <span class="c1"># Re-iterate to mark consumed indices</span>
+                <span class="n">last_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">consumed</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">last_end</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">L</span><span class="p">):</span>
+                            <span class="n">consumed</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">last_end</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">L</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="TCUPY.generate_sequence_optimized">
-    <p>def <span class="ident">generate_sequence_optimized</span>(</p><p>mapping_lookup: Dict[Any, Tuple[Tuple[Any, ...], cupy.ndarray]], training_set: set, memory_len: int, sequence_length: int = 24, max_attempts: int = 1000)</p>
+    <p>def <span class="ident">generate_sequence_optimized</span>(</p><p>mapping_lookup: Dict[Any, Tuple[Tuple[Any, ...], numpy.ndarray]], training_set: set, memory_len: int, sequence_length: int = 24, max_attempts: int = 1000)</p>
     </div>
     
 
@@ -3625,7 +3844,7 @@ into a new token via a custom merge kernel (with double-buffering).</p>
       
   <div class="item">
     <div class="name def" id="TCUPY.minkowski_distance_vector_to_matrix">
-    <p>def <span class="ident">minkowski_distance_vector_to_matrix</span>(</p><p>x: cupy.ndarray, X: cupy.ndarray, p: float = 3)</p>
+    <p>def <span class="ident">minkowski_distance_vector_to_matrix</span>(</p><p>x: numpy.ndarray, X: numpy.ndarray, p: float = 3)</p>
     </div>
     
 
@@ -3633,8 +3852,8 @@ into a new token via a custom merge kernel (with double-buffering).</p>
   
     <div class="desc"><p>Computes the Minkowski distance between a 1D CuPy array 'x' and each row of a 2D CuPy array 'X'.</p>
 <p>Parameters:
-    x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.
-    X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.
+    x (np.ndarray): A 1D array with shape (n_features,) representing a single vector.
+    X (np.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.
     p (float): The order of the Minkowski distance.
                For instance:
                  - p=1 yields the Manhattan distance,
@@ -3642,19 +3861,19 @@ into a new token via a custom merge kernel (with double-buffering).</p>
                  - p=3 yields the Minkowski distance and will use the cube-root implementation,
                  - p=∞ (or cp.inf) gives the Chebyshev distance.</p>
 <p>Returns:
-    cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between 'x' 
+    np.ndarray: A 1D array of length n_samples containing the Minkowski distance between 'x' 
                 and the corresponding row in 'X'.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.minkowski_distance_vector_to_matrix', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.minkowski_distance_vector_to_matrix" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">minkowski_distance_vector_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the Minkowski distance between a 1D CuPy array &#39;x&#39; and each row of a 2D CuPy array &#39;X&#39;.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        x (cp.ndarray): A 1D array with shape (n_features,) representing a single vector.</span>
-<span class="sd">        X (cp.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.</span>
+<span class="sd">        x (np.ndarray): A 1D array with shape (n_features,) representing a single vector.</span>
+<span class="sd">        X (np.ndarray): A 2D array with shape (n_samples, n_features) where each row is a vector.</span>
 <span class="sd">        p (float): The order of the Minkowski distance.</span>
 <span class="sd">                   For instance:</span>
 <span class="sd">                     - p=1 yields the Manhattan distance,</span>
@@ -3663,7 +3882,7 @@ into a new token via a custom merge kernel (with double-buffering).</p>
 <span class="sd">                     - p=∞ (or cp.inf) gives the Chebyshev distance.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cp.ndarray: A 1D array of length n_samples containing the Minkowski distance between &#39;x&#39; </span>
+<span class="sd">        np.ndarray: A 1D array of length n_samples containing the Minkowski distance between &#39;x&#39; </span>
 <span class="sd">                    and the corresponding row in &#39;X&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -3744,7 +3963,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
       
   <div class="item">
     <div class="name def" id="TCUPY.pairwise_cosine_similarity">
-    <p>def <span class="ident">pairwise_cosine_similarity</span>(</p><p>X: cupy.ndarray, eps: float = 1e-10)</p>
+    <p>def <span class="ident">pairwise_cosine_similarity</span>(</p><p>X: numpy.ndarray, eps: float = 1e-10)</p>
     </div>
     
 
@@ -3752,24 +3971,24 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   
     <div class="desc"><p>Computes the pairwise cosine similarity for a 2D CuPy array.</p>
 <p>Parameters:
-    X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.
+    X (np.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.
     eps (float): A small constant added to the denominator to prevent division by zero.</p>
 <p>Returns:
-    cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</p></div>
+    np.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pairwise_cosine_similarity', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.pairwise_cosine_similarity" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pairwise_cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the pairwise cosine similarity for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.</span>
+<span class="sd">        X (np.ndarray): A 2D array of shape (n_samples, n_features) where each row represents a vector.</span>
 <span class="sd">        eps (float): A small constant added to the denominator to prevent division by zero.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</span>
+<span class="sd">        np.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise cosine similarities.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Compute the dot product between every pair of rows.</span>
@@ -3798,7 +4017,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
       
   <div class="item">
     <div class="name def" id="TCUPY.pairwise_minkowski_distance">
-    <p>def <span class="ident">pairwise_minkowski_distance</span>(</p><p>X: cupy.ndarray, p: float = 2)</p>
+    <p>def <span class="ident">pairwise_minkowski_distance</span>(</p><p>X: numpy.ndarray, p: float = 2)</p>
     </div>
     
 
@@ -3806,24 +4025,24 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
   
     <div class="desc"><p>Computes pairwise Minkowski distances for a 2D CuPy array.</p>
 <p>Parameters:
-    X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.
+    X (np.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.
     p (float): The order of the Minkowski distance.
                For example:
                  - p=1 is the Manhattan distance,
                  - p=2 is the Euclidean distance,
                  - p=∞ (e.g., float('inf') or cp.inf) is the Chebyshev distance.</p>
 <p>Returns:
-    cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</p></div>
+    np.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TCUPY.pairwise_minkowski_distance', this);">Show source &equiv;</a></p>
   <div id="source-TCUPY.pairwise_minkowski_distance" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pairwise_minkowski_distance</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes pairwise Minkowski distances for a 2D CuPy array.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        X (cp.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.</span>
+<span class="sd">        X (np.ndarray): A 2D array of shape (n_samples, n_features), where each row represents a vector.</span>
 <span class="sd">        p (float): The order of the Minkowski distance.</span>
 <span class="sd">                   For example:</span>
 <span class="sd">                     - p=1 is the Manhattan distance,</span>
@@ -3831,7 +4050,7 @@ It converts each sequence into a CuPy array, concatenates them, and assigns toke
 <span class="sd">                     - p=∞ (e.g., float(&#39;inf&#39;) or cp.inf) is the Chebyshev distance.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cp.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</span>
+<span class="sd">        np.ndarray: A 2D array of shape (n_samples, n_samples) containing the pairwise Minkowski distances.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Use broadcasting to compute the absolute difference between every pair of vectors.</span>
@@ -3945,7 +4164,7 @@ Each GPU thread processes one sequence by applying all merge rules sequentially.
       
   <div class="item">
     <div class="name def" id="TCUPY.sliding_window_view_alternative">
-    <p>def <span class="ident">sliding_window_view_alternative</span>(</p><p>a: cupy.ndarray, window_length: int)</p>
+    <p>def <span class="ident">sliding_window_view_alternative</span>(</p><p>a: numpy.ndarray, window_length: int)</p>
     </div>
     
 
