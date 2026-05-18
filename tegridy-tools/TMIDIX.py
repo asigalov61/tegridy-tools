@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.5.13" # TMIDIX version
+__version__ = "26.5.18" # TMIDIX version
 
 ###################################################################################
 
@@ -18914,6 +18914,53 @@ def find_best_ngram_match(
         pool_std = 0.0
 
     return best_index, best_similarity, pool_mean, pool_std
+
+###################################################################################
+
+def remove_repeating_patterns(lst: list[int]) -> list[int]:
+    """
+    Removes consecutive repeating values AND consecutive repeating patterns 
+    strictly from left to right.
+    
+    Examples:
+        [1, 2, 2, 3]                            -> [1, 2, 3]
+        [1, 2, 3, 4, 3, 3, 2, 1, 2, 1, 2]      -> [1, 2, 3, 4, 3, 2, 1, 2]
+        [1, 2, 1, 2, 1, 2]                      -> [1, 2]
+        [1, 2, 3, 1, 2, 3]                      -> [1, 2, 3]
+        [1, 1, 1, 1]                            -> [1]
+    """
+    n = len(lst)
+    if n <= 1:
+        return lst[:]
+
+    # deque provides O(1) appends and O(1) pops from the right end,
+    # while perfectly preserving the original left-to-right history.
+    res = deque()
+    res.append(lst[0])
+    
+    for i in range(1, n):
+        val = lst[i]
+        res.append(val)
+        
+        # The maximum possible pattern length is half the current sequence length
+        max_len = len(res) >> 1
+        
+        # Check from the longest possible pattern down to 1
+        for p_len in range(max_len, 0, -1):
+            match = True
+            for j in range(p_len):
+                # Compare the right-most p_len elements with the p_len elements just before them
+                if res[-p_len + j] != res[-2 * p_len + j]:
+                    match = False
+                    break
+            
+            if match:
+                # Pattern found! Pop the matching elements off the end.
+                for _ in range(p_len):
+                    res.pop()
+                break
+                
+    return list(res)
 
 ###################################################################################
 
