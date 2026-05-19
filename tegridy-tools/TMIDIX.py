@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.5.18" # TMIDIX version
+__version__ = "26.5.19" # TMIDIX version
 
 ###################################################################################
 
@@ -18961,6 +18961,286 @@ def remove_repeating_patterns(lst: list[int]) -> list[int]:
                 break
                 
     return list(res)
+
+###################################################################################
+
+def find_repeating_non_overlapping_patterns(arr, min_len):
+    """
+    Finds all repeating non-overlapping patterns of min_len and longer.
+    Excludes overlapping subpatterns from longest to shortest.
+    
+    :param arr: List[int] - The input sequence
+    :param min_len: int - The minimum length of patterns
+    :return: Dict[Tuple[int, ...], int] - Dictionary of patterns and their valid counts
+    """
+    n = len(arr)
+    if n < min_len * 2:
+        return {}
+
+    # Tracks indices consumed by longer patterns to exclude shorter overlapping subpatterns
+    consumed = [False] * n
+    
+    # Max possible repeating length is half the array
+    max_len = n // 2
+    
+    result = {}
+
+    for L in range(max_len, min_len - 1, -1):
+        # 1. Group all starting indices by their pattern tuple
+        groups = {}
+        for i in range(n - L + 1):
+            pat = tuple(arr[i:i + L])
+            if pat in groups:
+                groups[pat].append(i)
+            else:
+                groups[pat] = [i]
+
+        # 2. Process each pattern group
+        for pat, indices in groups.items():
+            count = 0
+            last_end = -1
+            
+            # Sort indices to process left-to-right
+            indices.sort()
+            
+            for i in indices:
+                # Skip if this occurrence is inside an already consumed longer pattern
+                if consumed[i]:
+                    continue
+                    
+                # If it doesn't overlap with the previous selected occurrence of THIS pattern
+                if i >= last_end:
+                    count += 1
+                    last_end = i + L
+            
+            # 3. If we found repeating occurrences, record it and consume the indices
+            if count >= 2:
+                result[pat] = count
+                
+                # We must re-iterate to mark the exact consumed indices
+                last_end = -1
+                for i in indices:
+                    if consumed[i]:
+                        continue
+                    if i >= last_end:
+                        # Mark these indices as consumed for shorter patterns
+                        for k in range(i, i + L):
+                            consumed[k] = True
+                        last_end = i + L
+
+    return result
+
+###################################################################################
+
+def get_chord_name(intervals):
+    if not intervals:
+        return "Unknown"
+    
+    ivs = sorted(intervals)
+    root = ivs[0]
+    
+    # Standard note names for roots 0 through 11
+    root_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    R = root_names[root]
+    
+    # 1. Single note
+    if len(ivs) == 1:
+        return R
+        
+    # Normalize intervals relative to the root (so root always acts as 0)
+    norm_ivs = sorted([i - root for i in ivs])
+    
+    # 2. Dyads (Intervals / Power Chords)
+    if len(norm_ivs) == 2:
+        if norm_ivs[1] == 1: return f"{R}(addb9)"
+        if norm_ivs[1] == 2: return f"{R}(add9)"
+        if norm_ivs[1] == 3: return f"{R}m"      # minor 3rd implies minor chord
+        if norm_ivs[1] == 4: return f"{R}"       # major 3rd implies major chord
+        if norm_ivs[1] == 5: return f"{R}(add11)" # perfect 4th implies add11
+        if norm_ivs[1] == 6: return f"{R}(b5)"
+        if norm_ivs[1] == 7: return f"{R}5"
+        if norm_ivs[1] == 8: return f"{R}(#5)"
+        if norm_ivs[1] == 9: return f"{R}6"
+        if norm_ivs[1] == 10: return f"{R}(m7)"
+        if norm_ivs[1] == 11: return f"{R}(maj7)"
+        return f"{R}(add{norm_ivs[1]})"
+        
+    # Map normalized semitones to standard chord degrees
+    degree_map = {
+        1: "b9", 2: "9", 3: "m3", 4: "M3", 5: "11", 6: "b5", 
+        7: "P5", 8: "#5", 9: "6", 10: "m7", 11: "M7"
+    }
+    
+    degrees_set = set([degree_map[iv] for iv in norm_ivs if iv != 0])
+    
+    # Helper variables
+    has_m3 = "m3" in degrees_set
+    has_M3 = "M3" in degrees_set
+    has_P5 = "P5" in degrees_set
+    has_b5 = "b5" in degrees_set
+    has_sharp5 = "#5" in degrees_set
+    has_m7 = "m7" in degrees_set
+    has_M7 = "M7" in degrees_set
+    has_9  = "9" in degrees_set
+    has_b9 = "b9" in degrees_set
+    has_6  = "6" in degrees_set    # Corrected: 9 semitones is a 6, not a 13
+    has_11 = "11" in degrees_set
+    
+    # 4. Handle Whole-tone clusters (5 or 6 notes of even intervals)
+    # Fixed logic: strictly checks if all intervals are even semitones
+    if len(norm_ivs) >= 5 and all(i % 2 == 0 for i in norm_ivs):
+        return f"{R}(whole-tone cluster)"
+    
+    # 3. Determine Base Triad Quality
+    base = ""
+    triad_degrees = []
+    
+    if has_M3 and has_P5:
+        base = ""
+        triad_degrees = ["M3", "P5"]
+    elif has_M3 and has_sharp5:
+        base = "aug"
+        triad_degrees = ["M3", "#5"]
+    elif has_M3 and has_b5:
+        base = "(b5)"
+        triad_degrees = ["M3", "b5"]
+    elif has_M3:
+        base = ""
+        triad_degrees = ["M3"]
+    elif has_m3 and has_P5:
+        base = "m"
+        triad_degrees = ["m3", "P5"]
+    elif has_m3 and has_b5:
+        base = "dim"
+        triad_degrees = ["m3", "b5"]
+    elif has_m3 and has_sharp5:
+        base = "m#5"
+        triad_degrees = ["m3", "#5"]
+    elif has_m3:
+        base = "m"
+        triad_degrees = ["m3"]
+    else:
+        # No 3rd present (Ambiguous clusters or sus4/add11 combinations)
+        extensions = []
+        for iv in norm_ivs:
+            if iv == 0: continue
+            if iv == 5: extensions.append("sus4")  # 4th implies sus4
+            elif iv == 7: continue                  # 5th is assumed
+            elif iv == 6: extensions.append("b5")
+            elif iv == 8: extensions.append("#5")
+            elif iv == 2: extensions.append("add9")
+            elif iv == 9: extensions.append("6")
+            elif iv == 10: extensions.append("m7")
+            elif iv == 11: extensions.append("M7")
+            elif iv == 1: extensions.append("addb9")
+            else: extensions.append(f"add{iv}")
+            
+        if not extensions: return R
+        
+        # Handle sus4 & m7 combo standard naming convention
+        if "sus4" in extensions and "m7" in extensions:
+            extensions.remove("sus4")
+            extensions.remove("m7")
+            return f"{R}7sus4{''.join(extensions)}"
+            
+        return f"{R}{''.join(extensions)}"
+        
+    # 5. Determine Seventh Chord Quality
+    seventh = ""
+    if has_m7:
+        if base == "": 
+            seventh = "7"
+        elif base == "m":
+            if has_b5:
+                seventh = "7b5"
+                triad_degrees.append("b5")
+            else:
+                seventh = "7"
+        elif base == "dim":
+            seventh = "7"
+        elif base == "m#5":
+            seventh = "7"
+        elif base == "(b5)":
+            seventh = "7"
+        else:
+            seventh = "7"
+    elif has_M7:
+        if base == "": 
+            seventh = "maj7"
+        elif base == "m":
+            seventh = "maj7"
+        elif base == "dim":
+            seventh = "M7"
+        elif base == "aug":
+            seventh = "maj7"
+        elif base == "m#5":
+            seventh = "maj7"
+        elif base == "(b5)":
+            seventh = "maj7"
+            
+    # 6. Identify Extensions and Alterations
+    extensions = []
+    alterations = []
+    
+    for iv in norm_ivs:
+        if iv == 0: continue
+        d = degree_map[iv]
+        if d in triad_degrees: continue
+        if d == "m7" and has_m7: continue
+        if d == "M7" and has_M7: continue
+        
+        if d == "9":
+            extensions.append(d)
+        elif d == "b9":
+            alterations.append(d)
+        elif d == "11":
+            # Fixed addadd11 bug
+            if has_m7 or has_M7:
+                extensions.append(d)
+            else:
+                extensions.append("add11")
+        elif d == "6":
+            if has_m7 or has_M7:
+                extensions.append(d)
+            else:
+                extensions.append("6")
+        # Prevent conflicting and redundant b5/#5 alteration additions
+        elif d == "P5" and has_b5 and not has_sharp5:
+            alterations.append("#5")
+        elif d == "P5":
+            continue
+        elif d == "#5":
+            if "aug" in base:
+                continue
+            # If both b5 and #5 exist, we don't double-annotate #5 unless in 7th context
+            if has_b5:
+                continue
+            alterations.append(d)
+        elif d == "b5" and "(b5)" in base:
+            continue
+            
+    # 7. Formatting Rules
+    # A 6th chord takes priority if no 7th is present
+    is_sixth = "6" in extensions and not seventh
+    if is_sixth:
+        name = f"{R}{base}6"
+        extensions.remove("6")
+        if extensions:
+            name += f"(add{''.join(extensions)})"
+        if alterations:
+            name += f"({','.join(alterations)})"
+        return name
+        
+    # Build the core chord name
+    name = f"{R}{base}{seventh}"
+    
+    if extensions:
+        name += "".join(extensions)
+        
+    if alterations:
+        name += f"({','.join(alterations)})"
+        
+    return name
 
 ###################################################################################
 
