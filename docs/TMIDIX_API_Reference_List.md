@@ -1,5 +1,5 @@
 # TMIDIX API Reference List
-## All TMIDIX functions listed in alphabetical order
+## All 407 TMIDIX functions listed in alphabetical order
 
 ---
 
@@ -225,7 +225,7 @@
 ## E
 <a name="e"></a>
 
-**57 entries**
+**58 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -263,6 +263,7 @@
 * `escore_notes_pitches_chords_signature`
 * `escore_notes_pitches_range`
 * `escore_notes_primary_features`
+* `escore_notes_run_time`
 * `escore_notes_scale`
 * `escore_notes_times_tones`
 * `escore_notes_to_binary_matrix`
@@ -295,11 +296,12 @@
 ## F
 <a name="f"></a>
 
-**35 entries**
+**37 entries**
 
 <details>
 <summary>Show entries</summary>
 
+* `find_best_ngram_match`
 * `find_best_tones_chord`
 * `find_chords_chunk_in_escore_notes`
 * `find_chunk_indexes`
@@ -321,6 +323,7 @@
 * `find_paths`
 * `find_pattern_idxs`
 * `find_pattern_start_indexes`
+* `find_repeating_non_overlapping_patterns`
 * `find_similar_tones_chord`
 * `find_value_power`
 * `fix_bad_chords_in_escore_notes`
@@ -343,13 +346,14 @@
 ## G
 <a name="g"></a>
 
-**10 entries**
+**11 entries**
 
 <details>
 <summary>Show entries</summary>
 
 * `generate_colors`
 * `generate_tones_chords_progression`
+* `get_chord_name`
 * `get_chords_by_semitones`
 * `get_chords_with_prefix`
 * `get_md5_hash`
@@ -556,7 +560,7 @@
 ## R
 <a name="r"></a>
 
-**13 entries**
+**14 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -566,6 +570,7 @@
 * `recalculate_score_timings`
 * `remove_duplicate_pitches_from_escore_notes`
 * `remove_events_from_escore_notes`
+* `remove_repeating_patterns`
 * `replace_bad_tones_chord`
 * `replace_chords_in_escore_notes`
 * `resize_matrix`
@@ -582,7 +587,7 @@
 ## S
 <a name="s"></a>
 
-**29 entries**
+**31 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -591,6 +596,8 @@
 * `score2opus`
 * `score2stats`
 * `score_chord_to_tones_chord`
+* `set_no_warning`
+* `set_of_sublists`
 * `shift_bits`
 * `shift_to_smallest_integer_type`
 * `smooth_escore_notes`
