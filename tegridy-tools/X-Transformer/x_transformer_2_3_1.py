@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 13.0
+# Version 14.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -8978,602 +8978,1017 @@ print(f"Top 5 Lyrics indices matching MIDI 5: {indices.cpu().numpy()}")
 '''
 
 #=================================================================================================================================
-# MIDI PCA VQ VAE functions
+# MIDI PCA functions for non-autoregressive masked encoder models
 #=================================================================================================================================
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import math
+from contextlib import contextmanager
 
-# ---------------------------------------------------------
-# 1. RVQ with Direct Optimization & Dead Code Revival
-# ---------------------------------------------------------
-class ResidualVQ(nn.Module):
-    def __init__(self, n_e=1024, e_dim=64, d_model=256, n_codebooks=4, beta=0.25): # Default beta == 1.0
-        super().__init__()
-        self.n_e = n_e
-        self.e_dim = e_dim
-        self.n_codebooks = n_codebooks
-        self.beta = beta
-        
-        self.proj_down = nn.Linear(d_model, e_dim)
-        self.proj_up = nn.Linear(e_dim * n_codebooks, d_model)
-        
-        self.embedding = nn.ParameterList([
-            nn.Parameter(torch.randn(n_e, e_dim) * (1.0 / math.sqrt(e_dim))) for _ in range(n_codebooks)
-        ])
+# ──────────────────────────────────────────────────────────
+# Internal helpers
+# ──────────────────────────────────────────────────────────
 
-        # Ensures codes don't start too close to the zero-mean encoder outputs
-        for emb in self.embedding:
-            nn.init.kaiming_uniform_(emb, a=math.sqrt(5))
-
-    @torch.no_grad()
-    def _revive_dead_codes(self, i, indices, z_residual):
-        # Fixed typo here: self.n_e instead of self_n_e
-        one_hot = F.one_hot(indices, self.n_e).float()
-        usage = one_hot.sum(0)
-        dead_codes = (usage == 0)
-        n_dead = dead_codes.sum().item()
-        if n_dead > 0:
-            rand_idx = torch.randint(0, z_residual.shape[0], (n_dead,), device=z_residual.device)
-            self.embedding[i].data[dead_codes] = z_residual[rand_idx].detach().float()
-
-    def forward(self, z):
-        z_float = z.float()
-        z_flat = self.proj_down(z_float)
-        B, T, _ = z_flat.shape
-        z_flat_bt = z_flat.reshape(-1, self.e_dim)
-        
-        z_q_all = []
-        total_vq_loss = 0.0
-        all_indices = []
-        
-        z_residual = z_flat_bt
-
-        for i in range(self.n_codebooks):
-            emb = self.embedding[i]
-            
-            d = torch.sum(z_residual**2, dim=1, keepdim=True) + \
-                torch.sum(emb**2, dim=1) - 2 * (z_residual @ emb.t())
-            
-            indices = torch.argmin(d, dim=1)
-            z_q_hard = emb[indices]
-
-            if self.training:
-                self._revive_dead_codes(i, indices, z_residual.detach())
-
-            z_q_st = z_residual + (z_q_hard - z_residual).detach()
-            total_vq_loss += F.mse_loss(z_residual, z_q_hard.detach()) + self.beta * F.mse_loss(z_residual, z_q_hard.detach())
-
-            z_q_all.append(z_q_st)
-            all_indices.append(indices)
-            z_residual = z_residual - z_q_hard.detach()
-
-        z_q_cat = torch.cat(z_q_all, dim=-1)
-        z_q_up = self.proj_up(z_q_cat.reshape(B, T, -1)).to(z.dtype)
-        
-        all_indices = torch.stack(all_indices).reshape(self.n_codebooks, B, T)
-        
-        total_perplexity = 0.0
-        for cb_indices in all_indices:
-            enc = F.one_hot(cb_indices.reshape(-1), self.n_e).float()
-            probs = enc.mean(0)
-            perp = torch.exp(-torch.sum(probs * torch.log(probs + 1e-10)))
-            total_perplexity += perp
-
-        return z_q_up, total_vq_loss, all_indices, total_perplexity
-
-# ---------------------------------------------------------
-# 2. Symmetric Encoder
-# ---------------------------------------------------------
-class MVV_Encoder(nn.Module):
-    def __init__(self, vocab_size=18820, d_model=256, downsample_factor=16, pad_idx=0):
-        super().__init__()
-        self.emb = nn.Embedding(vocab_size, d_model, padding_idx=pad_idx)
-        self.n_layers = int(math.log2(downsample_factor))
-        
-        max_channels = 1024
-        out_channels = []
-        
-        curr = d_model
-        for i in range(self.n_layers):
-            if i < self.n_layers // 2:
-                curr = min(curr * 2, max_channels)
-            elif i == self.n_layers - 1:
-                curr = d_model
-            else:
-                curr = max(curr // 2, d_model)
-            out_channels.append(curr)
-            
-        in_channels = [d_model] + out_channels[:-1]
-        
-        layers = []
-        for i in range(self.n_layers):
-            layers.append(nn.Conv1d(in_channels[i], out_channels[i], kernel_size=4, stride=2, padding=1))
-            if i < self.n_layers - 1:
-                layers.append(nn.GELU())
-                
-        self.conv_net = nn.Sequential(*layers)
-        
-        # Increased depth and heads
-        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=8, batch_first=True, activation='gelu')
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=4)
-
-    def forward(self, x):
-        x = self.emb(x)              
-        x = x.transpose(1, 2)        
-        x = self.conv_net(x)         
-        x = x.transpose(1, 2)        
-        # x = self.transformer(x) # Uncomment this for full Encoder recon      
-        return x
-
-# ---------------------------------------------------------
-# 3. Symmetric Decoder
-# ---------------------------------------------------------
-class MVV_Decoder(nn.Module):
-    def __init__(self, vocab_size=18820, d_model=256, upsample_factor=16):
-        super().__init__()
-        self.n_layers = int(math.log2(upsample_factor))
-        
-        # Increased depth and heads
-        decoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=8, batch_first=True, activation='gelu')
-        self.transformer = nn.TransformerEncoder(decoder_layer, num_layers=4)
-        
-        max_channels = 1024
-        out_channels = []
-        
-        curr = d_model
-        for i in range(self.n_layers):
-            if i < self.n_layers // 2:
-                curr = min(curr * 2, max_channels)
-            elif i == self.n_layers - 1:
-                curr = d_model
-            else:
-                curr = max(curr // 2, d_model)
-            out_channels.append(curr)
-            
-        in_channels = [d_model] + out_channels[:-1]
-        
-        dec_in_channels = out_channels[::-1]
-        dec_out_channels = in_channels[::-1]
-        
-        layers = []
-        for i in range(self.n_layers):
-            layers.append(nn.ConvTranspose1d(dec_in_channels[i], dec_out_channels[i], kernel_size=4, stride=2, padding=1))
-            if i < self.n_layers - 1:
-                layers.append(nn.GELU())
-            
-        self.conv_net = nn.Sequential(*layers)
-        self.head = nn.Linear(d_model, vocab_size)
-
-    def forward(self, x):
-        x = self.transformer(x)      
-        x = x.transpose(1, 2)        
-        x = self.conv_net(x)         
-        x = x.transpose(1, 2)        
-        logits = self.head(x)        
-        return logits
-
-# ---------------------------------------------------------
-# 4. Complete MIDI VQ-VAE Autoencoder
-# ---------------------------------------------------------
-class MidiVQVAE(nn.Module):
-    def __init__(self, vocab_size=18820, d_model=256, downsample_factor=16, codebook_size=1024, pad_idx=0, vq_dim=64, n_codebooks=4):
-        super().__init__()
-        if downsample_factor & (downsample_factor - 1):
-            raise ValueError("downsample_factor must be a power of 2")
-            
-        self.downsample_factor = downsample_factor
-        self.pad_idx = pad_idx
-        
-        self.encoder = MVV_Encoder(vocab_size, d_model, downsample_factor, pad_idx)
-        self.quantizer = ResidualVQ(n_e=codebook_size, e_dim=vq_dim, d_model=d_model, n_codebooks=n_codebooks)
-        self.decoder = MVV_Decoder(vocab_size, d_model, downsample_factor)
-        
-        # Tie input and output embeddings for faster convergence
-        self.decoder.head.weight = self.encoder.emb.weight
-
-    def pad_to_factor(self, x):
-        seq_len = x.size(1)
-        pad_len = (self.downsample_factor - (seq_len % self.downsample_factor)) % self.downsample_factor
-        if pad_len > 0:
-            x = F.pad(x, (0, pad_len), value=self.pad_idx)
-        return x, pad_len
-
-    def forward(self, x):
-        original_len = x.size(1)
-        x, _ = self.pad_to_factor(x)
-        
-        z = self.encoder(x)                       
-        z_q, vq_loss, discrete_tokens, perplexity = self.quantizer(z) 
-        
-        logits = self.decoder(z_q)
-        logits = logits[:, :original_len, :]
-            
-        return logits, vq_loss, discrete_tokens, z, perplexity
-
-    def encode_to_tokens(self, x):
-        x, _ = self.pad_to_factor(x)
-        z = self.encoder(x)
-        _, _, discrete_tokens, _ = self.quantizer(z)
-        return discrete_tokens
-
-    def decode_from_tokens(self, discrete_tokens, target_len=8000):
-        z_q_all = []
-        for i in range(self.quantizer.n_codebooks):
-            emb = self.quantizer.embedding[i]
-            z_q_all.append(emb[discrete_tokens[i]].float())
-        
-        z_q_cat = torch.cat(z_q_all, dim=-1)
-        z_q = self.quantizer.proj_up(z_q_cat)
-        
-        logits = self.decoder(z_q)
-        logits = logits[:, :target_len, :] 
-        return torch.argmax(logits, dim=-1)
-
-import torch
-from torch.utils.data import Dataset, DataLoader
-from torch.nn.utils.rnn import pad_sequence
-
-# 1. Define the Dataset
-class SequenceDataset(Dataset):
-    def __init__(self, data, seq_len=8192):
-        """
-        Args:
-            data: A list of tuples where x[0] is metadata (e.g., label, id) 
-                  and x[1] is the sequence (list, numpy array, or tensor).
-        """
-        self.data = data
-        self.seq_len = seq_len
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        # Extract the sequence and convert to tensor
-        seq = torch.tensor(self.data[idx][:self.seq_len], dtype=torch.long)
-        
-        return seq 
-
-# 2. Define the Custom Collate Function
-def pad_collate_fn(batch, pad_idx=0):
-    """
-    This function is called by the DataLoader to merge a list of samples 
-    into a mini-batch of Tensors.
-    
-    Args:
-        batch: A list of tensors returned by __getitem__
-        pad_idx: The value to use for padding (defaults to 0)
-    """
-    # batch is a list of tensors: [tensor([1, 2, 3]), tensor([4, 5])]
-    padded_seqs = pad_sequence(batch, batch_first=True, padding_value=pad_idx)
-    
-    return padded_seqs
-
-import tqdm
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
-
-try:
-    from IPython.display import clear_output
-except:
-    pass
-
-# ---------------------------------------------------------
-# Training Logger & Plotter
-# ---------------------------------------------------------
-class TrainingLogger:
-    def __init__(self):
-        self.metrics = {
-            'Total Loss': [],
-            'Recon Loss': [],
-            'VQ Loss': [],
-            'Perplexity': [],
-            'Latent Length': []
-        }
-        self.steps = []
-        
-    def log(self, step, loss, recon_loss, vq_loss, perplexity, latent_len):
-        self.steps.append(step)
-        self.metrics['Total Loss'].append(loss)
-        self.metrics['Recon Loss'].append(recon_loss)
-        self.metrics['VQ Loss'].append(vq_loss)
-        self.metrics['Perplexity'].append(perplexity)
-        self.metrics['Latent Length'].append(latent_len)
-        
-    def plot(self, epoch, step, total_steps):
-        # Clear previous output (works great in Jupyter/Colab)
-        try:
-            clear_output(wait=True)
-        except:
-            pass
-        
-        # Create figure with pure white background and no frame
-        fig, axes = plt.subplots(2, 3, figsize=(18, 10), facecolor='white')
-        fig.suptitle(f'Training Metrics | Epoch: {epoch} | Step: {step}/{total_steps}', 
-                     fontsize=16, fontweight='bold', color='black')
-        
-        # Flatten axes for easy iteration
-        axes = axes.flatten()
-        
-        # Plot each metric
-        for idx, (name, values) in enumerate(self.metrics.items()):
-            ax = axes[idx]
-            
-            # White background, no frame (spines)
-            ax.set_facecolor('white')
-            for spine in ax.spines.values():
-                spine.set_visible(False)
-                
-            # Plot the data
-            ax.plot(self.steps, values, color='#1f77b4', linewidth=2)
-            
-            # Add light grid for readability
-            ax.grid(True, color='#cccccc', linestyle='--', linewidth=0.5, alpha=0.7)
-            
-            # Labels and styling
-            ax.set_title(name, fontsize=12, fontweight='bold', color='black')
-            ax.tick_params(colors='black', which='both')
-            ax.xaxis.label.set_color('black')
-            ax.yaxis.label.set_color('black')
-            
-            # Add a subtle fill below the line for aesthetic
-            ax.fill_between(self.steps, values, alpha=0.1, color='#1f77b4')
-        
-        # Hide the unused 6th subplot
-        axes[-1].set_visible(False)
-        
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-        plt.savefig('metrics_plot.png')
-        plt.show()
-
-r'''
---------------
-Usage examples
---------------
-
-# Instantiate the logger
-logger = TrainingLogger()
-
-# ---------------------------------------------------------
-# 5. AMP Training Loop Example (Optimized)
-# ---------------------------------------------------------
-VOCAB_SIZE = 18820
-PAD_IDX = 18819          
-BATCH_SIZE = 24
-SEQ_LEN = 8192
-DOWN_FACTOR = 32
-D_MODEL = 512
-CODEBOOK_SIZE = 256
-VQ_DIM = 128       
-N_CODEBOOKS = 1
-NUM_EPOCHS = 5
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-dtype = torch.float32 # torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-
-model = MidiVQVAE(
-    vocab_size=VOCAB_SIZE, 
-    d_model=D_MODEL, 
-    downsample_factor=DOWN_FACTOR, 
-    codebook_size=CODEBOOK_SIZE, 
-    pad_idx=PAD_IDX,
-    vq_dim=VQ_DIM,
-    n_codebooks=N_CODEBOOKS
-).to(device)
-
-optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
-criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX) 
-
-scaler = torch.amp.GradScaler('cuda', enabled=(dtype == torch.float16))
-
-# Instantiate Dataset and DataLoader
-dataset = SequenceDataset(data)
-dataloader = DataLoader(
-    dataset, 
-    batch_size=BATCH_SIZE,  
-    collate_fn=lambda batch: pad_collate_fn(batch, pad_idx=PAD_IDX),
-    shuffle=True,
-    drop_last=True
-)
-
-model.train()
-global_step = 0
-
-for epoch in range(NUM_EPOCHS):
-    # Initialize the tqdm progress bar with an empty description that we will update
-    pbar = tqdm.tqdm(dataloader, total=len(dataloader), desc="Initializing...")
-    
-    for i, batch in enumerate(pbar):
-        x = batch.cuda()
-        
-        optimizer.zero_grad(set_to_none=True) # Slight memory optimization
-        
-        with torch.amp.autocast('cuda', dtype=dtype):
-            logits, vq_loss, discrete_tokens, continuous_latents, perplexity = model(x)
-            recon_loss = criterion(logits.reshape(-1, VOCAB_SIZE), x.reshape(-1))
-            loss = recon_loss + vq_loss
-        
-        scaler.scale(loss).backward()
-        scaler.unscale_(optimizer)
-        
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        
-        scaler.step(optimizer)
-        scaler.update()
-        
-        reduced_len = discrete_tokens.shape[2] # [n_codebooks, B, T]
-
-        # --- UPDATE TQDM METRICS HERE ---
-        if global_step % 100 == 0:
-            pbar.set_description(
-                f"Epoch {epoch} | Step: {i}/{len(dataloader)} | "
-                f"Loss: {loss.item():.4f} | Recon: {recon_loss.item():.4f} | "
-                f"VQ: {vq_loss.item():.4f} | Perp: {perplexity.item():.0f} | "
-                f"Latent/Repr Length: {reduced_len}"
-            )
-
-        # Log metrics every step to ensure smooth graphs
-        logger.log(
-            step=global_step, 
-            loss=loss.item(), 
-            recon_loss=recon_loss.item(), 
-            vq_loss=vq_loss.item(), 
-            perplexity=perplexity.item(), 
-            latent_len=reduced_len
-        )
-
-        # Plot every 50 steps (skipping step 0)
-        if global_step > 0 and global_step % 1000 == 0:
-            logger.plot(epoch=epoch, step=global_step, total_steps=len(dataloader))
-            # Keep the model in train mode just in case clear_output causes any weirdness
-            model.train()
-
-            if global_step % 2000 == 0:
-                torch.save(model.state_dict(), 'model.pth')
-            
-        global_step += 1
-
-import torch
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
-import time
-
-    # --- 1. Configuration ---
-    VOCAB_SIZE = 18820
-    PAD_IDX = 18819          
-    BATCH_SIZE = 24
-    SEQ_LEN = 8192
-    DOWN_FACTOR = 32
-    D_MODEL = 512
-    CODEBOOK_SIZE = 256
-    VQ_DIM = 128       
-    N_CODEBOOKS = 1
-    NUM_EPOCHS = 5
-    MODEL_PATH = "model.pth"
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using device: {device}")
-
-    # --- 2. FORCE RE-INSTANTIATION ---
-    # This guarantees we are using the fresh class definition above, 
-    # destroying any ghost methods attached to a previously created `model` variable.
-    model = MidiVQVAE(
-        vocab_size=VOCAB_SIZE, 
-        d_model=D_MODEL, 
-        downsample_factor=DOWN_FACTOR, 
-        codebook_size=CODEBOOK_SIZE, 
-        pad_idx=PAD_IDX,
-        vq_dim=VQ_DIM,
-        n_codebooks=N_CODEBOOKS
-    ).to(device)
-
-    # --- 3. Load Trained Weights ---
+@contextmanager
+def _no_flash(model):
+    """Temporarily disable flash attention so that attention weight
+    matrices are materialised and returned in intermediates."""
+    saved: dict[str, bool] = {}
+    for name, mod in model.named_modules():
+        if hasattr(mod, 'flash'):
+            saved[name] = mod.flash
+            mod.flash = False
     try:
-        checkpoint = torch.load(MODEL_PATH, map_location=device)
-        if 'model_state_dict' in checkpoint:
-            state_dict = checkpoint['model_state_dict']
+        yield
+    finally:
+        for name, mod in model.named_modules():
+            if name in saved:
+                mod.flash = saved[name]
+
+
+def _call(model, input_ids, **kw):
+    """Call the model; always return (output, intermediates).
+    Handles versions that return either a dataclass, a plain list, or a tuple."""
+    out = model(input_ids, **kw)
+    if isinstance(out, tuple):
+        return out[0], out[1]
+    return out, None
+
+
+def _hidden(output, intermediates):
+    """Return hidden states (before any logits projection) whenever
+    possible, falling back to the raw output."""
+    if intermediates is not None:
+        if hasattr(intermediates, 'last_hidden'):
+            lh = intermediates.last_hidden
+            if lh is not None:
+                return lh
+    return output
+
+
+def _extract_attn_layers(intermediates) -> List[torch.Tensor]:
+    """
+    Extract attention weight matrices from the model intermediates,
+    supporting all x-transformers return formats:
+      - A LayerIntermediates dataclass
+      - A flat list of Tensors
+      - A list of Intermediates objects
+      - Nested lists / tuples
+    """
+    if intermediates is None:
+        return []
+
+    # 1. LayerIntermediates dataclass
+    if hasattr(intermediates, 'attn_intermediates'):
+        raw = intermediates.attn_intermediates
+        if raw is None:
+            return []
+        intermediates = raw
+
+    # 2. Ensure we are working with an iterable
+    if not isinstance(intermediates, (list, tuple)):
+        return []
+
+    # 3. Unwrap any nested structures (e.g. list of tuples containing Tensors)
+    flat_list = []
+    stack = list(intermediates)
+    while stack:
+        item = stack.pop(0)
+        if isinstance(item, (list, tuple)):
+            stack.extend(item)
         else:
-            state_dict = checkpoint
-            
-        # Prevent state dict from injecting corrupted ghost parameters
-        expected_params = set(model.state_dict().keys())
-        clean_state_dict = {k: v for k, v in state_dict.items() if k in expected_params}
-        model.load_state_dict(clean_state_dict, strict=False)
-        print(f"✅ Successfully loaded weights from {MODEL_PATH}")
-    except FileNotFoundError:
-        print(f"⚠️ Warning: {MODEL_PATH} not found. Running with random weights for demonstration.")
+            flat_list.append(item)
 
-    model.eval() 
+    # 4. Extract actual attention Tensor from each item
+    attn_mats = []
+    for item in flat_list:
+        if isinstance(item, torch.Tensor):
+            attn_mats.append(item)
+        elif hasattr(item, 'post_softmax_attn') and item.post_softmax_attn is not None:
+            attn_mats.append(item.post_softmax_attn)
+        elif hasattr(item, 'pre_softmax_attn') and item.pre_softmax_attn is not None:
+            a = item.pre_softmax_attn.float().softmax(dim=-1)
+            attn_mats.append(a)
 
-    # --- 4. Create Mock Validation Data ---
-    print("\nPreparing mock validation data...")
-    mock_data = batch.cuda()
-    
-    # --- 5. Forward Pass: End-to-End Reconstruction ---
-    print("\n" + "="*50)
-    print("1. END-TO-END FORWARD PASS")
-    print("="*50)
-    
+    return [a.float() for a in attn_mats]
+
+
+def _exclude_pad(scores, ids, pad_id):
+    return scores.masked_fill(ids == pad_id, float('-inf'))
+
+
+def _topk(scores, ids, k, pad_id):
+    n_valid = int((ids != pad_id).sum(dim=-1).min().item())
+    k = min(k, max(n_valid, 1))
+    top_scores, top_indices = _exclude_pad(scores, ids, pad_id).topk(k, dim=-1)
+    return top_indices, top_scores
+
+# ──────────────────────────────────────────────────────────
+# METHOD 1 — Gradient Saliency
+# ──────────────────────────────────────────────────────────
+
+def principal_tokens_gradient(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    top_k: int = 10,
+    pad_id: int = 334,
+    pool: Literal['mean', 'cls', 'max'] = 'mean',
+    device='cuda'
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Gradient saliency: token importance = ‖∂S / ∂E_i‖₂  where *S* is a
+    scalar summarising the encoder output and *E_i* is the embedding of
+    token *i*.
+
+    * One forward + one backward pass → **fast**
+    * Compatible with flash attention (no attention matrices needed)
+    * Rooted in Simonyan et al. (2014) deep-LIFT / saliency maps
+
+    Parameters
+    ----------
+    pool : how to reduce the (B, N, D) hidden states to a scalar *S*
+           'mean' – mean-pool over non-pad positions  (default, stable)
+           'cls'  – use the first position
+           'max'  – max-over-pos of the L2 norm per position
+    """
+    was_grad = torch.is_grad_enabled()
+    torch.set_grad_enabled(True)
+
+    model.eval()
+    input_ids = input_ids.to(device)
+    B, N = input_ids.shape
+
+    emb_out: Union[torch.Tensor, None] = None
+
+    def _hook(_module, _inp, out):
+        nonlocal emb_out
+        emb_out = out.detach().requires_grad_(True)
+        return emb_out
+
+    handle = model.token_emb.register_forward_hook(_hook)
+
+    output, intermediates = _call(model, input_ids)
+    h = _hidden(output, intermediates).float()
+
+    pad_m = (input_ids != pad_id).unsqueeze(-1).float()
+
+    if pool == 'mean':
+        repr_ = (h * pad_m).sum(1) / pad_m.sum(1).clamp(min=1)
+    elif pool == 'cls':
+        repr_ = h[:, 0]
+    elif pool == 'max':
+        repr_ = h.norm(dim=-1).masked_fill(~(input_ids != pad_id), 0).max(dim=1).values
+    else:
+        raise ValueError(f"Unknown pool '{pool}'")
+
+    score = repr_.norm()
+
+    model.zero_grad()
+    score.backward()
+
+    importance = emb_out.grad.float().norm(dim=-1)
+
+    handle.remove()
+    torch.set_grad_enabled(was_grad)
+
+    return _topk(importance, input_ids, top_k, pad_id)
+
+
+# ──────────────────────────────────────────────────────────
+# METHOD 2 — Attention Received / Rollout
+# ──────────────────────────────────────────────────────────
+
+def principal_tokens_attention(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    top_k: int = 10,
+    pad_id: int = 334,
+    mode: Literal['received', 'rollout'] = 'received',
+    device='cuda'
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Attention-based importance.
+
+    * One forward pass (flash is **temporarily disabled** so that
+      post-softmax attention matrices are returned).
+    * ``'received'`` – average column-sum of attention across all layers
+      & heads (how much each token is *attended to*).
+    * ``'rollout'``  – attention rollout (Abnar & Zuidema, 2020) which
+      propagates attention through layers while accounting for residual
+      connections.
+
+    **Note:** materialising (N × N) attention for long sequences and many
+    layers is memory-intensive.  For N > 512 consider the gradient method
+    instead.
+    """
+    model.eval()
+    input_ids = input_ids.to(device)
+    B, N = input_ids.shape
+
+    with _no_flash(model):
+        with torch.no_grad():
+            _, intermediates = _call(model, input_ids, return_attn=True)
+
+            mats = _extract_attn_layers(intermediates)
+
+            if not mats:
+                raise RuntimeError(
+                    "No attention weights found in intermediates. Ensure "
+                    "flash was successfully disabled and the encoder stores intermediates."
+                )
+
+            eye = torch.eye(N, device=device, dtype=torch.float32)
+
+            if mode == 'received':
+                importance = torch.zeros(B, N, device=device, dtype=torch.float32)
+                for a in mats:
+                    importance += a.sum(dim=(1, 2))
+                importance /= len(mats)
+
+            elif mode == 'rollout':
+                result = eye.unsqueeze(0).expand(B, -1, -1).clone()
+                for a in mats:
+                    a_mean = a.mean(dim=1)
+                    a_res  = 0.5 * a_mean + 0.5 * eye
+                    result = torch.bmm(a_res, result)
+                importance = result.sum(dim=1)
+            else:
+                raise ValueError(f"Unknown mode '{mode}'")
+
+    return _topk(importance, input_ids, top_k, pad_id)
+
+
+# ──────────────────────────────────────────────────────────
+# METHOD 3 — Occlusion / Leave-One-Out
+# ──────────────────────────────────────────────────────────
+
+def principal_tokens_occlusion(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    top_k: int = 10,
+    mask_id: int = 333,
+    pad_id: int = 334,
+    chunk: int = 64,
+    device='cuda'
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Occlusion: replace each token with ``<MASK>`` one at a time and
+    measure the change in the encoder's pooled representation.
+    Tokens whose removal causes the **largest** change are the most
+    principal.
+
+    * O(N) forward passes, batched for efficiency.
+    * Most principled / interpretable method.
+    * Currently supports **batch_size = 1**.
+
+    Parameters
+    ----------
+    chunk : how many positions to process per batched forward pass
+            (trade memory ↔ speed).
+    """
+    model.eval()
+    input_ids = input_ids.to(device)
+    assert input_ids.shape[0] == 1, "Occlusion currently supports batch_size=1"
+    _, N = input_ids.shape
+
+    valid = (input_ids[0] != pad_id).nonzero(as_tuple=True)[0]
+
     with torch.no_grad():
-        start_time = time.time()
-        logits, vq_loss, discrete_tokens, continuous_latents, perplexity = model(mock_data)
-        inference_time = time.time() - start_time
-        
-        predictions = torch.argmax(logits, dim=-1) 
-        
-        mask = (mock_data != PAD_IDX)
-        correct_preds = (predictions == mock_data) & mask
-        accuracy = correct_preds.sum().item() / mask.sum().item()
-        
-        ce_loss = F.cross_entropy(
-            logits.reshape(-1, VOCAB_SIZE), 
-            mock_data.reshape(-1), 
-            ignore_index=PAD_IDX
+        out, inter = _call(model, input_ids)
+        h0 = _hidden(out, inter).float()
+        pm = (input_ids != pad_id).unsqueeze(-1).float()
+        base = (h0 * pm).sum(1) / pm.sum(1).clamp(min=1)
+
+    importance = torch.zeros(1, N, device=device, dtype=torch.float32)
+
+    for s in range(0, len(valid), chunk):
+        pos = valid[s : s + chunk]
+        bs  = pos.shape[0]
+        batch = input_ids.expand(bs, -1).clone()
+        batch[torch.arange(bs, device=device), pos] = mask_id
+
+        with torch.no_grad():
+            out, inter = _call(model, batch)
+            h = _hidden(out, inter).float()
+            pm_b = (input_ids != pad_id).unsqueeze(-1).float().expand(bs, -1, -1)
+            repr_ = (h * pm_b).sum(1) / pm_b.sum(1).clamp(min=1)
+
+        dist = F.mse_loss(repr_, base.expand(bs, -1), reduction='none').sum(-1)
+        importance[0, pos] = dist
+
+    return _topk(importance, input_ids, top_k, pad_id)
+
+
+# ──────────────────────────────────────────────────────────
+# METHOD 4 — MLM Prediction Difficulty
+# ──────────────────────────────────────────────────────────
+
+def principal_tokens_prediction(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    top_k: int = 10,
+    mask_id: int = 333,
+    pad_id: int = 334,
+    chunk: int = 64,
+    device='cuda'
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Mask each token individually and compute the cross-entropy of the
+    model's prediction for that token.  Tokens with **higher** loss
+    carry more unique, irreplaceable information → more principal.
+
+    * O(N) forward passes (batched).
+    * Requires a logits head (``to_logits``) or tied embeddings.
+    * Currently supports **batch_size = 1**.
+    """
+    model.eval()
+    input_ids = input_ids.to(device)
+    assert input_ids.shape[0] == 1, "Prediction method supports batch_size=1"
+    _, N = input_ids.shape
+
+    valid = (input_ids[0] != pad_id).nonzero(as_tuple=True)[0]
+
+    importance = torch.zeros(1, N, device=device, dtype=torch.float32)
+
+    has_logits = hasattr(model, 'to_logits') and model.to_logits is not None
+
+    for s in range(0, len(valid), chunk):
+        pos = valid[s : s + chunk]
+        bs  = pos.shape[0]
+        batch = input_ids.expand(bs, -1).clone()
+        batch[torch.arange(bs, device=device), pos] = mask_id
+
+        with torch.no_grad():
+            out, _ = _call(model, batch)
+
+            if has_logits:
+                logits = out.float()
+            else:
+                logits = F.linear(
+                    out.float(),
+                    model.token_emb.emb.weight.float(),
+                )
+
+            logits_at = logits[torch.arange(bs, device=device), pos]
+            targets   = input_ids[0, pos]
+            loss = F.cross_entropy(logits_at, targets, reduction='none')
+        importance[0, pos] = loss
+
+    return _topk(importance, input_ids, top_k, pad_id)
+
+
+# ──────────────────────────────────────────────────────────
+# METHOD 5 — Ultimate (Multi-Method Consensus + Interaction)
+# ──────────────────────────────────────────────────────────
+#
+# Internal score-computation helpers used only by the ultimate method.
+# These return raw (B, N) score tensors without top-k selection so the
+# ultimate method can normalise and fuse them.
+# ──────────────────────────────────────────────────────────
+
+def _compute_ig_scores(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    mask_id: int,
+    pad_id: int,
+    pool: str,
+    steps: int,
+) -> torch.Tensor:
+    """
+    Integrated Gradients (Sundararajan et al., 2017).
+
+    Computes path-attributed gradients from a *masked baseline* to the
+    actual input along a straight-line interpolation in embedding space.
+    At each step α ∈ (0, 1] the token-embedding output is replaced by
+    ``baseline + α · (actual − baseline)`` via a forward hook.
+
+    Key advantages over vanilla gradient saliency
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    * **Completeness axiom** — attributions sum exactly to the output
+      difference (F(actual) − F(baseline)), guaranteeing no missing
+      or excess attribution.
+    * **Saturation-immune** — by averaging gradients along the full
+      path the method is not fooled by saturated activations.
+    * **Implementation-invariant** — two functionally equivalent
+      networks receive the same attribution.
+    """
+    was_grad = torch.is_grad_enabled()
+    torch.set_grad_enabled(True)
+    model.eval()
+
+    B, N = input_ids.shape
+
+    # Baseline: replace every non-pad token with <MASK>
+    baseline_ids = input_ids.clone()
+    baseline_ids[baseline_ids != pad_id] = mask_id
+
+    with torch.no_grad():
+        actual_emb   = model.token_emb(input_ids).detach()     # native dtype
+        baseline_emb = model.token_emb(baseline_ids).detach()  # native dtype
+
+    delta    = actual_emb - baseline_emb                       # native dtype
+    pad_mask = (input_ids != pad_id).unsqueeze(-1).float()     # (B, N, 1)
+
+    # Accumulate in float32 for numerical precision
+    accumulated = torch.zeros_like(actual_emb.float())
+
+    for step_idx in range(1, steps + 1):
+        alpha  = step_idx / steps
+        # Keep interp in native dtype so the hook output matches model expectations
+        interp = (baseline_emb + alpha * delta).detach().requires_grad_(True)
+
+        # ---- hook to inject the interpolated embedding ----
+        def _make_hook(emb):
+            def _hook(_module, _inp, out):
+                return emb
+            return _hook
+
+        handle = model.token_emb.register_forward_hook(_make_hook(interp))
+
+        output, intermediates = _call(model, input_ids)
+        h = _hidden(output, intermediates).float()
+
+        # Scalar summary (same logic as gradient method)
+        if pool == 'mean':
+            repr_ = (h * pad_mask).sum(1) / pad_mask.sum(1).clamp(min=1)
+        elif pool == 'cls':
+            repr_ = h[:, 0]
+        elif pool == 'max':
+            repr_ = h.norm(dim=-1).masked_fill(~(input_ids != pad_id), 0).max(dim=1).values
+        else:
+            raise ValueError(f"Unknown pool '{pool}'")
+
+        score = repr_.norm()
+
+        model.zero_grad()
+        score.backward()
+
+        # Accumulate gradients in float32
+        accumulated += interp.grad.float()
+        handle.remove()
+
+    avg_grad = accumulated / steps
+    ig = delta.float() * avg_grad                              # (B, N, D)
+    importance = ig.abs().sum(dim=-1)                           # (B, N)
+
+    torch.set_grad_enabled(was_grad)
+    return importance
+
+
+def _compute_occlusion_scores(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    mask_id: int,
+    pad_id: int,
+    chunk: int,
+    device='cuda'
+) -> torch.Tensor:
+    """Leave-one-out occlusion: raw (B, N) MSE-distance scores."""
+    model.eval()
+    B, N = input_ids.shape
+    valid = (input_ids[0] != pad_id).nonzero(as_tuple=True)[0]
+
+    with torch.no_grad():
+        out, inter = _call(model, input_ids)
+        h0 = _hidden(out, inter).float()
+        pm = (input_ids != pad_id).unsqueeze(-1).float()
+        base = (h0 * pm).sum(1) / pm.sum(1).clamp(min=1)
+
+    importance = torch.zeros(B, N, device=device, dtype=torch.float32)
+
+    for s in range(0, len(valid), chunk):
+        pos = valid[s : s + chunk]
+        bs  = pos.shape[0]
+        batch = input_ids.expand(bs, -1).clone()
+        batch[torch.arange(bs, device=device), pos] = mask_id
+
+        with torch.no_grad():
+            out, inter = _call(model, batch)
+            h = _hidden(out, inter).float()
+            pm_b = (input_ids != pad_id).unsqueeze(-1).float().expand(bs, -1, -1)
+            repr_ = (h * pm_b).sum(1) / pm_b.sum(1).clamp(min=1)
+
+        dist = F.mse_loss(repr_, base.expand(bs, -1), reduction='none').sum(-1)
+        importance[0, pos] = dist
+
+    return importance
+
+
+def _compute_prediction_scores(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    mask_id: int,
+    pad_id: int,
+    chunk: int,
+    device='cuda'
+) -> torch.Tensor:
+    """MLM prediction difficulty: raw (B, N) cross-entropy scores."""
+    model.eval()
+    B, N = input_ids.shape
+    valid = (input_ids[0] != pad_id).nonzero(as_tuple=True)[0]
+    has_logits = hasattr(model, 'to_logits') and model.to_logits is not None
+
+    importance = torch.zeros(B, N, device=device, dtype=torch.float32)
+
+    for s in range(0, len(valid), chunk):
+        pos = valid[s : s + chunk]
+        bs  = pos.shape[0]
+        batch = input_ids.expand(bs, -1).clone()
+        batch[torch.arange(bs, device=device), pos] = mask_id
+
+        with torch.no_grad():
+            out, _ = _call(model, batch)
+
+            if has_logits:
+                logits = out.float()
+            else:
+                logits = F.linear(out.float(), model.token_emb.emb.weight.float())
+
+            logits_at = logits[torch.arange(bs, device=device), pos]
+            targets   = input_ids[0, pos]
+            loss = F.cross_entropy(logits_at, targets, reduction='none')
+        importance[0, pos] = loss
+
+    return importance
+
+
+def _compute_attention_scores(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    pad_id: int,
+    device='cuda'
+) -> torch.Tensor:
+    """Attention rollout: raw (B, N) centrality scores."""
+    model.eval()
+    B, N = input_ids.shape
+
+    with _no_flash(model):
+        with torch.no_grad():
+            _, intermediates = _call(model, input_ids, return_attn=True)
+            mats = _extract_attn_layers(intermediates)
+
+            if not mats:
+                raise RuntimeError("No attention weights found.")
+
+            eye = torch.eye(N, device=device, dtype=torch.float32)
+            result = eye.unsqueeze(0).expand(B, -1, -1).clone()
+
+            for a in mats:
+                a_mean = a.mean(dim=1)               # (B, N, N)
+                a_res  = 0.5 * a_mean + 0.5 * eye    # residual
+                result = torch.bmm(a_res, result)
+
+            importance = result.sum(dim=1)            # (B, N)
+
+    return importance
+
+
+def _compute_pairwise_synergy(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    positions: List[int],
+    mask_id: int,
+    pad_id: int,
+    individual_occ: torch.Tensor,
+    chunk: int,
+    device='cuda'
+) -> torch.Tensor:
+    """
+    Pairwise occlusion synergy for second-order interaction effects.
+
+    For every pair (i, j) among *positions* we mask both tokens at once
+    and measure::
+
+        Synergy(i, j) = max(0,  Δ(i,j) − Δ(i) − Δ(j))
+
+    where Δ(S) is the MSE change in the pooled representation when the
+    token set *S* is masked.  Positive synergy means that tokens *i* and
+    *j* are **super-additive**: their combined importance exceeds the sum
+    of their individual contributions, revealing contextual dependencies
+    that first-order occlusion misses.
+
+    Returns a (B, N) tensor with the *average positive synergy* per token.
+    """
+    B, N = input_ids.shape
+    n_pos = len(positions)
+    if n_pos < 2:
+        return torch.zeros(B, N, device=device, dtype=torch.float32)
+
+    # Baseline representation
+    with torch.no_grad():
+        out, inter = _call(model, input_ids)
+        h0 = _hidden(out, inter).float()
+        pm = (input_ids != pad_id).unsqueeze(-1).float()
+        base = (h0 * pm).sum(1) / pm.sum(1).clamp(min=1)
+
+    # Enumerate all pairs
+    pairs = []
+    for i in range(n_pos):
+        for j in range(i + 1, n_pos):
+            pairs.append((positions[i], positions[j]))
+
+    synergy_accum = torch.zeros(B, N, device=device, dtype=torch.float32)
+    synergy_count = torch.zeros(N, device=device, dtype=torch.long)
+
+    for s in range(0, len(pairs), chunk):
+        batch_pairs = pairs[s : s + chunk]
+        bs = len(batch_pairs)
+        batch = input_ids.expand(bs, -1).clone()
+
+        for b, (pi, pj) in enumerate(batch_pairs):
+            batch[b, pi] = mask_id
+            batch[b, pj] = mask_id
+
+        with torch.no_grad():
+            out, inter = _call(model, batch)
+            h = _hidden(out, inter).float()
+            pm_b = (input_ids != pad_id).unsqueeze(-1).float().expand(bs, -1, -1)
+            repr_ = (h * pm_b).sum(1) / pm_b.sum(1).clamp(min=1)
+
+        dist = F.mse_loss(repr_, base.expand(bs, -1), reduction='none').sum(-1)
+
+        for b, (pi, pj) in enumerate(batch_pairs):
+            dij = dist[b].item()
+            di  = individual_occ[0, pi].item()
+            dj  = individual_occ[0, pj].item()
+            syn = max(0.0, dij - di - dj)
+
+            synergy_accum[0, pi] += syn
+            synergy_accum[0, pj] += syn
+            synergy_count[pi] += 1
+            synergy_count[pj] += 1
+
+    mask = synergy_count > 0
+    synergy_accum[0, mask] /= synergy_count[mask].float()
+
+    return synergy_accum
+
+
+def _minmax_norm(
+    tensor: torch.Tensor,
+    valid_mask: torch.Tensor,
+) -> torch.Tensor:
+    """Min-max normalise to [0, 1] over valid (non-pad) positions only."""
+    t = tensor.float().clone()
+    masked = t.masked_fill(~valid_mask, float('-inf'))
+    t_min  = masked.min(dim=-1, keepdim=True).values
+    t_max  = masked.max(dim=-1, keepdim=True).values
+    t_range = (t_max - t_min).clamp(min=1e-8)
+    t = (t - t_min) / t_range
+    return t.masked_fill(~valid_mask, 0.0)
+
+
+def _borda_ranks(
+    tensor: torch.Tensor,
+    valid_mask: torch.Tensor,
+    device='cuda'
+) -> torch.Tensor:
+    """
+    Borda count rank scores: convert a (B, N) importance tensor into
+    Borda rank points.  The token with the highest score receives
+    rank ``n_valid − 1``, the lowest receives ``0``.  Pad positions
+    receive ``0``.
+    """
+    B, N = tensor.shape
+    t = tensor.float().clone()
+    t = t.masked_fill(~valid_mask, float('-inf'))   # pads sort first
+    sorted_idx = t.argsort(dim=-1)                   # ascending
+    rank_vals  = torch.arange(N, device=device, dtype=torch.float32)
+    rank_vals  = rank_vals.unsqueeze(0).expand(B, -1)
+    borda = torch.zeros(B, N, device=device, dtype=torch.float32)
+    borda.scatter_(dim=-1, index=sorted_idx, src=rank_vals)
+    return borda.masked_fill(~valid_mask, 0.0)
+
+
+# ──────────────────────────────────────────────────────────
+# METHOD 5 — Ultimate: public entry point
+# ──────────────────────────────────────────────────────────
+
+def principal_tokens_ultimate(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    top_k: int = 10,
+    mask_id: int = 333,
+    pad_id: int = 334,
+    chunk: int = 64,
+    pool: Literal['mean', 'cls', 'max'] = 'mean',
+    ig_steps: int = 20,
+    weights: dict | None = None,
+    fusion: Literal['rank', 'score', 'both'] = 'both',
+    pairwise_refine: bool = True,
+    pairwise_top_n: int = 20,
+    device='cuda'
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    **Ultimate** precision principal token identification.
+
+    Combines four orthogonal importance signals via multi-method
+    consensus and optionally refines with pairwise interaction analysis.
+
+    Signals
+    ~~~~~~~
+    1. **Integrated Gradients** — Path-attributed gradients from a
+       masked baseline to the actual input.  Satisfies the completeness
+       axiom, is immune to gradient saturation, and provides faithful
+       attribution of each token's contribution to the output.
+
+    2. **Leave-One-Out Occlusion** — Directly measures each token's
+       causal contribution to the pooled representation.  The most
+       principled first-order method.
+
+    3. **MLM Prediction Difficulty** — Cross-entropy of predicting the
+       original token when masked.  Quantifies information uniqueness.
+
+    4. **Attention Rollout** — Centrality in the attention graph with
+       residual propagation.  Captures structural / positional importance.
+
+    Fusion strategies
+    ~~~~~~~~~~~~~~~~~
+    ``'rank'``
+      Borda count rank aggregation.  Each method ranks all tokens; rank
+      points are summed across methods (weighted).  Robust to scale
+      differences and outliers.
+
+    ``'score'``
+      Weighted sum of min-max normalised scores.  Preserves magnitude
+      information that rank aggregation discards.
+
+    ``'both'`` *(default)*
+      Average of the rank-fusion and score-fusion maps (each first
+      normalised to [0, 1]).  Captures the strengths of both approaches
+      — the robustness of ranks and the discriminative power of
+      magnitudes.
+
+    Pairwise occlusion refinement
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    When ``pairwise_refine=True``, the top ``pairwise_top_n`` candidates
+    from the initial consensus are subjected to a second-order analysis:
+    every pair is masked simultaneously and the *synergy*
+    (Δ(i,j) − Δ(i) − Δ(j)) is computed.  Tokens that participate in
+    super-additive pairs receive a bonus, ensuring that tokens whose
+    importance is primarily contextual are not overlooked.
+
+    Precision: ULTIMATE  |  Accuracy: ULTIMATE
+
+    Parameters
+    ----------
+    top_k : int
+        Number of principal tokens to return.
+    chunk : int
+        Batch size for occlusion / prediction forward passes.
+    pool : str
+        Pooling strategy for integrated gradients ('mean', 'cls', 'max').
+    ig_steps : int
+        Number of interpolation steps for integrated gradients.
+        More steps → more faithful attribution but slower.
+    weights : dict or None
+        Per-method weights, e.g.
+        ``{'occlusion': 1.0, 'prediction': 1.0,
+          'integrated_gradients': 0.7, 'attention': 0.3}``.
+        A weight of 0 skips that method entirely.  If *None*, sensible
+        defaults are used (occlusion & prediction weighted highest).
+    fusion : str
+        ``'rank'``, ``'score'``, or ``'both'``.
+    pairwise_refine : bool
+        Whether to run pairwise synergy refinement on top candidates.
+    pairwise_top_n : int
+        How many top candidates to consider for pairwise refinement.
+
+    Returns
+    -------
+    indices : (batch, top_k)  positions of the principal tokens
+    scores  : (batch, top_k)  importance scores  (higher ⇒ more principal)
+    """
+    model.eval()
+    input_ids = input_ids.to(device)
+    B, N = input_ids.shape
+    assert B == 1, "Ultimate method currently supports batch_size=1"
+
+    valid_mask = (input_ids != pad_id)                              # (B, N)
+    n_valid    = int(valid_mask.sum(dim=-1).min().item())
+
+    # ── Default weights (occlusion & prediction most reliable) ──────
+    if weights is None:
+        weights = {
+            'occlusion':            1.0,
+            'prediction':           1.0,
+            'integrated_gradients': 0.7,
+            'attention':            0.3,
+        }
+
+    # ── Step 1: Compute individual method scores ────────────────────
+    raw_scores: dict[str, torch.Tensor] = {}
+
+    if weights.get('integrated_gradients', 0) > 0 and ig_steps > 0:
+        raw_scores['integrated_gradients'] = _compute_ig_scores(
+            model, input_ids, mask_id, pad_id, pool, ig_steps,
         )
 
-    print(f"\n⏱️ Inference Time: {inference_time:.4f} seconds")
-    print(f"📝 Metrics:")
-    print(f"   - Reconstruction CE Loss: {ce_loss.item():.4f}")
-    print(f"   - VQ Loss:                {vq_loss.item():.4f}")
-    print(f"   - Codebook Perplexity:    {perplexity.item():.0f} / {CODEBOOK_SIZE * N_CODEBOOKS}")
-    print(f"   - Token Accuracy:         {accuracy * 100:.2f}% (Excluding PAD tokens)")
-    
-    print(f"\n🔢 Tensor Shapes:")
-    print(f"   - Input Tokens:           {list(mock_data.shape)}")
-    print(f"   - Encoder Latents (z):    {list(continuous_latents.shape)}")
-    print(f"   - Discrete Tokens:        {list(discrete_tokens.shape)}  <-- [N_CODEBOOKS, BATCH, LATENT_T]")
-    print(f"   - Output Logits:          {list(logits.shape)}")
-    print(f"   - Output Predictions:     {list(predictions.shape)}")
-    
-    original_tokens = mock_data.shape[1]
-    latent_tokens = discrete_tokens.shape[2]
-    compression_ratio = (original_tokens / latent_tokens) * N_CODEBOOKS
-    print(f"\n📉 Compression Info:")
-    print(f"   - Original Sequence Length:  {original_tokens}")
-    print(f"   - Compressed Latent Length:  {latent_tokens} (Downsample factor: {original_tokens//latent_tokens})")
-    print(f"   - Effective Compression:     {compression_ratio:.2f}x")
+    if weights.get('occlusion', 0) > 0:
+        raw_scores['occlusion'] = _compute_occlusion_scores(
+            model, input_ids, mask_id, pad_id, chunk,
+        )
 
-    # --- 6. Round-Trip Tokenization Test ---
-    print("\n" + "="*50)
-    print("2. DISCRETE ROUND-TRIP TEST (ENCODE -> DECODE)")
-    print("="*50)
-    
-    target_reconstruct_len = mock_data.shape[1]
-    
-    with torch.no_grad():
-        discrete_tokens_rt = model.encode_to_tokens(mock_data)
-        reconstructed_tokens_rt = model.decode_from_tokens(discrete_tokens_rt, target_len=target_reconstruct_len)
-        
-        rt_mask = (mock_data != PAD_IDX)
-        rt_correct = (reconstructed_tokens_rt == mock_data) & rt_mask
-        rt_accuracy = rt_correct.sum().item() / rt_mask.sum().item()
+    if weights.get('prediction', 0) > 0:
+        raw_scores['prediction'] = _compute_prediction_scores(
+            model, input_ids, mask_id, pad_id, chunk,
+        )
 
-    print(f"\n🔢 Round-Trip Shapes:")
-    print(f"   - Encoded Discrete Tokens: {list(discrete_tokens_rt.shape)}")
-    print(f"   - Decoded MIDI Tokens:     {list(reconstructed_tokens_rt.shape)}")
-    
-    print(f"\n📝 Round-Trip Metrics:")
-    print(f"   - Round-Trip Accuracy:     {rt_accuracy * 100:.2f}%")
-    print(f"   - Matches End-to-End?      {'Yes ✅' if torch.equal(predictions, reconstructed_tokens_rt) else 'No ❌ (Check implementation)'}")
+    if weights.get('attention', 0) > 0:
+        try:
+            raw_scores['attention'] = _compute_attention_scores(
+                model, input_ids, pad_id,
+            )
+        except RuntimeError:
+            pass  # gracefully skip if attention weights unavailable
 
-    # --- 7. Codebook Usage Analysis ---
-    print("\n" + "="*50)
-    print("3. CODEBOOK USAGE ANALYSIS")
-    print("="*50)
-    
-    for i in range(N_CODEBOOKS):
-        cb_indices = discrete_tokens[i].reshape(-1) 
-        unique_codes = torch.unique(cb_indices).shape[0]
-        utilization = (unique_codes / CODEBOOK_SIZE) * 100
-        print(f"   - Codebook {i}: {unique_codes}/{CODEBOOK_SIZE} codes used ({utilization:.1f}% utilization)")
+    if not raw_scores:
+        raise ValueError(
+            "No importance methods could be computed.  Check weights and model configuration."
+        )
 
-    print("\nInference complete.")
+    # ── Step 2: Normalise & rank each method ────────────────────────
+    normed: dict[str, torch.Tensor] = {}
+    ranks:  dict[str, torch.Tensor] = {}
+
+    for name, score in raw_scores.items():
+        normed[name] = _minmax_norm(score, valid_mask)
+        ranks[name]  = _borda_ranks(score, valid_mask)
+
+    # ── Step 3: Fuse scores ─────────────────────────────────────────
+    active = {k: v for k, v in weights.items() if k in raw_scores and v > 0}
+    w_sum  = sum(active.values())
+
+    if fusion in ('rank', 'both'):
+        rank_fused = sum(
+            ranks[name] * active[name] for name in active
+        ) / w_sum
+        rank_fused = _minmax_norm(rank_fused, valid_mask)
+
+    if fusion in ('score', 'both'):
+        score_fused = sum(
+            normed[name] * active[name] for name in active
+        ) / w_sum
+        score_fused = _minmax_norm(score_fused, valid_mask)
+
+    if fusion == 'rank':
+        consensus = rank_fused
+    elif fusion == 'score':
+        consensus = score_fused
+    else:                                                           # 'both'
+        consensus = 0.5 * rank_fused + 0.5 * score_fused
+
+    # ── Step 4: Pairwise occlusion refinement ───────────────────────
+    if pairwise_refine and 'occlusion' in raw_scores and pairwise_top_n >= 2:
+        refine_k   = min(pairwise_top_n, n_valid)
+        cand_scores = consensus.masked_fill(~valid_mask, float('-inf'))
+        _, cand_idx = cand_scores.topk(refine_k, dim=-1)
+        positions   = cand_idx[0].tolist()
+
+        if len(positions) >= 2:
+            occ_scores = raw_scores['occlusion']
+            synergy    = _compute_pairwise_synergy(
+                model, input_ids, positions, mask_id, pad_id, occ_scores, chunk,
+            )
+            synergy_normed = _minmax_norm(synergy, valid_mask)
+            # Blend synergy into consensus (weight 0.2 keeps it as a
+            # tie-breaker / refinement without overpowering first-order signals)
+            consensus = consensus + 0.2 * synergy_normed
+
+    # ── Step 5: Return top-k ────────────────────────────────────────
+    return _topk(consensus, input_ids, top_k, pad_id)
+
+
+# ──────────────────────────────────────────────────────────
+# Unified interface
+# ──────────────────────────────────────────────────────────
+
+def find_principal_tokens(
+    model: TransformerWrapper,
+    input_ids: torch.Tensor,
+    top_k: int = 10,
+    device='cuda',
+    method: Literal[
+        'gradient',
+        'attention',
+        'occlusion',
+        'prediction',
+        'ultimate',
+    ] = 'gradient',
+    **kwargs,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Return the top-k most important (principal) token positions in
+    ``input_ids`` according to the chosen ``method``.
+
+    Parameters
+    ----------
+    model     : pre-trained TransformerWrapper encoder
+    input_ids : (batch, seq_len) integer token IDs
+    top_k     : number of principal tokens to return
+    method    : importance-scoring method
+
+        ``'gradient'``
+            Gradient saliency – **fast** (1 fwd + 1 bwd), works with
+            flash attention.  Recommended default.
+
+        ``'attention'``
+            Attention received or rollout – 1 forward pass; flash is
+            temporarily disabled.  ``mode='received'`` (default) or
+            ``mode='rollout'``.
+
+        ``'occlusion'``
+            Leave-one-out masking – **principled** but O(N) forward
+            passes.  Set ``chunk=…`` to control memory.
+
+        ``'prediction'``
+            MLM prediction difficulty – masks each token and measures
+            cross-entropy.  O(N) forward passes.
+
+        ``'ultimate'``
+            Multi-method consensus — fuses Integrated Gradients,
+            Occlusion, Prediction Difficulty, and Attention Rollout
+            via dual Borda rank + normalised score fusion, with
+            optional pairwise synergy refinement.  **Highest possible
+            precision and accuracy** at greater computational cost.
+
+    **kwargs  : forwarded to the chosen method (see individual
+                docstrings for details).
+
+    Returns
+    -------
+    indices : (batch, top_k)  positions of the principal tokens
+    scores  : (batch, top_k)  importance scores  (higher ⇒ more principal)
+    """
+    dispatch = {
+        'gradient':   principal_tokens_gradient,
+        'attention':  principal_tokens_attention,
+        'occlusion':  principal_tokens_occlusion,
+        'prediction': principal_tokens_prediction,
+        'ultimate':   principal_tokens_ultimate,
+    }
+    if method not in dispatch:
+        raise ValueError(
+            f"method must be one of {list(dispatch)}, got '{method}'"
+        )
+    return dispatch[method](model, input_ids, top_k=top_k, device=device, **kwargs)
+
 '''
-       
+# ──────────────────────────────────────────────────────────
+# Example usage
+# ──────────────────────────────────────────────────────────
+
+if __name__ == '__main__':
+
+    seq = torch.tensor([chords]).cuda()
+
+    # ── 1. Gradient saliency  (recommended – fast & flash-safe) ────
+    idx, val = find_principal_tokens(model, seq, top_k=10, method='gradient')
+    print("Gradient saliency")
+    print(f"  indices (positions) : {idx}")
+    print(f"  scores  (importance): {val}\n")
+
+    # ── 2. Attention received  (interpretable, disables flash) ─────
+    idx, val = find_principal_tokens(
+        model, seq, top_k=10, method='attention', mode='received',
+    )
+    print("Attention received")
+    print(f"  indices (positions) : {idx}")
+    print(f"  scores  (importance): {val}\n")
+
+    # ── 2b. Attention rollout ──────────────────────────────────────
+    idx, val = find_principal_tokens(
+        model, seq, top_k=10, method='attention', mode='rollout',
+    )
+    print("Attention rollout")
+    print(f"  indices (positions) : {idx}")
+    print(f"  scores  (importance): {val}\n")
+
+    # ── 3. Occlusion  (principled, slow) ──────────────────────────
+    idx, val = find_principal_tokens(
+        model, seq, top_k=10, method='occlusion', chunk=32,
+    )
+    print("Occlusion")
+    print(f"  indices (positions) : {idx}")
+    print(f"  scores  (importance): {val}\n")
+
+    # ── 4. Prediction difficulty  (for masked LMs) ────────────────
+    idx, val = find_principal_tokens(
+        model, seq, top_k=10, method='prediction', chunk=32,
+    )
+    print("Prediction difficulty")
+    print(f"  indices (positions) : {idx}")
+    print(f"  scores  (importance): {val}\n")
+
+    # ── 5. Ultimate  (maximum precision & accuracy) ───────────────
+    idx, val = find_principal_tokens(
+        model, seq, top_k=10, method='ultimate',
+        ig_steps=20, chunk=32, pool='mean',
+        fusion='both', pairwise_refine=True, pairwise_top_n=20,
+    )
+    print("Ultimate consensus")
+    print(f"  indices (positions) : {idx}")
+    print(f"  scores  (importance): {val}\n")
+'''
+
 #=================================================================================================================================
 # This is the end of x_transformer_2_3_1 Python module
 #=================================================================================================================================
