@@ -5755,6 +5755,7 @@ def build_cls_model(num_tokens=18819,
                     logits_dim=1,
                     use_cls_token=True,
                     squeeze_out_last_dim=True,
+                    average_pool_embed=False,
                     dim=1024,
                     depth=8,
                     heads=8,
@@ -5773,6 +5774,7 @@ def build_cls_model(num_tokens=18819,
         logits_dim=logits_dim,
         use_cls_token=use_cls_token,
         squeeze_out_last_dim = squeeze_out_last_dim,
+        average_pool_embed=average_pool_embed,
         attn_layers=Encoder(dim=dim,
                             depth=depth,
                             heads=heads,
@@ -5783,13 +5785,13 @@ def build_cls_model(num_tokens=18819,
 
     return model.to(device)
 
-def load_cls_model(checkpoint_path, device='cuda'):
+def load_cls_model(checkpoint_path, device='cuda', **kwargs):
     
     """
     Rebuilds the architecture, loads weights.
     """
     
-    model = build_cls_model(device=device)
+    model = build_cls_model(device=device, **kwargs)
     state = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(state)
     model.to(device).eval()
