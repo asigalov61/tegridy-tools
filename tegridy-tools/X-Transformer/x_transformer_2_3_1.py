@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 14.0
+# Version 15.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -5354,13 +5354,13 @@ def build_cls_model(num_tokens=18819,
 
     return model.to(device)
 
-def load_cls_model(checkpoint_path, device='cuda'):
+def load_cls_model(checkpoint_path, device='cuda', **kwargs):
     
     """
     Rebuilds the architecture, loads weights.
     """
     
-    model = build_cls_model(device=device)
+    model = build_cls_model(device=device, **kwargs)
     state = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(state)
     model.to(device).eval()
@@ -9987,6 +9987,350 @@ if __name__ == '__main__':
     print("Ultimate consensus")
     print(f"  indices (positions) : {idx}")
     print(f"  scores  (importance): {val}\n")
+'''
+
+#=================================================================================================================================
+# Sequence continuation classifier functions
+#=================================================================================================================================
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from torch.amp import autocast
+from torch.optim.lr_scheduler import CosineAnnealingLR
+import random
+import time
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
+
+# ======================================================================
+# 1. Dataset
+# ======================================================================
+class PairListDataset(Dataset):
+    """
+    Dataset for pairs (src_seq, label).
+    src_seq: list of token IDs (ints).
+    label: single int or float (0 or 1).
+    """
+    def __init__(self, data_pairs):
+        self.data_pairs = data_pairs
+
+    def __len__(self):
+        return len(self.data_pairs)
+
+    def __getitem__(self, idx):
+        src_seq, label = self.data_pairs[idx]
+        x = torch.tensor(src_seq, dtype=torch.long)
+        y = torch.tensor(label, dtype=torch.float)
+        return x, y
+
+# ======================================================================
+# 2. Model
+# ======================================================================
+
+class SequenceContinuationClassifier(nn.Module):
+    """
+    Classifier designed to evaluate sequence coherence by mean-pooling 
+    only the second half (continuation) of the sequence, which already 
+    has the first half (prefix) context baked in via self-attention.
+    """
+    def __init__(self, num_tokens=18819, max_seq_len=1024, dim=512, depth=8, heads=8):
+        super().__init__()
+        
+        self.encoder = TransformerWrapper(
+            num_tokens=num_tokens,
+            max_seq_len=max_seq_len,
+            use_cls_token=False,
+            attn_layers=Encoder(
+                dim=dim,
+                depth=depth,
+                heads=heads,
+                attn_flash=True,       # Crucial for 1024 sequence length
+                rotary_emb_dim=32,     # Enables RoPE (relative positions)
+                ff_dropout=0.1,
+                attn_dropout=0.1
+            )
+        )
+        
+        self.classifier = nn.Linear(dim, 1)
+        
+    def forward(self, x):
+        # FIX: return_embeddings=True bypasses the final vocab projection
+        # Output shape becomes [batch, 1024, dim(512)] instead of [batch, 1024, 18819]
+        hidden_states = self.encoder(x, return_embeddings=True)
+        
+        # MEAN POOL: Average ONLY the second half (index 512 to 1023)
+        second_half = hidden_states[:, 512:, :]
+        pooled_second_half = second_half.mean(dim=1) # Shape: [batch, dim]
+        
+        # Classify and squeeze last dim -> Shape: [batch]
+        logits = self.classifier(pooled_second_half).squeeze(-1)
+        return logits
+
+def build_sc_cls_model(num_tokens=18819,
+                       max_seq_len=1024,
+                       dim=512,
+                       depth=8,
+                       heads=8,
+                       device='cuda'
+                      ):
+    model = SequenceContinuationClassifier(
+        num_tokens=num_tokens,
+        max_seq_len=max_seq_len,
+        dim=dim,
+        depth=depth,
+        heads=heads
+    )
+    return model.to(device)
+
+@torch.inference_mode()
+def predict_sc_cls(model,
+                   seqs_lst,
+                   thres=0.5,
+                   device='cuda',
+                   verbose=False
+                  ):
+    """
+    Generates predictions and probabilities for a given dataset.
+    
+    Returns:
+        preds (torch.Tensor): 1D tensor of binary predictions (0 or 1).
+        probs (torch.Tensor): 1D tensor of probabilities (0.0 to 1.0).
+    """
+    model.eval()
+    
+    all_preds = []
+    all_probs = []
+
+    max_seq_len = model.encoder.max_seq_len
+
+    pbar = tqdm(seqs_lst, total=len(seqs_lst), desc="Predicting", leave=False, disable=not verbose)
+    
+    for x in pbar:  # We ignore the label 'y' from the loader
+        x = torch.tensor(x[:max_seq_len])
+        x = x.unsqueeze(0).to(device)
+
+        with autocast(device_type='cuda', dtype=torch.bfloat16):
+            logits = model(x)
+
+        # Convert logits to probabilities using Sigmoid
+        probs = torch.sigmoid(logits)
+        
+        # Threshold probabilities to get binary predictions
+        preds = (probs >= thres).int()
+
+        # Move back to CPU and append to lists
+        all_probs.append(probs.cpu())
+        all_preds.append(preds.cpu())
+
+    # Concatenate all batches into single 1D tensors
+    all_probs = torch.cat(all_probs, dim=0).tolist()
+    all_preds = torch.cat(all_preds, dim=0).tolist()
+
+    return all_preds, all_probs
+    
+'''
+# ======================================================================
+# 3. Training & Validation Loops
+# ======================================================================
+def train_epoch(loader, model, optimizer, criterion, scheduler, device, epoch, total_epochs, log_interval=25):
+    model.train()
+    running_loss = 0.0
+    total_samples = 0
+
+    # Lists to accumulate predictions and labels for accurate epoch-level F1
+    all_preds = []
+    all_labels = []
+
+    step_losses = []
+    step_accs = []
+
+    pbar = tqdm(loader, total=len(loader), desc=f"Train Epoch {epoch}/{total_epochs}")
+    for step, (x, y) in enumerate(pbar):
+        x, y = x.to(device), y.to(device).view(-1) # Ensure shape [B]
+
+        optimizer.zero_grad()
+
+        with autocast(device_type='cuda', dtype=torch.bfloat16):
+            logits = model(x)                       # Shape: [B]
+            loss = criterion(logits, y)
+
+        loss.backward()
+        optimizer.step()
+
+        # Metrics
+        preds = (torch.sigmoid(logits) >= 0.5).float()
+        
+        # Accumulate for F1 calculation
+        all_preds.extend(preds.cpu().numpy())
+        all_labels.extend(y.cpu().numpy())
+        
+        batch_correct = (preds == y).sum().item()
+        batch_size = x.size(0)
+
+        running_loss += loss.item() * batch_size
+        total_samples += batch_size
+
+        avg_loss = running_loss / total_samples
+        avg_acc = sum(1 for p, l in zip(all_preds, all_labels) if p == l) / total_samples
+        
+        step_losses.append(avg_loss)
+        step_accs.append(avg_acc)
+
+        pbar.set_postfix({"Loss": f"{avg_loss:.4f}", "Acc": f"{avg_acc:.4f}", "LR": f"{scheduler.get_last_lr()[0]:.6f}"})
+
+        if step != 0 and step % (log_interval * 16) == 0:
+            plt.figure(figsize=(10, 3))
+            plt.subplot(1, 2, 1)
+            plt.plot(step_losses, 'b-')
+            plt.title('Train Loss (cumulative)')
+            
+            plt.subplot(1, 2, 2)
+            plt.plot(step_accs, 'b-')
+            plt.title('Train Acc (cumulative)')
+            plt.show()
+            plt.close()
+
+    scheduler.step()
+    
+    epoch_loss = running_loss / len(loader.dataset)
+    epoch_acc = sum(1 for p, l in zip(all_preds, all_labels) if p == l) / len(loader.dataset)
+    epoch_f1 = f1_score(all_labels, all_preds, average='binary') # Calculate F1 at epoch end
+    
+    return epoch_loss, epoch_acc, epoch_f1
+
+def validate_epoch(loader, model, criterion, device, epoch, total_epochs):
+    model.eval()
+    running_loss = 0.0
+    total_samples = 0
+
+    all_preds = []
+    all_labels = []
+
+    pbar = tqdm(loader, total=len(loader), desc=f"Valid Epoch {epoch}/{total_epochs}", leave=False)
+
+    with torch.no_grad():
+        for x, y in pbar:
+            x, y = x.to(device), y.to(device).view(-1) # Ensure shape [B]
+            
+            with autocast(device_type='cuda', dtype=torch.bfloat16):
+                logits = model(x)
+                loss = criterion(logits, y)
+
+            preds = (torch.sigmoid(logits) >= 0.5).float()
+            
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(y.cpu().numpy())
+            
+            batch_size = x.size(0)
+            running_loss += loss.item() * batch_size
+            total_samples += batch_size
+
+            avg_loss = running_loss / total_samples
+            avg_acc = sum(1 for p, l in zip(all_preds, all_labels) if p == l) / total_samples
+            
+            pbar.set_postfix({"Loss": f"{avg_loss:.4f}", "Acc": f"{avg_acc:.4f}"})
+
+    epoch_loss = running_loss / len(loader.dataset)
+    epoch_acc = sum(1 for p, l in zip(all_preds, all_labels) if p == l) / len(loader.dataset)
+    epoch_f1 = f1_score(all_labels, all_preds, average='binary') # Calculate F1 at epoch end
+    
+    return epoch_loss, epoch_acc, epoch_f1
+
+def plot_metrics(train_losses, valid_losses, train_accs, valid_accs, train_f1s, valid_f1s):
+    epochs = range(1, len(train_losses) + 1)
+    plt.figure(figsize=(18, 5)) # Widened figure to fit 3 plots
+
+    # Loss plot
+    plt.subplot(1, 3, 1)
+    plt.plot(epochs, train_losses, 'b-', label='Train Loss')
+    plt.plot(epochs, valid_losses, 'r--', label='Valid Loss')
+    plt.title('Loss per Epoch')
+    plt.xlabel('Epoch'); plt.ylabel('Loss'); plt.legend()
+
+    # Accuracy plot
+    plt.subplot(1, 3, 2)
+    plt.plot(epochs, train_accs, 'b-', label='Train Acc')
+    plt.plot(epochs, valid_accs, 'r--', label='Valid Acc')
+    plt.title('Accuracy per Epoch')
+    plt.xlabel('Epoch'); plt.ylabel('Accuracy'); plt.legend()
+
+    # F1 Score plot
+    plt.subplot(1, 3, 3)
+    plt.plot(epochs, train_f1s, 'b-', label='Train F1')
+    plt.plot(epochs, valid_f1s, 'r--', label='Valid F1')
+    plt.title('F1 Score per Epoch')
+    plt.xlabel('Epoch'); plt.ylabel('F1 Score'); plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+# ======================================================================
+# 4. Execution Setup
+# ======================================================================
+# Assuming `train_data` is your full list of (seq, label) tuples loaded previously
+# Example: train_data = [( [1, 2, 3...], 1 ), ( [4, 5, 6...], 0 ), ...]
+
+# PROPER TRAIN/VAL SPLIT (90/10)
+train_pairs, valid_pairs = train_test_split(train_data, test_size=0.01, random_state=42, stratify=[p[1] for p in train_data])
+
+train_ds = PairListDataset(train_pairs)
+valid_ds = PairListDataset(valid_pairs)
+
+SEQ_LEN = 1024
+BATCH_SIZE = 384
+
+train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, drop_last=True, num_workers=16, pin_memory=True)
+valid_loader = DataLoader(valid_ds, batch_size=BATCH_SIZE, drop_last=False, num_workers=16, pin_memory=True)
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = build_model(device)
+
+# AdamW is essential for Transformers. Weight decay prevents overfitting.
+optimizer = optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)
+
+# Cosine Annealing scheduler helps the model settle into lower loss minima
+epochs = 10
+scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
+
+criterion = nn.BCEWithLogitsLoss()
+
+train_losses, valid_losses = [], []
+train_accs, valid_accs = [], []
+train_f1s, valid_f1s = [], [] # Added F1 tracking lists
+
+start_time = time.time()
+for epoch in range(1, epochs + 1):
+    tr_loss, tr_acc, tr_f1 = train_epoch(
+        train_loader, model, optimizer, criterion, scheduler,
+        device, epoch, epochs
+    )
+    va_loss, va_acc, va_f1 = validate_epoch(
+        valid_loader, model, criterion,
+        device, epoch, epochs
+    )
+
+    train_losses.append(tr_loss)
+    valid_losses.append(va_loss)
+    train_accs.append(tr_acc)
+    valid_accs.append(va_acc)
+    train_f1s.append(tr_f1)
+    valid_f1s.append(va_f1)
+
+    print(
+        f"Epoch {epoch}/{epochs} | "
+        f"Train Loss: {tr_loss:.4f}, Train Acc: {tr_acc:.4f}, Train F1: {tr_f1:.4f} | "
+        f"Valid Loss: {va_loss:.4f}, Valid Acc: {va_acc:.4f}, Valid F1: {va_f1:.4f} | "
+        f"LR: {scheduler.get_last_lr()[0]:.6f}"
+    )
+
+total_time = time.time() - start_time
+print(f"Training complete in {total_time/60:.2f} minutes")
+
+plot_metrics(train_losses, valid_losses, train_accs, valid_accs, train_f1s, valid_f1s)
 '''
 
 #=================================================================================================================================
