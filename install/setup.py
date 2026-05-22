@@ -45,14 +45,21 @@ import TMIDIX
 import TPLOTS
 import TMELODIES
 import HaystackSearch
+import NumbaHaystackSearch
 import midi_to_colab_audio
 
 import random
 
-from IPython.display import display, Audio
+try:
+  from IPython.display import display, Audio
+except:
+  pass
 
-import locale
-locale.getpreferredencoding = lambda: "UTF-8"
+try:
+  import locale
+  locale.getpreferredencoding = lambda: "UTF-8"
+except:
+  pass
 
 print('=' * 70)
 print('Done!')
