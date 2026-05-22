@@ -5,6 +5,7 @@ networkx
 scikit-learn
 einops
 einx
+numba
 torch
 cupy-cuda13x
 numpy==1.26.4 # For max compat with legacy
