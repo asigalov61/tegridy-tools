@@ -10037,7 +10037,15 @@ class SequenceContinuationClassifier(nn.Module):
     only the second half (continuation) of the sequence, which already 
     has the first half (prefix) context baked in via self-attention.
     """
-    def __init__(self, num_tokens=18819, max_seq_len=1024, dim=512, depth=8, heads=8):
+    def __init__(self,
+                 num_tokens=18819,
+                 max_seq_len=1024,
+                 dim=1024,
+                 depth=8,
+                 heads=16,
+                 ff_dropout=0.1,
+                 attn_dropout=0.1
+                ):
         super().__init__()
         
         self.encoder = TransformerWrapper(
@@ -10048,22 +10056,21 @@ class SequenceContinuationClassifier(nn.Module):
                 dim=dim,
                 depth=depth,
                 heads=heads,
-                attn_flash=True,       # Crucial for 1024 sequence length
-                rotary_emb_dim=32,     # Enables RoPE (relative positions)
-                ff_dropout=0.1,
-                attn_dropout=0.1
+                attn_flash=True,
+                rotary_pos_emb=True,
+                ff_dropout=ff_dropout,
+                attn_dropout=attn_dropout
             )
         )
         
         self.classifier = nn.Linear(dim, 1)
         
     def forward(self, x):
-        # FIX: return_embeddings=True bypasses the final vocab projection
-        # Output shape becomes [batch, 1024, dim(512)] instead of [batch, 1024, 18819]
+        # Return_embeddings=True bypasses the final vocab projection
         hidden_states = self.encoder(x, return_embeddings=True)
         
-        # MEAN POOL: Average ONLY the second half (index 512 to 1023)
-        second_half = hidden_states[:, 512:, :]
+        # MEAN POOL: Average ONLY the second half
+        second_half = hidden_states[:, self.max_seq_len // 2:, :]
         pooled_second_half = second_half.mean(dim=1) # Shape: [batch, dim]
         
         # Classify and squeeze last dim -> Shape: [batch]
@@ -10072,18 +10079,24 @@ class SequenceContinuationClassifier(nn.Module):
 
 def build_sc_cls_model(num_tokens=18819,
                        max_seq_len=1024,
-                       dim=512,
+                       dim=1024,
                        depth=8,
-                       heads=8,
+                       heads=16,
+                       ff_dropout=0.1,
+                       attn_dropout=0.1,
                        device='cuda'
                       ):
+    
     model = SequenceContinuationClassifier(
         num_tokens=num_tokens,
         max_seq_len=max_seq_len,
         dim=dim,
         depth=depth,
-        heads=heads
+        heads=heads,
+        ff_dropout,
+        attn_dropout
     )
+    
     return model.to(device)
 
 @torch.inference_mode()
@@ -10091,6 +10104,7 @@ def predict_sc_cls(model,
                    seqs_lst,
                    thres=0.5,
                    device='cuda',
+                   dtype=torch.bfloat16,
                    verbose=False
                   ):
     """
@@ -10113,7 +10127,7 @@ def predict_sc_cls(model,
         x = torch.tensor(x[:max_seq_len])
         x = x.unsqueeze(0).to(device)
 
-        with autocast(device_type='cuda', dtype=torch.bfloat16):
+        with autocast(device_type=device, dtype=dtype):
             logits = model(x)
 
         # Convert logits to probabilities using Sigmoid
@@ -10281,7 +10295,7 @@ train_ds = PairListDataset(train_pairs)
 valid_ds = PairListDataset(valid_pairs)
 
 SEQ_LEN = 1024
-BATCH_SIZE = 384
+BATCH_SIZE = 192
 
 train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, drop_last=True, num_workers=16, pin_memory=True)
 valid_loader = DataLoader(valid_ds, batch_size=BATCH_SIZE, drop_last=False, num_workers=16, pin_memory=True)
@@ -10293,7 +10307,7 @@ model = build_model(device)
 optimizer = optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)
 
 # Cosine Annealing scheduler helps the model settle into lower loss minima
-epochs = 10
+epochs = 6
 scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
 
 criterion = nn.BCEWithLogitsLoss()
