@@ -42,9 +42,11 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 from scipy.stats import zscore
 
 import TMIDIX
+import TCUPY
 import TPLOTS
 import TMELODIES
 import HaystackSearch
+import AdvancedHaystackSearch
 import midi_to_colab_audio
 
 import torch
