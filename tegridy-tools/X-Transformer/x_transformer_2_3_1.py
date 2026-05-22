@@ -10093,8 +10093,8 @@ def build_sc_cls_model(num_tokens=18819,
         dim=dim,
         depth=depth,
         heads=heads,
-        ff_dropout,
-        attn_dropout
+        ff_dropout=ff_dropout,
+        attn_dropout=attn_dropout
     )
     
     return model.to(device)
