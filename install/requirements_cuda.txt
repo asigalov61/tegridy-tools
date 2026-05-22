@@ -1,10 +1,11 @@
 tqdm
-numpy
 matplotlib
 scipy
 networkx
 scikit-learn
 einops
+einx
 torch
-cupy-cuda12x
+cupy-cuda13x
+numpy==1.26.4 # For max compat with legacy
 torch-summary
