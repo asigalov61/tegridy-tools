@@ -10047,6 +10047,8 @@ class SequenceContinuationClassifier(nn.Module):
                  attn_dropout=0.1
                 ):
         super().__init__()
+
+        self.max_seq_len = max_seq_len
         
         self.encoder = TransformerWrapper(
             num_tokens=num_tokens,
