@@ -52,7 +52,7 @@ import cupy as cp
 
 from torchsummary import summary
 
-from x_transformer_1_23_2 import *
+from x_transformer_2_3_1 import *
 
 import random
 
