@@ -58,20 +58,23 @@ import tqdm
 
 try:
     import cupy as cp
-    import cupy as np
+    import numpy as np
     print('=' * 70)
     print('CuPy is found!')
     print('Will use CuPy and GPU for processing!')
     print('=' * 70)
 
 except ImportError as e:
-    print(f"Error: Could not import CuPy. Details: {e}")
-    # Handle the error, such as providing a fallback or exiting the program
-    # For example:
-    print("Please make sure CuPy is installed.")
+    print('Error: Could not import CuPy!')
+    print(f'Details: {e}')
     print('=' * 70)
-    
-    raise RuntimeError("CuPy could not be loaded!") from e
+    print("Please make sure CuPy is installed.")
+    print('pip install cupy-cuda13x')
+    print('=' * 70)
+    print('Will use NumPy for now...')
+    import numpy as cp
+    import numpy as np
+    print('=' * 70)
 
 ################################################################################
 
@@ -264,7 +267,12 @@ void merge_pair_kernel(const long* input, long* output,
     }
 }
 '''
-merge_kernel = cp.RawKernel(merge_kernel_code, 'merge_pair_kernel')
+
+try:
+    merge_kernel = cp.RawKernel(merge_kernel_code, 'merge_pair_kernel')
+
+except:
+    pass
 
 ###################################################################################
 
@@ -394,7 +402,12 @@ void fused_merge_kernel(long* data_in, long* data_out, long* lengths, const long
     }
 }
 '''
-fused_kernel = cp.RawKernel(fused_merge_kernel_code, 'fused_merge_kernel')
+
+try:
+    fused_kernel = cp.RawKernel(fused_merge_kernel_code, 'fused_merge_kernel')
+
+except:
+    pass
 
 ###################################################################################
 
@@ -1233,7 +1246,7 @@ def find_matches_fast(src_array, trg_array, seed: int = 0) -> int:
 
 ###################################################################################
 
-def find_repeating_non_overlapping_patterns(arr, min_len):
+def find_repeating_non_overlapping_patterns(arr, min_len=8):
     """
     Finds all repeating non-overlapping patterns of min_len and longer.
     GPU-Accelerated using CuPy with O(N) memory per length.
@@ -1336,6 +1349,120 @@ def find_repeating_non_overlapping_patterns(arr, min_len):
                     if i >= last_end:
                         for k in range(i, i + L):
                             consumed[k] = True
+                        last_end = i + L
+
+    return result
+
+###################################################################################
+
+def find_repeating_non_overlapping_patterns_numpy(arr, min_len=8):   
+    """
+    Finds all repeating non-overlapping patterns of min_len and longer.
+    Fully NumPy-vectorized except where sequential logic is required.
+    """
+    arr = np.asarray(arr, dtype=np.int64)
+    n = len(arr)
+    if n < min_len * 2:
+        return {}
+
+    max_len = n // 2
+    consumed = np.zeros(n, dtype=bool)
+    result = {}
+
+    BASE = np.int64(1000000007)
+
+    # ---------------------------------------------------------
+    # 1. Precompute powers (vectorized)
+    # ---------------------------------------------------------
+    powers = np.ones(max_len + 1, dtype=np.int64)
+    with np.errstate(over='ignore'):
+        powers[1:] = np.cumprod(np.full(max_len, BASE, dtype=np.int64))
+
+    # ---------------------------------------------------------
+    # 2. Prefix hash (must stay a loop — correct polynomial hash)
+    # ---------------------------------------------------------
+    pref = np.zeros(n + 1, dtype=np.int64)
+    with np.errstate(over='ignore'):
+        for i in range(1, n + 1):
+            pref[i] = pref[i - 1] * BASE + arr[i - 1]
+
+    # ---------------------------------------------------------
+    # 3. Main loop over pattern lengths
+    # ---------------------------------------------------------
+    for L in range(max_len, min_len - 1, -1):
+        n_hashes = n - L + 1
+        if n_hashes <= 0:
+            continue
+
+        # -----------------------------------------------------
+        # 3A. Vectorized rolling hash extraction
+        # -----------------------------------------------------
+        with np.errstate(over='ignore'):
+            raw = pref[L:L + n_hashes] - pref[:n_hashes] * powers[L]
+
+        # Mix upper/lower bits
+        hash_l = raw ^ (raw >> 32)
+
+        # -----------------------------------------------------
+        # 3B. Sort hashes and find equal groups (vectorized)
+        # -----------------------------------------------------
+        sort_idx = np.argsort(hash_l)
+        sorted_hash = hash_l[sort_idx]
+
+        diff = np.flatnonzero(sorted_hash[1:] != sorted_hash[:-1])
+        start_idx = np.concatenate(([0], diff + 1))
+        end_idx = np.concatenate((diff + 1, [n_hashes]))
+
+        # Keep only groups with ≥2 matches
+        mask = (end_idx - start_idx) >= 2
+        if not np.any(mask):
+            continue
+
+        start_idx = start_idx[mask]
+        end_idx = end_idx[mask]
+
+        # -----------------------------------------------------
+        # 3C. Flatten candidate indices (vectorized)
+        # -----------------------------------------------------
+        ranges = [np.arange(s, e) for s, e in zip(start_idx, end_idx)]
+        indices_flat = sort_idx[np.concatenate(ranges)]
+
+        # -----------------------------------------------------
+        # 3D. Group by exact bytes (collision‑free)
+        # -----------------------------------------------------
+        groups = {}
+        for idx in indices_flat:
+            key = arr[idx:idx + L].tobytes()
+            groups.setdefault(key, []).append(idx)
+
+        # -----------------------------------------------------
+        # 3E. Greedy non-overlapping selection
+        # -----------------------------------------------------
+        for key, indices in groups.items():
+            indices = np.array(indices)
+            indices.sort()
+
+            valid = []
+            last_end = -1
+
+            for i in indices:
+                if consumed[i]:
+                    continue
+                if i >= last_end:
+                    valid.append(i)
+                    last_end = i + L
+
+            if len(valid) >= 2:
+                pat = tuple(int(x) for x in arr[valid[0]:valid[0] + L])
+                result[pat] = len(valid)
+
+                # Mark consumed
+                last_end = -1
+                for i in indices:
+                    if consumed[i]:
+                        continue
+                    if i >= last_end:
+                        consumed[i:i + L] = True
                         last_end = i + L
 
     return result
