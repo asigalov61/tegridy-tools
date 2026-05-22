@@ -45,7 +45,6 @@ import TMIDIX
 import TPLOTS
 import TMELODIES
 import HaystackSearch
-import NumbaHaystackSearch
 import midi_to_colab_audio
 
 import random
