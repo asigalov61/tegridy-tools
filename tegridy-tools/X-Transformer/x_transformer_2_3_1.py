@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 15.0
+# Version 16.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -8401,6 +8401,217 @@ def predict_masked_tokens(
         'masked_ids':      masked_ids[:n],  # what the model actually saw
         'predicted_ids':   predicted_ids[:n],
         'predictions':     predictions
+    }
+
+def predict_masked_tokens_iter(
+    model,
+    input_ids,
+    mask_prob=None,
+    mask_positions=None,
+    topk=5,
+    seq_len=2048,
+    mask_idx=18819,
+    pad_idx=18820,
+    vocab_size=18821,
+    device='cuda',
+    dtype=torch.bfloat16,
+    temperature=1.0,
+    iterations=5,
+):
+    """
+    Predict masked token indices using iterative "easy-first" non-autoregressive decoding.
+
+    Instead of predicting all tokens at once, this performs multiple forward passes.
+    In each pass, it identifies the most confident predictions, writes them into the
+    sequence, and uses them as context to improve the remaining predictions.
+
+    Args:
+        model: Trained transformer model accepting token IDs.
+        input_ids: List or 1D tensor of token indices (length ≤ seq_len).
+        mask_prob: Float in [0,1] for random masking probability.
+        mask_positions: List of integer positions to mask explicitly.
+        topk: Number of top predictions to return per masked position.
+        seq_len: Maximum sequence length.
+        mask_idx: Token ID used for [MASK].
+        pad_idx: Token ID used for padding.
+        vocab_size: Size of the vocabulary.
+        device: Torch device for computation.
+        dtype: Autocast dtype for inference.
+        temperature: Temperature for logit calibration (1.0 = unchanged).
+        iterations: Max number of forward passes for iterative decoding.
+                    If 1, behaves like standard single-pass MLM prediction.
+
+    Returns:
+        {
+            'original_ids':  List[int],
+            'masked_ids':    List[int],
+            'predicted_ids': List[int],
+            'predictions': [ { ... }, ... ]
+        }
+    """
+    model.eval()
+
+    # Normalise device type for autocast
+    dev_type = device.split(':')[0] if isinstance(device, str) else device.type
+
+    # ---- Prepare input sequence -------------------------------------------
+    if isinstance(input_ids, torch.Tensor):
+        input_ids = input_ids.tolist()
+
+    original_seq = input_ids[:seq_len]
+    n = len(original_seq)
+    padded_seq = (
+        original_seq + [pad_idx] * (seq_len - n)
+        if n < seq_len
+        else original_seq[:]
+    )
+    batch = torch.tensor([padded_seq], dtype=torch.long, device=device)
+
+    # ---- Determine mask ---------------------------------------------------
+    if mask_positions is not None:
+        mask = torch.zeros_like(batch, dtype=torch.bool)
+        for pos in mask_positions:
+            if 0 <= pos < seq_len:
+                mask[:, pos] = True
+    else:
+        p = mask_prob if mask_prob is not None else 0.15
+        prob_matrix = torch.full(batch.shape, p, device=device)
+        prob_matrix[batch == pad_idx] = 0.0          # never mask padding
+        mask = torch.bernoulli(prob_matrix).bool()
+
+    # Labels: original IDs at masked positions, −100 elsewhere
+    labels = batch.clone()
+    labels[~mask] = -100
+
+    # ---- Apply 80/10/10 corruption ----------------------------------------
+    masked_input = batch.clone()
+    r = torch.rand(batch.shape, device=device)
+
+    replace_mask = mask & (r < 0.8)                        # 80 % → [MASK]
+    random_mask  = mask & (r >= 0.8) & (r < 0.9)           # 10 % → random
+    # remaining 10 %: keep original (no-op)
+
+    masked_input[replace_mask] = mask_idx
+    rand_tokens = torch.randint(0, vocab_size, batch.shape, device=device)
+    masked_input[random_mask] = rand_tokens[random_mask]
+
+    # Store the initial state of the masked input before iterative filling
+    initial_masked_ids = masked_input[0, :n].cpu().tolist()
+
+    # ---- Attention mask ---------------------------------------------------
+    # Built from original batch (bool) to satisfy scaled_dot_product_attention
+    attn_mask = (batch != pad_idx)
+
+    # ---- Iterative "Easy-First" Decoding ---------------------------------
+    remaining_masked_pos = mask[0].nonzero(as_tuple=True)[0]
+    remaining_masked_pos = remaining_masked_pos[remaining_masked_pos < n].tolist()
+
+    predictions_dict = {}
+
+    max_iters = max(1, int(iterations))
+    actual_vocab = vocab_size
+
+    for iter_step in range(max_iters):
+        if not remaining_masked_pos:
+            break
+
+        with torch.no_grad():
+            with autocast(device_type=dev_type, dtype=dtype):
+                logits = model(masked_input, mask=attn_mask)
+
+        # Upcast to float32 → log_softmax → exp for probabilities
+        logits = logits.float()
+        if temperature != 1.0:
+            logits = logits / temperature
+
+        log_probs = F.log_softmax(logits, dim=-1)
+        probs     = log_probs.exp()
+
+        # Get data for all currently remaining masked positions
+        pos_tensor = torch.tensor(remaining_masked_pos, device=device, dtype=torch.long)
+        mp_probs     = probs[0, pos_tensor]
+        mp_log_probs = log_probs[0, pos_tensor]
+        orig_ids     = labels[0, pos_tensor]
+
+        k = min(topk, actual_vocab)
+        topk_probs, topk_ids = torch.topk(mp_probs, k=k, dim=-1)
+
+        # Confidence metric: probability of the top-1 prediction
+        confidence = topk_probs[:, 0]
+
+        # Determine how many tokens to commit this iteration
+        # Dynamically scale based on remaining tokens and iterations left
+        remaining_iters = max_iters - iter_step
+        num_to_commit = max(1, len(remaining_masked_pos) // remaining_iters)
+
+        # Find the indices of the most confident predictions
+        conf_vals, conf_indices = torch.topk(confidence, k=num_to_commit)
+        
+        # Map back to actual sequence positions
+        committed_pos_tensor = pos_tensor[conf_indices]
+        
+        # Extract metrics for the committed tokens
+        committed_topk_ids = topk_ids[conf_indices]
+        committed_topk_probs = topk_probs[conf_indices]
+        committed_orig_ids = orig_ids[conf_indices]
+        
+        # Log-likelihood / probability of the *original* token
+        committed_orig_ll = mp_log_probs.gather(1, committed_orig_ids.unsqueeze(1)).squeeze(1)
+        committed_orig_p  = mp_probs.gather(1, committed_orig_ids.unsqueeze(1)).squeeze(1)
+
+        # Shannon entropy (nats)
+        committed_entropy = -(mp_probs[conf_indices] * mp_log_probs[conf_indices]).sum(dim=-1)
+
+        # Margin between top-1 and top-2
+        if k >= 2:
+            committed_margin = committed_topk_probs[:, 0] - committed_topk_probs[:, 1]
+        else:
+            committed_margin = torch.ones_like(committed_topk_probs[:, 0])
+
+        # Write top-1 predictions into the sequence for the next iteration
+        masked_input[0, committed_pos_tensor] = committed_topk_ids[:, 0]
+
+        # Transfer committed data to CPU and store
+        _cpos   = committed_pos_tensor.cpu().tolist()
+        _coids  = committed_orig_ids.cpu().tolist()
+        _ctids  = committed_topk_ids.cpu().tolist()
+        _ctprobs= committed_topk_probs.cpu().tolist()
+        _coll   = committed_orig_ll.cpu().tolist()
+        _cop    = committed_orig_p.cpu().tolist()
+        _cent   = committed_entropy.cpu().tolist()
+        _cmgn   = committed_margin.cpu().tolist()
+
+        for pos, oid, tids, tprobs, oll, op, ent, mgn in zip(
+            _cpos, _coids, _ctids, _ctprobs, _coll, _cop, _cent, _cmgn
+        ):
+            predictions_dict[pos] = {
+                'position': pos,
+                'original_id': oid,
+                'predicted_id': tids[0],
+                'topk': list(zip(tids, tprobs)),
+                'original_log_likelihood': oll,
+                'original_prob': op,
+                'entropy': ent,
+                'top1_margin': mgn,
+            }
+
+        # Remove committed positions from the remaining list
+        committed_set = set(_cpos)
+        remaining_masked_pos = [p for p in remaining_masked_pos if p not in committed_set]
+
+    # ---- Assemble output --------------------------------------------------
+    # Sort predictions by position index to match original behavior
+    predictions = [predictions_dict[p] for p in sorted(predictions_dict.keys())]
+
+    predicted_ids = original_seq[:]
+    for pred in predictions:
+        predicted_ids[pred['position']] = pred['predicted_id']
+
+    return {
+        'original_ids':  original_seq,
+        'masked_ids':    initial_masked_ids,
+        'predicted_ids': predicted_ids,
+        'predictions':   predictions,
     }
 
 def print_masked_predictions_ids(
