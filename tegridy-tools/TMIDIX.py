@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.5.19" # TMIDIX version
+__version__ = "26.7.17" # TMIDIX version
 
 ###################################################################################
 
@@ -19241,6 +19241,31 @@ def get_chord_name(intervals):
         name += f"({','.join(alterations)})"
         
     return name
+
+###################################################################################
+
+def create_log_bins(num_bins=128, max_val=128):
+    return [math.exp(i * math.log(max_val) / num_bins) for i in range(num_bins + 1)]
+
+###################################################################################
+
+def log_bin_to_val(log_bins, bin_idx, num_bins=128, max_val=128):
+
+    bin_idx = max(0, min(num_bins - 1, int(bin_idx)))
+
+    return int(log_bins[bin_idx])
+
+###################################################################################
+
+def val_to_log_bin(log_bins, val, num_bins=128, max_val=128):
+
+    val = max(1, min(max_val-1, int(val)))
+    
+    for i, edge in enumerate(log_bins):
+        if val < edge:
+            return i
+            
+    return num_bins-1
 
 ###################################################################################
 
