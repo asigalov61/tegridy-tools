@@ -4,7 +4,7 @@
 
 ## Symbolic music artificial Intelligence toolkit for rapid prototyping, design and evaluation of the symbolic music AI architectures, systems and models
 
-![Tegridy-Tools-Logo](https://github.com/user-attachments/assets/25539aeb-c4fa-4a84-ae43-f73c1db3fe9b)
+<img width="1024" height="1024" alt="tegridy-tools-logo" src="https://github.com/user-attachments/assets/b32b7f04-e7eb-4913-820c-09c003741228" />
 
 ***
 
