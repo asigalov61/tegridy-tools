@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 9.0
+# Version 10.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -5037,105 +5037,6 @@ class AutoregressiveWrapper(Module):
 
         return out
 
-    def compute_accuracy(self, logits, labels):
-        
-        out = torch.argmax(logits, dim=-1) 
-        out = out.flatten() 
-        labels = labels.flatten() 
-
-        mask = (labels != self.ignore_index) # can also be self.pad_value (your choice)
-        out = out[mask] 
-        labels = labels[mask] 
-
-        num_right = (out == labels)
-        num_right = torch.sum(num_right).type(torch.float32)
-
-        acc = num_right / len(labels)
-        
-        return acc
-
-    def forward(
-        self,
-        x,
-        return_outputs = False,
-        prepend_embeds = None,
-        **kwargs
-    ):
-        seq, ignore_index, add_attn_z_loss, add_next_embed_loss = x.shape[1], self.ignore_index, self.add_attn_z_loss, self.add_continuous_pred_head
-
-        inp, target = x, x[:, 1:]
-        inp = torch.where(inp == ignore_index, self.pad_value, inp)
-
-        if self.mask_prob > 0.:
-            rand = torch.randn(inp.shape, device = x.device)
-            rand[:, 0] = -torch.finfo(rand.dtype).max # first token should not be masked out
-            num_mask = min(int(seq * self.mask_prob), seq - 1)
-            indices = rand.topk(num_mask, dim = -1).indices
-            mask = ~torch.zeros_like(inp).scatter(1, indices, 1.).bool()
-            kwargs.update(self_attn_kv_mask = mask)
-
-        out, cache = self.net(
-            inp,
-            return_intermediates = True,
-            return_attn_z_loss = add_attn_z_loss,
-            return_next_embed_pred = add_next_embed_loss,
-            prepend_embeds = prepend_embeds,
-            **kwargs
-        )
-
-        # destruct differently if doing continuous pred
-
-        if add_next_embed_loss:
-            logits, (next_embed_pred, init_embeds) = out
-        else:
-            logits = out
-
-        # if there are prepended embeds, excise it out
-
-        if exists(prepend_embeds):
-            prepend_len = prepend_embeds.shape[1]
-            logits = logits[:, prepend_len:]
-
-        # take all tokens but the last
-
-        logits = logits[:, :-1]
-
-        # Compute accuracy
-        
-        acc = self.compute_accuracy(logits, target)      
-
-        # loss function
-
-        loss_fn = F.cross_entropy if not self.net.output_is_log_prob else F.nll_loss
-
-        # cross entropy loss
-
-        loss = loss_fn(
-            rearrange(logits, 'b n c -> b c n'),
-            target,
-            ignore_index = ignore_index
-        )
-
-        if add_attn_z_loss:
-            loss = loss + cache.attn_z_loss
-
-        if add_next_embed_loss:
-            mask = target != ignore_index
-            embed_pred = next_embed_pred[:, :-1]
-            cont_targets = init_embeds[:, 1:].detach()
-
-            cont_loss = F.l1_loss(embed_pred, cont_targets, reduction = 'none')
-            cont_loss = cont_loss[mask].mean()
-
-            loss = loss + cont_loss * self.next_embed_loss_weight
-
-        # Return
-        
-        if not return_outputs:
-            return loss, acc
-
-        return loss, acc, logits, cache
-
     @torch.inference_mode()
     @eval_decorator
     def generate_infill(
@@ -5286,6 +5187,377 @@ class AutoregressiveWrapper(Module):
             return torch.empty(batch_size, 0, dtype = tokens.dtype, device = device)
 
         return tokens
+
+    @torch.inference_mode()
+    @eval_decorator
+    def generate_infill_advanced(
+        self,
+        tokens,
+        infill_indexes,
+        mask_token_id = None,
+        token_ranges = None,
+        temperature = 0.9,
+        filter_logits_fn = None,
+        filter_kwargs = None,
+        num_candidates = 1,
+        beam_size = 1,
+        return_infill_only = False,
+        verbose = True,
+        **kwargs
+    ):
+        """
+        Infill tokens at specified positions using bidirectional context and 
+        span-level beam search.
+
+        ────────────────────────────────────────────────────────────────────
+        BIDIRECTIONAL CONTEXT & SPAN INFILLING
+        ────────────────────────────────────────────────────────────────────
+        This method groups contiguous `infill_indexes` into spans. 
+        For each span, it constructs a custom attention mask that allows the 
+        model to see the **entire sequence** (left and right context), while 
+        only predicting the target span left-to-right. This overcomes the 
+        "causal blindness" typical of decoder-only models.
+
+        If `beam_size > 1`, span infilling uses Beam Search to find the most 
+        probable sequence of tokens for the whole span, eliminating error 
+        drift. (Note: `num_candidates` is ignored when `beam_size > 1`).
+
+        ────────────────────────────────────────────────────────────────────
+        MASK TOKEN  (which token ID to use for infill positions)
+        ────────────────────────────────────────────────────────────────────
+        Positions to be infilled should be pre-filled with a dedicated
+        placeholder token whose ID is passed as ``mask_token_id``.
+        Pass ``mask_token_id = None`` (default) to skip validation.
+
+        ────────────────────────────────────────────────────────────────────
+        TOKEN RANGES  (constrained decoding per position)
+        ────────────────────────────────────────────────────────────────────
+        ``token_ranges`` restricts which token IDs may be *sampled* at each
+        infill position. 
+        Accepted formats:
+        * ``None``  — no constraint (default).
+        * ``list[int]`` / ``Tensor``  —  same allowed set for **all** positions.
+        * ``dict[int, list[int]]``  —  maps position index → allowed token IDs.
+
+        Args:
+            tokens:             Long tensor ``(batch, seq_len)``.
+            infill_indexes:     List or 1-D tensor of integer positions.
+            mask_token_id:      Token ID used to mark infill positions.
+            token_ranges:       Optional constraint on allowed token IDs.
+            temperature:        Sampling temperature. ``0.`` → greedy.
+            filter_logits_fn:   Logit-filtering function (``top_k``, ``top_p``).
+            filter_kwargs:      Dict of keyword arguments for filter function.
+            num_candidates:     Best-of-n sampling (used only if beam_size=1).
+            beam_size:          Beam width for contiguous span infilling. 
+                                Default: 1 (greedy/stochastic).
+            return_infill_only: If True, return only predicted tokens.
+            verbose:            Print generation progress.
+            **kwargs:           Forwarded to ``self.net``.
+        """
+        was_training = self.training
+        self.eval()
+
+        device = tokens.device
+        batch_size, seq_len = tokens.shape
+        tokens = tokens.clone()
+
+        # Prevent 'attn_mask' from being passed twice if user provides it in kwargs
+        kwargs.pop('attn_mask', None)
+
+        temperature = max(0.0, float(temperature))
+        beam_size = max(1, int(beam_size))
+
+        # ── normalise infill_indexes ──────────────────────────────────────
+        if isinstance(infill_indexes, torch.Tensor):
+            infill_indexes = infill_indexes.detach().cpu().sort().values.tolist()
+        elif not isinstance(infill_indexes, list):
+            infill_indexes = list(infill_indexes)
+        infill_indexes = sorted(set(int(i) for i in infill_indexes))
+        infill_indexes = [i for i in infill_indexes if 0 <= i < seq_len]
+
+        # ── validate mask_token_id ────────────────────────────────────────
+        if exists(mask_token_id) and len(infill_indexes) > 0:
+            mask_token_id = int(mask_token_id)
+            mismatched = [idx for idx in infill_indexes if not torch.all(tokens[:, idx] == mask_token_id)]
+            if mismatched and verbose:
+                print(f'generate_infill | ⚠  positions {mismatched} do not '
+                      f'all contain mask_token_id={mask_token_id}.')
+
+        # ── group contiguous indexes into spans ───────────────────────────
+        spans = []
+        if infill_indexes:
+            cur_span = [infill_indexes[0]]
+            for idx in infill_indexes[1:]:
+                if idx == cur_span[-1] + 1:
+                    cur_span.append(idx)
+                else:
+                    spans.append(cur_span)
+                    cur_span = [idx]
+            spans.append(cur_span)
+
+        num_spans = len(spans)
+        total_infill = sum(len(s) for s in spans)
+
+        # ── normalise token_ranges ────────────────────────────────────────
+        token_range_masks = {}
+        if exists(token_ranges):
+            def _to_allowed_tensor(spec):
+                if isinstance(spec, torch.Tensor):
+                    t = spec.to(device=device, dtype=torch.long).flatten()
+                elif isinstance(spec, (list, set)):
+                    t = torch.tensor(sorted(set(int(v) for v in spec)), dtype=torch.long, device=device)
+                else:
+                    raise TypeError(f'token_ranges entry must be list/set/Tensor, got {type(spec)}')
+                if t.numel() == 0: raise ValueError('token_ranges entry is empty.')
+                return t
+
+            if isinstance(token_ranges, dict):
+                for pos, allowed in token_ranges.items():
+                    pos = int(pos)
+                    if pos in infill_indexes:
+                        token_range_masks[pos] = _to_allowed_tensor(allowed)
+            else:
+                allowed_t = _to_allowed_tensor(token_ranges)
+                for idx in infill_indexes:
+                    token_range_masks[idx] = allowed_t
+
+        if not exists(filter_kwargs):
+            filter_kwargs = dict(thres=0.9) if filter_logits_fn is top_p else {}
+
+        if verbose:
+            fn_name = filter_logits_fn.__name__ if exists(filter_logits_fn) else None
+            print(f'generate_infill | batch={batch_size} | seq_len={seq_len} '
+                  f'| spans={num_spans} | total_infill={total_infill} '
+                  f'| beam_size={beam_size} | temp={temperature} | filter={fn_name}')
+
+        if total_infill == 0:
+            if return_infill_only:
+                return torch.empty(batch_size, 0, dtype=tokens.dtype, device=device)
+            return tokens
+
+        # ── helper: constrain & filter logits ─────────────────────────────
+        def _process_logits(logits_vec, pos):
+            if pos in token_range_masks:
+                disallowed = torch.ones(logits_vec.shape[-1], dtype=torch.bool, device=logits_vec.device)
+                disallowed[token_range_masks[pos]] = False
+                logits_vec = logits_vec.masked_fill(disallowed.unsqueeze(0), float('-inf'))
+
+            if exists(filter_logits_fn):
+                filt = filter_logits_fn(logits_vec, **filter_kwargs)
+            else:
+                filt = logits_vec
+
+            # numerical stability: replace ±inf with large negative
+            return torch.where(torch.isfinite(filt), filt, torch.full_like(filt, -1e4))
+
+        # ══════════════════════════════════════════════════════════════════
+        #  SPAN INFILLING (Bidirectional Context + Beam Search)
+        # ══════════════════════════════════════════════════════════════════
+        if verbose:
+            print(f'generate_infill | starting {num_spans} span(s) ...')
+
+        # Track all mask positions to prevent attending to future masks
+        is_future_mask = torch.zeros(seq_len, dtype=torch.bool, device=device)
+        for idx in infill_indexes:
+            is_future_mask[idx] = True
+
+        for span_idx, span in enumerate(spans):
+            s, e = span[0], span[-1]
+            
+            if s == 0:
+                if verbose:
+                    print(f'  span {span_idx+1}/{num_spans} | skipped (starts at pos 0, no left context)')
+                continue
+
+            if verbose:
+                print(f'  span {span_idx+1}/{num_spans} | range=[{s}, {e}] | length={e-s+1} | beam_size={beam_size}')
+
+            # 1. BEAM SEARCH (if beam_size > 1)
+            if beam_size > 1:
+                B, K = batch_size, beam_size
+                V = None
+
+                tokens_eff = tokens.repeat_interleave(K, dim=0)
+                scores = torch.full((B, K), -1e4, device=device)
+                scores[:, 0] = 0.0
+
+                for t in range(s, e + 1):
+                    # Construct dynamically updating bidirectional mask (True = attend)
+                    allowed = torch.ones(seq_len, seq_len, dtype=torch.bool, device=device).tril()
+                    if e + 1 < seq_len:
+                        allowed[:, e+1:] = True
+                    allowed[:, is_future_mask] = False
+
+                    # Pass 2D boolean mask. x-transformers will broadcast to (1, 1, seq, seq)
+                    logits = self.net(tokens_eff, attn_mask=allowed, **kwargs)[:, t-1, :]
+                    if V is None:
+                        V = logits.shape[-1]
+                        
+                    filt = _process_logits(logits, t)
+                    
+                    if temperature > 0:
+                        log_probs = F.log_softmax(filt / temperature, dim=-1)
+                    else:
+                        # Greedy beam search (temp=0)
+                        log_probs = torch.full_like(filt, float('-inf'))
+                        log_probs.scatter_(-1, filt.argmax(dim=-1, keepdim=True), 0.0)
+
+                    total_scores = scores.view(-1).unsqueeze(-1) + log_probs
+                    total_scores = total_scores.view(B, K * V)
+
+                    top_scores, top_indices = total_scores.topk(K, dim=-1)
+                    beam_idx = top_indices // V
+                    token_idx = top_indices % V
+
+                    tokens_eff = tokens_eff.view(B, K, seq_len)
+                    gather_idx = beam_idx.unsqueeze(-1).expand(-1, -1, seq_len)
+                    tokens_eff = tokens_eff.gather(1, gather_idx)
+                    tokens_eff[:, :, t] = token_idx
+                    tokens_eff = tokens_eff.view(B * K, seq_len)
+
+                    scores = top_scores
+                    is_future_mask[t] = False
+
+                tokens_eff = tokens_eff.view(B, K, seq_len)
+                best_idx = scores.argmax(dim=-1)
+                tokens = tokens_eff.gather(1, best_idx.view(B, 1, 1).expand(-1, -1, seq_len)).squeeze(1)
+
+            # 2. STANDARD INFILL (beam_size == 1, supports best-of-n)
+            else:
+                for t in range(s, e + 1):
+                    allowed = torch.ones(seq_len, seq_len, dtype=torch.bool, device=device).tril()
+                    if e + 1 < seq_len:
+                        allowed[:, e+1:] = True
+                    allowed[:, is_future_mask] = False
+
+                    logits = self.net(tokens, attn_mask=allowed, **kwargs)[:, t-1, :]
+                    filt = _process_logits(logits, t)
+
+                    if temperature == 0.:
+                        sample = filt.argmax(dim=-1, keepdim=True)
+                    else:
+                        probs = F.softmax(filt / temperature, dim=-1)
+                        if num_candidates > 1:
+                            samples = torch.multinomial(probs, num_candidates, replacement=True)
+                            sample_probs = probs.gather(-1, samples)
+                            best_idx = sample_probs.argmax(dim=-1)
+                            sample = samples.gather(-1, best_idx.unsqueeze(-1))
+                        else:
+                            sample = torch.multinomial(probs, 1)
+
+                    tokens[:, t] = sample.squeeze(-1)
+                    is_future_mask[t] = False
+
+        if verbose:
+            print('generate_infill | complete')
+
+        if was_training:
+            self.train()
+
+        if return_infill_only:
+            cols = [tokens[:, idx] for idx in infill_indexes]
+            return torch.stack(cols, dim=1) if cols else torch.empty(batch_size, 0, dtype=tokens.dtype, device=device)
+
+        return tokens
+
+    def compute_accuracy(self, logits, labels):
+        
+        out = torch.argmax(logits, dim=-1) 
+        out = out.flatten() 
+        labels = labels.flatten() 
+
+        mask = (labels != self.ignore_index) # can also be self.pad_value (your choice)
+        out = out[mask] 
+        labels = labels[mask] 
+
+        num_right = (out == labels)
+        num_right = torch.sum(num_right).type(torch.float32)
+
+        acc = num_right / len(labels)
+        
+        return acc
+
+    def forward(
+        self,
+        x,
+        return_outputs = False,
+        prepend_embeds = None,
+        **kwargs
+    ):
+        seq, ignore_index, add_attn_z_loss, add_next_embed_loss = x.shape[1], self.ignore_index, self.add_attn_z_loss, self.add_continuous_pred_head
+
+        inp, target = x, x[:, 1:]
+        inp = torch.where(inp == ignore_index, self.pad_value, inp)
+
+        if self.mask_prob > 0.:
+            rand = torch.randn(inp.shape, device = x.device)
+            rand[:, 0] = -torch.finfo(rand.dtype).max # first token should not be masked out
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask = ~torch.zeros_like(inp).scatter(1, indices, 1.).bool()
+            kwargs.update(self_attn_kv_mask = mask)
+
+        out, cache = self.net(
+            inp,
+            return_intermediates = True,
+            return_attn_z_loss = add_attn_z_loss,
+            return_next_embed_pred = add_next_embed_loss,
+            prepend_embeds = prepend_embeds,
+            **kwargs
+        )
+
+        # destruct differently if doing continuous pred
+
+        if add_next_embed_loss:
+            logits, (next_embed_pred, init_embeds) = out
+        else:
+            logits = out
+
+        # if there are prepended embeds, excise it out
+
+        if exists(prepend_embeds):
+            prepend_len = prepend_embeds.shape[1]
+            logits = logits[:, prepend_len:]
+
+        # take all tokens but the last
+
+        logits = logits[:, :-1]
+
+        # Compute accuracy
+        
+        acc = self.compute_accuracy(logits, target)      
+
+        # loss function
+
+        loss_fn = F.cross_entropy if not self.net.output_is_log_prob else F.nll_loss
+
+        # cross entropy loss
+
+        loss = loss_fn(
+            rearrange(logits, 'b n c -> b c n'),
+            target,
+            ignore_index = ignore_index
+        )
+
+        if add_attn_z_loss:
+            loss = loss + cache.attn_z_loss
+
+        if add_next_embed_loss:
+            mask = target != ignore_index
+            embed_pred = next_embed_pred[:, :-1]
+            cont_targets = init_embeds[:, 1:].detach()
+
+            cont_loss = F.l1_loss(embed_pred, cont_targets, reduction = 'none')
+            cont_loss = cont_loss[mask].mean()
+
+            loss = loss + cont_loss * self.next_embed_loss_weight
+
+        # Return
+        
+        if not return_outputs:
+            return loss, acc
+
+        return loss, acc, logits, cache
 
 #=================================================================================================================================
 # gpt_vae.py
