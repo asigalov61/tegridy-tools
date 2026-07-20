@@ -19279,6 +19279,90 @@ def vals_in_range_idxs(lst, lo, hi):
 
 ###################################################################################
 
+def insert_to_list(lst, target, value, delta):
+    try:
+        idx = lst.index(target)
+        lst.insert(idx + delta, value)
+        
+    except ValueError:
+        pass
+        
+    return lst
+
+###################################################################################
+
+def get_seqs_lens(list_of_lists,
+                  idx=None,
+                  min_len=0,
+                  max_len=8192,
+                  return_lens=False
+                 ):
+
+    try:
+        if idx is not None:
+            lens = [len(c[idx]) for c in list_of_lists if min_len <= len(c) <= max_len]
+    
+        else:
+            lens = [len(c) for c in list_of_lists if min_len <= len(c) <= max_len]
+    
+        if return_lens:
+            return [min(lens), sum(lens) / len(lens), max(lens), len(lens)], lens
+    
+        else:
+            return [min(lens), sum(lens) / len(lens), max(lens), len(lens)]
+
+    except:
+        return []
+
+###################################################################################
+
+def chunk_sequence_by_anchors(seq,
+                              num_anchors=128,
+                              min_val=0,
+                              max_val=200,
+                              step=128
+                             ):
+
+    all_chunks = []
+
+    chunk = []
+    tcount = 0
+    ccount = 0
+    sidx = 0
+
+    cc = sum(min_val <= v <= max_val for v in seq)
+    idxs = [j for j, v in enumerate(seq) if min_val <= v <= max_val]
+    
+    i = 0
+    n = len(seq)
+    
+    while 0 <= i < n:
+        t = seq[i]
+        
+        if min_val <= t < max_val:
+            tcount += 1
+
+        if tcount >= num_anchors:
+            if chunk:
+                all_chunks.append(chunk)
+            
+            chunk = []
+            tcount = 0
+            ccount += step
+
+            if ccount < cc:
+                i = idxs[ccount]
+            
+        chunk.append(t)
+        i += 1
+
+    if cc >= num_anchors:
+        all_chunks.append(seq[idxs[cc-num_anchors]:])
+    
+    return all_chunks
+
+###################################################################################
+
 print('Module loaded!')
 print('=' * 70)
 print('Enjoy! :)')
