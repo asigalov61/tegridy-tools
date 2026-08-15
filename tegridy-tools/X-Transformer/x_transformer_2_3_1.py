@@ -4,7 +4,7 @@
 #
 # Partial x-transformers code With useful modifications as a stand-alone Python module
 #
-# Version 17.0
+# Version 18.0
 #
 # Original source code courtesy of lucidrains
 # https://github.com/lucidrains/x-transformers
@@ -4153,6 +4153,262 @@ class AutoregressiveWrapper(Module):
 
     @torch.inference_mode()
     @eval_decorator
+    def generate_metrics(
+        self,
+        prompts,
+        seq_len,
+        eos_token = None,
+        temperature = 1.,
+        prompt_lens: Tensor | None = None,
+        filter_logits_fn: str | Callable = top_k,
+        restrict_to_max_seq_len = True,
+        amateur_model: Module | Tuple[Module] | None = None,
+        filter_kwargs: dict = dict(),
+        contrastive_decode_kwargs: dict | Tuple[dict] = dict(
+            beta = 0.5,
+            alpha = 0.1
+        ),
+        cache_kv = True,
+        return_prime=False,
+        return_metrics=False,                          # --- METRICS: new flag ---
+        verbose=True,
+        **kwargs
+    ):
+        max_seq_len, greedy, device = self.max_seq_len, temperature == 0., prompts.device
+
+        prompts, ps = pack([prompts], '* n')
+
+        b, t = prompts.shape
+
+        # handle filter logits fn given as string
+
+        if isinstance(filter_logits_fn, str):
+            assert filter_logits_fn in FILTER_LOGITS_FN, f"only {join(FILTER_LOGITS_FN.keys())} are available"
+
+            filter_logits_fn = FILTER_LOGITS_FN[filter_logits_fn]
+
+        # handle variable lengthed prompts (prefixes)
+
+        seq_start_pos = None
+        if exists(prompt_lens):
+            prompts = align_right(prompts, prompt_lens, pad_id = self.pad_value)
+            seq_start_pos = t - prompt_lens
+
+        # output from which sampled tokens appended to
+
+        out = prompts
+        
+        if verbose:
+            print("Generating sequence of max length:", seq_len)
+
+        # kv caches
+
+        cache = None
+
+        # if doing contrastive decoding, turn off filter automatically
+
+        if exists(amateur_model):
+            amateur_model = cast_tuple(amateur_model)
+            contrastive_decode_kwargs = cast_tuple(contrastive_decode_kwargs)
+
+            assert len(amateur_model) == len(contrastive_decode_kwargs)
+
+            amateur_caches = [None] * len(amateur_model)
+            filter_logits_fn = identity
+
+            for i, module in enumerate(amateur_model):
+                if isinstance(module, AutoregressiveWrapper):
+                    amateur_model[i] = module.net
+
+                module.eval()
+
+        # --- METRICS: initialise tracking containers ---
+        #
+        #   next_token_prob  – P(sampled token) under the *raw* (un-filtered,
+        #                       un-temperature-scaled) distribution.  Low values
+        #                       signal the model is unsure about what it just
+        #                       emitted.
+        #
+        #   entropy          – Shannon entropy of the raw next-token distribution.
+        #                       High entropy ⇒ the model is spreading probability
+        #                       mass widely (drift / confusion).
+        #
+        #   top_k_gap        – logit(top-1) – logit(top-2).  A small gap means the
+        #                       runner-up was nearly as likely as the winner.
+        #
+        #   hidden_cos_sim   – cosine similarity between the current step's final
+        #                       hidden state and the previous step's.  A sharp drop
+        #                       indicates the model's internal representation is
+        #                       shifting unexpectedly (drift).
+        #
+        # Every metric is stored as a list of 1-D tensors with shape (batch,).
+        # After the loop they are stacked into (num_steps, batch) tensors.
+
+        metrics: dict[str, list[Tensor]] = {
+            'next_token_prob': [],
+            'entropy':          [],
+            'top_k_gap':        [],
+            'hidden_cos_sim':   [],
+        }
+        prev_hidden: Tensor | None = None   # hidden state from the previous step
+
+        # sampling up to seq_len
+
+        for sl in range(seq_len):
+
+            if restrict_to_max_seq_len:
+                max_len_exceeded = out.shape[-1] > max_seq_len
+
+                assert not (cache_kv and max_len_exceeded and not self.net.can_cache_kv_outside_max_seq_len), 'the network cannot use cached key values when decoding outside the max sequence length. most likely because you are using absolute positional embedding. you can switch to rotary embeddings to resolve this issue'
+
+                x = out[:, -max_seq_len:]
+
+                if exists(cache):
+                    for inter in cache.attn_intermediates:
+                        if inter.layer_type == 'a':
+                            # Bug fix: renamed loop variable `t` to `kv` so it doesn't 
+                            # shadow the prompt length `t` defined above
+                            inter.cached_kv = [kv[..., -(max_seq_len - 1):, :] for kv in inter.cached_kv]
+
+            # --- forward pass ---
+
+            logits, new_cache = self.net(
+                x,
+                return_intermediates = True,
+                cache = cache,
+                seq_start_pos = seq_start_pos,
+                **kwargs
+            )
+
+            if cache_kv and self.net.can_cache_kv:
+                cache = new_cache
+
+            logits = logits[:, -1]                         # (b, vocab)
+
+            # --- METRICS: extract final hidden state from intermediates ---
+            # x-transformers' TransformerWrapper returns a list of hidden states
+            # in `intermediates.hiddens` when `return_intermediates=True` is used.
+            hidden = None
+            if hasattr(new_cache, 'hiddens') and new_cache.hiddens is not None and len(new_cache.hiddens) > 0:
+                hidden = new_cache.hiddens[-1] # (b, t, d)
+
+            # --- METRICS: compute on raw logits (pre-filter, pre-temperature,
+            #              pre-contrastive-decode) for an honest signal --------
+
+            full_probs     = F.softmax(logits, dim = -1)       # (b, vocab)
+            log_full_probs = F.log_softmax(logits, dim = -1)   # (b, vocab)
+
+            # Entropy  H = -Σ p·log p   (clamped ≥ 0 for numerical safety)
+            entropy = -(full_probs * log_full_probs).sum(dim = -1)          # (b,)
+            entropy = torch.clamp(entropy, min = 0.0)
+
+            # Top-k gap = logit_1 − logit_2
+            top2_logits, _ = logits.topk(2, dim = -1)                      # (b, 2)
+            top_k_gap = top2_logits[:, 0] - top2_logits[:, 1]              # (b,)
+
+            # Hidden-state cosine similarity (vs. previous step)
+            if hidden is not None:
+                cur_hidden = hidden[:, -1, :]                              # (b, d)
+                if prev_hidden is not None:
+                    cos_sim = F.cosine_similarity(cur_hidden, prev_hidden, dim = -1)  # (b,)
+                else:
+                    cos_sim = torch.full((b,), float('nan'), device = device)
+                prev_hidden = cur_hidden.clone()
+            else:
+                cos_sim = torch.full((b,), float('nan'), device = device)
+
+            # handle contrastive decoding, Li et al.
+            # https://arxiv.org/abs/2210.15097
+
+            if exists(amateur_model):
+                for i, (amateur, amateur_cache, amateur_contrastive_decode_kwargs) in enumerate(zip(amateur_model, amateur_caches, contrastive_decode_kwargs)):
+                    amateur_logits, next_amateur_cache = amateur(
+                        x,
+                        return_intermediates = True,
+                        cache = amateur_cache,
+                        seq_start_pos = seq_start_pos,
+                        **kwargs
+                    )
+
+                    amateur_logits = amateur_logits[:, -1]
+
+                    assert amateur_logits.shape == logits.shape, 'logits dimension are not the same between amateur and expert model'
+                    logits = contrastive_decode_fn(logits, amateur_logits, **amateur_contrastive_decode_kwargs)
+
+                    if cache_kv and amateur.can_cache_kv:
+                        amateur_caches[i] = next_amateur_cache
+
+            # filter by top_k, top_p (nucleus), top_a, or custom
+
+            if greedy:
+                sample = logits.argmax(dim = -1, keepdim = True)          # (b, 1)
+            else:
+                filtered_logits = filter_logits_fn(logits, **filter_kwargs)
+                probs = F.softmax(filtered_logits / temperature, dim=-1)
+                sample = torch.multinomial(probs, 1)                      # (b, 1)
+
+            # --- METRICS: probability of the *actually sampled* token under
+            #              the raw (un-filtered) distribution ----------------
+
+            next_token_prob = full_probs.gather(-1, sample).squeeze(-1)   # (b,)
+
+            # --- METRICS: store per-step values (move to CPU to save VRAM) ---
+
+            metrics['next_token_prob'].append(next_token_prob.cpu())
+            metrics['entropy'].append(entropy.cpu())
+            metrics['top_k_gap'].append(top_k_gap.cpu())
+            metrics['hidden_cos_sim'].append(cos_sim.cpu())
+
+            # concat sample
+
+            out = torch.cat((out, sample), dim=-1)
+
+            if verbose:
+              if sl % 32 == 0:
+                print(sl, '/', seq_len)
+                
+            if not exists(eos_token):
+                continue
+
+            is_eos_tokens = (out == eos_token)
+
+            if is_eos_tokens.any(dim = -1).all():
+                
+                if verbose: 
+                    print('Model called the end of sequence at:', sl, '/', seq_len)
+                    
+                break
+
+        if exists(eos_token):
+            # mask out everything after the eos tokens
+            shifted_is_eos_tokens = F.pad(is_eos_tokens, (1, -1))
+            mask = shifted_is_eos_tokens.float().cumsum(dim = -1) >= 1
+            out = out.masked_fill(mask, self.pad_value)
+
+        if return_prime:
+            out = out[:, :]
+        
+        else:
+            out = out[:, t:]
+
+        out, = unpack(out, ps, '* n')
+
+        # --- METRICS: stack lists → (num_steps, batch) tensors --------------
+
+        stacked_metrics: dict[str, Tensor] = {}
+        for key, vals in metrics.items():
+            if len(vals) > 0:
+                stacked_metrics[key] = torch.stack(vals, dim = 0)   # (steps, b)
+            else:
+                stacked_metrics[key] = torch.empty(0, b)
+
+        if return_metrics:
+            return out, stacked_metrics
+
+        return out
+        
+    @torch.inference_mode()
+    @eval_decorator
     def generate_infill(
         self,
         tokens,
@@ -5570,6 +5826,230 @@ class AutoregressiveWrapper(Module):
             return loss, acc
 
         return loss, acc, logits, cache
+
+import torch
+import math
+from typing import Dict, Optional
+
+def analyze_generation_metrics(
+    metrics: Dict[str, torch.Tensor],
+    tokens: Optional[torch.Tensor] = None,
+    print_report: bool = True,
+    outlier_std: float = 2.0,
+    abs_thresholds: Optional[Dict[str, float]] = None
+) -> Dict:
+    """
+    Analyzes the metrics dictionary returned by generate_metrics and flags exact tokens.
+    Groups multiple metric failures into a single anomaly per token.
+    
+    Args:
+        metrics: Dictionary containing tensors of shape (num_steps, batch).
+        tokens: The generated tokens tensor returned by generate_metrics. 
+        print_report: If True, prints a detailed diagnostic report.
+        outlier_std: The number of standard deviations to use for flagging statistical outliers.
+        abs_thresholds: Optional dict to override absolute problem thresholds. 
+                        Defaults are extreme values to only catch catastrophic failures.
+    """
+    if not metrics or not isinstance(metrics, dict):
+        if print_report: print("No metrics provided for analysis.")
+        return {}
+
+    # Default absolute thresholds (set to extreme values so they only trigger on catastrophic failure)
+    if abs_thresholds is None:
+        abs_thresholds = {
+            'entropy': 6.0,           # Near-random guessing for a large vocab
+            'next_token_prob': 0.01,  # < 1% confidence
+            'top_k_gap': 0.01,        # Identical top-2 logits
+            'hidden_cos_sim': 0.0     # Orthogonal or opposite direction representation
+        }
+
+    analysis = {}
+    report_lines = [
+        "=" * 70,
+        "GENERATION METRICS ANALYSIS & ANOMALY REPORT",
+        "=" * 70
+    ]
+
+    # --- 1. Calculate Global Statistics ---
+    def safe_stats(t: torch.Tensor):
+        valid = t[~torch.isnan(t)]
+        if valid.numel() == 0:
+            return float('nan'), float('nan'), float('nan'), float('nan')
+        return valid.mean().item(), valid.min().item(), valid.max().item(), valid.std().item()
+
+    stats = {}
+    for name, tensor in metrics.items():
+        if tensor.numel() == 0: continue
+        mean_val, min_val, max_val, std_val = safe_stats(tensor)
+        stats[name] = {"mean": mean_val, "std": std_val}
+        
+        step_means = tensor.mean(dim=tuple(range(1, tensor.dim()))) if tensor.dim() > 1 else tensor
+        valid_step_means = step_means[~torch.isnan(step_means)]
+        
+        drift_pct = 0.0
+        first_half_mean, second_half_mean = float('nan'), float('nan')
+        if len(valid_step_means) >= 2:
+            split_idx = len(valid_step_means) // 2
+            first_half_mean = valid_step_means[:split_idx].mean().item()
+            second_half_mean = valid_step_means[split_idx:].mean().item()
+            if abs(first_half_mean) > 1e-8:
+                drift_pct = ((second_half_mean - first_half_mean) / abs(first_half_mean)) * 100.0
+
+        analysis[name] = {
+            "mean": mean_val, "min": min_val, "max": max_val, "std": std_val,
+            "first_half_mean": first_half_mean, "second_half_mean": second_half_mean,
+            "drift_pct": drift_pct, "step_means": step_means.tolist()
+        }
+
+    # --- 2. Token Alignment ---
+    num_steps, batch_size = metrics['entropy'].shape
+    
+    if tokens is not None:
+        if tokens.dim() == 1:
+            tokens = tokens.unsqueeze(0)
+        gen_tokens = tokens[:, -num_steps:] if tokens.shape[1] >= num_steps else tokens
+    else:
+        gen_tokens = None
+
+    # --- 3. Exact Token Anomaly Detection (Grouped by Token) ---
+    anomalies_map = {}
+    
+    for b in range(batch_size):
+        for s in range(num_steps):
+            tok_id = "N/A"
+            if gen_tokens is not None:
+                try: tok_id = gen_tokens[b, s].item()
+                except IndexError: pass
+            
+            token_issues = []
+            
+            for name, tensor in metrics.items():
+                val = tensor[s, b].item()
+                if math.isnan(val): continue
+                
+                mean = stats[name]["mean"]
+                std = stats[name]["std"]
+                thresh = abs_thresholds.get(name, float('inf'))
+                
+                is_anomaly = False
+                reason = ""
+                
+                # Check absolute catastrophic thresholds
+                if name in ['entropy'] and val > thresh:
+                    is_anomaly = True
+                    reason = f"High Entropy (Abs>{thresh})"
+                elif name in ['next_token_prob', 'top_k_gap', 'hidden_cos_sim'] and val < thresh:
+                    is_anomaly = True
+                    reason = f"Low {name.replace('_', ' ').title()} (Abs<{thresh})"
+                
+                # Check statistical outliers relative to this model's own baseline
+                elif not math.isnan(std) and std > 1e-6:
+                    if name in ['entropy'] and val > mean + outlier_std * std:
+                        is_anomaly = True
+                        reason = f"Entropy Spike (>={outlier_std}σ)"
+                    elif name in ['next_token_prob', 'top_k_gap', 'hidden_cos_sim'] and val < mean - outlier_std * std:
+                        is_anomaly = True
+                        reason = f"{name.replace('_', ' ').title()} Drop (<-{outlier_std}σ)"
+                
+                if is_anomaly:
+                    token_issues.append(f"{name}={val:.4f} ({reason})")
+            
+            # If any metric flagged this token, log it as ONE anomaly entry
+            if token_issues:
+                anomalies_map[(b, s)] = {
+                    "batch": b,
+                    "step": s,
+                    "token_id": tok_id,
+                    "issues": token_issues
+                }
+
+    # Convert map to list
+    anomalies = list(anomalies_map.values())
+    anomalies.sort(key=lambda x: (x['batch'], x['step']))
+
+    # --- 4. Diagnostic Flags & Summary Recommendations ---
+    flags = []
+    recommendations = []
+    total_tokens = num_steps * batch_size
+    anomaly_density = len(anomalies) / total_tokens if total_tokens > 0 else 0
+
+    # Hidden State Drift
+    if "hidden_cos_sim" in analysis and not math.isnan(analysis["hidden_cos_sim"].get("drift_pct", float('nan'))):
+        if analysis["hidden_cos_sim"]["drift_pct"] < -20.0:
+            flags.append("⚠️ High Hidden State Drift: Internal representations shifted significantly (>20% drop in cosine similarity).")
+            recommendations.append("- The model's internal context is drifting. Consider using context windowing, restricting max_seq_len, or checking if the prompt leads to an out-of-distribution generation path.")
+
+    # Entropy Drift
+    if "entropy" in analysis and not math.isnan(analysis["entropy"].get("drift_pct", float('nan'))):
+        if analysis["entropy"]["drift_pct"] > 50.0:
+            flags.append("⚠️ High Entropy Drift: Model confusion increased significantly (>50% rise in entropy) over generation.")
+            recommendations.append("- As generation progresses, the model becomes less certain. This often leads to repetitive or nonsensical text. Consider reducing sequence length or applying repetition penalties.")
+
+    # High Anomaly Density (Now correctly calculated as 1 entry per anomalous token)
+    if anomaly_density > 0.15:
+        flags.append(f"⚠️ High Anomaly Density: {len(anomalies)} anomalous tokens detected out of {total_tokens} ({anomaly_density:.1%}).")
+        recommendations.append("- A high percentage of tokens are anomalous. The generation path is highly unstable. Verify your prompt formatting or consider retraining/fine-tuning.")
+
+    if not flags:
+        flags.append("✅ No global drift or systemic issues detected.")
+        recommendations.append("- Generation appears globally stable. Review the exact anomaly log below for any isolated token errors.")
+
+    # --- 5. Format Final Report ---
+    for name, data in analysis.items():
+        interp = {
+            "entropy": "(High = confused, spreading probability)",
+            "next_token_prob": "(Low = unsure of emitted token)",
+            "top_k_gap": "(Small = runner-up nearly tied)",
+            "hidden_cos_sim": "(Drops = internal representation shift)"
+        }.get(name, "")
+        
+        report_lines.append(f"\n--- {name} --- {interp}")
+        report_lines.append(f"  Global Mean: {data['mean']:.4f} | Std: {data['std']:.4f}")
+        if not math.isnan(data['first_half_mean']):
+            report_lines.append(f"  1st Half Mean: {data['first_half_mean']:.4f} | 2nd Half Mean: {data['second_half_mean']:.4f} (Drift: {data['drift_pct']:+.1f}%)")
+
+    report_lines.append("\n" + "-" * 70)
+    report_lines.append("EXACT ANOMALY LOG (Drift / Errors)")
+    report_lines.append("-" * 70)
+    
+    if not anomalies:
+        report_lines.append("✅ No severe anomalies detected at exact token levels.")
+    else:
+        report_lines.append(f"Found {len(anomalies)} anomalous tokens:\n")
+        
+        print_count = 0
+        for a in anomalies:
+            if print_count < 50:
+                issues_str = "; ".join(a['issues'])
+                report_lines.append(
+                    f"  [Batch {a['batch']} | Step {a['step']:>3} | Token ID: {str(a['token_id']):>5}] "
+                    f"-> {issues_str}"
+                )
+                print_count += 1
+            elif print_count == 50:
+                report_lines.append(f"  ... and {len(anomalies) - 50} more anomalies omitted from printout.")
+                break
+
+    report_lines.append("\n" + "-" * 70)
+    report_lines.append("DIAGNOSTIC FLAGS")
+    report_lines.append("-" * 70)
+    report_lines.extend(flags)
+
+    report_lines.append("\n" + "-" * 70)
+    report_lines.append("SUMMARY RECOMMENDATIONS")
+    report_lines.append("-" * 70)
+    report_lines.extend(recommendations)
+
+    report_lines.append("\n" + "=" * 70)
+
+    if print_report:
+        print("\n".join(report_lines))
+
+    analysis['anomalies'] = anomalies
+    analysis['flags'] = flags
+    analysis['recommendations'] = recommendations
+    
+    return analysis
 
 #=================================================================================================================================
 # Binary classifier fuctions
