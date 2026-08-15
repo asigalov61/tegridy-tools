@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.7.20" # TMIDIX version
+__version__ = "26.8.15" # TMIDIX version
 
 ###################################################################################
 
@@ -1541,7 +1541,7 @@ from array import array
 from pathlib import Path
 from fnmatch import fnmatch
 
-from typing import List, Optional, Tuple, Dict, Any, Optional, Iterable, Set
+from typing import List, Optional, Tuple, Dict, Any, Optional, Iterable, Set, Union
 
 import subprocess
 
@@ -18395,7 +18395,7 @@ def binary_matrix_to_rle_toks(binary_matrix,
 
             else:
                 if any(t > 1 for t in pmat):
-                    seq.extend(TMIDIX.flatten(zip([i for i in range(128) if pmat[i] != 0], [pmat[i]+vels_sidx for i in range(128) if pmat[i] != 0])))
+                    seq.extend(flatten(zip([i for i in range(128) if pmat[i] != 0], [pmat[i]+vels_sidx for i in range(128) if pmat[i] != 0])))
 
                 else:
                     seq.extend([i for i in range(128) if pmat[i] != 0])
@@ -18416,7 +18416,7 @@ def binary_matrix_to_rle_toks(binary_matrix,
 
     else:
         if any(t > 1 for t in pmat):
-            seq.extend(TMIDIX.flatten(zip([i for i in range(128) if pmat[i] != 0], [pmat[i]+vels_sidx for i in range(128) if pmat[i] > 1 ])))
+            seq.extend(flatten(zip([i for i in range(128) if pmat[i] != 0], [pmat[i]+vels_sidx for i in range(128) if pmat[i] > 1 ])))
 
         else:
             seq.extend([i for i in range(128) if pmat[i] != 0])
@@ -19360,6 +19360,758 @@ def chunk_sequence_by_anchors(seq,
         all_chunks.append(seq[idxs[cc-num_anchors]:])
     
     return all_chunks
+
+###################################################################################
+
+def preserve_max_nonconsecutive(lst):
+    
+    if not lst:
+        return []
+
+    out = [lst[0]]
+
+    for i in range(1, len(lst)):
+        if lst[i] == out[-1] + 1:
+            continue
+            
+        out.append(lst[i])
+
+    return out
+
+###################################################################################
+
+def remove_stacked_pitches_from_escore_notes(escore_notes):
+    
+    cscore = chordify_score([1000, escore_notes])
+
+    new_score = []
+
+    for c in cscore:
+        c.sort(key=lambda x: x[4])
+        
+        seen = preserve_max_nonconsecutive([e[4] for e in c if e[3] != 9])
+        
+        for e in c:
+            if e[4] in seen or e[3] == 9:
+                new_score.append(e)
+                
+    return new_score
+
+###################################################################################
+
+def align_escore_notes_to_grid(score,
+                               min_td=16,
+                               max_td=32,
+                               step_td=2,
+                               bar_time=4000,
+                               note_time=200,
+                               adj_durs=False,
+                               split_durs=False,
+                               min_dur=4,
+                               show_progress=True
+                              ):
+
+    results = []
+    
+    for t in tqdm.tqdm(range(min_td, max_td+1, step_td), disable=not show_progress):
+        ascore = augment_enhanced_score_notes(score, timings_divider=t)
+    
+    
+        for i in range(bar_time // t):
+            rscore = recalculate_score_timings(ascore, i)
+            count = 0
+            for e in rscore:
+                if e[3] != 9:
+                    if e[1] % (note_time // t) == 0:
+                        count += 1    
+                
+            results.append([t, i, count])
+
+
+    td = results[0][0]
+    st = results[0][1]
+    
+    ascore = augment_enhanced_score_notes(score, timings_divider=td)
+    
+    rscore = recalculate_score_timings(ascore, st)
+
+    nscore = copy.deepcopy(rscore)
+
+    splits = []
+
+    if adj_durs:
+        ntime = round(bar_time / td)
+        
+        for i, e in enumerate(nscore):
+            if e[3] != 9:
+                tt = e[1]+e[2]
+                if tt > ntime:
+                    ndur = e[2] - abs(ntime - tt)
+            
+                    if ndur >= min_dur:
+                        if adj_durs:
+                            e[2] = ndur
+                            
+                        if split_durs:
+                            nn = copy.deepcopy(e)
+                            nn[1] = e[1]+e[2]
+                            nn[2] = tt - nn[1]
+    
+                            if nn[2] >= min_dur:
+                                nscore.append(nn)
+    
+                    else:
+                        if split_durs:
+                            nscore.remove(e)
+            
+                if e[1] > ntime:
+                    ntime += round(bar_time / td)
+                
+    nscore.sort(key=lambda x: x[1])
+
+    fscore = remove_stacked_pitches_from_escore_notes(nscore)
+
+    for e in fscore:
+        e[1] *= td
+        e[2] *= td
+
+    return fscore
+
+###################################################################################
+
+from typing import List, Optional
+import random
+
+def random_ngram_replace(
+    seq: List[int],
+    prob_single: float = 0.05,
+    prob_ngram: float = 0.05,
+    max_ngram: int = 3,
+    replace_value: Optional[int] = None,
+    rng: Optional[random.Random] = None,
+) -> List[int]:
+    """
+    Randomly replaces values in a list with a specified value.
+    Also randomly replaces consecutive n-grams (up to max_ngram length).
+    Original list remains intact.
+
+    Args:
+        seq: List[int] — original sequence.
+        prob_single: Probability of replacing a single element.
+        prob_ngram: Probability of replacing an n-gram starting at any index.
+        max_ngram: Maximum n-gram length to replace.
+        replace_value: Value to insert.
+        rng: Optional NumPy random generator.
+
+    Returns:
+        A new list with random replacements applied.
+    """
+    if rng is None:
+        rng = random.Random()
+
+    n = len(seq)
+    out = list(seq)  # copy to avoid mutating original
+
+    # 1. Single-value replacements
+    for i in range(n):
+        if rng.random() < prob_single:
+            out[i] = replace_value
+
+    # 2. N-gram replacements
+    if max_ngram >= 2 and prob_ngram > 0.0:
+        for s in range(n):
+            if rng.random() < prob_ngram:
+                # choose length L uniformly from [2, max_ngram]
+                L = rng.randint(2, max_ngram)
+                end = min(s + L, n)
+                for j in range(s, end):
+                    out[j] = replace_value
+
+    return out
+
+###################################################################################
+
+def remove_contiguous_patterns(arr: List[int]) -> Tuple[List[int], List[int]]:
+    if not arr:
+        return [], []
+    if len(arr) == 1:
+        return arr[:], [0]
+
+    # Parameters for rolling hash (two moduli to reduce collision risk)
+    B = 91138233
+    M1 = 1_000_000_007
+    M2 = 1_000_000_009
+    OFFSET = 1_000_000_007  # shift values to non-negative domain
+
+    vals: List[int] = []
+    idxs: List[int] = []
+
+    # prefix hashes: ph1[k] is hash of vals[:k]
+    ph1: List[int] = [0]
+    ph2: List[int] = [0]
+    # powers: pow1[k] = B**k % M1
+    pow1: List[int] = [1]
+    pow2: List[int] = [1]
+
+    for i, x in enumerate(arr):
+        v = x + OFFSET
+        vals.append(x)
+        idxs.append(i)
+
+        ph1.append((ph1[-1] * B + v) % M1)
+        ph2.append((ph2[-1] * B + v) % M2)
+        pow1.append((pow1[-1] * B) % M1)
+        pow2.append((pow2[-1] * B) % M2)
+
+        # Try to remove a right-most repeated block (one instance at a time).
+        # After a removal, re-check because new repeats may form.
+        while True:
+            n = len(vals)
+            max_L = n // 2
+            removed = False
+            # check longest L first to match original behavior
+            for L in range(max_L, 0, -1):
+                a = n - 2 * L
+                b = n - L
+                # hash of vals[a:b]
+                h1_a = (ph1[b] - ph1[a] * pow1[L]) % M1
+                h1_b = (ph1[n] - ph1[b] * pow1[L]) % M1
+                if h1_a != h1_b:
+                    continue
+                h2_a = (ph2[b] - ph2[a] * pow2[L]) % M2
+                h2_b = (ph2[n] - ph2[b] * pow2[L]) % M2
+                if h2_a != h2_b:
+                    continue
+                # confirmed match: remove the right-most instance (last L elements)
+                for _ in range(L):
+                    vals.pop()
+                    idxs.pop()
+                    ph1.pop()
+                    ph2.pop()
+                    pow1.pop()
+                    pow2.pop()
+                removed = True
+                break
+            if not removed:
+                break
+
+    return vals, idxs
+
+###################################################################################
+
+def truncate_after_k_least_common(int_list: List[int], k: int = 1) -> List[int]:
+    """
+    Truncate the list at the earliest position where every distinct value
+    from the original list has been seen at least k times.
+    Default k is 1 (truncate once all values have been seen at least once).
+    """
+    if not int_list:
+        return []
+
+    if k <= 0:
+        return int_list
+
+    counts = Counter(int_list)
+    # Use all distinct values (not only least-common)
+    all_vals = set(counts.keys())
+
+    # If k is impossible for any value, return full list
+    if any(k > counts[v] for v in all_vals):
+        return int_list
+
+    seen = {v: 0 for v in all_vals}
+
+    for i, x in enumerate(int_list):
+        if x in seen:
+            seen[x] += 1
+
+        if all(seen[v] >= k for v in all_vals):
+            return int_list[: i + 1]
+
+    return int_list
+
+###################################################################################
+
+from collections import Counter
+from itertools import accumulate
+from bisect import bisect_left
+from typing import List, Tuple
+
+
+def get_significant_chords(
+    chords_seq: List[int],
+    min_count: int = 2,
+    coverage_floor: float = 0.85,
+    coverage_ceiling: float = 0.95,
+    ) -> List[Tuple[int, int]]:
+    
+    """
+    Returns Counter.most_common() list of only "significant" chord tokens.
+
+    Combines three criteria (knee detection, cumulative coverage, min count)
+    where the most permissive wins. See original docstring for full details.
+    """
+    
+    if not chords_seq:
+        return []
+
+    mc = Counter(chords_seq).most_common()
+
+    if len(mc) <= 3:
+        return [(t, c) for t, c in mc if c >= min_count]
+
+    # mc is sorted descending by count, so filtering preserves order
+    f_items = [(t, c) for t, c in mc if c >= min_count]
+    if not f_items:
+        return []
+    n = len(f_items)
+    if n <= 3:
+        return f_items
+
+    f_counts = [c for _, c in f_items]
+    c_max = f_counts[0]
+    c_min = f_counts[-1]
+    if c_max == c_min:
+        return f_items
+
+    inv_n1 = 1.0 / (n - 1)
+    inv_range = 1.0 / (c_max - c_min)
+
+    # --- Kneedle: argmax of (1 - x) - y_s  (fused smoothing + search) ---
+    best_dist = -1.0
+    best_idx = 0
+
+    if n > 5:
+        # y_s[0] = y[0];  distance at i=0 is 1 - 0 - y[0]
+        y_prev = (f_counts[0] - c_min) * inv_range
+        dist = 1.0 - y_prev
+        if dist > best_dist:
+            best_dist = dist
+            best_idx = 0
+        # y_s[i] = (y[i-1] + y[i] + y[i+1]) / 3  for 1 <= i <= n-2
+        y_curr = (f_counts[1] - c_min) * inv_range
+        for i in range(1, n - 1):
+            y_next = (f_counts[i + 1] - c_min) * inv_range
+            y_s = (y_prev + y_curr + y_next) / 3.0
+            dist = 1.0 - i * inv_n1 - y_s
+            if dist > best_dist:
+                best_dist = dist
+                best_idx = i
+            y_prev = y_curr
+            y_curr = y_next
+        # y_s[n-1] = y[n-1];  distance = 1 - 1 - y[n-1] = -y[n-1]
+        dist = -y_curr
+        if dist > best_dist:
+            best_idx = n - 1
+    else:
+        for i in range(n):
+            y = (f_counts[i] - c_min) * inv_range
+            dist = 1.0 - i * inv_n1 - y
+            if dist > best_dist:
+                best_dist = dist
+                best_idx = i
+
+    knee_idx = best_idx + 1
+
+    # --- Cumulative coverage (accumulate is C-level; bisect is O(log n)) ---
+    cumulative = list(accumulate(f_counts))
+    total = cumulative[-1]
+    floor_idx = bisect_left(cumulative, coverage_floor * total) + 1
+    ceiling_idx = bisect_left(cumulative, coverage_ceiling * total) + 1
+
+    cutoff = min(max(knee_idx, floor_idx), ceiling_idx, n)
+    return f_items[:cutoff]
+
+###################################################################################
+
+def keep_only_undesirables(values, undesirables):
+    undeset = set(undesirables)  # O(1) membership checks
+
+    kept_values = []
+    kept_indexes = []
+
+    for idx, val in enumerate(values):
+        if val not in undeset:
+            kept_values.append(val)
+            kept_indexes.append(idx)
+
+    return kept_values, kept_indexes
+
+###################################################################################
+
+def keep_only_desirables(values, desirables):
+    des_set = set(desirables)
+
+    kept_values = []
+    kept_indexes = []
+
+    for idx, val in enumerate(values):
+        if val in des_set:
+            kept_values.append(val)
+            kept_indexes.append(idx)
+
+    return kept_values, kept_indexes
+
+###################################################################################
+
+IndexPair = Tuple[int, int]
+Result = Union[List[List[int]], List[IndexPair]]
+
+def find_shortest_sublist_idxs(arr: List[int], k: int) -> Optional[IndexPair]:
+    
+    """Return (l, r) inclusive of the shortest window where every distinct value appears >= k times."""
+    
+    n = len(arr)
+    if n == 0:
+        return None
+
+    total = Counter(arr)
+    # global feasibility
+    for cnt in total.values():
+        if cnt < k:
+            return None
+
+    need_types = len(total)
+    window: Dict[int, int] = {}
+    satisfied = 0
+    best_len = n + 1
+    best_l = 0
+    l = 0
+
+    for r, v in enumerate(arr):
+        window[v] = window.get(v, 0) + 1
+        if window[v] == k:
+            satisfied += 1
+
+        while satisfied == need_types and l <= r:
+            cur_len = r - l + 1
+            if cur_len < best_len:
+                best_len = cur_len
+                best_l = l
+            lv = arr[l]
+            window[lv] -= 1
+            if window[lv] == k - 1:
+                satisfied -= 1
+            l += 1
+
+    if best_len <= n:
+        return (best_l, best_l + best_len - 1)
+    return None
+
+def _segment_has_all_types(segment: List[int], global_types: List[int], k: int) -> bool:
+    
+    """Return True if every type in global_types appears >= k times in segment."""
+    
+    seg_counts = Counter(segment)
+    for t in global_types:
+        if seg_counts.get(t, 0) < k:
+            return False
+    return True
+
+def _greedy_nonoverlapping_from_to(arr: List[int], k: int, start: int, end: int, global_types: List[int]) -> List[IndexPair]:
+    
+    """
+    Greedy left->right within arr[start:end+1]. Return list of (l,r) inclusive
+    non-overlapping minimal windows where every global type appears >= k times.
+    Assumes the segment [start,end] contains at least k of every global type.
+    """
+    
+    res: List[IndexPair] = []
+    if start > end:
+        return res
+
+    l = start
+    r = start
+    window: Dict[int, int] = {}
+    satisfied = 0
+    need_types = len(global_types)
+
+    while l <= end:
+        # expand r until satisfied or r > end
+        while r <= end and satisfied < need_types:
+            v = arr[r]
+            prev = window.get(v, 0)
+            window[v] = prev + 1
+            if prev + 1 == k:
+                satisfied += 1
+            r += 1
+
+        if satisfied < need_types:
+            break  # cannot find more windows in this segment
+
+        # shrink l to minimal while still satisfying
+        while l < r:
+            lv = arr[l]
+            if window[lv] - 1 >= k:
+                window[lv] -= 1
+                l += 1
+            else:
+                break
+
+        # record minimal window [l, r-1]
+        res.append((l, r - 1))
+
+        # reset and continue after r-1 (non-overlapping)
+        window.clear()
+        satisfied = 0
+        l = r
+
+    return res
+
+def find_nonoverlapping_shortest_sublists(arr: List[int], k: int = 1, return_indices: bool = True) -> Result:
+    
+    """
+    Find the shortest qualifying subarray first, then find all other non-overlapping
+    qualifying subarrays to the left and right of that seed. Return subarrays in original order.
+
+    If return_indices is True, return List[(l, r)] inclusive index pairs.
+    If return_indices is False, return List[sublists].
+    """
+    
+    n = len(arr)
+    if n == 0:
+        return []  # type: ignore[return-value]
+
+    # k <= 0: treat single elements as minimal windows
+    if k <= 0:
+        if n == 1:
+            return []  # nothing shorter than full array
+        if return_indices:
+            return [(i, i) for i in range(n)]  # all singletons as index pairs
+        else:
+            return [[arr[i]] for i in range(n)]
+
+    # global feasibility
+    total = Counter(arr)
+    for cnt in total.values():
+        if cnt < k:
+            return []  # impossible
+
+    global_types = list(total.keys())
+
+    # find shortest seed
+    seed = find_shortest_sublist_idxs(arr, k)
+    if seed is None:
+        return []  # type: ignore[return-value]
+    seed_l, seed_r = seed
+    seed_len = seed_r - seed_l + 1
+    if seed_len == n:
+        return []  # exclude full-array result
+
+    results_idx: List[IndexPair] = []
+
+    # Left segment: [0, seed_l-1]
+    if seed_l > 0:
+        left_start, left_end = 0, seed_l - 1
+        if _segment_has_all_types(arr[left_start:left_end+1], global_types, k):
+            left_windows = _greedy_nonoverlapping_from_to(arr, k, left_start, left_end, global_types)
+            results_idx.extend(left_windows)
+
+    # Add seed
+    results_idx.append((seed_l, seed_r))
+
+    # Right segment: [seed_r+1, n-1]
+    if seed_r + 1 < n:
+        right_start, right_end = seed_r + 1, n - 1
+        if _segment_has_all_types(arr[right_start:right_end+1], global_types, k):
+            right_windows = _greedy_nonoverlapping_from_to(arr, k, right_start, right_end, global_types)
+            results_idx.extend(right_windows)
+
+    if return_indices:
+        return results_idx
+    else:
+        return [arr[l:r+1] for (l, r) in results_idx]
+
+###################################################################################
+
+def align_integer_lists_global(seq1,
+                               seq2,
+                               gap_penalty=-2,
+                               match_score=2,
+                               mismatch_penalty=-2
+                              ):
+    """
+    Global sequence alignment (Needleman-Wunsch) of two lists of integers.
+
+    Returns
+    -------
+    align1 : list           # seq1 with None where a gap was inserted
+    align2 : list           # seq2 with None where a gap was inserted
+    alignment_cost : int    # optimal alignment score (score_matrix[n][m])
+    """
+    n = len(seq1)
+    m = len(seq2)
+
+    # --- DP matrix ---------------------------------------------------------
+    # Full matrix retained so we can run an exact traceback afterwards.
+    score = [[0] * (m + 1) for _ in range(n + 1)]
+
+    # Boundary conditions (prefixes aligned to all-gaps).
+    row0 = score[0]
+    for j in range(1, m + 1):
+        row0[j] = gap_penalty * j
+    for i in range(1, n + 1):
+        score[i][0] = gap_penalty * i
+
+    # Hoist locals for tight inner-loop speed.
+    s1 = seq1
+    s2 = seq2
+    gp = gap_penalty
+    ms = match_score
+    mp = mismatch_penalty
+
+    # Fill the table.
+    for i in range(1, n + 1):
+        cur_row  = score[i]
+        prev_row = score[i - 1]
+        a = s1[i - 1]                       # seq1 char fixed for this row
+        for j in range(1, m + 1):
+            d = prev_row[j - 1] + (ms if a == s2[j - 1] else mp)   # diagonal
+            u = prev_row[j]     + gp                                 # up (gap in seq2)
+            l = cur_row[j - 1]  + gp                                 # left (gap in seq1)
+            best = d
+            if u > best:
+                best = u
+            if l > best:
+                best = l
+            cur_row[j] = best
+
+    alignment_cost = score[n][m]
+
+    # --- Traceback ---------------------------------------------------------
+    # Preference order on ties: diagonal > up > left.
+    # (Preferring matches/mismatches over gaps yields the tightest alignment,
+    #  which is what we want for max alignment accuracy.)
+    align1 = []
+    align2 = []
+    i, j = n, m
+
+    while i > 0 and j > 0:
+        cur       = score[i][j]
+        diag_val  = score[i - 1][j - 1]
+        up_val    = score[i - 1][j]
+        left_val  = score[i][j - 1]
+        match_val = ms if s1[i - 1] == s2[j - 1] else mp
+
+        if cur == diag_val + match_val:
+            align1.append(s1[i - 1])
+            align2.append(s2[j - 1])
+            i -= 1
+            j -= 1
+        elif cur == up_val + gp:                # gap in seq2
+            align1.append(s1[i - 1])
+            align2.append(None)
+            i -= 1
+        else:                                    # cur == left_val + gp  -> gap in seq1
+            align1.append(None)
+            align2.append(s2[j - 1])
+            j -= 1
+
+    # Drain any leftover tail (one sequence exhausted before the other).
+    while i > 0:
+        align1.append(s1[i - 1])
+        align2.append(None)
+        i -= 1
+    while j > 0:
+        align1.append(None)
+        align2.append(s2[j - 1])
+        j -= 1
+
+    align1.reverse()
+    align2.reverse()
+
+    return align1, align2, alignment_cost
+
+###################################################################################
+
+def align_subsequence_lcs(seq1, seq2):
+    
+    """
+    Longest Common Subsequence (LCS) based alignment.
+    Perfect for finding a shorter seq2 hidden inside a longer seq1.
+    - Matches give +1
+    - Gaps in seq1 (skipping context) cost 0
+    - Gaps in seq2 (deleted elements) cost 0
+    """
+    
+    n = len(seq1)
+    m = len(seq2)
+    
+    # Initialize DP matrix with 0s.
+    # A value of 0 means "no penalty for starting the match here"
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    
+    s1 = seq1
+    s2 = seq2
+    
+    for i in range(1, n + 1):
+        cur_row = dp[i]
+        prev_row = dp[i - 1]
+        a = s1[i - 1]
+        for j in range(1, m + 1):
+            if a == s2[j - 1]:
+                # Match found! Add 1 to the diagonal
+                cur_row[j] = prev_row[j - 1] + 1
+            else:
+                # No match. Take the max of skipping seq1[i] or skipping seq2[j].
+                # Both cost 0, so we just inherit the best score so far.
+                cur_row[j] = prev_row[j] if prev_row[j] >= cur_row[j - 1] else cur_row[j - 1]
+                
+    final_cost = dp[n][m]
+
+    # --- Traceback ---
+    align1, align2 = [], []
+    i, j = n, m
+    
+    while i > 0 and j > 0:
+        # If the current score is exactly 1 greater than the diagonal, it was a match
+        if s1[i - 1] == s2[j - 1] and dp[i][j] == dp[i - 1][j - 1] + 1:
+            align1.append(s1[i - 1])
+            align2.append(s2[j - 1])
+            i -= 1
+            j -= 1
+        elif dp[i][j] == dp[i - 1][j]:
+            # Skipped an element in seq1 (Gap in seq2 / Context element)
+            align1.append(s1[i - 1])
+            align2.append(None)
+            i -= 1
+        else:
+            # Skipped an element in seq2 (Gap in seq1 / Noise element)
+            align1.append(None)
+            align2.append(s2[j - 1])
+            j -= 1
+            
+    # Drain any remaining seq1 (the prefix before the subsequence)
+    while i > 0:
+        align1.append(s1[i - 1])
+        align2.append(None)
+        i -= 1
+        
+    # Drain any remaining seq2 (rare, but safe)
+    while j > 0:
+        align1.append(None)
+        align2.append(s2[j - 1])
+        j -= 1
+
+    align1.reverse()
+    align2.reverse()
+    
+    return align1, align2, final_cost
+
+###################################################################################
+
+def first_last(arr):
+    first = next(x for x in arr if x is not None)
+    last = next(x for x in reversed(arr) if x is not None)
+    return first, last
+
+###################################################################################
+
+def first_last_idx(arr):
+    return (
+        next(i for i,x in enumerate(arr) if x is not None),
+        next(len(arr)-1-i for i,x in enumerate(reversed(arr)) if x is not None)
+    )
 
 ###################################################################################
 
