@@ -1,5 +1,5 @@
 # TMIDIX API Reference List
-## All 407 TMIDIX functions listed in alphabetical order
+## All 432 TMIDIX functions listed in alphabetical order
 
 ---
 
@@ -16,6 +16,7 @@
 - [H](#h)
 - [I](#i)
 - [J](#j)
+- [K](#k)
 - [L](#l)
 - [M](#m)
 - [N](#n)
@@ -33,7 +34,7 @@
 ## #
 <a name="#"></a>
 
-**27 entries**
+**29 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -49,6 +50,7 @@
 * `_encode`
 * `_fits_in_signed`
 * `_fits_in_unsigned`
+* `_greedy_nonoverlapping_from_to`
 * `_int2twobytes`
 * `_mad`
 * `_median`
@@ -56,6 +58,7 @@
 * `_read_varint_from_bytearray`
 * `_rep`
 * `_round_int`
+* `_segment_has_all_types`
 * `_some_text_event`
 * `_twobytes2int`
 * `_unshift_ber_int`
@@ -73,7 +76,7 @@
 ## A
 <a name="a"></a>
 
-**29 entries**
+**32 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -98,7 +101,10 @@
 * `advanced_validate_chord_pitches`
 * `align_escore_notes_to_bars`
 * `align_escore_notes_to_escore_notes`
+* `align_escore_notes_to_grid`
 * `align_integer_lists`
+* `align_integer_lists_global`
+* `align_subsequence_lcs`
 * `all_consequtive`
 * `alpha_str`
 * `alpha_str_to_toks`
@@ -142,7 +148,7 @@
 ## C
 <a name="c"></a>
 
-**40 entries**
+**42 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -162,6 +168,7 @@
 * `chords_to_escore_notes`
 * `chunk_by_threshold_mode`
 * `chunk_list`
+* `chunk_sequence_by_anchors`
 * `chunks_shuffle`
 * `clean_string`
 * `common_subpatterns`
@@ -184,6 +191,7 @@
 * `covariance`
 * `create_enhanced_monophonic_melody`
 * `create_files_list`
+* `create_log_bins`
 * `create_nested_chords_tree`
 * `create_similarity_matrix`
 * `cubic_kernel`
@@ -296,7 +304,7 @@
 ## F
 <a name="f"></a>
 
-**37 entries**
+**41 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -320,12 +328,16 @@
 * `find_most_similar_matrix`
 * `find_next`
 * `find_next_bar`
+* `find_nonoverlapping_shortest_sublists`
 * `find_paths`
 * `find_pattern_idxs`
 * `find_pattern_start_indexes`
 * `find_repeating_non_overlapping_patterns`
+* `find_shortest_sublist_idxs`
 * `find_similar_tones_chord`
 * `find_value_power`
+* `first_last`
+* `first_last_idx`
 * `fix_bad_chords_in_escore_notes`
 * `fix_escore_notes_durations`
 * `fix_monophonic_score_durations`
@@ -346,7 +358,7 @@
 ## G
 <a name="g"></a>
 
-**11 entries**
+**13 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -357,6 +369,8 @@
 * `get_chords_by_semitones`
 * `get_chords_with_prefix`
 * `get_md5_hash`
+* `get_seqs_lens`
+* `get_significant_chords`
 * `get_weighted_score`
 * `grep`
 * `group_by_threshold`
@@ -390,7 +404,7 @@
 ## I
 <a name="i"></a>
 
-**8 entries**
+**9 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -398,6 +412,7 @@
 * `image_matrix_to_original_escore_notes`
 * `insert_caps_newlines`
 * `insert_newlines`
+* `insert_to_list`
 * `int_to_bits`
 * `int_to_pitches_chord`
 * `int_to_tones_chord`
@@ -422,10 +437,25 @@
 
 ---
 
+## K
+<a name="k"></a>
+
+**2 entries**
+
+<details>
+<summary>Show entries</summary>
+
+* `keep_only_desirables`
+* `keep_only_undesirables`
+
+</details>
+
+---
+
 ## L
 <a name="l"></a>
 
-**6 entries**
+**7 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -435,6 +465,7 @@
 * `lists_intersections`
 * `lists_similarity`
 * `lists_sym_differences`
+* `log_bin_to_val`
 * `longest_common_chunk`
 
 </details>
@@ -521,7 +552,7 @@
 ## P
 <a name="p"></a>
 
-**11 entries**
+**12 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -535,6 +566,7 @@
 * `pitches_to_tones`
 * `pitches_to_tones_chord`
 * `plot_ms_SONG`
+* `preserve_max_nonconsecutive`
 * `proportional_adjust`
 * `proportions_counter`
 
@@ -560,17 +592,20 @@
 ## R
 <a name="r"></a>
 
-**14 entries**
+**17 entries**
 
 <details>
 <summary>Show entries</summary>
 
+* `random_ngram_replace`
 * `read_jsonl`
 * `read_jsonl_lines`
 * `recalculate_score_timings`
+* `remove_contiguous_patterns`
 * `remove_duplicate_pitches_from_escore_notes`
 * `remove_events_from_escore_notes`
 * `remove_repeating_patterns`
+* `remove_stacked_pitches_from_escore_notes`
 * `replace_bad_tones_chord`
 * `replace_chords_in_escore_notes`
 * `resize_matrix`
@@ -631,7 +666,7 @@
 ## T
 <a name="t"></a>
 
-**49 entries**
+**50 entries**
 
 <details>
 <summary>Show entries</summary>
@@ -685,6 +720,7 @@
 * `transpose_tones`
 * `transpose_tones_chord`
 * `trim_list_trail_range`
+* `truncate_after_k_least_common`
 
 </details>
 
@@ -693,13 +729,16 @@
 ## V
 <a name="v"></a>
 
-**5 entries**
+**8 entries**
 
 <details>
 <summary>Show entries</summary>
 
+* `val_to_log_bin`
 * `validate_pitches`
 * `validate_pitches_chord`
+* `vals_in_range_count`
+* `vals_in_range_idxs`
 * `values_percentile`
 * `variance`
 * `vertical_list_search`
