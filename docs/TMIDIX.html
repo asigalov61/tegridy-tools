@@ -1083,9 +1083,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.BLACK_NOTES">BLACK_NOTES</a></li>
     <li class="mono"><a href="#TMIDIX.CHORDS_TYPES">CHORDS_TYPES</a></li>
     <li class="mono"><a href="#TMIDIX.CLASS_OF_INST">CLASS_OF_INST</a></li>
+    <li class="mono"><a href="#TMIDIX.CLEAN_INSTRUMENTS">CLEAN_INSTRUMENTS</a></li>
     <li class="mono"><a href="#TMIDIX.CONTROL_CHANGES">CONTROL_CHANGES</a></li>
     <li class="mono"><a href="#TMIDIX.DRUMS_PITCH_RANGE">DRUMS_PITCH_RANGE</a></li>
     <li class="mono"><a href="#TMIDIX.DRUMS_SETS">DRUMS_SETS</a></li>
+    <li class="mono"><a href="#TMIDIX.DRUM_SETS">DRUM_SETS</a></li>
     <li class="mono"><a href="#TMIDIX.Event2channelindex">Event2channelindex</a></li>
     <li class="mono"><a href="#TMIDIX.HAPPY_MAJOR">HAPPY_MAJOR</a></li>
     <li class="mono"><a href="#TMIDIX.INSTRUMENTS_CLASSES">INSTRUMENTS_CLASSES</a></li>
@@ -1495,6 +1497,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.stack_list">stack_list</a></li>
     <li class="mono"><a href="#TMIDIX.strings_dict">strings_dict</a></li>
     <li class="mono"><a href="#TMIDIX.strip_drums_from_escore_notes">strip_drums_from_escore_notes</a></li>
+    <li class="mono"><a href="#TMIDIX.substitute_instrument">substitute_instrument</a></li>
     <li class="mono"><a href="#TMIDIX.summarize_escore_notes">summarize_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.symmetric_match_ratio">symmetric_match_ratio</a></li>
     <li class="mono"><a href="#TMIDIX.system_cpus_utilization">system_cpus_utilization</a></li>
@@ -1664,7 +1667,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;26.8.15&quot;</span> <span class="c1"># TMIDIX version</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;26.8.20&quot;</span> <span class="c1"># TMIDIX version</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -13189,7 +13192,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     <span class="mi">56</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="c1"># Brass</span>
                     <span class="mi">64</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="c1"># Reed</span>
                     <span class="mi">72</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="c1"># Pipe</span>
-                    <span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">87</span> <span class="c1"># Synth Lead</span>
+                    <span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="c1"># Synth Lead</span>
+                    <span class="mi">105</span><span class="p">,</span> <span class="mi">110</span> <span class="c1"># Folk</span>
                    <span class="p">]</span>
 
 <span class="c1">###################################################################################</span>
@@ -13199,6 +13203,23 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     <span class="mi">58</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="c1"># Brass</span>
                     <span class="mi">87</span> <span class="c1"># Synth Lead</span>
                    <span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="n">DRUM_SETS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="c1"># Standard</span>
+             <span class="mi">8</span><span class="p">,</span> <span class="c1"># Room</span>
+             <span class="mi">16</span><span class="p">,</span> <span class="c1">#Power</span>
+             <span class="mi">24</span><span class="p">,</span> <span class="c1">#Electronic</span>
+             <span class="mi">25</span><span class="p">,</span> <span class="c1">#Analog</span>
+             <span class="mi">32</span><span class="p">,</span> <span class="c1">#Jazz</span>
+             <span class="mi">40</span><span class="p">,</span> <span class="c1">#Brush</span>
+             <span class="mi">48</span><span class="p">,</span> <span class="c1">#Orchestra</span>
+             <span class="mi">56</span><span class="p">,</span> <span class="c1">#SFX</span>
+            <span class="p">]</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="n">CLEAN_INSTRUMENTS</span> <span class="o">=</span> <span class="n">LEAD_INSTRUMENTS</span> <span class="o">+</span> <span class="n">BASE_INSTRUMENTS</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -21731,6 +21752,193 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">substitute_instrument</span><span class="p">(</span><span class="n">instrument</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">best_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a MIDI instrument number (0-127) and returns a gentle substitution.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - instrument (int): The original MIDI instrument number (0-127).</span>
+<span class="sd">    - best_only (bool): If True, returns only the absolute closest substitute. </span>
+<span class="sd">                        If False (default), returns a randomly selected substitute </span>
+<span class="sd">                        from the best possible options.</span>
+<span class="sd">                        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - int: The substituted instrument number, or the original if no substitute exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">instrument</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;MIDI instrument number must be between 0 and 127.&quot;</span><span class="p">)</span>
+        
+    <span class="c1"># Dictionary mapping original instruments to a list of gentle substitutes.</span>
+    <span class="c1"># Lists are strictly ordered from CLOSEST timbre to slightly further (but still gentle).</span>
+    <span class="n">substitutes</span> <span class="o">=</span> <span class="p">{</span>
+        
+        <span class="c1"># --- Pianos ---</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>   <span class="c1"># Acoustic Grand Piano -&gt; Bright Acoustic, Electric Grand, E.Piano 1</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>   <span class="c1"># Bright Acoustic Piano -&gt; Acoustic Grand, Electric Grand, E.Piano 1</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>   <span class="c1"># Electric Grand Piano -&gt; E.Piano 1, E.Piano 2, Acoustic Grand</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>   <span class="c1"># Honky-Tonk Piano -&gt; Acoustic Grand, Bright Acoustic, E.Piano 1</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>   <span class="c1"># Electric Piano 1 -&gt; E.Piano 2, Electric Grand, Acoustic Grand</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>   <span class="c1"># Electric Piano 2 -&gt; E.Piano 1, Electric Grand, Acoustic Grand</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>      <span class="c1"># Harpsichord -&gt; Clavinet, Acoustic Grand</span>
+        <span class="mi">7</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>      <span class="c1"># Clavinet -&gt; Harpsichord, Acoustic Grand</span>
+        
+        <span class="c1"># --- Chromatic Percussion ---</span>
+        <span class="mi">8</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>   <span class="c1"># Celesta -&gt; Music Box, Tubular Bells, Glockenspiel</span>
+        <span class="mi">9</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>   <span class="c1"># Glockenspiel -&gt; Music Box, Tubular Bells, Celesta</span>
+        <span class="mi">10</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span>   <span class="c1"># Music Box -&gt; Celesta, Glockenspiel, Tubular Bells</span>
+        <span class="mi">11</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>  <span class="c1"># Vibraphone -&gt; Marimba, Xylophone, Glockenspiel</span>
+        <span class="mi">12</span><span class="p">:</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>     <span class="c1"># Marimba -&gt; Vibraphone, Xylophone</span>
+        <span class="mi">13</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>     <span class="c1"># Xylophone -&gt; Marimba, Vibraphone</span>
+        <span class="mi">14</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>   <span class="c1"># Tubular Bells -&gt; Celesta, Glockenspiel, Dulcimer</span>
+        <span class="mi">15</span><span class="p">:</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>  <span class="c1"># Dulcimer -&gt; Acoustic Guitar (Nylon), Tubular Bells, Celesta</span>
+        
+        <span class="c1"># --- Organs ---</span>
+        <span class="mi">16</span><span class="p">:</span> <span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span> <span class="c1"># Drawbar Organ -&gt; Percussive Organ, Reed Organ, Church Organ</span>
+        <span class="mi">17</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span> <span class="c1"># Percussive Organ -&gt; Drawbar Organ, Reed Organ, Church Organ</span>
+        <span class="mi">18</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span> <span class="c1"># Rock Organ -&gt; Drawbar, Percussive, Church</span>
+        <span class="mi">19</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">],</span> <span class="c1"># Church Organ -&gt; Reed Organ, Drawbar Organ, Percussive Organ</span>
+        <span class="mi">20</span><span class="p">:</span> <span class="p">[</span><span class="mi">19</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span> <span class="c1"># Reed Organ -&gt; Church Organ, Accordion, Drawbar Organ</span>
+        <span class="mi">21</span><span class="p">:</span> <span class="p">[</span><span class="mi">23</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># Accordion -&gt; Tango Accordion, Harmonica, Reed Organ</span>
+        <span class="mi">22</span><span class="p">:</span> <span class="p">[</span><span class="mi">21</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">85</span><span class="p">],</span> <span class="c1"># Harmonica -&gt; Accordion, Tango Accordion, Synth Voice</span>
+        <span class="mi">23</span><span class="p">:</span> <span class="p">[</span><span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># Tango Accordion -&gt; Accordion, Harmonica, Reed Organ</span>
+        
+        <span class="c1"># --- Guitars ---</span>
+        <span class="mi">24</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="c1"># Acoustic Guitar Nylon -&gt; Acoustic Guitar Steel, Jazz Guitar, Dulcimer</span>
+        <span class="mi">25</span><span class="p">:</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="c1"># Acoustic Guitar Steel -&gt; Acoustic Guitar Nylon, Jazz Guitar, Harmonics</span>
+        <span class="mi">26</span><span class="p">:</span> <span class="p">[</span><span class="mi">27</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span> <span class="c1"># Electric Guitar Jazz -&gt; Clean Electric, Nylon, Steel</span>
+        <span class="mi">27</span><span class="p">:</span> <span class="p">[</span><span class="mi">26</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="c1"># Electric Guitar Clean -&gt; Jazz Electric, Muted Electric, Harmonics</span>
+        <span class="mi">28</span><span class="p">:</span> <span class="p">[</span><span class="mi">27</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="c1"># Electric Guitar Muted -&gt; Clean Electric, Jazz Electric, Harmonics</span>
+        <span class="mi">29</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>    <span class="c1"># Overdriven Guitar -&gt; Distortion Guitar, Synth Drum</span>
+        <span class="mi">30</span><span class="p">:</span> <span class="p">[</span><span class="mi">29</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>    <span class="c1"># Distortion Guitar -&gt; Overdriven Guitar, Synth Drum</span>
+        <span class="mi">31</span><span class="p">:</span> <span class="p">[</span><span class="mi">27</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span> <span class="c1"># Guitar Harmonics -&gt; Clean Electric, Nylon, Steel</span>
+        
+        <span class="c1"># --- Basses ---</span>
+        <span class="mi">32</span><span class="p">:</span> <span class="p">[</span><span class="mi">35</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span> <span class="c1"># Acoustic Bass -&gt; Fretless, Finger, Pick</span>
+        <span class="mi">33</span><span class="p">:</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="c1"># Electric Bass Finger -&gt; Pick, Fretless, Acoustic</span>
+        <span class="mi">34</span><span class="p">:</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="c1"># Electric Bass Pick -&gt; Finger, Fretless, Acoustic</span>
+        <span class="mi">35</span><span class="p">:</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span> <span class="c1"># Fretless Bass -&gt; Acoustic, Finger, Pick</span>
+        <span class="mi">36</span><span class="p">:</span> <span class="p">[</span><span class="mi">37</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">],</span> <span class="c1"># Slap Bass 1 -&gt; Slap Bass 2, Synth Bass 1, Synth Bass 2</span>
+        <span class="mi">37</span><span class="p">:</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">],</span> <span class="c1"># Slap Bass 2 -&gt; Slap Bass 1, Synth Bass 1, Synth Bass 2</span>
+        <span class="mi">38</span><span class="p">:</span> <span class="p">[</span><span class="mi">39</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">37</span><span class="p">],</span> <span class="c1"># Synth Bass 1 -&gt; Synth Bass 2, Slap 1, Slap 2</span>
+        <span class="mi">39</span><span class="p">:</span> <span class="p">[</span><span class="mi">38</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">37</span><span class="p">],</span> <span class="c1"># Synth Bass 2 -&gt; Synth Bass 1, Slap 1, Slap 2</span>
+        
+        <span class="c1"># --- Strings ---</span>
+        <span class="mi">40</span><span class="p">:</span> <span class="p">[</span><span class="mi">41</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Violin -&gt; Viola, Cello, String Ensemble 1</span>
+        <span class="mi">41</span><span class="p">:</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Viola -&gt; Violin, Cello, String Ensemble 1</span>
+        <span class="mi">42</span><span class="p">:</span> <span class="p">[</span><span class="mi">41</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Cello -&gt; Viola, Violin, String Ensemble 1</span>
+        <span class="mi">43</span><span class="p">:</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Contrabass -&gt; Cello, Acoustic Bass, String Ensemble 1</span>
+        <span class="mi">44</span><span class="p">:</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="c1"># Tremolo Strings -&gt; String Ensemble 1, String Ensemble 2, Violin</span>
+        <span class="mi">45</span><span class="p">:</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="c1"># Pizzicato Strings -&gt; String Ensemble, Acoustic Bass, Marimba</span>
+        <span class="mi">46</span><span class="p">:</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">107</span><span class="p">],</span> <span class="c1"># Orchestral Harp -&gt; Tubular Bells, Celesta, Koto</span>
+        
+        <span class="c1"># --- Ensemble ---</span>
+        <span class="mi">48</span><span class="p">:</span> <span class="p">[</span><span class="mi">49</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="c1"># String Ensemble 1 -&gt; Ensemble 2, Synth Strings 1, Violin</span>
+        <span class="mi">49</span><span class="p">:</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="c1"># String Ensemble 2 -&gt; Ensemble 1, Synth Strings 1, Violin</span>
+        <span class="mi">50</span><span class="p">:</span> <span class="p">[</span><span class="mi">51</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">],</span> <span class="c1"># Synth Strings 1 -&gt; Synth Strings 2, String Ensembles</span>
+        <span class="mi">51</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">],</span> <span class="c1"># Synth Strings 2 -&gt; Synth Strings 1, String Ensembles</span>
+        <span class="mi">52</span><span class="p">:</span> <span class="p">[</span><span class="mi">53</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">91</span><span class="p">],</span> <span class="c1"># Choir Aahs -&gt; Voice Oohs, Synth Voice, Pad 4 (Choir)</span>
+        <span class="mi">53</span><span class="p">:</span> <span class="p">[</span><span class="mi">52</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">85</span><span class="p">],</span> <span class="c1"># Voice Oohs -&gt; Choir Aahs, Synth Voice, Lead 6 (Voice)</span>
+        <span class="mi">54</span><span class="p">:</span> <span class="p">[</span><span class="mi">85</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">53</span><span class="p">],</span> <span class="c1"># Synth Voice -&gt; Lead 6 (Voice), Choir Aahs, Voice Oohs</span>
+        
+        <span class="c1"># --- Brass ---</span>
+        <span class="mi">56</span><span class="p">:</span> <span class="p">[</span><span class="mi">59</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Trumpet -&gt; Muted Trumpet, Trombone, Brass Section</span>
+        <span class="mi">57</span><span class="p">:</span> <span class="p">[</span><span class="mi">58</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Trombone -&gt; Tuba, Trumpet, Brass Section</span>
+        <span class="mi">58</span><span class="p">:</span> <span class="p">[</span><span class="mi">57</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Tuba -&gt; Trombone, Trumpet, Brass Section</span>
+        <span class="mi">59</span><span class="p">:</span> <span class="p">[</span><span class="mi">56</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Muted Trumpet -&gt; Trumpet, Trombone, Brass Section</span>
+        <span class="mi">60</span><span class="p">:</span> <span class="p">[</span><span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">58</span><span class="p">],</span> <span class="c1"># French Horn -&gt; Brass Section, Synth Brass 1, Tuba</span>
+        <span class="mi">61</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">56</span><span class="p">],</span> <span class="c1"># Brass Section -&gt; French Horn, Synth Brass 1, Trumpet</span>
+        <span class="mi">62</span><span class="p">:</span> <span class="p">[</span><span class="mi">63</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="c1"># Synth Brass 1 -&gt; Synth Brass 2, Brass Section, French Horn</span>
+        <span class="mi">63</span><span class="p">:</span> <span class="p">[</span><span class="mi">62</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="c1"># Synth Brass 2 -&gt; Synth Brass 1, Brass Section, French Horn</span>
+        
+        <span class="c1"># --- Reed ---</span>
+        <span class="mi">64</span><span class="p">:</span> <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span> <span class="c1"># Soprano Sax -&gt; Alto, Tenor, Baritone</span>
+        <span class="mi">65</span><span class="p">:</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span> <span class="c1"># Alto Sax -&gt; Soprano, Tenor, Baritone</span>
+        <span class="mi">66</span><span class="p">:</span> <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span> <span class="c1"># Tenor Sax -&gt; Alto, Soprano, Baritone</span>
+        <span class="mi">67</span><span class="p">:</span> <span class="p">[</span><span class="mi">66</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">68</span><span class="p">],</span> <span class="c1"># Baritone Sax -&gt; Tenor, Alto, Oboe</span>
+        <span class="mi">68</span><span class="p">:</span> <span class="p">[</span><span class="mi">69</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span> <span class="c1"># Oboe -&gt; English Horn, Clarinet, Bassoon</span>
+        <span class="mi">69</span><span class="p">:</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">71</span><span class="p">],</span> <span class="c1"># English Horn -&gt; Oboe, Bassoon, Clarinet</span>
+        <span class="mi">70</span><span class="p">:</span> <span class="p">[</span><span class="mi">71</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">68</span><span class="p">],</span> <span class="c1"># Bassoon -&gt; Clarinet, English Horn, Oboe</span>
+        <span class="mi">71</span><span class="p">:</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">69</span><span class="p">],</span> <span class="c1"># Clarinet -&gt; Oboe, Flute, English Horn</span>
+        
+        <span class="c1"># --- Pipe ---</span>
+        <span class="mi">72</span><span class="p">:</span> <span class="p">[</span><span class="mi">73</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span> <span class="c1"># Piccolo -&gt; Flute, Recorder, Blown Bottle</span>
+        <span class="mi">73</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span> <span class="c1"># Flute -&gt; Piccolo, Recorder, Blown Bottle</span>
+        <span class="mi">74</span><span class="p">:</span> <span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">72</span><span class="p">],</span> <span class="c1"># Recorder -&gt; Pan Flute, Flute, Piccolo</span>
+        <span class="mi">75</span><span class="p">:</span> <span class="p">[</span><span class="mi">74</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span> <span class="c1"># Pan Flute -&gt; Recorder, Flute, Blown Bottle</span>
+        <span class="mi">76</span><span class="p">:</span> <span class="p">[</span><span class="mi">77</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">74</span><span class="p">],</span> <span class="c1"># Blown Bottle -&gt; Shakuhachi, Pan Flute, Recorder</span>
+        <span class="mi">77</span><span class="p">:</span> <span class="p">[</span><span class="mi">76</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">73</span><span class="p">],</span> <span class="c1"># Shakuhachi -&gt; Blown Bottle, Pan Flute, Flute</span>
+        <span class="mi">78</span><span class="p">:</span> <span class="p">[</span><span class="mi">79</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">74</span><span class="p">],</span> <span class="c1"># Whistle -&gt; Ocarina, Flute, Recorder</span>
+        <span class="mi">79</span><span class="p">:</span> <span class="p">[</span><span class="mi">78</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">73</span><span class="p">],</span> <span class="c1"># Ocarina -&gt; Whistle, Recorder, Flute</span>
+        
+        <span class="c1"># --- Synth Lead ---</span>
+        <span class="mi">80</span><span class="p">:</span> <span class="p">[</span><span class="mi">81</span><span class="p">,</span> <span class="mi">86</span><span class="p">,</span> <span class="mi">82</span><span class="p">],</span> <span class="c1"># Square -&gt; Sawtooth, Fifths, Calliope</span>
+        <span class="mi">81</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">84</span><span class="p">,</span> <span class="mi">82</span><span class="p">],</span> <span class="c1"># Sawtooth -&gt; Square, Charang, Calliope</span>
+        <span class="mi">82</span><span class="p">:</span> <span class="p">[</span><span class="mi">83</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">84</span><span class="p">],</span> <span class="c1"># Calliope -&gt; Chiff, Sawtooth, Charang</span>
+        <span class="mi">83</span><span class="p">:</span> <span class="p">[</span><span class="mi">82</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span> <span class="c1"># Chiff -&gt; Calliope, Square, New Age Pad</span>
+        <span class="mi">84</span><span class="p">:</span> <span class="p">[</span><span class="mi">81</span><span class="p">,</span> <span class="mi">85</span><span class="p">,</span> <span class="mi">80</span><span class="p">],</span> <span class="c1"># Charang -&gt; Sawtooth, Voice Lead, Square</span>
+        <span class="mi">85</span><span class="p">:</span> <span class="p">[</span><span class="mi">54</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">81</span><span class="p">],</span> <span class="c1"># Voice -&gt; Synth Voice, Voice Oohs, Sawtooth</span>
+        <span class="mi">86</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">82</span><span class="p">],</span> <span class="c1"># Fifths -&gt; Square, Sawtooth, Calliope</span>
+        <span class="mi">87</span><span class="p">:</span> <span class="p">[</span><span class="mi">81</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">],</span> <span class="c1"># Bass+lead -&gt; Sawtooth, Synth Bass 1, Synth Bass 2</span>
+        
+        <span class="c1"># --- Synth Pad ---</span>
+        <span class="mi">88</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">],</span> <span class="c1"># New Age -&gt; Warm, Polysynth, Choir</span>
+        <span class="mi">89</span><span class="p">:</span> <span class="p">[</span><span class="mi">88</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">92</span><span class="p">],</span> <span class="c1"># Warm -&gt; New Age, Polysynth, Bowed</span>
+        <span class="mi">90</span><span class="p">:</span> <span class="p">[</span><span class="mi">88</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">62</span><span class="p">],</span> <span class="c1"># Polysynth -&gt; New Age, Warm, Synth Brass 1</span>
+        <span class="mi">91</span><span class="p">:</span> <span class="p">[</span><span class="mi">52</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">89</span><span class="p">],</span> <span class="c1"># Choir -&gt; Choir Aahs, Synth Voice, Warm</span>
+        <span class="mi">92</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="c1"># Bowed -&gt; Warm, New Age, Polysynth</span>
+        <span class="mi">93</span><span class="p">:</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span> <span class="c1"># Metallic -&gt; Polysynth, Crystal, Atmosphere</span>
+        <span class="mi">94</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">91</span><span class="p">],</span> <span class="c1"># Halo -&gt; Warm, New Age, Choir</span>
+        <span class="mi">95</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">94</span><span class="p">],</span> <span class="c1"># Sweep -&gt; Warm, New Age, Halo</span>
+        
+        <span class="c1"># --- Synth FX ---</span>
+        <span class="mi">96</span><span class="p">:</span> <span class="p">[</span><span class="mi">97</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span> <span class="c1"># Rain -&gt; Soundtrack, Crystal, New Age</span>
+        <span class="mi">97</span><span class="p">:</span> <span class="p">[</span><span class="mi">96</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span> <span class="c1"># Soundtrack -&gt; Rain, Crystal, New Age</span>
+        <span class="mi">98</span><span class="p">:</span> <span class="p">[</span><span class="mi">99</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span><span class="c1"># Crystal -&gt; Atmosphere, Brightness, New Age</span>
+        <span class="mi">99</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span><span class="c1"># Atmosphere -&gt; Brightness, Crystal, New Age</span>
+        <span class="mi">100</span><span class="p">:</span> <span class="p">[</span><span class="mi">99</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span><span class="c1"># Brightness -&gt; Atmosphere, Crystal, New Age</span>
+        <span class="mi">101</span><span class="p">:</span> <span class="p">[</span><span class="mi">98</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">102</span><span class="p">],</span><span class="c1"># Goblins -&gt; Crystal, Atmosphere, Echoes</span>
+        <span class="mi">102</span><span class="p">:</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span><span class="c1"># Echoes -&gt; Goblins, Sci-Fi, Atmosphere</span>
+        <span class="mi">103</span><span class="p">:</span> <span class="p">[</span><span class="mi">102</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span><span class="c1"># Sci-Fi -&gt; Echoes, Goblins, Atmosphere</span>
+        
+        <span class="c1"># --- Ethnic ---</span>
+        <span class="mi">104</span><span class="p">:</span> <span class="p">[</span><span class="mi">105</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="c1"># Sitar -&gt; Banjo, Shamisen, Acoustic Guitar Nylon</span>
+        <span class="mi">105</span><span class="p">:</span> <span class="p">[</span><span class="mi">104</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>  <span class="c1"># Banjo -&gt; Sitar, Acoustic Guitar Nylon, Steel</span>
+        <span class="mi">106</span><span class="p">:</span> <span class="p">[</span><span class="mi">107</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="c1"># Shamisen -&gt; Koto, Sitar, Acoustic Guitar Nylon</span>
+        <span class="mi">107</span><span class="p">:</span> <span class="p">[</span><span class="mi">106</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="c1"># Koto -&gt; Shamisen, Sitar, Acoustic Guitar Nylon</span>
+        <span class="mi">108</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>   <span class="c1"># Kalimba -&gt; Marimba, Vibraphone, Xylophone</span>
+        <span class="mi">109</span><span class="p">:</span> <span class="p">[</span><span class="mi">111</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">],</span>  <span class="c1"># Bagpipe -&gt; Shanai, Oboe, English Horn</span>
+        <span class="mi">110</span><span class="p">:</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">41</span><span class="p">],</span>   <span class="c1"># Fiddle -&gt; Violin, String Ensemble, Viola</span>
+        <span class="mi">111</span><span class="p">:</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">109</span><span class="p">],</span>  <span class="c1"># Shanai -&gt; Oboe, English Horn, Bagpipe</span>
+        
+        <span class="c1"># --- Percussive ---</span>
+        <span class="mi">112</span><span class="p">:</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">113</span><span class="p">],</span>   <span class="c1"># Tinkle Bell -&gt; Glockenspiel, Tubular Bells, Agogo</span>
+        <span class="mi">113</span><span class="p">:</span> <span class="p">[</span><span class="mi">112</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>  <span class="c1"># Agogo -&gt; Tinkle Bell, Steel Drums, Glockenspiel</span>
+        <span class="mi">114</span><span class="p">:</span> <span class="p">[</span><span class="mi">113</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>  <span class="c1"># Steel Drums -&gt; Agogo, Tinkle Bell, Glockenspiel</span>
+        <span class="mi">115</span><span class="p">:</span> <span class="p">[</span><span class="mi">116</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span><span class="c1"># Woodblock -&gt; Taiko Drum, Melodic Tom, Synth Drum</span>
+        <span class="mi">116</span><span class="p">:</span> <span class="p">[</span><span class="mi">117</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">115</span><span class="p">],</span><span class="c1"># Taiko Drum -&gt; Melodic Tom, Synth Drum, Woodblock</span>
+        <span class="mi">117</span><span class="p">:</span> <span class="p">[</span><span class="mi">118</span><span class="p">,</span> <span class="mi">116</span><span class="p">,</span> <span class="mi">115</span><span class="p">],</span><span class="c1"># Melodic Tom -&gt; Synth Drum, Taiko Drum, Woodblock</span>
+        <span class="mi">118</span><span class="p">:</span> <span class="p">[</span><span class="mi">117</span><span class="p">,</span> <span class="mi">116</span><span class="p">,</span> <span class="mi">115</span><span class="p">]</span> <span class="c1"># Synth Drum -&gt; Melodic Tom, Taiko Drum, Woodblock</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Retrieve the list of possible substitutes</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">substitutes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+    
+    <span class="c1"># If there are no defined substitutes, return the original instrument</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">choices</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">instrument</span>
+        
+    <span class="k">if</span> <span class="n">best_only</span><span class="p">:</span>
+        <span class="c1"># Return the first item in the list (the closest possible match)</span>
+        <span class="k">return</span> <span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Return a randomly selected instrument from the allowed gentle substitutes</span>
+        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span>
+    
+<span class="c1">###################################################################################</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Module loaded!&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Enjoy! :)&#39;</span><span class="p">)</span>
@@ -21932,6 +22140,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
       </div>
       <div class="item">
+      <p id="TMIDIX.CLEAN_INSTRUMENTS" class="name">var <span class="ident">CLEAN_INSTRUMENTS</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
       <p id="TMIDIX.CONTROL_CHANGES" class="name">var <span class="ident">CONTROL_CHANGES</span></p>
       
   
@@ -21949,6 +22165,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       </div>
       <div class="item">
       <p id="TMIDIX.DRUMS_SETS" class="name">var <span class="ident">DRUMS_SETS</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="TMIDIX.DRUM_SETS" class="name">var <span class="ident">DRUM_SETS</span></p>
       
   
   <div class="source_cont">
@@ -43978,6 +44202,217 @@ preserving average pitch and avoiding large jumps between consecutive notes.</p>
                                   <span class="p">):</span>
   
   <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_index</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.substitute_instrument">
+    <p>def <span class="ident">substitute_instrument</span>(</p><p>instrument: int, best_only: bool = False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Takes a MIDI instrument number (0-127) and returns a gentle substitution.</p>
+<p>Parameters:
+- instrument (int): The original MIDI instrument number (0-127).
+- best_only (bool): If True, returns only the absolute closest substitute. 
+                    If False (default), returns a randomly selected substitute 
+                    from the best possible options.</p>
+<p>Returns:
+- int: The substituted instrument number, or the original if no substitute exists.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.substitute_instrument', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.substitute_instrument" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">substitute_instrument</span><span class="p">(</span><span class="n">instrument</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">best_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a MIDI instrument number (0-127) and returns a gentle substitution.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - instrument (int): The original MIDI instrument number (0-127).</span>
+<span class="sd">    - best_only (bool): If True, returns only the absolute closest substitute. </span>
+<span class="sd">                        If False (default), returns a randomly selected substitute </span>
+<span class="sd">                        from the best possible options.</span>
+<span class="sd">                        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - int: The substituted instrument number, or the original if no substitute exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">instrument</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;MIDI instrument number must be between 0 and 127.&quot;</span><span class="p">)</span>
+        
+    <span class="c1"># Dictionary mapping original instruments to a list of gentle substitutes.</span>
+    <span class="c1"># Lists are strictly ordered from CLOSEST timbre to slightly further (but still gentle).</span>
+    <span class="n">substitutes</span> <span class="o">=</span> <span class="p">{</span>
+        
+        <span class="c1"># --- Pianos ---</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>   <span class="c1"># Acoustic Grand Piano -&gt; Bright Acoustic, Electric Grand, E.Piano 1</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>   <span class="c1"># Bright Acoustic Piano -&gt; Acoustic Grand, Electric Grand, E.Piano 1</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>   <span class="c1"># Electric Grand Piano -&gt; E.Piano 1, E.Piano 2, Acoustic Grand</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>   <span class="c1"># Honky-Tonk Piano -&gt; Acoustic Grand, Bright Acoustic, E.Piano 1</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>   <span class="c1"># Electric Piano 1 -&gt; E.Piano 2, Electric Grand, Acoustic Grand</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>   <span class="c1"># Electric Piano 2 -&gt; E.Piano 1, Electric Grand, Acoustic Grand</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>      <span class="c1"># Harpsichord -&gt; Clavinet, Acoustic Grand</span>
+        <span class="mi">7</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>      <span class="c1"># Clavinet -&gt; Harpsichord, Acoustic Grand</span>
+        
+        <span class="c1"># --- Chromatic Percussion ---</span>
+        <span class="mi">8</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>   <span class="c1"># Celesta -&gt; Music Box, Tubular Bells, Glockenspiel</span>
+        <span class="mi">9</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>   <span class="c1"># Glockenspiel -&gt; Music Box, Tubular Bells, Celesta</span>
+        <span class="mi">10</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span>   <span class="c1"># Music Box -&gt; Celesta, Glockenspiel, Tubular Bells</span>
+        <span class="mi">11</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>  <span class="c1"># Vibraphone -&gt; Marimba, Xylophone, Glockenspiel</span>
+        <span class="mi">12</span><span class="p">:</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>     <span class="c1"># Marimba -&gt; Vibraphone, Xylophone</span>
+        <span class="mi">13</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>     <span class="c1"># Xylophone -&gt; Marimba, Vibraphone</span>
+        <span class="mi">14</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>   <span class="c1"># Tubular Bells -&gt; Celesta, Glockenspiel, Dulcimer</span>
+        <span class="mi">15</span><span class="p">:</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>  <span class="c1"># Dulcimer -&gt; Acoustic Guitar (Nylon), Tubular Bells, Celesta</span>
+        
+        <span class="c1"># --- Organs ---</span>
+        <span class="mi">16</span><span class="p">:</span> <span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span> <span class="c1"># Drawbar Organ -&gt; Percussive Organ, Reed Organ, Church Organ</span>
+        <span class="mi">17</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span> <span class="c1"># Percussive Organ -&gt; Drawbar Organ, Reed Organ, Church Organ</span>
+        <span class="mi">18</span><span class="p">:</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span> <span class="c1"># Rock Organ -&gt; Drawbar, Percussive, Church</span>
+        <span class="mi">19</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">],</span> <span class="c1"># Church Organ -&gt; Reed Organ, Drawbar Organ, Percussive Organ</span>
+        <span class="mi">20</span><span class="p">:</span> <span class="p">[</span><span class="mi">19</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span> <span class="c1"># Reed Organ -&gt; Church Organ, Accordion, Drawbar Organ</span>
+        <span class="mi">21</span><span class="p">:</span> <span class="p">[</span><span class="mi">23</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># Accordion -&gt; Tango Accordion, Harmonica, Reed Organ</span>
+        <span class="mi">22</span><span class="p">:</span> <span class="p">[</span><span class="mi">21</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">85</span><span class="p">],</span> <span class="c1"># Harmonica -&gt; Accordion, Tango Accordion, Synth Voice</span>
+        <span class="mi">23</span><span class="p">:</span> <span class="p">[</span><span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># Tango Accordion -&gt; Accordion, Harmonica, Reed Organ</span>
+        
+        <span class="c1"># --- Guitars ---</span>
+        <span class="mi">24</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="c1"># Acoustic Guitar Nylon -&gt; Acoustic Guitar Steel, Jazz Guitar, Dulcimer</span>
+        <span class="mi">25</span><span class="p">:</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="c1"># Acoustic Guitar Steel -&gt; Acoustic Guitar Nylon, Jazz Guitar, Harmonics</span>
+        <span class="mi">26</span><span class="p">:</span> <span class="p">[</span><span class="mi">27</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span> <span class="c1"># Electric Guitar Jazz -&gt; Clean Electric, Nylon, Steel</span>
+        <span class="mi">27</span><span class="p">:</span> <span class="p">[</span><span class="mi">26</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="c1"># Electric Guitar Clean -&gt; Jazz Electric, Muted Electric, Harmonics</span>
+        <span class="mi">28</span><span class="p">:</span> <span class="p">[</span><span class="mi">27</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="c1"># Electric Guitar Muted -&gt; Clean Electric, Jazz Electric, Harmonics</span>
+        <span class="mi">29</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>    <span class="c1"># Overdriven Guitar -&gt; Distortion Guitar, Synth Drum</span>
+        <span class="mi">30</span><span class="p">:</span> <span class="p">[</span><span class="mi">29</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>    <span class="c1"># Distortion Guitar -&gt; Overdriven Guitar, Synth Drum</span>
+        <span class="mi">31</span><span class="p">:</span> <span class="p">[</span><span class="mi">27</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span> <span class="c1"># Guitar Harmonics -&gt; Clean Electric, Nylon, Steel</span>
+        
+        <span class="c1"># --- Basses ---</span>
+        <span class="mi">32</span><span class="p">:</span> <span class="p">[</span><span class="mi">35</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span> <span class="c1"># Acoustic Bass -&gt; Fretless, Finger, Pick</span>
+        <span class="mi">33</span><span class="p">:</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="c1"># Electric Bass Finger -&gt; Pick, Fretless, Acoustic</span>
+        <span class="mi">34</span><span class="p">:</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="c1"># Electric Bass Pick -&gt; Finger, Fretless, Acoustic</span>
+        <span class="mi">35</span><span class="p">:</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span> <span class="c1"># Fretless Bass -&gt; Acoustic, Finger, Pick</span>
+        <span class="mi">36</span><span class="p">:</span> <span class="p">[</span><span class="mi">37</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">],</span> <span class="c1"># Slap Bass 1 -&gt; Slap Bass 2, Synth Bass 1, Synth Bass 2</span>
+        <span class="mi">37</span><span class="p">:</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">],</span> <span class="c1"># Slap Bass 2 -&gt; Slap Bass 1, Synth Bass 1, Synth Bass 2</span>
+        <span class="mi">38</span><span class="p">:</span> <span class="p">[</span><span class="mi">39</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">37</span><span class="p">],</span> <span class="c1"># Synth Bass 1 -&gt; Synth Bass 2, Slap 1, Slap 2</span>
+        <span class="mi">39</span><span class="p">:</span> <span class="p">[</span><span class="mi">38</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">37</span><span class="p">],</span> <span class="c1"># Synth Bass 2 -&gt; Synth Bass 1, Slap 1, Slap 2</span>
+        
+        <span class="c1"># --- Strings ---</span>
+        <span class="mi">40</span><span class="p">:</span> <span class="p">[</span><span class="mi">41</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Violin -&gt; Viola, Cello, String Ensemble 1</span>
+        <span class="mi">41</span><span class="p">:</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Viola -&gt; Violin, Cello, String Ensemble 1</span>
+        <span class="mi">42</span><span class="p">:</span> <span class="p">[</span><span class="mi">41</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Cello -&gt; Viola, Violin, String Ensemble 1</span>
+        <span class="mi">43</span><span class="p">:</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">48</span><span class="p">],</span> <span class="c1"># Contrabass -&gt; Cello, Acoustic Bass, String Ensemble 1</span>
+        <span class="mi">44</span><span class="p">:</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="c1"># Tremolo Strings -&gt; String Ensemble 1, String Ensemble 2, Violin</span>
+        <span class="mi">45</span><span class="p">:</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="c1"># Pizzicato Strings -&gt; String Ensemble, Acoustic Bass, Marimba</span>
+        <span class="mi">46</span><span class="p">:</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">107</span><span class="p">],</span> <span class="c1"># Orchestral Harp -&gt; Tubular Bells, Celesta, Koto</span>
+        
+        <span class="c1"># --- Ensemble ---</span>
+        <span class="mi">48</span><span class="p">:</span> <span class="p">[</span><span class="mi">49</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="c1"># String Ensemble 1 -&gt; Ensemble 2, Synth Strings 1, Violin</span>
+        <span class="mi">49</span><span class="p">:</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="c1"># String Ensemble 2 -&gt; Ensemble 1, Synth Strings 1, Violin</span>
+        <span class="mi">50</span><span class="p">:</span> <span class="p">[</span><span class="mi">51</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">],</span> <span class="c1"># Synth Strings 1 -&gt; Synth Strings 2, String Ensembles</span>
+        <span class="mi">51</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">],</span> <span class="c1"># Synth Strings 2 -&gt; Synth Strings 1, String Ensembles</span>
+        <span class="mi">52</span><span class="p">:</span> <span class="p">[</span><span class="mi">53</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">91</span><span class="p">],</span> <span class="c1"># Choir Aahs -&gt; Voice Oohs, Synth Voice, Pad 4 (Choir)</span>
+        <span class="mi">53</span><span class="p">:</span> <span class="p">[</span><span class="mi">52</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">85</span><span class="p">],</span> <span class="c1"># Voice Oohs -&gt; Choir Aahs, Synth Voice, Lead 6 (Voice)</span>
+        <span class="mi">54</span><span class="p">:</span> <span class="p">[</span><span class="mi">85</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">53</span><span class="p">],</span> <span class="c1"># Synth Voice -&gt; Lead 6 (Voice), Choir Aahs, Voice Oohs</span>
+        
+        <span class="c1"># --- Brass ---</span>
+        <span class="mi">56</span><span class="p">:</span> <span class="p">[</span><span class="mi">59</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Trumpet -&gt; Muted Trumpet, Trombone, Brass Section</span>
+        <span class="mi">57</span><span class="p">:</span> <span class="p">[</span><span class="mi">58</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Trombone -&gt; Tuba, Trumpet, Brass Section</span>
+        <span class="mi">58</span><span class="p">:</span> <span class="p">[</span><span class="mi">57</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Tuba -&gt; Trombone, Trumpet, Brass Section</span>
+        <span class="mi">59</span><span class="p">:</span> <span class="p">[</span><span class="mi">56</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span> <span class="c1"># Muted Trumpet -&gt; Trumpet, Trombone, Brass Section</span>
+        <span class="mi">60</span><span class="p">:</span> <span class="p">[</span><span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">58</span><span class="p">],</span> <span class="c1"># French Horn -&gt; Brass Section, Synth Brass 1, Tuba</span>
+        <span class="mi">61</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">56</span><span class="p">],</span> <span class="c1"># Brass Section -&gt; French Horn, Synth Brass 1, Trumpet</span>
+        <span class="mi">62</span><span class="p">:</span> <span class="p">[</span><span class="mi">63</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="c1"># Synth Brass 1 -&gt; Synth Brass 2, Brass Section, French Horn</span>
+        <span class="mi">63</span><span class="p">:</span> <span class="p">[</span><span class="mi">62</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="c1"># Synth Brass 2 -&gt; Synth Brass 1, Brass Section, French Horn</span>
+        
+        <span class="c1"># --- Reed ---</span>
+        <span class="mi">64</span><span class="p">:</span> <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span> <span class="c1"># Soprano Sax -&gt; Alto, Tenor, Baritone</span>
+        <span class="mi">65</span><span class="p">:</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span> <span class="c1"># Alto Sax -&gt; Soprano, Tenor, Baritone</span>
+        <span class="mi">66</span><span class="p">:</span> <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span> <span class="c1"># Tenor Sax -&gt; Alto, Soprano, Baritone</span>
+        <span class="mi">67</span><span class="p">:</span> <span class="p">[</span><span class="mi">66</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">68</span><span class="p">],</span> <span class="c1"># Baritone Sax -&gt; Tenor, Alto, Oboe</span>
+        <span class="mi">68</span><span class="p">:</span> <span class="p">[</span><span class="mi">69</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span> <span class="c1"># Oboe -&gt; English Horn, Clarinet, Bassoon</span>
+        <span class="mi">69</span><span class="p">:</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">71</span><span class="p">],</span> <span class="c1"># English Horn -&gt; Oboe, Bassoon, Clarinet</span>
+        <span class="mi">70</span><span class="p">:</span> <span class="p">[</span><span class="mi">71</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">68</span><span class="p">],</span> <span class="c1"># Bassoon -&gt; Clarinet, English Horn, Oboe</span>
+        <span class="mi">71</span><span class="p">:</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">69</span><span class="p">],</span> <span class="c1"># Clarinet -&gt; Oboe, Flute, English Horn</span>
+        
+        <span class="c1"># --- Pipe ---</span>
+        <span class="mi">72</span><span class="p">:</span> <span class="p">[</span><span class="mi">73</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span> <span class="c1"># Piccolo -&gt; Flute, Recorder, Blown Bottle</span>
+        <span class="mi">73</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span> <span class="c1"># Flute -&gt; Piccolo, Recorder, Blown Bottle</span>
+        <span class="mi">74</span><span class="p">:</span> <span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">72</span><span class="p">],</span> <span class="c1"># Recorder -&gt; Pan Flute, Flute, Piccolo</span>
+        <span class="mi">75</span><span class="p">:</span> <span class="p">[</span><span class="mi">74</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span> <span class="c1"># Pan Flute -&gt; Recorder, Flute, Blown Bottle</span>
+        <span class="mi">76</span><span class="p">:</span> <span class="p">[</span><span class="mi">77</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">74</span><span class="p">],</span> <span class="c1"># Blown Bottle -&gt; Shakuhachi, Pan Flute, Recorder</span>
+        <span class="mi">77</span><span class="p">:</span> <span class="p">[</span><span class="mi">76</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">73</span><span class="p">],</span> <span class="c1"># Shakuhachi -&gt; Blown Bottle, Pan Flute, Flute</span>
+        <span class="mi">78</span><span class="p">:</span> <span class="p">[</span><span class="mi">79</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">74</span><span class="p">],</span> <span class="c1"># Whistle -&gt; Ocarina, Flute, Recorder</span>
+        <span class="mi">79</span><span class="p">:</span> <span class="p">[</span><span class="mi">78</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">73</span><span class="p">],</span> <span class="c1"># Ocarina -&gt; Whistle, Recorder, Flute</span>
+        
+        <span class="c1"># --- Synth Lead ---</span>
+        <span class="mi">80</span><span class="p">:</span> <span class="p">[</span><span class="mi">81</span><span class="p">,</span> <span class="mi">86</span><span class="p">,</span> <span class="mi">82</span><span class="p">],</span> <span class="c1"># Square -&gt; Sawtooth, Fifths, Calliope</span>
+        <span class="mi">81</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">84</span><span class="p">,</span> <span class="mi">82</span><span class="p">],</span> <span class="c1"># Sawtooth -&gt; Square, Charang, Calliope</span>
+        <span class="mi">82</span><span class="p">:</span> <span class="p">[</span><span class="mi">83</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">84</span><span class="p">],</span> <span class="c1"># Calliope -&gt; Chiff, Sawtooth, Charang</span>
+        <span class="mi">83</span><span class="p">:</span> <span class="p">[</span><span class="mi">82</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span> <span class="c1"># Chiff -&gt; Calliope, Square, New Age Pad</span>
+        <span class="mi">84</span><span class="p">:</span> <span class="p">[</span><span class="mi">81</span><span class="p">,</span> <span class="mi">85</span><span class="p">,</span> <span class="mi">80</span><span class="p">],</span> <span class="c1"># Charang -&gt; Sawtooth, Voice Lead, Square</span>
+        <span class="mi">85</span><span class="p">:</span> <span class="p">[</span><span class="mi">54</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">81</span><span class="p">],</span> <span class="c1"># Voice -&gt; Synth Voice, Voice Oohs, Sawtooth</span>
+        <span class="mi">86</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">82</span><span class="p">],</span> <span class="c1"># Fifths -&gt; Square, Sawtooth, Calliope</span>
+        <span class="mi">87</span><span class="p">:</span> <span class="p">[</span><span class="mi">81</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span><span class="p">],</span> <span class="c1"># Bass+lead -&gt; Sawtooth, Synth Bass 1, Synth Bass 2</span>
+        
+        <span class="c1"># --- Synth Pad ---</span>
+        <span class="mi">88</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">],</span> <span class="c1"># New Age -&gt; Warm, Polysynth, Choir</span>
+        <span class="mi">89</span><span class="p">:</span> <span class="p">[</span><span class="mi">88</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">92</span><span class="p">],</span> <span class="c1"># Warm -&gt; New Age, Polysynth, Bowed</span>
+        <span class="mi">90</span><span class="p">:</span> <span class="p">[</span><span class="mi">88</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">62</span><span class="p">],</span> <span class="c1"># Polysynth -&gt; New Age, Warm, Synth Brass 1</span>
+        <span class="mi">91</span><span class="p">:</span> <span class="p">[</span><span class="mi">52</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">89</span><span class="p">],</span> <span class="c1"># Choir -&gt; Choir Aahs, Synth Voice, Warm</span>
+        <span class="mi">92</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="c1"># Bowed -&gt; Warm, New Age, Polysynth</span>
+        <span class="mi">93</span><span class="p">:</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span> <span class="c1"># Metallic -&gt; Polysynth, Crystal, Atmosphere</span>
+        <span class="mi">94</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">91</span><span class="p">],</span> <span class="c1"># Halo -&gt; Warm, New Age, Choir</span>
+        <span class="mi">95</span><span class="p">:</span> <span class="p">[</span><span class="mi">89</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">94</span><span class="p">],</span> <span class="c1"># Sweep -&gt; Warm, New Age, Halo</span>
+        
+        <span class="c1"># --- Synth FX ---</span>
+        <span class="mi">96</span><span class="p">:</span> <span class="p">[</span><span class="mi">97</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span> <span class="c1"># Rain -&gt; Soundtrack, Crystal, New Age</span>
+        <span class="mi">97</span><span class="p">:</span> <span class="p">[</span><span class="mi">96</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span> <span class="c1"># Soundtrack -&gt; Rain, Crystal, New Age</span>
+        <span class="mi">98</span><span class="p">:</span> <span class="p">[</span><span class="mi">99</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span><span class="c1"># Crystal -&gt; Atmosphere, Brightness, New Age</span>
+        <span class="mi">99</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span><span class="c1"># Atmosphere -&gt; Brightness, Crystal, New Age</span>
+        <span class="mi">100</span><span class="p">:</span> <span class="p">[</span><span class="mi">99</span><span class="p">,</span> <span class="mi">98</span><span class="p">,</span> <span class="mi">88</span><span class="p">],</span><span class="c1"># Brightness -&gt; Atmosphere, Crystal, New Age</span>
+        <span class="mi">101</span><span class="p">:</span> <span class="p">[</span><span class="mi">98</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">102</span><span class="p">],</span><span class="c1"># Goblins -&gt; Crystal, Atmosphere, Echoes</span>
+        <span class="mi">102</span><span class="p">:</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span><span class="c1"># Echoes -&gt; Goblins, Sci-Fi, Atmosphere</span>
+        <span class="mi">103</span><span class="p">:</span> <span class="p">[</span><span class="mi">102</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span><span class="c1"># Sci-Fi -&gt; Echoes, Goblins, Atmosphere</span>
+        
+        <span class="c1"># --- Ethnic ---</span>
+        <span class="mi">104</span><span class="p">:</span> <span class="p">[</span><span class="mi">105</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="c1"># Sitar -&gt; Banjo, Shamisen, Acoustic Guitar Nylon</span>
+        <span class="mi">105</span><span class="p">:</span> <span class="p">[</span><span class="mi">104</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>  <span class="c1"># Banjo -&gt; Sitar, Acoustic Guitar Nylon, Steel</span>
+        <span class="mi">106</span><span class="p">:</span> <span class="p">[</span><span class="mi">107</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="c1"># Shamisen -&gt; Koto, Sitar, Acoustic Guitar Nylon</span>
+        <span class="mi">107</span><span class="p">:</span> <span class="p">[</span><span class="mi">106</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="c1"># Koto -&gt; Shamisen, Sitar, Acoustic Guitar Nylon</span>
+        <span class="mi">108</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>   <span class="c1"># Kalimba -&gt; Marimba, Vibraphone, Xylophone</span>
+        <span class="mi">109</span><span class="p">:</span> <span class="p">[</span><span class="mi">111</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">],</span>  <span class="c1"># Bagpipe -&gt; Shanai, Oboe, English Horn</span>
+        <span class="mi">110</span><span class="p">:</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">41</span><span class="p">],</span>   <span class="c1"># Fiddle -&gt; Violin, String Ensemble, Viola</span>
+        <span class="mi">111</span><span class="p">:</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">109</span><span class="p">],</span>  <span class="c1"># Shanai -&gt; Oboe, English Horn, Bagpipe</span>
+        
+        <span class="c1"># --- Percussive ---</span>
+        <span class="mi">112</span><span class="p">:</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">113</span><span class="p">],</span>   <span class="c1"># Tinkle Bell -&gt; Glockenspiel, Tubular Bells, Agogo</span>
+        <span class="mi">113</span><span class="p">:</span> <span class="p">[</span><span class="mi">112</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>  <span class="c1"># Agogo -&gt; Tinkle Bell, Steel Drums, Glockenspiel</span>
+        <span class="mi">114</span><span class="p">:</span> <span class="p">[</span><span class="mi">113</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>  <span class="c1"># Steel Drums -&gt; Agogo, Tinkle Bell, Glockenspiel</span>
+        <span class="mi">115</span><span class="p">:</span> <span class="p">[</span><span class="mi">116</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span><span class="c1"># Woodblock -&gt; Taiko Drum, Melodic Tom, Synth Drum</span>
+        <span class="mi">116</span><span class="p">:</span> <span class="p">[</span><span class="mi">117</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">115</span><span class="p">],</span><span class="c1"># Taiko Drum -&gt; Melodic Tom, Synth Drum, Woodblock</span>
+        <span class="mi">117</span><span class="p">:</span> <span class="p">[</span><span class="mi">118</span><span class="p">,</span> <span class="mi">116</span><span class="p">,</span> <span class="mi">115</span><span class="p">],</span><span class="c1"># Melodic Tom -&gt; Synth Drum, Taiko Drum, Woodblock</span>
+        <span class="mi">118</span><span class="p">:</span> <span class="p">[</span><span class="mi">117</span><span class="p">,</span> <span class="mi">116</span><span class="p">,</span> <span class="mi">115</span><span class="p">]</span> <span class="c1"># Synth Drum -&gt; Melodic Tom, Taiko Drum, Woodblock</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Retrieve the list of possible substitutes</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">substitutes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+    
+    <span class="c1"># If there are no defined substitutes, return the original instrument</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">choices</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">instrument</span>
+        
+    <span class="k">if</span> <span class="n">best_only</span><span class="p">:</span>
+        <span class="c1"># Return the first item in the list (the closest possible match)</span>
+        <span class="k">return</span> <span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Return a randomly selected instrument from the allowed gentle substitutes</span>
+        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span>
 </pre></div>
 
   </div>
