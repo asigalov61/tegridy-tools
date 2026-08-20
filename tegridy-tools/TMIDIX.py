@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.8.15" # TMIDIX version
+__version__ = "26.8.20" # TMIDIX version
 
 ###################################################################################
 
@@ -11573,7 +11573,8 @@ LEAD_INSTRUMENTS = [0, 1, 2, 3, 4, 5, 6, 7, # Piano
                     56, 57, 59, 60, # Brass
                     64, 65, 66, 67, 68, 69, 70, 71, # Reed
                     72, 73, 74, 75, 76, 77, 78, 79, # Pipe
-                    80, 81, 87 # Synth Lead
+                    80, 81, 87, # Synth Lead
+                    105, 110 # Folk
                    ]
 
 ###################################################################################
@@ -11583,6 +11584,23 @@ BASE_INSTRUMENTS = [32, 33, 34, 35, 36, 37, 38, 39, # Bass
                     58, 61, 62, 63, # Brass
                     87 # Synth Lead
                    ]
+
+###################################################################################
+
+DRUM_SETS = [0, # Standard
+             8, # Room
+             16, #Power
+             24, #Electronic
+             25, #Analog
+             32, #Jazz
+             40, #Brush
+             48, #Orchestra
+             56, #SFX
+            ]
+
+###################################################################################
+
+CLEAN_INSTRUMENTS = LEAD_INSTRUMENTS + BASE_INSTRUMENTS
 
 ###################################################################################
 
@@ -20113,6 +20131,193 @@ def first_last_idx(arr):
         next(len(arr)-1-i for i,x in enumerate(reversed(arr)) if x is not None)
     )
 
+###################################################################################
+
+def substitute_instrument(instrument: int, best_only: bool = False) -> int:
+    
+    """
+    Takes a MIDI instrument number (0-127) and returns a gentle substitution.
+    
+    Parameters:
+    - instrument (int): The original MIDI instrument number (0-127).
+    - best_only (bool): If True, returns only the absolute closest substitute. 
+                        If False (default), returns a randomly selected substitute 
+                        from the best possible options.
+                        
+    Returns:
+    - int: The substituted instrument number, or the original if no substitute exists.
+    """
+    
+    if not (0 <= instrument <= 127):
+        raise ValueError("MIDI instrument number must be between 0 and 127.")
+        
+    # Dictionary mapping original instruments to a list of gentle substitutes.
+    # Lists are strictly ordered from CLOSEST timbre to slightly further (but still gentle).
+    substitutes = {
+        
+        # --- Pianos ---
+        0: [1, 2, 4],   # Acoustic Grand Piano -> Bright Acoustic, Electric Grand, E.Piano 1
+        1: [0, 2, 4],   # Bright Acoustic Piano -> Acoustic Grand, Electric Grand, E.Piano 1
+        2: [4, 5, 0],   # Electric Grand Piano -> E.Piano 1, E.Piano 2, Acoustic Grand
+        3: [0, 1, 4],   # Honky-Tonk Piano -> Acoustic Grand, Bright Acoustic, E.Piano 1
+        4: [5, 2, 0],   # Electric Piano 1 -> E.Piano 2, Electric Grand, Acoustic Grand
+        5: [4, 2, 0],   # Electric Piano 2 -> E.Piano 1, Electric Grand, Acoustic Grand
+        6: [7, 0],      # Harpsichord -> Clavinet, Acoustic Grand
+        7: [6, 0],      # Clavinet -> Harpsichord, Acoustic Grand
+        
+        # --- Chromatic Percussion ---
+        8: [10, 14, 9],   # Celesta -> Music Box, Tubular Bells, Glockenspiel
+        9: [10, 14, 8],   # Glockenspiel -> Music Box, Tubular Bells, Celesta
+        10: [8, 9, 14],   # Music Box -> Celesta, Glockenspiel, Tubular Bells
+        11: [12, 13, 9],  # Vibraphone -> Marimba, Xylophone, Glockenspiel
+        12: [11, 13],     # Marimba -> Vibraphone, Xylophone
+        13: [12, 11],     # Xylophone -> Marimba, Vibraphone
+        14: [8, 9, 15],   # Tubular Bells -> Celesta, Glockenspiel, Dulcimer
+        15: [24, 14, 8],  # Dulcimer -> Acoustic Guitar (Nylon), Tubular Bells, Celesta
+        
+        # --- Organs ---
+        16: [17, 20, 19], # Drawbar Organ -> Percussive Organ, Reed Organ, Church Organ
+        17: [16, 20, 19], # Percussive Organ -> Drawbar Organ, Reed Organ, Church Organ
+        18: [16, 17, 19], # Rock Organ -> Drawbar, Percussive, Church
+        19: [20, 16, 17], # Church Organ -> Reed Organ, Drawbar Organ, Percussive Organ
+        20: [19, 21, 16], # Reed Organ -> Church Organ, Accordion, Drawbar Organ
+        21: [23, 22, 20], # Accordion -> Tango Accordion, Harmonica, Reed Organ
+        22: [21, 23, 85], # Harmonica -> Accordion, Tango Accordion, Synth Voice
+        23: [21, 22, 20], # Tango Accordion -> Accordion, Harmonica, Reed Organ
+        
+        # --- Guitars ---
+        24: [25, 26, 15], # Acoustic Guitar Nylon -> Acoustic Guitar Steel, Jazz Guitar, Dulcimer
+        25: [24, 26, 31], # Acoustic Guitar Steel -> Acoustic Guitar Nylon, Jazz Guitar, Harmonics
+        26: [27, 24, 25], # Electric Guitar Jazz -> Clean Electric, Nylon, Steel
+        27: [26, 28, 31], # Electric Guitar Clean -> Jazz Electric, Muted Electric, Harmonics
+        28: [27, 26, 31], # Electric Guitar Muted -> Clean Electric, Jazz Electric, Harmonics
+        29: [30, 118],    # Overdriven Guitar -> Distortion Guitar, Synth Drum
+        30: [29, 118],    # Distortion Guitar -> Overdriven Guitar, Synth Drum
+        31: [27, 24, 25], # Guitar Harmonics -> Clean Electric, Nylon, Steel
+        
+        # --- Basses ---
+        32: [35, 33, 34], # Acoustic Bass -> Fretless, Finger, Pick
+        33: [34, 35, 32], # Electric Bass Finger -> Pick, Fretless, Acoustic
+        34: [33, 35, 32], # Electric Bass Pick -> Finger, Fretless, Acoustic
+        35: [32, 33, 34], # Fretless Bass -> Acoustic, Finger, Pick
+        36: [37, 38, 39], # Slap Bass 1 -> Slap Bass 2, Synth Bass 1, Synth Bass 2
+        37: [36, 38, 39], # Slap Bass 2 -> Slap Bass 1, Synth Bass 1, Synth Bass 2
+        38: [39, 36, 37], # Synth Bass 1 -> Synth Bass 2, Slap 1, Slap 2
+        39: [38, 36, 37], # Synth Bass 2 -> Synth Bass 1, Slap 1, Slap 2
+        
+        # --- Strings ---
+        40: [41, 42, 48], # Violin -> Viola, Cello, String Ensemble 1
+        41: [40, 42, 48], # Viola -> Violin, Cello, String Ensemble 1
+        42: [41, 40, 48], # Cello -> Viola, Violin, String Ensemble 1
+        43: [42, 32, 48], # Contrabass -> Cello, Acoustic Bass, String Ensemble 1
+        44: [48, 49, 40], # Tremolo Strings -> String Ensemble 1, String Ensemble 2, Violin
+        45: [48, 32, 12], # Pizzicato Strings -> String Ensemble, Acoustic Bass, Marimba
+        46: [14, 8, 107], # Orchestral Harp -> Tubular Bells, Celesta, Koto
+        
+        # --- Ensemble ---
+        48: [49, 50, 40], # String Ensemble 1 -> Ensemble 2, Synth Strings 1, Violin
+        49: [48, 50, 40], # String Ensemble 2 -> Ensemble 1, Synth Strings 1, Violin
+        50: [51, 48, 49], # Synth Strings 1 -> Synth Strings 2, String Ensembles
+        51: [50, 48, 49], # Synth Strings 2 -> Synth Strings 1, String Ensembles
+        52: [53, 54, 91], # Choir Aahs -> Voice Oohs, Synth Voice, Pad 4 (Choir)
+        53: [52, 54, 85], # Voice Oohs -> Choir Aahs, Synth Voice, Lead 6 (Voice)
+        54: [85, 52, 53], # Synth Voice -> Lead 6 (Voice), Choir Aahs, Voice Oohs
+        
+        # --- Brass ---
+        56: [59, 57, 61], # Trumpet -> Muted Trumpet, Trombone, Brass Section
+        57: [58, 56, 61], # Trombone -> Tuba, Trumpet, Brass Section
+        58: [57, 56, 61], # Tuba -> Trombone, Trumpet, Brass Section
+        59: [56, 57, 61], # Muted Trumpet -> Trumpet, Trombone, Brass Section
+        60: [61, 62, 58], # French Horn -> Brass Section, Synth Brass 1, Tuba
+        61: [60, 62, 56], # Brass Section -> French Horn, Synth Brass 1, Trumpet
+        62: [63, 61, 60], # Synth Brass 1 -> Synth Brass 2, Brass Section, French Horn
+        63: [62, 61, 60], # Synth Brass 2 -> Synth Brass 1, Brass Section, French Horn
+        
+        # --- Reed ---
+        64: [65, 66, 67], # Soprano Sax -> Alto, Tenor, Baritone
+        65: [64, 66, 67], # Alto Sax -> Soprano, Tenor, Baritone
+        66: [65, 64, 67], # Tenor Sax -> Alto, Soprano, Baritone
+        67: [66, 65, 68], # Baritone Sax -> Tenor, Alto, Oboe
+        68: [69, 71, 70], # Oboe -> English Horn, Clarinet, Bassoon
+        69: [68, 70, 71], # English Horn -> Oboe, Bassoon, Clarinet
+        70: [71, 69, 68], # Bassoon -> Clarinet, English Horn, Oboe
+        71: [68, 73, 69], # Clarinet -> Oboe, Flute, English Horn
+        
+        # --- Pipe ---
+        72: [73, 74, 76], # Piccolo -> Flute, Recorder, Blown Bottle
+        73: [72, 74, 76], # Flute -> Piccolo, Recorder, Blown Bottle
+        74: [75, 73, 72], # Recorder -> Pan Flute, Flute, Piccolo
+        75: [74, 73, 76], # Pan Flute -> Recorder, Flute, Blown Bottle
+        76: [77, 75, 74], # Blown Bottle -> Shakuhachi, Pan Flute, Recorder
+        77: [76, 75, 73], # Shakuhachi -> Blown Bottle, Pan Flute, Flute
+        78: [79, 73, 74], # Whistle -> Ocarina, Flute, Recorder
+        79: [78, 74, 73], # Ocarina -> Whistle, Recorder, Flute
+        
+        # --- Synth Lead ---
+        80: [81, 86, 82], # Square -> Sawtooth, Fifths, Calliope
+        81: [80, 84, 82], # Sawtooth -> Square, Charang, Calliope
+        82: [83, 81, 84], # Calliope -> Chiff, Sawtooth, Charang
+        83: [82, 80, 88], # Chiff -> Calliope, Square, New Age Pad
+        84: [81, 85, 80], # Charang -> Sawtooth, Voice Lead, Square
+        85: [54, 53, 81], # Voice -> Synth Voice, Voice Oohs, Sawtooth
+        86: [80, 81, 82], # Fifths -> Square, Sawtooth, Calliope
+        87: [81, 38, 39], # Bass+lead -> Sawtooth, Synth Bass 1, Synth Bass 2
+        
+        # --- Synth Pad ---
+        88: [89, 90, 91], # New Age -> Warm, Polysynth, Choir
+        89: [88, 90, 92], # Warm -> New Age, Polysynth, Bowed
+        90: [88, 89, 62], # Polysynth -> New Age, Warm, Synth Brass 1
+        91: [52, 54, 89], # Choir -> Choir Aahs, Synth Voice, Warm
+        92: [89, 88, 90], # Bowed -> Warm, New Age, Polysynth
+        93: [90, 98, 99], # Metallic -> Polysynth, Crystal, Atmosphere
+        94: [89, 88, 91], # Halo -> Warm, New Age, Choir
+        95: [89, 88, 94], # Sweep -> Warm, New Age, Halo
+        
+        # --- Synth FX ---
+        96: [97, 98, 88], # Rain -> Soundtrack, Crystal, New Age
+        97: [96, 98, 88], # Soundtrack -> Rain, Crystal, New Age
+        98: [99, 100, 88],# Crystal -> Atmosphere, Brightness, New Age
+        99: [100, 98, 88],# Atmosphere -> Brightness, Crystal, New Age
+        100: [99, 98, 88],# Brightness -> Atmosphere, Crystal, New Age
+        101: [98, 99, 102],# Goblins -> Crystal, Atmosphere, Echoes
+        102: [101, 103, 99],# Echoes -> Goblins, Sci-Fi, Atmosphere
+        103: [102, 101, 99],# Sci-Fi -> Echoes, Goblins, Atmosphere
+        
+        # --- Ethnic ---
+        104: [105, 106, 24], # Sitar -> Banjo, Shamisen, Acoustic Guitar Nylon
+        105: [104, 24, 25],  # Banjo -> Sitar, Acoustic Guitar Nylon, Steel
+        106: [107, 104, 24], # Shamisen -> Koto, Sitar, Acoustic Guitar Nylon
+        107: [106, 104, 24], # Koto -> Shamisen, Sitar, Acoustic Guitar Nylon
+        108: [12, 11, 13],   # Kalimba -> Marimba, Vibraphone, Xylophone
+        109: [111, 68, 69],  # Bagpipe -> Shanai, Oboe, English Horn
+        110: [40, 48, 41],   # Fiddle -> Violin, String Ensemble, Viola
+        111: [68, 69, 109],  # Shanai -> Oboe, English Horn, Bagpipe
+        
+        # --- Percussive ---
+        112: [9, 14, 113],   # Tinkle Bell -> Glockenspiel, Tubular Bells, Agogo
+        113: [112, 114, 9],  # Agogo -> Tinkle Bell, Steel Drums, Glockenspiel
+        114: [113, 112, 9],  # Steel Drums -> Agogo, Tinkle Bell, Glockenspiel
+        115: [116, 117, 118],# Woodblock -> Taiko Drum, Melodic Tom, Synth Drum
+        116: [117, 118, 115],# Taiko Drum -> Melodic Tom, Synth Drum, Woodblock
+        117: [118, 116, 115],# Melodic Tom -> Synth Drum, Taiko Drum, Woodblock
+        118: [117, 116, 115] # Synth Drum -> Melodic Tom, Taiko Drum, Woodblock
+    }
+    
+    # Retrieve the list of possible substitutes
+    choices = substitutes.get(instrument)
+    
+    # If there are no defined substitutes, return the original instrument
+    if not choices:
+        return instrument
+        
+    if best_only:
+        # Return the first item in the list (the closest possible match)
+        return choices[0]
+    
+    else:
+        # Return a randomly selected instrument from the allowed gentle substitutes
+        return random.choice(choices)
+    
 ###################################################################################
 
 print('Module loaded!')
