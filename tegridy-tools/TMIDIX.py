@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.8.20" # TMIDIX version
+__version__ = "26.9.17" # TMIDIX version
 
 ###################################################################################
 
@@ -4257,7 +4257,7 @@ def advanced_score_processor(raw_score,
                              return_chordified_enhanced_score_with_lyrics=False,
                              return_score_tones_chords=False,
                              return_text_and_lyric_events=False,
-                             apply_sustain=False  
+                             apply_sustain=True  
                             ):
 
   '''TMIDIX Advanced Score Processor'''
@@ -4732,7 +4732,7 @@ def ascii_text_words_counter(ascii_text):
     
 ###################################################################################
 
-def check_and_fix_tones_chord(tones_chord, use_full_chords=True):
+def check_and_fix_tones_chord(tones_chord, use_full_chords=False):
 
   tones_chord_combs = [list(comb) for i in range(len(tones_chord), 0, -1) for comb in combinations(tones_chord, i)]
 
@@ -4756,7 +4756,7 @@ def find_closest_tone(tones, tone):
 
 ###################################################################################
 
-def advanced_check_and_fix_tones_chord(tones_chord, high_pitch=0, use_full_chords=True):
+def advanced_check_and_fix_tones_chord(tones_chord, high_pitch=0, use_full_chords=False):
 
   tones_chord_combs = [list(comb) for i in range(len(tones_chord), 0, -1) for comb in combinations(tones_chord, i)]
 
@@ -5947,7 +5947,7 @@ def enhanced_chord_to_chord_token(enhanced_chord,
                                   channels_index=3, 
                                   pitches_index=4, 
                                   use_filtered_chords=False,
-                                  use_full_chords=True
+                                  use_full_chords=False
                                   ):
   
   bad_chords_counter = 0
@@ -7463,7 +7463,7 @@ CHORDS_TYPES = ['WHITE', 'BLACK', 'UNKNOWN', 'MIXED WHITE', 'MIXED BLACK', 'MIXE
 def tones_chord_type(tones_chord, 
                      return_chord_type_index=True,
                      use_filtered_chords=False,
-                     use_full_chords=True
+                     use_full_chords=False
                      ):
 
   WN = WHITE_NOTES
@@ -7570,7 +7570,7 @@ def find_matching_tones_chords(tones_chord,
                                matching_chord_length=-1,
                                match_chord_type=True,
                                use_filtered_chords=True,
-                               use_full_chords=True
+                               use_full_chords=False
                                ):
 
   if use_filtered_chords:
@@ -7765,7 +7765,7 @@ def harmonize_enhanced_melody_score_notes_to_ms_SONG(escore_notes,
 def check_and_fix_pitches_chord(pitches_chord,
                                 remove_duplicate_pitches=True,
                                 use_filtered_chords=False,
-                                use_full_chords=True,
+                                use_full_chords=False,
                                 fix_bad_pitches=False,
                                 ):
   
@@ -8053,7 +8053,7 @@ def tones_chords_to_types(tones_chords,
 def morph_tones_chord(tones_chord, 
                       trg_tone, 
                       use_filtered_chords=True,
-                      use_full_chords=True
+                      use_full_chords=False
                       ):
 
   src_tones_chord = sorted(sorted(set(tones_chord)) + [trg_tone])
@@ -9414,7 +9414,7 @@ def escore_notes_lrno_pattern_fast(escore_notes,
                                    patches_index=6,
                                    patches_list=[],
                                    zero_start_time=True,
-                                   use_full_chords=True,
+                                   use_full_chords=False,
                                    use_dtimes=True,
                                    skip_pitches=False,
                                    fuzzy_matching=False,
@@ -11975,6 +11975,8 @@ def create_files_list(datasets_paths=['./'],
             print('=' * 70)
             print('Processing', dataset_addr)
             print('=' * 70)
+
+        total_fsize = 0
         
         for dirpath, dirnames, filenames in tqdm.tqdm(os.walk(dataset_addr), disable=not verbose):
                 
@@ -11990,12 +11992,13 @@ def create_files_list(datasets_paths=['./'],
                 for file in filenames[:max_num_files]:
                     if file.endswith(files_exts):
                         if check_for_dupes:
-                        
+                            
                             if use_md5_hashes:
                                 md5_hash = hashlib.md5(open(os.path.join(dirpath, file), 'rb').read()).hexdigest()
                                 
                                 if md5_hash not in filez_set:
                                     filez_set[md5_hash] = os.path.join(dirpath, file)
+                                    total_fsize += os.path.getsize(filez_set[md5_hash])
                                 
                                 else:
                                     dupes_list.append(os.path.join(dirpath, file))
@@ -12003,12 +12006,14 @@ def create_files_list(datasets_paths=['./'],
                             else:
                                 if file not in filez_set:
                                     filez_set[file] = os.path.join(dirpath, file)
+                                    total_fsize += os.path.getsize(filez_set[file])
                                 
                                 else:
                                     dupes_list.append(os.path.join(dirpath, file))
                         else:
                             fpath = os.path.join(dirpath, file)
-                            filez_set[fpath] = fpath                              
+                            filez_set[fpath] = fpath
+                            total_fsize += os.path.getsize(fpath)
 
     filez = list(filez_set.values())
 
@@ -12030,9 +12035,17 @@ def create_files_list(datasets_paths=['./'],
                 
         if verbose:
             print('Found', len(filez), 'files.')
+
+            total_fsize_kb = total_fsize / 1024
+            total_fsize_mb = total_fsize_kb / 1024
+            total_fsize_gb = total_fsize_mb / 1024
+
+            print(f"Total files size: {total_fsize_mb:.4f} MB / {total_fsize_gb:.4f} GB")
+            
+            print('-' * 70)
             print('Skipped', len(dupes_list), 'duplicate files.')
             print('=' * 70)
- 
+
     else:
         if verbose:
             print('Could not find any files...')
