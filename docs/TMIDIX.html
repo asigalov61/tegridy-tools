@@ -1667,7 +1667,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;26.9.17&quot;</span> <span class="c1"># TMIDIX version</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;26.9.20&quot;</span> <span class="c1"># TMIDIX version</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -5554,7 +5554,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       <span class="k">return</span> <span class="kc">None</span>
 
 <span class="k">def</span> <span class="nf">fix_monophonic_score_durations</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">,</span>
-                                   <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                    <span class="n">min_notes_dur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                    <span class="n">extend_durs</span><span class="o">=</span><span class="kc">False</span>
                                    <span class="p">):</span>
@@ -14933,8 +14933,20 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="k">def</span> <span class="nf">chunk_list</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">)]</span>
+<span class="k">def</span> <span class="nf">chunk_list</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Chunk a list with optional overlap.</span>
+<span class="sd">    overlap = number of elements shared between consecutive chunks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">chunk_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;chunk_size must be &gt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be &gt;= 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be smaller than chunk_size&quot;</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">-</span> <span class="n">overlap</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="n">step</span><span class="p">)]</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -15449,8 +15461,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">###################################################################################</span>
 
 <span class="k">def</span> <span class="nf">fix_escore_notes_durations</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
-                               <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                <span class="n">min_notes_dur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">max_allowed_dur</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                               <span class="n">remove_notes_with_bad_durs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                <span class="n">durs_idx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                                <span class="n">channels_idx</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> 
@@ -15458,8 +15472,20 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                                <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
                               <span class="p">):</span>
 
-    <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+    <span class="n">raw_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
     <span class="n">drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="n">notes</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">raw_notes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_allowed_dur</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">remove_notes_with_bad_durs</span><span class="p">:</span>
+                <span class="n">ee</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">ee</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_allowed_dur</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">])</span>
+                <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ee</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
     
     <span class="n">escore_groups</span> <span class="o">=</span> <span class="n">ordered_groups</span><span class="p">(</span><span class="n">notes</span><span class="p">,</span> <span class="n">pitches_idx</span><span class="p">,</span> <span class="n">patches_idx</span><span class="p">)</span>
 
@@ -15924,11 +15950,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="k">def</span> <span class="nf">transpose_list</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">lst</span><span class="p">)]</span>
-
-<span class="c1">###################################################################################</span>
-
-<span class="k">def</span> <span class="nf">chunk_list</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="n">size</span><span class="p">)]</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -29364,17 +29385,31 @@ Costs are tuned to preserve white notes and avoid introducing black notes.</p></
       
   <div class="item">
     <div class="name def" id="TMIDIX.chunk_list">
-    <p>def <span class="ident">chunk_list</span>(</p><p>lst, size)</p>
+    <p>def <span class="ident">chunk_list</span>(</p><p>lst, chunk_size, overlap=0)</p>
     </div>
     
 
     
   
+    <div class="desc"><p>Chunk a list with optional overlap.
+overlap = number of elements shared between consecutive chunks.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.chunk_list', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.chunk_list" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">chunk_list</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="n">size</span><span class="p">)]</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">chunk_list</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Chunk a list with optional overlap.</span>
+<span class="sd">    overlap = number of elements shared between consecutive chunks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">chunk_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;chunk_size must be &gt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be &gt;= 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be smaller than chunk_size&quot;</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">-</span> <span class="n">overlap</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="n">step</span><span class="p">)]</span>
 </pre></div>
 
   </div>
@@ -37312,7 +37347,7 @@ Excludes overlapping subpatterns from longest to shortest.</p>
       
   <div class="item">
     <div class="name def" id="TMIDIX.fix_escore_notes_durations">
-    <p>def <span class="ident">fix_escore_notes_durations</span>(</p><p>escore_notes, min_notes_gap=1, min_notes_dur=1, times_idx=1, durs_idx=2, channels_idx=3, pitches_idx=4, patches_idx=6)</p>
+    <p>def <span class="ident">fix_escore_notes_durations</span>(</p><p>escore_notes, min_notes_gap=0, min_notes_dur=1, max_allowed_dur=4000, remove_notes_with_bad_durs=True, times_idx=1, durs_idx=2, channels_idx=3, pitches_idx=4, patches_idx=6)</p>
     </div>
     
 
@@ -37322,8 +37357,10 @@ Excludes overlapping subpatterns from longest to shortest.</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.fix_escore_notes_durations', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.fix_escore_notes_durations" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fix_escore_notes_durations</span><span class="p">(</span><span class="n">escore_notes</span><span class="p">,</span>
-                               <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                <span class="n">min_notes_dur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">max_allowed_dur</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                               <span class="n">remove_notes_with_bad_durs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                <span class="n">times_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                <span class="n">durs_idx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                                <span class="n">channels_idx</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> 
@@ -37331,8 +37368,20 @@ Excludes overlapping subpatterns from longest to shortest.</p>
                                <span class="n">patches_idx</span><span class="o">=</span><span class="mi">6</span>
                               <span class="p">):</span>
 
-    <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
+    <span class="n">raw_notes</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">]</span>
     <span class="n">drums</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">escore_notes</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">channels_idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]</span>
+
+    <span class="n">notes</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">raw_notes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_allowed_dur</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">remove_notes_with_bad_durs</span><span class="p">:</span>
+                <span class="n">ee</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">ee</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_allowed_dur</span><span class="p">,</span> <span class="n">e</span><span class="p">[</span><span class="n">durs_idx</span><span class="p">])</span>
+                <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ee</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
     
     <span class="n">escore_groups</span> <span class="o">=</span> <span class="n">ordered_groups</span><span class="p">(</span><span class="n">notes</span><span class="p">,</span> <span class="n">pitches_idx</span><span class="p">,</span> <span class="n">patches_idx</span><span class="p">)</span>
 
@@ -37367,7 +37416,7 @@ Excludes overlapping subpatterns from longest to shortest.</p>
       
   <div class="item">
     <div class="name def" id="TMIDIX.fix_monophonic_score_durations">
-    <p>def <span class="ident">fix_monophonic_score_durations</span>(</p><p>monophonic_score, min_notes_gap=1, min_notes_dur=1, extend_durs=False)</p>
+    <p>def <span class="ident">fix_monophonic_score_durations</span>(</p><p>monophonic_score, min_notes_gap=0, min_notes_dur=1, extend_durs=False)</p>
     </div>
     
 
@@ -37377,7 +37426,7 @@ Excludes overlapping subpatterns from longest to shortest.</p>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.fix_monophonic_score_durations', this);">Show source &equiv;</a></p>
   <div id="source-TMIDIX.fix_monophonic_score_durations" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fix_monophonic_score_durations</span><span class="p">(</span><span class="n">monophonic_score</span><span class="p">,</span>
-                                   <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">min_notes_gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                    <span class="n">min_notes_dur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                    <span class="n">extend_durs</span><span class="o">=</span><span class="kc">False</span>
                                    <span class="p">):</span>
