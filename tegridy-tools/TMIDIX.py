@@ -48,7 +48,7 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.9.17" # TMIDIX version
+__version__ = "26.9.20" # TMIDIX version
 
 ###################################################################################
 
@@ -3935,7 +3935,7 @@ def chordify_score(score,
       return None
 
 def fix_monophonic_score_durations(monophonic_score,
-                                   min_notes_gap=1,
+                                   min_notes_gap=0,
                                    min_notes_dur=1,
                                    extend_durs=False
                                    ):
@@ -13314,8 +13314,20 @@ def equalize_closest_elements_dynamic(seq,
 
 ###################################################################################
 
-def chunk_list(lst, chunk_size):
-    return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
+def chunk_list(lst, chunk_size, overlap=0):
+    """
+    Chunk a list with optional overlap.
+    overlap = number of elements shared between consecutive chunks.
+    """
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be > 0")
+    if overlap < 0:
+        raise ValueError("overlap must be >= 0")
+    if overlap >= chunk_size:
+        raise ValueError("overlap must be smaller than chunk_size")
+
+    step = chunk_size - overlap
+    return [lst[i:i + chunk_size] for i in range(0, len(lst), step)]
 
 ###################################################################################
 
@@ -13830,8 +13842,10 @@ def list_md5_hash(ints_list):
 ###################################################################################
 
 def fix_escore_notes_durations(escore_notes,
-                               min_notes_gap=1,
+                               min_notes_gap=0,
                                min_notes_dur=1,
+                               max_allowed_dur=4000,
+                               remove_notes_with_bad_durs=True,
                                times_idx=1,
                                durs_idx=2,
                                channels_idx = 3, 
@@ -13839,8 +13853,20 @@ def fix_escore_notes_durations(escore_notes,
                                patches_idx=6
                               ):
 
-    notes = [e for e in escore_notes if e[channels_idx] != 9]
+    raw_notes = [e for e in escore_notes if e[channels_idx] != 9]
     drums = [e for e in escore_notes if e[channels_idx] == 9]
+
+    notes = []
+    
+    for e in raw_notes:
+        if e[durs_idx] > max_allowed_dur:
+            if not remove_notes_with_bad_durs:
+                ee = copy.deepcopy(e)
+                ee[durs_idx] = min(max_allowed_dur, e[durs_idx])
+                notes.append(ee)
+
+        else:
+            notes.append(e)
     
     escore_groups = ordered_groups(notes, pitches_idx, patches_idx)
 
@@ -14305,11 +14331,6 @@ def escore_notes_to_expanded_binary_matrix(escore_notes,
 
 def transpose_list(lst):
     return [list(row) for row in zip(*lst)]
-
-###################################################################################
-
-def chunk_list(lst, size):
-    return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 ###################################################################################
 
