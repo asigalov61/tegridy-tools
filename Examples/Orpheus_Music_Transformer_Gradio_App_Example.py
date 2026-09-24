@@ -582,7 +582,8 @@ def generate_music_and_state(input_midi,
                              final_composition, 
                              generated_batches, 
                              block_lines,
-                             model_selector
+                             model_selector,
+                             legacy_plot
                             ):
     
     """
@@ -611,6 +612,7 @@ def generate_music_and_state(input_midi,
     
     print('Add drums:', add_drums)
     print('Add outro:', add_outro)
+    print('Legacy plot:', legacy_plot)
 
     print_sep()
     
@@ -710,6 +712,7 @@ def generate_music_and_state(input_midi,
         preview_tokens = preview_composition[-PREVIEW_LENGTH:]
 
         plot_kwargs = {'plot_title': f'Batch # {i}', 'return_plt': True}
+        plot_kwargs['legacy_plot'] = legacy_plot
         
         if len(preview_composition) > PREVIEW_LENGTH:
             preview_score = save_midi(preview_tokens[:PREVIEW_LENGTH])[1]
@@ -912,12 +915,12 @@ with gr.Blocks() as orpheus_app:
 
     gr.Markdown("""
     ### PLEASE NOTE:
-    - Orpheus Music Transformer is a primarily continuation/co-composition model!"
+    - Orpheus Music Transformer is a primarily continuation/co-composition model!
     - The model works best if given some music context to work with
     - Random generation from SOS token/embeddings may not always produce good results
     """)
     
-    input_midi = gr.File(label="Input MIDI", file_types=[".midi", ".mid", ".kar"])
+    input_midi = gr.File(label="Input MIDI") # , file_types=[".midi", ".mid", ".kar"])
     input_midi.upload(reset, [final_composition, generated_batches, block_lines],
                       [final_composition, generated_batches, block_lines])
 
@@ -945,6 +948,7 @@ with gr.Blocks() as orpheus_app:
                            )
     add_drums = gr.Checkbox(value=False, label="Add drums")
     add_outro = gr.Checkbox(value=False, label="Add an outro")
+    legacy_plot = gr.Checkbox(value=False, label="Legacy plot style")
     
     generate_btn = gr.Button("Generate", variant="primary")
 
@@ -977,7 +981,8 @@ with gr.Blocks() as orpheus_app:
          final_composition, 
          generated_batches, 
          block_lines,
-         model_selector
+         model_selector,
+         legacy_plot
         ],
         outputs
     )
