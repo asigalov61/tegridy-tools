@@ -48,7 +48,11 @@ r'''
 
 ###################################################################################
 
-__version__ = "26.9.20" # TMIDIX version
+from __future__ import annotations
+
+###################################################################################
+
+__version__ = "26.9.23" # TMIDIX version
 
 ###################################################################################
 
@@ -1474,6 +1478,8 @@ def _encode(events_lol, unknown_callback=None, never_add_eot=False,
 
 import os
 
+import sys
+
 import platform
 
 import ctypes
@@ -1526,7 +1532,17 @@ import struct
 
 import heapq
 
+import textwrap
+
+import numpy as np                      # ships with matplotlib (no extra dep)
+
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.transforms as mtransforms
+import matplotlib.ticker as mticker
+from matplotlib.path import Path as mplPath
+from matplotlib.collections import PathCollection
+from matplotlib.colors import to_rgba, LinearSegmentedColormap
 
 import json
 
@@ -1538,10 +1554,12 @@ import hashlib
 
 from array import array
 
-from pathlib import Path
 from fnmatch import fnmatch
 
-from typing import List, Optional, Tuple, Dict, Any, Optional, Iterable, Set, Union
+from typing import List, Sequence, Tuple, Dict, Any
+from typing import Optional, Iterable, Set, Union, TypeVar
+
+T = TypeVar("T")
 
 import subprocess
 
@@ -1809,91 +1827,664 @@ def add_arrays(a, b):
     return [sum(pair) for pair in zip(a, b)]
 
 #-------------------------------------------------------------------------------
+#  Private helpers for the Synthesia-style plotter (rename freely on collision)
+#-------------------------------------------------------------------------------
+
+_TMIDIX_GM_INSTRUMENT_NAMES = (
+    'Acoustic Grand Piano', 'Bright Acoustic Piano', 'Electric Grand Piano', 'Honky-tonk Piano',
+    'Electric Piano 1', 'Electric Piano 2', 'Harpsichord', 'Clavi',
+    'Celesta', 'Glockenspiel', 'Music Box', 'Vibraphone',
+    'Marimba', 'Xylophone', 'Tubular Bells', 'Dulcimer',
+    'Drawbar Organ', 'Percussive Organ', 'Rock Organ', 'Church Organ',
+    'Reed Organ', 'Accordion', 'Harmonica', 'Tango Accordion',
+    'Acoustic Guitar (nylon)', 'Acoustic Guitar (steel)', 'Electric Guitar (jazz)', 'Electric Guitar (clean)',
+    'Electric Guitar (muted)', 'Overdriven Guitar', 'Distortion Guitar', 'Guitar Harmonics',
+    'Acoustic Bass', 'Electric Bass (finger)', 'Electric Bass (pick)', 'Fretless Bass',
+    'Slap Bass 1', 'Slap Bass 2', 'Synth Bass 1', 'Synth Bass 2',
+    'Violin', 'Viola', 'Cello', 'Contrabass',
+    'Tremolo Strings', 'Pizzicato Strings', 'Orchestral Harp', 'Timpani',
+    'String Ensemble 1', 'String Ensemble 2', 'Synth Strings 1', 'Synth Strings 2',
+    'Choir Aahs', 'Voice Oohs', 'Synth Voice', 'Orchestra Hit',
+    'Trumpet', 'Trombone', 'Tuba', 'Muted Trumpet',
+    'French Horn', 'Brass Section', 'Synth Brass 1', 'Synth Brass 2',
+    'Soprano Sax', 'Alto Sax', 'Tenor Sax', 'Baritone Sax',
+    'Oboe', 'English Horn', 'Bassoon', 'Clarinet',
+    'Piccolo', 'Flute', 'Recorder', 'Pan Flute',
+    'Blown Bottle', 'Shakuhachi', 'Whistle', 'Ocarina',
+    'Lead 1 (square)', 'Lead 2 (sawtooth)', 'Lead 3 (calliope)', 'Lead 4 (chiff)',
+    'Lead 5 (charang)', 'Lead 6 (voice)', 'Lead 7 (fifths)', 'Lead 8 (bass + lead)',
+    'Pad 1 (new age)', 'Pad 2 (warm)', 'Pad 3 (polysynth)', 'Pad 4 (choir)',
+    'Pad 5 (bowed)', 'Pad 6 (metallic)', 'Pad 7 (halo)', 'Pad 8 (sweep)',
+    'FX 1 (rain)', 'FX 2 (soundtrack)', 'FX 3 (crystal)', 'FX 4 (atmosphere)',
+    'FX 5 (brightness)', 'FX 6 (goblins)', 'FX 7 (echoes)', 'FX 8 (sci-fi)',
+    'Sitar', 'Banjo', 'Shamisen', 'Koto',
+    'Kalimba', 'Bagpipe', 'Fiddle', 'Shanai',
+    'Tinkle Bell', 'Agogo', 'Steel Drums', 'Woodblock',
+    'Taiko Drum', 'Melodic Tom', 'Synth Drum', 'Reverse Cymbal',
+    'Guitar Fret Noise', 'Breath Noise', 'Seashore', 'Bird Tweet',
+    'Telephone Ring', 'Helicopter', 'Applause', 'Gun Shot',
+)
+
+_TMIDIX_PLOT_GOLDEN = 0.6180339887498949   # golden-ratio hue spacing
+_TMIDIX_PLOT_KAPPA  = 0.5522847498307936   # circle -> bezier constant
+_TMIDIX_PLOT_AUTO_THEME = None             # cached auto-theme result
+
+
+def _tm_plot_os_dark_preference():
+    '''Best-effort OS dark-mode detection (stdlib only).
+       Returns True (dark), False (light) or None (unknown).'''
+    try:
+        if sys.platform == 'win32':
+            import winreg
+            with winreg.OpenKey(
+                    winreg.HKEY_CURRENT_USER,
+                    r'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize') as key:
+                value, _ = winreg.QueryValueEx(key, 'AppsUseLightTheme')
+                return int(value) == 0
+        elif sys.platform == 'darwin':
+            import subprocess
+            res = subprocess.run(['defaults', 'read', '-g', 'AppleInterfaceStyle'],
+                                 capture_output=True, timeout=2)
+            return res.returncode == 0 and b'Dark' in res.stdout
+        else:
+            import subprocess
+            res = subprocess.run(
+                ['gsettings', 'get', 'org.gnome.desktop.interface', 'color-scheme'],
+                capture_output=True, timeout=2)
+            if res.returncode == 0:
+                scheme = res.stdout.decode('utf-8', 'ignore').strip().strip('\'"').lower()
+                if 'dark' in scheme:
+                    return True
+                if 'light' in scheme:
+                    return False
+    except Exception:
+        pass
+    return None
+
+
+def _tm_plot_resolve_auto_theme():
+    '''theme="auto" resolution order: TMIDIX_PLOT_THEME env var ->
+       user's matplotlib style -> OS setting -> dark (Synthesia look).'''
+    global _TMIDIX_PLOT_AUTO_THEME
+    if _TMIDIX_PLOT_AUTO_THEME is not None:
+        return _TMIDIX_PLOT_AUTO_THEME
+    env = os.environ.get('TMIDIX_PLOT_THEME', '').strip().lower()
+    if env in ('dark', 'light'):
+        _TMIDIX_PLOT_AUTO_THEME = env
+        return env
+    try:
+        import matplotlib as _mpl
+        cur = to_rgba(_mpl.rcParams['figure.facecolor'])
+        dflt = to_rgba(_mpl.rcParamsDefault['figure.facecolor'])
+        if cur != dflt:   # user has loaded a custom style -> respect it
+            lum = 0.2126 * cur[0] + 0.7152 * cur[1] + 0.0722 * cur[2]
+            _TMIDIX_PLOT_AUTO_THEME = 'dark' if lum < 0.5 else 'light'
+            return _TMIDIX_PLOT_AUTO_THEME
+    except Exception:
+        pass
+    os_dark = _tm_plot_os_dark_preference()
+    if os_dark is not None:
+        _TMIDIX_PLOT_AUTO_THEME = 'dark' if os_dark else 'light'
+        return _TMIDIX_PLOT_AUTO_THEME
+    _TMIDIX_PLOT_AUTO_THEME = 'dark'
+    return 'dark'
+
+
+def _tm_plot_theme_colors(theme):
+    '''Complete color set for each theme.'''
+    if theme == 'light':
+        return {
+            'fig_face': '#ffffff', 'ax_face': '#fcfdfe',
+            'grad_top': '#ffffff', 'grad_bottom': '#e8edf5',
+            'text': '#1b1f27', 'muted': '#66707f',
+            'spine': '#c3c9d4', 'tick': '#4b5361',
+            'grid': '#1b1f27', 'grid_alpha': 0.13,
+            'octave': '#1b1f27', 'octave_alpha': 0.22,
+            'lane': '#1b1f27', 'lane_alpha': 0.05,
+            'marker': '#22262e', 'preview': '#d81b60',
+            'drums': (0.16, 0.17, 0.21),
+            'vel_target': (0.0, 0.0, 0.0), 'vel_k': 0.30,
+            'edge_target': (0.0, 0.0, 0.0), 'edge_k': 0.38,
+            'glow_alphas': (0.06, 0.13),
+            'key_white': '#ffffff', 'key_black': '#343941', 'key_edge': '#c3c9d4',
+        }
+    return {
+        'fig_face': '#0d1117', 'ax_face': '#0b0e14',
+        'grad_top': '#151b26', 'grad_bottom': '#07090d',
+        'text': '#f1f3f7', 'muted': '#8b93a3',
+        'spine': '#39404d', 'tick': '#a7afc0',
+        'grid': '#ffffff', 'grid_alpha': 0.07,
+        'octave': '#ffffff', 'octave_alpha': 0.15,
+        'lane': '#ffffff', 'lane_alpha': 0.05,
+        'marker': '#f5f7fb', 'preview': '#ff4d88',
+        'drums': (0.96, 0.97, 1.00),
+        'vel_target': (1.0, 1.0, 1.0), 'vel_k': 0.34,
+        'edge_target': (1.0, 1.0, 1.0), 'edge_k': 0.42,
+        'glow_alphas': (0.10, 0.22),
+        'key_white': '#e8ebf0', 'key_black': '#20242c', 'key_edge': '#39404d',
+    }
+
+
+def _tm_plot_palette(n, theme='dark', drums_color_num=128,
+                     drums_color=None, custom_colors=None):
+    '''Vivid palette with golden-ratio hue spacing so that neighboring
+       patches always receive clearly distinguishable colors.'''
+    sat, val = (0.85, 0.72) if theme == 'light' else (0.78, 1.00)
+    base = [hsv_to_rgb((i * _TMIDIX_PLOT_GOLDEN) % 1.0, sat, val) for i in range(n)]
+    if custom_colors is not None:
+        if isinstance(custom_colors, dict):
+            for k, c in custom_colors.items():
+                try:
+                    ki = int(k)
+                except (TypeError, ValueError):
+                    continue
+                if 0 <= ki < n:
+                    base[ki] = to_rgba(c)[:3]
+        else:
+            try:
+                cc = [to_rgba(c)[:3] for c in custom_colors]
+            except Exception:
+                cc = []
+            if cc:
+                base = [cc[i % len(cc)] for i in range(n)]
+    drums_given = isinstance(custom_colors, dict) and (
+        drums_color_num in custom_colors or str(drums_color_num) in custom_colors)
+    if not drums_given and drums_color is not None and 0 <= drums_color_num < n:
+        base[drums_color_num] = drums_color
+    return np.asarray(base, dtype=float)
+
+
+def _tm_plot_note_path(x, y, w, h, rx, ry):
+    '''Rounded-rectangle Path with independent x/y corner radii (data coords).'''
+    rx = min(rx, w * 0.5)
+    ry = min(ry, h * 0.5)
+    if rx <= 0.0 or ry <= 0.0:
+        return mplPath([(x, y), (x + w, y), (x + w, y + h), (x, y + h), (x, y)],
+                    [mplPath.MOVETO, mplPath.LINETO, mplPath.LINETO,
+                     mplPath.LINETO, mplPath.CLOSEPOLY])
+    kx, ky = rx * _TMIDIX_PLOT_KAPPA, ry * _TMIDIX_PLOT_KAPPA
+    verts = [
+        (x + rx, y),                                                    # start
+        (x + w - rx, y),                                                # bottom
+        (x + w - rx + kx, y), (x + w, y + ry - ky), (x + w, y + ry),    # BR corner
+        (x + w, y + h - ry),                                            # right
+        (x + w, y + h - ry + ky), (x + w - rx + kx, y + h), (x + w - rx, y + h),  # TR
+        (x + rx, y + h),                                                # top
+        (x + rx - kx, y + h), (x, y + h - ry + ky), (x, y + h - ry),    # TL corner
+        (x, y + ry),                                                    # left
+        (x, y + ry - ky), (x + rx - kx, y), (x + rx, y),                # BL corner
+        (x + rx, y),
+    ]
+    codes = [mplPath.MOVETO, mplPath.LINETO,
+             mplPath.CURVE4, mplPath.CURVE4, mplPath.CURVE4, mplPath.LINETO,
+             mplPath.CURVE4, mplPath.CURVE4, mplPath.CURVE4, mplPath.LINETO,
+             mplPath.CURVE4, mplPath.CURVE4, mplPath.CURVE4, mplPath.LINETO,
+             mplPath.CURVE4, mplPath.CURVE4, mplPath.CURVE4, mplPath.CLOSEPOLY]
+    return mplPath(verts, codes)
+
+
+#-------------------------------------------------------------------------------
+#  Tick formatters (module-level so figures stay picklable for Gradio gr.Plot)
+#-------------------------------------------------------------------------------
+
+def _tm_plot_t_fmt(x, pos=None):
+    x = max(0, int(round(x)))
+    return f'{x // 60}:{x % 60:02d}'
+
+
+def _tm_plot_plain_fmt(x, pos=None):
+    return f'{x:g}'
+
+#-------------------------------------------------------------------------------
 
 def plot_ms_SONG(ms_song,
-                  preview_length_in_notes=0,
-                  block_lines_times_list = None,
-                  plot_title='ms Song',
-                  max_num_colors=129, 
-                  drums_color_num=128, 
-                  plot_size=(11,4), 
-                  note_height = 0.75,
-                  show_grid_lines=False,
-                  return_plt = False,
-                  timings_multiplier=1,
-                  save_plt='',
-                  save_only_plt_image=True,
-                  save_transparent=False
-                  ):
+                 preview_length_in_notes=0,
+                 block_lines_times_list=None,
+                 plot_title='ms Song',
+                 max_num_colors=129,
+                 drums_color_num=128,
+                 plot_size=(11, 4),
+                 note_height=0.75,
+                 show_grid_lines=False,
+                 return_plt=False,
+                 timings_multiplier=1,
+                 save_plt='',
+                 save_only_plt_image=True,
+                 save_transparent=False,
+                 *,
+                 theme='auto',
+                 note_glow=True,
+                 velocity_shading=True,
+                 show_pitch_guides=True,
+                 show_keyboard=True,
+                 show_stats=True,
+                 show_legend='auto',
+                 custom_colors=None,
+                 plot_margins=None,
+                 save_dpi=None,
+                 legacy_plot=False
+                 ):
 
-  '''Tegridy ms SONG plotter/vizualizer'''
+    '''Tegridy ms SONG plotter/vizualizer (Synthesia-style edition)
 
-  notes = [s for s in ms_song if s[0] == 'note']
+    Input: a flat TMIDIX ms score (one event list, no ticks) where note events
+    are ['note', start_ms, dur_ms, channel, pitch, velocity, patch] and patch
+    is the TMIDIX instrument number (+128 for drums).
 
-  if (len(max(notes, key=len)) != 7) and (len(min(notes, key=len)) != 7):
-    print('The song notes do not have patches information')
-    print('Ploease add patches to the notes in the song')
+    Fully compatible with the original signature; all new options are
+    keyword-only arguments with sensible defaults.
 
-  else:
+    New keyword-only arguments:
+      theme='auto'           'auto' (TMIDIX_PLOT_THEME env var -> your matplotlib
+                             style -> your OS dark-mode setting), 'dark' /
+                             'synthesia', 'light', or True/False
+      note_glow=True         soft neon glow around every note
+      velocity_shading=True  note brightness follows note velocity
+      show_pitch_guides=True piano-key lanes + octave (C) lines and labels
+      show_keyboard=True     slim keyboard ruler along the right edge
+      show_stats=True        small stats line under the title
+      show_legend='auto'     instrument legend ('auto' = when 2-16 parts)
+      custom_colors=None     list of colors, or a {patch_number: color} dict
+      plot_margins=None      (left, bottom, right, top) figure margins
+      save_dpi=None          DPI for saved images (None = matplotlib default)
+    '''
+    
+    if legacy_plot:
+        notes = [s for s in ms_song if s[0] == 'note']
 
-    start_times = [(s[1] * timings_multiplier) / 1000 for s in notes]
-    durations = [(s[2]  * timings_multiplier) / 1000 for s in notes]
-    pitches = [s[4] for s in notes]
-    patches = [s[6] for s in notes]
+        if (len(max(notes, key=len)) != 7) and (len(min(notes, key=len)) != 7):
+            print('The song notes do not have patches information')
+            print('Ploease add patches to the notes in the song')
 
-    colors = generate_colors(max_num_colors)
-    colors[drums_color_num] = (1, 1, 1)
+        else:
 
-    pbl = (notes[preview_length_in_notes][1] * timings_multiplier) / 1000
+            start_times = [(s[1] * timings_multiplier) / 1000 for s in notes]
+            durations = [(s[2]  * timings_multiplier) / 1000 for s in notes]
+            pitches = [s[4] for s in notes]
+            patches = [s[6] for s in notes]
 
-    fig, ax = plt.subplots(figsize=plot_size)
-    #fig, ax = plt.subplots()
+            colors = generate_colors(max_num_colors)
+            colors[drums_color_num] = (1, 1, 1)
 
-    # Create a rectangle for each note with color based on patch number
-    for start, duration, pitch, patch in zip(start_times, durations, pitches, patches):
-        rect = plt.Rectangle((start, pitch), duration, note_height, facecolor=colors[patch])
-        ax.add_patch(rect)
+            pbl = (notes[preview_length_in_notes][1] * timings_multiplier) / 1000
 
-    # Set the limits of the plot
-    ax.set_xlim([min(start_times), max(add_arrays(start_times, durations))])
-    ax.set_ylim([min(pitches)-1, max(pitches)+1])
+            fig, ax = plt.subplots(figsize=plot_size)
+            #fig, ax = plt.subplots()
 
-    # Set the background color to black
-    ax.set_facecolor('black')
-    fig.patch.set_facecolor('white')
+            # Create a rectangle for each note with color based on patch number
+            for start, duration, pitch, patch in zip(start_times, durations, pitches, patches):
+                rect = plt.Rectangle((start, pitch), duration, note_height, facecolor=colors[patch])
+                ax.add_patch(rect)
 
-    if preview_length_in_notes > 0:
-      ax.axvline(x=pbl, c='white')
+            # Set the limits of the plot
+            ax.set_xlim([min(start_times), max(add_arrays(start_times, durations))])
+            ax.set_ylim([min(pitches)-1, max(pitches)+1])
 
-    if block_lines_times_list:
-      for bl in block_lines_times_list:
-        ax.axvline(x=bl, c='white')
-           
-    if show_grid_lines:
-      ax.grid(color='white')
+            # Set the background color to black
+            ax.set_facecolor('black')
+            fig.patch.set_facecolor('white')
 
-    plt.xlabel('Time (s)', c='black')
-    plt.ylabel('MIDI Pitch', c='black')
+            if preview_length_in_notes > 0:
+              ax.axvline(x=pbl, c='white')
 
-    plt.title(plot_title)
+            if block_lines_times_list:
+              for bl in block_lines_times_list:
+                ax.axvline(x=bl, c='white')
+                   
+            if show_grid_lines:
+              ax.grid(color='white')
 
-    if save_plt != '':
-      if save_only_plt_image:
-        plt.axis('off')
-        plt.title('')
-        plt.savefig(save_plt, transparent=save_transparent, bbox_inches='tight', pad_inches=0, facecolor='black')
+            plt.xlabel('Time (s)', c='black')
+            plt.ylabel('MIDI Pitch', c='black')
+
+            plt.title(plot_title)
+
+            if save_plt != '':
+              if save_only_plt_image:
+                plt.axis('off')
+                plt.title('')
+                plt.savefig(save_plt, transparent=save_transparent, bbox_inches='tight', pad_inches=0, facecolor='black')
+                plt.close()
+              
+              else:
+                plt.savefig(save_plt)
+                plt.close()
+
+            if return_plt:
+              plt.close(fig)
+              return fig
+
+            plt.show()
+            plt.close()
+            
+    else:
+        #=========================================================================#
+        # 1) Collect and validate note events
+        #=========================================================================#
+        notes = [s for s in ms_song if s[0] == 'note']
+
+        if not notes:
+            print('The song does not contain any notes to plot')
+            return None
+
+        if any(len(s) < 6 for s in notes):
+            print('Malformed note events: each note needs at least 6 elements')
+            return None
+
+        #=========================================================================#
+        # 2) Extract note data (graceful fallback to channel colors w/o patches)
+        #=========================================================================#
+        using_channels = not all(len(s) >= 7 for s in notes)
+        if using_channels:
+            print('The song notes do not have patches information')
+            print('Ploease add patches to the notes in the song')
+            print('>>> Falling back to channel-based colors (channel 10 = drums)')
+            patches_raw = [drums_color_num if s[3] == 9 else s[3] for s in notes]
+        else:
+            patches_raw = [s[6] for s in notes]
+
+        tm = timings_multiplier
+        starts = np.asarray([s[1] * tm for s in notes], dtype=float) / 1000.0
+        durs = np.asarray([s[2] * tm for s in notes], dtype=float) / 1000.0
+        pitches = np.asarray([s[4] for s in notes], dtype=float)
+        vels = np.asarray([s[5] for s in notes], dtype=float)
+        patch_arr = np.asarray(patches_raw, dtype=int)
+
+        #=========================================================================#
+        # 3) Resolve theme ('auto' -> env var -> matplotlib style -> OS -> dark)
+        #=========================================================================#
+        if isinstance(theme, str):
+            t = theme.strip().lower()
+            if t in ('dark', 'synthesia', 'black'):
+                theme = 'dark'
+            elif t in ('light', 'white'):
+                theme = 'light'
+            elif t in ('auto', ''):
+                theme = _tm_plot_resolve_auto_theme()
+            else:
+                print(f"Unknown theme '{theme}'; using 'auto'")
+                theme = _tm_plot_resolve_auto_theme()
+        else:
+            theme = 'dark' if theme else 'light'
+        TH = _tm_plot_theme_colors(theme)
+
+        #=========================================================================#
+        # 4) Palette and per-note colors (velocity -> brightness)
+        #=========================================================================#
+        n_pal = max(int(max_num_colors), int(drums_color_num) + 1, 16)
+        palette = _tm_plot_palette(n_pal, theme, drums_color_num,
+                                   TH['drums'], custom_colors)
+
+        idx = np.where(patch_arr >= drums_color_num, drums_color_num, patch_arr % n_pal)
+        faces = palette[idx]
+        if velocity_shading:
+            tv = (np.clip(vels, 0.0, 127.0) / 127.0)[:, None] * TH['vel_k']
+            faces = (1.0 - tv) * faces + tv * np.asarray(TH['vel_target'], dtype=float)
+        edges = (1.0 - TH['edge_k']) * faces + TH['edge_k'] * np.asarray(TH['edge_target'], dtype=float)
+        faces_rgba = np.hstack([faces, np.ones((len(faces), 1))])
+        edges_rgba = np.hstack([edges, np.ones((len(edges), 1))])
+
+        uniq = sorted({int(i) for i in idx})
+        n_parts = len(uniq)
+        if n_parts == 1 and uniq[0] == drums_color_num:
+            show_pitch_guides = False      # key guides are meaningless for drum kits
+
+        if isinstance(show_legend, str):
+            sl = show_legend.strip().lower()
+            show_legend = (2 <= n_parts <= 16) if sl == 'auto' else sl in ('1', 'true', 'yes', 'on')
+        leg_ncol = min(max(n_parts, 1), 6)
+        leg_rows = int(np.ceil(max(n_parts, 1) / leg_ncol))
+
+        #=========================================================================#
+        # 5) Plot ranges and slim ("narrow") frame margins
+        #=========================================================================#
+        x0 = float(starts.min())
+        x1 = float((starts + durs).max())
+        if x1 - x0 < 1e-9:
+            x1 = x0 + 1.0
+        x_pad = (x1 - x0) * 0.015
+        X0, X1 = x0 - x_pad, x1 + x_pad
+
+        pmin, pmax = int(pitches.min()), int(pitches.max())
+        Y0, Y1 = float(pmin - 1), float(pmax + 1)
+        if Y1 - Y0 < 2.0:
+            Y1 = Y0 + 2.0
+
+        try:
+            fw, fh = float(plot_size[0]), float(plot_size[1])
+        except Exception:
+            fw, fh = 11.0, 4.0
+
+        wrap_at = max(28, int(round(78 * fw / 11.0)))
+        title_txt = textwrap.fill(str(plot_title), wrap_at) if plot_title else ''
+        title_lines = title_txt.count('\n') + 1 if title_txt else 0
+
+        if plot_margins is not None:
+            m_left, m_bottom, m_right, m_top = (float(v) for v in plot_margins)
+        else:
+            m_left = min(0.15, max(0.05, 0.72 / fw))
+            m_right = 0.952 if show_keyboard else 0.985
+            if title_txt:
+                m_top = 0.885 - 0.09 * max(0, title_lines - 1)
+            else:
+                m_top = 0.94 if show_stats else 0.96
+            m_bottom = min(0.25, max(0.12, 0.56 / fh))
+            if show_legend:
+                m_bottom = min(0.5, m_bottom + 0.055 * leg_rows + 0.035)
+
+        #=========================================================================#
+        # 6) Figure, background gradient, key lanes, octave lines
+        #=========================================================================#
+        fig, ax = plt.subplots(figsize=(fw, fh))
+        fig.patch.set_facecolor(TH['fig_face'])
+        ax.set_facecolor(TH['ax_face'])
+        fig.subplots_adjust(left=m_left, bottom=m_bottom, right=m_right, top=m_top)
+        ax.set_axisbelow(True)
+
+        bg_cmap = LinearSegmentedColormap.from_list('tmidix_bg',
+                                                    [TH['grad_top'], TH['grad_bottom']])
+        bg_img = ax.imshow(np.linspace(0.0, 1.0, 256).reshape(-1, 1), cmap=bg_cmap,
+                           extent=(X0, X1, Y0, Y1), origin='upper', aspect='auto',
+                           interpolation='bilinear', zorder=-60)
+
+        lane_artists, octave_artists = [], []
+        p_lo, p_hi = int(np.floor(Y0)) - 1, int(np.ceil(Y1)) + 2
+        if show_pitch_guides:
+            for p in range(p_lo, p_hi):
+                if 0 <= p <= 127 and (p % 12) in (1, 3, 6, 8, 10):   # black keys
+                    lane_artists.append(ax.axhspan(p - 0.5, p + 0.5, color=TH['lane'],
+                                                    alpha=TH['lane_alpha'], linewidth=0,
+                                                    zorder=-50))
+            for p in range(p_lo, p_hi):
+                if p % 12 == 0 and Y0 < p < Y1:                       # every C
+                    octave_artists.append(ax.axhline(p, color=TH['octave'],
+                                                      alpha=TH['octave_alpha'],
+                                                      linewidth=0.9, zorder=-40))
+                    ax.text(X0 + (X1 - X0) * 0.006, p + 0.10, f'C{p // 12 - 1}',
+                            fontsize=6.5, color=TH['muted'], alpha=0.9,
+                            ha='left', va='bottom', zorder=-39)
+
+        if show_grid_lines:
+            ax.grid(True, color=TH['grid'], alpha=TH['grid_alpha'],
+                    linewidth=0.6, linestyle=(0, (2, 4)))
+
+        #=========================================================================#
+        # 7) Rounded, glowing notes (fast vectorized PathCollections)
+        #=========================================================================#
+        fig_w_in, fig_h_in = fig.get_size_inches()
+        pos = ax.get_position()
+        ax_w_px = pos.width * fig_w_in * fig.dpi
+        ax_h_px = pos.height * fig_h_in * fig.dpi
+        px_per_sec = ax_w_px / (X1 - X0)
+        px_per_pitch = ax_h_px / (Y1 - Y0)
+
+        h = float(note_height)
+        note_h_px = h * px_per_pitch
+        r_px = 0.0 if note_h_px < 2.5 else min(6.0, 0.42 * note_h_px)   # corner radius
+        ry = min(r_px / px_per_pitch, 0.49 * h) if r_px else 0.0
+        rx0 = r_px / px_per_sec if r_px else 0.0
+        min_w = 1.25 / px_per_sec                                       # ~1.25 px minimum
+
+        if note_glow and len(notes) > 25000:
+            print(f'Note glow disabled automatically ({len(notes):,} notes is a lot!)')
+            note_glow = False
+
+        paths = []
+        for x, w, y in zip(starts.tolist(), durs.tolist(), pitches.tolist()):
+            if w < min_w:
+                w = min_w
+            rx = min(rx0, 0.49 * w) if rx0 else 0.0
+            paths.append(_tm_plot_note_path(x, y, w, h, rx, ry))
+
+        if note_glow:
+            for lw, alpha in ((7.0, TH['glow_alphas'][0]), (3.2, TH['glow_alphas'][1])):
+                glow = PathCollection(paths, facecolors='none', edgecolors=faces_rgba,
+                                      linewidths=lw, alpha=alpha, zorder=2.0)
+                glow.set_joinstyle('round')
+                ax.add_collection(glow)
+
+        note_col = PathCollection(paths, facecolors=faces_rgba, edgecolors=edges_rgba,
+                                  linewidths=0.75, zorder=3.0)
+        note_col.set_joinstyle('round')
+        ax.add_collection(note_col)
+
+        #=========================================================================#
+        # 8) Preview / block marker lines
+        #=========================================================================#
+        if preview_length_in_notes > 0:
+            pidx = min(int(preview_length_in_notes), len(notes) - 1)
+            pbl = (notes[pidx][1] * tm) / 1000.0
+            ax.axvline(pbl, color=TH['preview'], linewidth=1.8,
+                       linestyle=(0, (5, 3)), alpha=0.95, zorder=5)
+
+        if block_lines_times_list:
+            for bl in block_lines_times_list:
+                try:
+                    ax.axvline(float(bl), color=TH['marker'], linewidth=1.1,
+                               alpha=0.8, zorder=5)
+                except (TypeError, ValueError):
+                    pass
+
+        ax.set_xlim(X0, X1)
+        ax.set_ylim(Y0, Y1)
+
+        #=========================================================================#
+        # 9) Keyboard ruler (right edge, Synthesia-style)
+        #=========================================================================#
+        if show_keyboard:
+            axes_w_in = pos.width * fig_w_in
+            kb_w_in = min(0.42, (0.997 - m_left) * fig_w_in - 1.006 * axes_w_in)
+            if kb_w_in >= 0.1:
+                kb_tf = mtransforms.blended_transform_factory(ax.transAxes, ax.transData)
+                kb_frac = kb_w_in / axes_w_in
+                kb_x = 1.006
+                ax.add_patch(mpatches.Rectangle((kb_x - 0.004, Y0), kb_frac + 0.008,
+                                                Y1 - Y0, facecolor=TH['ax_face'],
+                                                edgecolor=TH['key_edge'], linewidth=0.6,
+                                                transform=kb_tf, clip_on=False, zorder=5.5))
+                for p in range(int(np.ceil(Y0 - 1e-9)), int(np.floor(Y1 + 1e-9))):
+                    if (p % 12) in (1, 3, 6, 8, 10):
+                        key_fc, key_w = TH['key_black'], kb_frac * 0.68
+                    else:
+                        key_fc, key_w = TH['key_white'], kb_frac
+                    ax.add_patch(mpatches.Rectangle((kb_x, p), key_w, 1.0,
+                                                    facecolor=key_fc,
+                                                    edgecolor=TH['key_edge'], linewidth=0.4,
+                                                    transform=kb_tf, clip_on=False, zorder=6))
+
+        #=========================================================================#
+        # 10) Axes chrome: spines, ticks, labels, titles, legend
+        #=========================================================================#
+        for sp in ('top', 'right'):
+            ax.spines[sp].set_visible(False)
+        for sp in ('left', 'bottom'):
+            ax.spines[sp].set_color(TH['spine'])
+            ax.spines[sp].set_linewidth(0.8)
+
+        ax.tick_params(colors=TH['tick'], labelsize=8.5, length=3.5, width=0.8)
+        ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+
+        if (X1 - X0) >= 120:
+            ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+            ax.xaxis.set_major_formatter(mticker.FuncFormatter(_tm_plot_t_fmt))
+            ax.set_xlabel('Time (mm:ss)', color=TH['text'], fontsize=10, labelpad=6)
+        else:
+            ax.xaxis.set_major_formatter(mticker.FuncFormatter(_tm_plot_plain_fmt))
+            ax.set_xlabel('Time (s)', color=TH['text'], fontsize=10, labelpad=6)
+
+        ax.set_ylabel('MIDI Pitch', color=TH['text'], fontsize=10, labelpad=4)
+
+        supt = None
+        if title_txt:
+            supt = fig.suptitle(title_txt, fontsize=12.5, fontweight='bold',
+                                color=TH['text'], x=(m_left + m_right) / 2.0,
+                                y=0.995, va='top')
+
+        if show_stats:
+            ax.set_title(f'{len(notes):,} notes   ·   {n_parts} part'
+                         f'{"s" if n_parts != 1 else ""}   ·   length {x1 - x0:,.1f} s'
+                         f'   ·   pitch {pmin}–{pmax}',
+                         fontsize=8.5, color=TH['muted'], pad=7)
+
+        leg = None
+        if show_legend and uniq:
+            handles = []
+            for i in uniq:
+                fc = tuple(float(c) for c in palette[i])
+                ec = tuple(float(c) for c in
+                           ((1.0 - TH['edge_k']) * palette[i] +
+                            TH['edge_k'] * np.asarray(TH['edge_target'], dtype=float)))
+                if using_channels:
+                    name = 'Drums (ch 10)' if i == drums_color_num else f'Channel {i + 1}'
+                elif i == drums_color_num:
+                    name = 'Drum Kit'
+                elif 0 <= i < 128:
+                    name = _TMIDIX_GM_INSTRUMENT_NAMES[i]
+                else:
+                    name = f'Patch {i}'
+                if len(name) > 24:
+                    name = name[:23] + '…'
+                handles.append(mpatches.Patch(facecolor=fc, edgecolor=ec,
+                                              linewidth=0.6, label=name))
+            axes_h_in = max(0.3, (m_top - m_bottom) * fh)
+            leg = ax.legend(handles=handles, loc='upper center',
+                            bbox_to_anchor=(0.5, -0.70 / axes_h_in), ncol=leg_ncol,
+                            fontsize=8, handlelength=1.3, handleheight=0.85,
+                            columnspacing=1.3, frameon=True, facecolor=TH['fig_face'],
+                            edgecolor=TH['spine'], framealpha=0.95)
+            for t in leg.get_texts():
+                t.set_color(TH['text'])
+
+        #=========================================================================#
+        # 11) Save / return / show (drop-in compatible with the original)
+        #=========================================================================#
+        if save_plt != '':
+            if save_only_plt_image:
+                plt.axis('off')
+                ax.set_title('')
+                if supt is not None:
+                    supt.set_visible(False)
+                for t in list(ax.texts):          # hide octave labels etc.
+                    t.set_visible(False)
+                if leg is not None:
+                    leg.set_visible(False)
+                if save_transparent:
+                    bg_img.set_visible(False)
+                    for a in lane_artists + octave_artists:
+                        a.set_visible(False)
+                plt.savefig(save_plt, transparent=save_transparent, bbox_inches='tight',
+                            pad_inches=0, facecolor=TH['fig_face'], dpi=save_dpi)
+                plt.close()
+            else:
+                plt.savefig(save_plt, transparent=save_transparent, dpi=save_dpi)
+                plt.close()
+
+        if return_plt:
+            plt.close(fig)
+            return fig
+
+        plt.show()
         plt.close()
-      
-      else:
-        plt.savefig(save_plt)
-        plt.close()
-
-    if return_plt:
-      plt.close(fig)
-      return fig
-
-    plt.show()
-    plt.close()
 
 ###################################################################################
 
@@ -20352,6 +20943,98 @@ def substitute_instrument(instrument: int, best_only: bool = False) -> int:
         # Return a randomly selected instrument from the allowed gentle substitutes
         return random.choice(choices)
     
+###################################################################################
+    
+def chunk_by_size(
+    items: Sequence[T],
+    chunk_size: int,
+    overlap: int = 0,
+    min_chunk_size: int | None = None,
+) -> List[List[T]]:
+    """
+    Split ``items`` into chunks of at most ``chunk_size`` elements where
+    adjacent chunks share ``overlap`` elements and every chunk has at least
+    ``min_chunk_size`` elements.
+
+    Guarantees
+    ----------
+    * Chunks cover the input in order; ``chunk_size`` is a hard maximum.
+    * Every chunk has >= ``min_chunk_size`` elements, except that an input
+      shorter than ``min_chunk_size`` is returned as a single chunk (nothing
+      better is possible).
+    * Adjacent chunks overlap by exactly ``overlap`` elements, except at the
+      final boundary, where the overlap may be *larger* if that is the only
+      way to keep the last chunks above ``min_chunk_size`` (e.g. 15 items,
+      chunk_size=10, min=10 forces one overlapping element).
+
+    Parameters
+    ----------
+    items:
+        Input sequence.
+    chunk_size:
+        Desired (maximum) chunk size, > 0.
+    overlap:
+        Elements shared between adjacent chunks, ``0 <= overlap < chunk_size``.
+    min_chunk_size:
+        Minimum allowed chunk length.  Defaults to ``chunk_size // 2 + 1``.
+
+    Raises
+    ------
+    ValueError:
+        If the arguments are inconsistent.
+    """
+    # Validate arguments before any early returns.
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be > 0")
+    if overlap < 0:
+        raise ValueError("overlap must be >= 0")
+    if overlap >= chunk_size:
+        raise ValueError("overlap must be < chunk_size")
+    if min_chunk_size is None:
+        min_chunk_size = chunk_size // 2 + 1
+    if min_chunk_size <= 0:
+        raise ValueError("min_chunk_size must be > 0")
+    if min_chunk_size > chunk_size:
+        raise ValueError("min_chunk_size cannot exceed chunk_size")
+
+    n = len(items)
+    if n == 0:
+        return []
+    if n <= chunk_size:                      # also covers n < min_chunk_size
+        return [list(items)]
+
+    step = chunk_size - overlap
+    chunks: List[List[T]] = []
+    start = 0
+
+    while True:
+        remaining = n - start
+
+        # Everything left fits into one final chunk.
+        if remaining <= chunk_size:
+            chunks.append(list(items[start:n]))
+            break
+
+        # A full chunk would leave a non-empty remainder smaller than
+        # min_chunk_size: split the remainder almost evenly between the
+        # final two chunks instead.
+        if remaining - chunk_size < min_chunk_size:
+            # Extra overlap needed so both final chunks can reach
+            # min_chunk_size; only used if the split is feasible at all,
+            # otherwise keep taking full chunks until it is.
+            need = max(overlap, 2 * min_chunk_size - remaining)
+            if remaining + need <= 2 * chunk_size:
+                first = (remaining + need + 1) // 2          # larger half
+                chunks.append(list(items[start:start + first]))
+                chunks.append(list(items[start + first - need:n]))
+                break
+
+        # Regular full chunk.
+        chunks.append(list(items[start:start + chunk_size]))
+        start += step
+
+    return chunks
+       
 ###################################################################################
 
 print('Module loaded!')
