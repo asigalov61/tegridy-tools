@@ -4,7 +4,7 @@
 
 ## Main example applications: [Advanced MIDI Renderer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Advanced_MIDI_Renderer_TMIDIX_Gradio_Example.py) and [MIDI Melody](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/MIDI_Melody_Gradio_App_Example.py)
 
-## Advanced example application: [Orpheus Music Transformer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Orpheus__Music_Transformer_Gradio_App_Example.py)
+## Advanced example applications: [Orpheus Music Transformer](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Orpheus__Music_Transformer_Gradio_App_Example.py) and [Drum Track Master](https://github.com/asigalov61/tegridy-tools/blob/main/Examples/Drum_Track_Master_Gradio_App_Example.py)
 
 ***
 
@@ -333,4 +333,4 @@ if mel_score and acc_score:
 ***
 
 ### Project Los Angeles
-### Tegridy Code 2024
+### Tegridy Code 2026
