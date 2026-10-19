@@ -1221,6 +1221,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.chords_common_tones_chain">chords_common_tones_chain</a></li>
     <li class="mono"><a href="#TMIDIX.chords_to_escore_notes">chords_to_escore_notes</a></li>
     <li class="mono"><a href="#TMIDIX.chunk_by_size">chunk_by_size</a></li>
+    <li class="mono"><a href="#TMIDIX.chunk_by_size_with_anchors">chunk_by_size_with_anchors</a></li>
     <li class="mono"><a href="#TMIDIX.chunk_by_threshold_mode">chunk_by_threshold_mode</a></li>
     <li class="mono"><a href="#TMIDIX.chunk_list">chunk_list</a></li>
     <li class="mono"><a href="#TMIDIX.chunk_sequence_by_anchors">chunk_sequence_by_anchors</a></li>
@@ -1400,6 +1401,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <li class="mono"><a href="#TMIDIX.keep_only_desirables">keep_only_desirables</a></li>
     <li class="mono"><a href="#TMIDIX.keep_only_undesirables">keep_only_undesirables</a></li>
     <li class="mono"><a href="#TMIDIX.list_md5_hash">list_md5_hash</a></li>
+    <li class="mono"><a href="#TMIDIX.list_to_num_dict">list_to_num_dict</a></li>
     <li class="mono"><a href="#TMIDIX.lists_differences">lists_differences</a></li>
     <li class="mono"><a href="#TMIDIX.lists_intersections">lists_intersections</a></li>
     <li class="mono"><a href="#TMIDIX.lists_similarity">lists_similarity</a></li>
@@ -1673,7 +1675,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="c1">###################################################################################</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;26.9.23&quot;</span> <span class="c1"># TMIDIX version</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;26.10.19&quot;</span> <span class="c1"># TMIDIX version</span>
 
 <span class="c1">###################################################################################</span>
 
@@ -3124,6 +3126,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
 
 <span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect_left</span><span class="p">,</span> <span class="n">bisect_right</span>
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
@@ -22658,6 +22661,207 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
        
 <span class="c1">###################################################################################</span>
 
+<span class="k">def</span> <span class="nf">chunk_by_size_with_anchors</span><span class="p">(</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+    <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">min_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">anchor_range</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Chunking of sequences by size, with optional anchor-aligned boundaries.</span>
+<span class="sd">    </span>
+<span class="sd">    Split ``items`` into chunks of at most ``chunk_size`` elements where</span>
+<span class="sd">    adjacent chunks share ``overlap`` elements and every chunk has at least</span>
+<span class="sd">    ``min_chunk_size`` elements.</span>
+
+<span class="sd">    If ``anchor_range`` is given as a non-empty collection of token ids, the</span>
+<span class="sd">    chunks are additionally *anchor aligned* whenever the input allows it:</span>
+<span class="sd">    such a chunk both begins with a token from ``anchor_range`` and ends with</span>
+<span class="sd">    the token that immediately precedes a boundary anchor (the next chunk&#39;s</span>
+<span class="sd">    first element).  Alignment is best effort: the size guarantees below</span>
+<span class="sd">    always win when they conflict with alignment.</span>
+
+<span class="sd">    Guarantees</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * Chunks cover the input in order; ``chunk_size`` is a hard maximum.</span>
+<span class="sd">    * Every chunk has &gt;= ``min_chunk_size`` elements, except that an input</span>
+<span class="sd">      shorter than ``min_chunk_size`` is returned as a single chunk (nothing</span>
+<span class="sd">      better is possible).</span>
+<span class="sd">    * Adjacent chunks overlap by whole elements and never leave gaps, so the</span>
+<span class="sd">      original sequence can be reconstructed exactly (see &quot;Reconstruction&quot;).</span>
+<span class="sd">    * Without anchors, adjacent chunks overlap by exactly ``overlap``</span>
+<span class="sd">      elements, except at the final boundary, where the overlap may be</span>
+<span class="sd">      *larger* if that is the only way to keep the last chunks above</span>
+<span class="sd">      ``min_chunk_size`` (e.g. 15 items, chunk_size=10, min_chunk_size=8</span>
+<span class="sd">      forces one overlapping element).</span>
+<span class="sd">    * With anchors, a boundary is anchor aligned whenever a valid aligned cut</span>
+<span class="sd">      exists: the later chunk then starts on an anchor, the earlier chunk</span>
+<span class="sd">      ends right before an anchor, and their shared region is the shortest</span>
+<span class="sd">      run of at least ``overlap`` elements that is delimited that way (so it</span>
+<span class="sd">      may be longer than ``overlap`` when the local anchor spacing exceeds</span>
+<span class="sd">      it).  Boundaries where no aligned cut fits under ``chunk_size`` (anchor</span>
+<span class="sd">      gaps longer than ``chunk_size``), or where an aligned cut would break</span>
+<span class="sd">      ``min_chunk_size``, fall back to plain size-based cutting and share</span>
+<span class="sd">      exactly ``overlap`` elements.  An aligned cut is only taken when it</span>
+<span class="sd">      still consumes at least half a regular step (``(chunk_size - overlap +</span>
+<span class="sd">      1) // 2`` new elements); this keeps anchors from producing</span>
+<span class="sd">      near-duplicate chunks when they are sparse relative to ``overlap``.</span>
+<span class="sd">      The first chunk also necessarily starts where the input starts, whether</span>
+<span class="sd">      or not that is an anchor.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items:</span>
+<span class="sd">        Input sequence (e.g. a tokenized sequence of token ids).</span>
+<span class="sd">    chunk_size:</span>
+<span class="sd">        Desired (maximum) chunk size, &gt; 0.</span>
+<span class="sd">    overlap:</span>
+<span class="sd">        Elements shared between adjacent chunks, ``0 &lt;= overlap &lt; chunk_size``.</span>
+<span class="sd">    min_chunk_size:</span>
+<span class="sd">        Minimum allowed chunk length.  Defaults to ``chunk_size // 2 + 1``.</span>
+<span class="sd">    anchor_range:</span>
+<span class="sd">        Token ids treated as anchors (e.g. ``[bos_id]``).  ``None`` (the</span>
+<span class="sd">        default) or an empty collection disables anchor alignment and the</span>
+<span class="sd">        function behaves exactly like the plain size-based chunker.</span>
+
+<span class="sd">    Reconstruction</span>
+<span class="sd">    --------------</span>
+<span class="sd">    Adjacent chunks overlap but never leave gaps, so ``items`` is rebuilt by</span>
+<span class="sd">    concatenating the chunks while dropping, from each chunk after the first,</span>
+<span class="sd">    the head it shares with the reconstruction built so far:</span>
+
+<span class="sd">    * Without anchors, every non-final boundary shares exactly ``overlap``</span>
+<span class="sd">      elements.  The final boundary may share *more* if ``min_chunk_size``</span>
+<span class="sd">      balancing required it (this can happen even when ``overlap == 0``).</span>
+<span class="sd">    * With anchors, for every non-final chunk take the smallest</span>
+<span class="sd">      ``j &gt;= overlap`` such that ``chunk[j]`` is in ``anchor_range`` and</span>
+<span class="sd">      ``chunk[:j]`` equals the tail of the reconstruction so far (that ``j``</span>
+<span class="sd">      is the anchor-delimited shared region of an aligned boundary); if no</span>
+<span class="sd">      such ``j`` exists the boundary was not anchor aligned and</span>
+<span class="sd">      ``j = overlap``.</span>
+<span class="sd">    * For the last chunk, drop the longest head that equals the tail of the</span>
+<span class="sd">      reconstruction so far: it comes out as ``overlap`` for a plain final</span>
+<span class="sd">      boundary, as the anchor-delimited length for an aligned one, and as the</span>
+<span class="sd">      enlarged shared region when ``min_chunk_size`` balancing applied.  On</span>
+<span class="sd">      pathologically repetitive inputs these content tests can be ambiguous;</span>
+<span class="sd">      the tail equality keeps them self-consistent.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError:</span>
+<span class="sd">        If the arguments are inconsistent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Validate arguments before any early returns.</span>
+    <span class="k">if</span> <span class="n">chunk_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;chunk_size must be &gt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be &gt;= 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be &lt; chunk_size&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_chunk_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">min_chunk_size</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">min_chunk_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;min_chunk_size must be &gt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_chunk_size</span> <span class="o">&gt;</span> <span class="n">chunk_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;min_chunk_size cannot exceed chunk_size&quot;</span><span class="p">)</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="n">chunk_size</span><span class="p">:</span>                      <span class="c1"># also covers n &lt; min_chunk_size</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">)]</span>
+
+    <span class="c1"># Anchor positions (sorted).  With no anchors the aligned branch below is</span>
+    <span class="c1"># never taken and the loop degenerates to the plain size-based algorithm.</span>
+    <span class="n">anchor_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">anchor_range</span><span class="p">)</span> <span class="k">if</span> <span class="n">anchor_range</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">anchors</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tok</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="k">if</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">anchor_set</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">anchor_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="p">[]</span>
+    <span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">-</span> <span class="n">overlap</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">start</span>
+
+        <span class="c1"># Everything left fits into one final chunk.  The position just past</span>
+        <span class="c1"># the input acts as a virtual anchor, so the final chunk trivially</span>
+        <span class="c1"># ends right before an &quot;anchor&quot;.</span>
+        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&lt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">n</span><span class="p">]))</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Try an anchor-aligned boundary: pick the next chunk&#39;s start ``nxt``</span>
+        <span class="c1"># (an anchor) as large as possible such that this chunk can end at</span>
+        <span class="c1"># ``end`` -- the first anchor at least ``overlap`` elements past</span>
+        <span class="c1"># ``nxt`` (with overlap == 0, ``end`` is ``nxt`` itself) -- while</span>
+        <span class="c1"># keeping ``end`` within ``chunk_size`` of ``start`` and leaving a</span>
+        <span class="c1"># tail of at least ``min_chunk_size`` elements.  ``end`` grows</span>
+        <span class="c1"># monotonically with ``nxt``, so the largest feasible ``nxt`` also</span>
+        <span class="c1"># gives the largest (fullest) chunk and the smallest overshoot of</span>
+        <span class="c1"># ``overlap``; a binary search finds it.</span>
+        <span class="k">if</span> <span class="n">anchors</span><span class="p">:</span>
+            <span class="n">lo_i</span> <span class="o">=</span> <span class="n">bisect_right</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>               <span class="c1"># nxt &gt; start</span>
+            <span class="n">hi_i</span> <span class="o">=</span> <span class="n">bisect_right</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">min_chunk_size</span><span class="p">)</span>  <span class="c1"># nxt &lt;= n - min</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">chunk_size</span>                        <span class="c1"># end &lt;= limit</span>
+            <span class="n">found_start</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">found_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">lo_i</span><span class="p">,</span> <span class="n">hi_i</span>
+            <span class="k">while</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+                <span class="n">cand</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">cand</span> <span class="o">+</span> <span class="n">overlap</span><span class="p">)</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">anchors</span><span class="p">)</span> <span class="k">else</span> <span class="n">n</span>
+                <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">limit</span><span class="p">:</span>
+                    <span class="n">found_start</span><span class="p">,</span> <span class="n">found_end</span> <span class="o">=</span> <span class="n">cand</span><span class="p">,</span> <span class="n">end</span>
+                    <span class="n">lo</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hi</span> <span class="o">=</span> <span class="n">mid</span>
+            <span class="k">if</span> <span class="n">found_end</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">found_end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">min_chunk_size</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">found_start</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">found_end</span><span class="p">]))</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">found_start</span>
+                    <span class="k">continue</span>
+                <span class="c1"># The only feasible aligned cut would re-share almost the</span>
+                <span class="c1"># whole chunk (anchors too sparse for this overlap): prefer</span>
+                <span class="c1"># the size-based cut below.</span>
+
+        <span class="c1"># A full chunk would leave a non-empty remainder smaller than</span>
+        <span class="c1"># min_chunk_size: split the remainder almost evenly between the</span>
+        <span class="c1"># final two chunks instead.</span>
+        <span class="k">if</span> <span class="n">remaining</span> <span class="o">-</span> <span class="n">chunk_size</span> <span class="o">&lt;</span> <span class="n">min_chunk_size</span><span class="p">:</span>
+            <span class="c1"># Extra overlap needed so both final chunks can reach</span>
+            <span class="c1"># min_chunk_size; only used if the split is feasible at all,</span>
+            <span class="c1"># otherwise keep taking full chunks until it is.</span>
+            <span class="n">need</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">overlap</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">min_chunk_size</span> <span class="o">-</span> <span class="n">remaining</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">remaining</span> <span class="o">+</span> <span class="n">need</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">chunk_size</span><span class="p">:</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="p">(</span><span class="n">remaining</span> <span class="o">+</span> <span class="n">need</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>          <span class="c1"># larger half</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">first</span><span class="p">]))</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="n">first</span> <span class="o">-</span> <span class="n">need</span><span class="p">:</span><span class="n">n</span><span class="p">]))</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Regular full chunk.</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]))</span>
+        <span class="n">start</span> <span class="o">+=</span> <span class="n">step</span>
+
+    <span class="k">return</span> <span class="n">chunks</span>
+
+<span class="c1">###################################################################################</span>
+
+<span class="k">def</span> <span class="nf">list_to_num_dict</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))}</span>
+        
+    <span class="k">return</span> <span class="p">{</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))}</span>
+
+<span class="c1">###################################################################################</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Module loaded!&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Enjoy! :)&#39;</span><span class="p">)</span>
@@ -30085,6 +30289,289 @@ min_chunk_size:
         <span class="k">if</span> <span class="n">remaining</span> <span class="o">&lt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
             <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">n</span><span class="p">]))</span>
             <span class="k">break</span>
+
+        <span class="c1"># A full chunk would leave a non-empty remainder smaller than</span>
+        <span class="c1"># min_chunk_size: split the remainder almost evenly between the</span>
+        <span class="c1"># final two chunks instead.</span>
+        <span class="k">if</span> <span class="n">remaining</span> <span class="o">-</span> <span class="n">chunk_size</span> <span class="o">&lt;</span> <span class="n">min_chunk_size</span><span class="p">:</span>
+            <span class="c1"># Extra overlap needed so both final chunks can reach</span>
+            <span class="c1"># min_chunk_size; only used if the split is feasible at all,</span>
+            <span class="c1"># otherwise keep taking full chunks until it is.</span>
+            <span class="n">need</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">overlap</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">min_chunk_size</span> <span class="o">-</span> <span class="n">remaining</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">remaining</span> <span class="o">+</span> <span class="n">need</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">chunk_size</span><span class="p">:</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="p">(</span><span class="n">remaining</span> <span class="o">+</span> <span class="n">need</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>          <span class="c1"># larger half</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">first</span><span class="p">]))</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="n">first</span> <span class="o">-</span> <span class="n">need</span><span class="p">:</span><span class="n">n</span><span class="p">]))</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Regular full chunk.</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]))</span>
+        <span class="n">start</span> <span class="o">+=</span> <span class="n">step</span>
+
+    <span class="k">return</span> <span class="n">chunks</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.chunk_by_size_with_anchors">
+    <p>def <span class="ident">chunk_by_size_with_anchors</span>(</p><p>items: &#39;Sequence[T]&#39;, chunk_size: &#39;int&#39;, overlap: &#39;int&#39; = 0, min_chunk_size: &#39;int | None&#39; = None, anchor_range: &#39;list | None&#39; = None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Chunking of sequences by size, with optional anchor-aligned boundaries.</p>
+<p>Split <code>items</code> into chunks of at most <code>chunk_size</code> elements where
+adjacent chunks share <code>overlap</code> elements and every chunk has at least
+<code>min_chunk_size</code> elements.</p>
+<p>If <code>anchor_range</code> is given as a non-empty collection of token ids, the
+chunks are additionally <em>anchor aligned</em> whenever the input allows it:
+such a chunk both begins with a token from <code>anchor_range</code> and ends with
+the token that immediately precedes a boundary anchor (the next chunk's
+first element).  Alignment is best effort: the size guarantees below
+always win when they conflict with alignment.</p>
+<h2 id="guarantees">Guarantees</h2>
+<ul>
+<li>Chunks cover the input in order; <code>chunk_size</code> is a hard maximum.</li>
+<li>Every chunk has &gt;= <code>min_chunk_size</code> elements, except that an input
+  shorter than <code>min_chunk_size</code> is returned as a single chunk (nothing
+  better is possible).</li>
+<li>Adjacent chunks overlap by whole elements and never leave gaps, so the
+  original sequence can be reconstructed exactly (see "Reconstruction").</li>
+<li>Without anchors, adjacent chunks overlap by exactly <code>overlap</code>
+  elements, except at the final boundary, where the overlap may be
+  <em>larger</em> if that is the only way to keep the last chunks above
+  <code>min_chunk_size</code> (e.g. 15 items, chunk_size=10, min_chunk_size=8
+  forces one overlapping element).</li>
+<li>With anchors, a boundary is anchor aligned whenever a valid aligned cut
+  exists: the later chunk then starts on an anchor, the earlier chunk
+  ends right before an anchor, and their shared region is the shortest
+  run of at least <code>overlap</code> elements that is delimited that way (so it
+  may be longer than <code>overlap</code> when the local anchor spacing exceeds
+  it).  Boundaries where no aligned cut fits under <code>chunk_size</code> (anchor
+  gaps longer than <code>chunk_size</code>), or where an aligned cut would break
+  <code>min_chunk_size</code>, fall back to plain size-based cutting and share
+  exactly <code>overlap</code> elements.  An aligned cut is only taken when it
+  still consumes at least half a regular step (<code>(chunk_size - overlap +
+  1) // 2</code> new elements); this keeps anchors from producing
+  near-duplicate chunks when they are sparse relative to <code>overlap</code>.
+  The first chunk also necessarily starts where the input starts, whether
+  or not that is an anchor.</li>
+</ul>
+<h2 id="parameters">Parameters</h2>
+<p>items:
+    Input sequence (e.g. a tokenized sequence of token ids).
+chunk_size:
+    Desired (maximum) chunk size, &gt; 0.
+overlap:
+    Elements shared between adjacent chunks, <code>0 &lt;= overlap &lt; chunk_size</code>.
+min_chunk_size:
+    Minimum allowed chunk length.  Defaults to <code>chunk_size // 2 + 1</code>.
+anchor_range:
+    Token ids treated as anchors (e.g. <code>[bos_id]</code>).  <code>None</code> (the
+    default) or an empty collection disables anchor alignment and the
+    function behaves exactly like the plain size-based chunker.</p>
+<h2 id="reconstruction">Reconstruction</h2>
+<p>Adjacent chunks overlap but never leave gaps, so <code>items</code> is rebuilt by
+concatenating the chunks while dropping, from each chunk after the first,
+the head it shares with the reconstruction built so far:</p>
+<ul>
+<li>Without anchors, every non-final boundary shares exactly <code>overlap</code>
+  elements.  The final boundary may share <em>more</em> if <code>min_chunk_size</code>
+  balancing required it (this can happen even when <code>overlap == 0</code>).</li>
+<li>With anchors, for every non-final chunk take the smallest
+  <code>j &gt;= overlap</code> such that <code>chunk[j]</code> is in <code>anchor_range</code> and
+  <code>chunk[:j]</code> equals the tail of the reconstruction so far (that <code>j</code>
+  is the anchor-delimited shared region of an aligned boundary); if no
+  such <code>j</code> exists the boundary was not anchor aligned and
+  <code>j = overlap</code>.</li>
+<li>For the last chunk, drop the longest head that equals the tail of the
+  reconstruction so far: it comes out as <code>overlap</code> for a plain final
+  boundary, as the anchor-delimited length for an aligned one, and as the
+  enlarged shared region when <code>min_chunk_size</code> balancing applied.  On
+  pathologically repetitive inputs these content tests can be ambiguous;
+  the tail equality keeps them self-consistent.</li>
+</ul>
+<h2 id="raises">Raises</h2>
+<p>ValueError:
+    If the arguments are inconsistent.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.chunk_by_size_with_anchors', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.chunk_by_size_with_anchors" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">chunk_by_size_with_anchors</span><span class="p">(</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+    <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">min_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">anchor_range</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Chunking of sequences by size, with optional anchor-aligned boundaries.</span>
+<span class="sd">    </span>
+<span class="sd">    Split ``items`` into chunks of at most ``chunk_size`` elements where</span>
+<span class="sd">    adjacent chunks share ``overlap`` elements and every chunk has at least</span>
+<span class="sd">    ``min_chunk_size`` elements.</span>
+
+<span class="sd">    If ``anchor_range`` is given as a non-empty collection of token ids, the</span>
+<span class="sd">    chunks are additionally *anchor aligned* whenever the input allows it:</span>
+<span class="sd">    such a chunk both begins with a token from ``anchor_range`` and ends with</span>
+<span class="sd">    the token that immediately precedes a boundary anchor (the next chunk&#39;s</span>
+<span class="sd">    first element).  Alignment is best effort: the size guarantees below</span>
+<span class="sd">    always win when they conflict with alignment.</span>
+
+<span class="sd">    Guarantees</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * Chunks cover the input in order; ``chunk_size`` is a hard maximum.</span>
+<span class="sd">    * Every chunk has &gt;= ``min_chunk_size`` elements, except that an input</span>
+<span class="sd">      shorter than ``min_chunk_size`` is returned as a single chunk (nothing</span>
+<span class="sd">      better is possible).</span>
+<span class="sd">    * Adjacent chunks overlap by whole elements and never leave gaps, so the</span>
+<span class="sd">      original sequence can be reconstructed exactly (see &quot;Reconstruction&quot;).</span>
+<span class="sd">    * Without anchors, adjacent chunks overlap by exactly ``overlap``</span>
+<span class="sd">      elements, except at the final boundary, where the overlap may be</span>
+<span class="sd">      *larger* if that is the only way to keep the last chunks above</span>
+<span class="sd">      ``min_chunk_size`` (e.g. 15 items, chunk_size=10, min_chunk_size=8</span>
+<span class="sd">      forces one overlapping element).</span>
+<span class="sd">    * With anchors, a boundary is anchor aligned whenever a valid aligned cut</span>
+<span class="sd">      exists: the later chunk then starts on an anchor, the earlier chunk</span>
+<span class="sd">      ends right before an anchor, and their shared region is the shortest</span>
+<span class="sd">      run of at least ``overlap`` elements that is delimited that way (so it</span>
+<span class="sd">      may be longer than ``overlap`` when the local anchor spacing exceeds</span>
+<span class="sd">      it).  Boundaries where no aligned cut fits under ``chunk_size`` (anchor</span>
+<span class="sd">      gaps longer than ``chunk_size``), or where an aligned cut would break</span>
+<span class="sd">      ``min_chunk_size``, fall back to plain size-based cutting and share</span>
+<span class="sd">      exactly ``overlap`` elements.  An aligned cut is only taken when it</span>
+<span class="sd">      still consumes at least half a regular step (``(chunk_size - overlap +</span>
+<span class="sd">      1) // 2`` new elements); this keeps anchors from producing</span>
+<span class="sd">      near-duplicate chunks when they are sparse relative to ``overlap``.</span>
+<span class="sd">      The first chunk also necessarily starts where the input starts, whether</span>
+<span class="sd">      or not that is an anchor.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items:</span>
+<span class="sd">        Input sequence (e.g. a tokenized sequence of token ids).</span>
+<span class="sd">    chunk_size:</span>
+<span class="sd">        Desired (maximum) chunk size, &gt; 0.</span>
+<span class="sd">    overlap:</span>
+<span class="sd">        Elements shared between adjacent chunks, ``0 &lt;= overlap &lt; chunk_size``.</span>
+<span class="sd">    min_chunk_size:</span>
+<span class="sd">        Minimum allowed chunk length.  Defaults to ``chunk_size // 2 + 1``.</span>
+<span class="sd">    anchor_range:</span>
+<span class="sd">        Token ids treated as anchors (e.g. ``[bos_id]``).  ``None`` (the</span>
+<span class="sd">        default) or an empty collection disables anchor alignment and the</span>
+<span class="sd">        function behaves exactly like the plain size-based chunker.</span>
+
+<span class="sd">    Reconstruction</span>
+<span class="sd">    --------------</span>
+<span class="sd">    Adjacent chunks overlap but never leave gaps, so ``items`` is rebuilt by</span>
+<span class="sd">    concatenating the chunks while dropping, from each chunk after the first,</span>
+<span class="sd">    the head it shares with the reconstruction built so far:</span>
+
+<span class="sd">    * Without anchors, every non-final boundary shares exactly ``overlap``</span>
+<span class="sd">      elements.  The final boundary may share *more* if ``min_chunk_size``</span>
+<span class="sd">      balancing required it (this can happen even when ``overlap == 0``).</span>
+<span class="sd">    * With anchors, for every non-final chunk take the smallest</span>
+<span class="sd">      ``j &gt;= overlap`` such that ``chunk[j]`` is in ``anchor_range`` and</span>
+<span class="sd">      ``chunk[:j]`` equals the tail of the reconstruction so far (that ``j``</span>
+<span class="sd">      is the anchor-delimited shared region of an aligned boundary); if no</span>
+<span class="sd">      such ``j`` exists the boundary was not anchor aligned and</span>
+<span class="sd">      ``j = overlap``.</span>
+<span class="sd">    * For the last chunk, drop the longest head that equals the tail of the</span>
+<span class="sd">      reconstruction so far: it comes out as ``overlap`` for a plain final</span>
+<span class="sd">      boundary, as the anchor-delimited length for an aligned one, and as the</span>
+<span class="sd">      enlarged shared region when ``min_chunk_size`` balancing applied.  On</span>
+<span class="sd">      pathologically repetitive inputs these content tests can be ambiguous;</span>
+<span class="sd">      the tail equality keeps them self-consistent.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError:</span>
+<span class="sd">        If the arguments are inconsistent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Validate arguments before any early returns.</span>
+    <span class="k">if</span> <span class="n">chunk_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;chunk_size must be &gt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be &gt;= 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be &lt; chunk_size&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_chunk_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">min_chunk_size</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">min_chunk_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;min_chunk_size must be &gt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_chunk_size</span> <span class="o">&gt;</span> <span class="n">chunk_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;min_chunk_size cannot exceed chunk_size&quot;</span><span class="p">)</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="n">chunk_size</span><span class="p">:</span>                      <span class="c1"># also covers n &lt; min_chunk_size</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">)]</span>
+
+    <span class="c1"># Anchor positions (sorted).  With no anchors the aligned branch below is</span>
+    <span class="c1"># never taken and the loop degenerates to the plain size-based algorithm.</span>
+    <span class="n">anchor_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">anchor_range</span><span class="p">)</span> <span class="k">if</span> <span class="n">anchor_range</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">anchors</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tok</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="k">if</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">anchor_set</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">anchor_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="p">[]</span>
+    <span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="o">-</span> <span class="n">overlap</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">start</span>
+
+        <span class="c1"># Everything left fits into one final chunk.  The position just past</span>
+        <span class="c1"># the input acts as a virtual anchor, so the final chunk trivially</span>
+        <span class="c1"># ends right before an &quot;anchor&quot;.</span>
+        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&lt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">n</span><span class="p">]))</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Try an anchor-aligned boundary: pick the next chunk&#39;s start ``nxt``</span>
+        <span class="c1"># (an anchor) as large as possible such that this chunk can end at</span>
+        <span class="c1"># ``end`` -- the first anchor at least ``overlap`` elements past</span>
+        <span class="c1"># ``nxt`` (with overlap == 0, ``end`` is ``nxt`` itself) -- while</span>
+        <span class="c1"># keeping ``end`` within ``chunk_size`` of ``start`` and leaving a</span>
+        <span class="c1"># tail of at least ``min_chunk_size`` elements.  ``end`` grows</span>
+        <span class="c1"># monotonically with ``nxt``, so the largest feasible ``nxt`` also</span>
+        <span class="c1"># gives the largest (fullest) chunk and the smallest overshoot of</span>
+        <span class="c1"># ``overlap``; a binary search finds it.</span>
+        <span class="k">if</span> <span class="n">anchors</span><span class="p">:</span>
+            <span class="n">lo_i</span> <span class="o">=</span> <span class="n">bisect_right</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>               <span class="c1"># nxt &gt; start</span>
+            <span class="n">hi_i</span> <span class="o">=</span> <span class="n">bisect_right</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">min_chunk_size</span><span class="p">)</span>  <span class="c1"># nxt &lt;= n - min</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">chunk_size</span>                        <span class="c1"># end &lt;= limit</span>
+            <span class="n">found_start</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">found_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">lo_i</span><span class="p">,</span> <span class="n">hi_i</span>
+            <span class="k">while</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+                <span class="n">cand</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">anchors</span><span class="p">,</span> <span class="n">cand</span> <span class="o">+</span> <span class="n">overlap</span><span class="p">)</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">anchors</span><span class="p">)</span> <span class="k">else</span> <span class="n">n</span>
+                <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">limit</span><span class="p">:</span>
+                    <span class="n">found_start</span><span class="p">,</span> <span class="n">found_end</span> <span class="o">=</span> <span class="n">cand</span><span class="p">,</span> <span class="n">end</span>
+                    <span class="n">lo</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hi</span> <span class="o">=</span> <span class="n">mid</span>
+            <span class="k">if</span> <span class="n">found_end</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">found_end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">min_chunk_size</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">found_start</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">found_end</span><span class="p">]))</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">found_start</span>
+                    <span class="k">continue</span>
+                <span class="c1"># The only feasible aligned cut would re-share almost the</span>
+                <span class="c1"># whole chunk (anchors too sparse for this overlap): prefer</span>
+                <span class="c1"># the size-based cut below.</span>
 
         <span class="c1"># A full chunk would leave a non-empty remainder smaller than</span>
         <span class="c1"># min_chunk_size: split the remainder almost evenly between the</span>
@@ -40400,6 +40887,31 @@ where the most permissive wins. See original docstring for full details.</p></di
     <span class="n">binary_data</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
     
     <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="TMIDIX.list_to_num_dict">
+    <p>def <span class="ident">list_to_num_dict</span>(</p><p>lst, reverse=False)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-TMIDIX.list_to_num_dict', this);">Show source &equiv;</a></p>
+  <div id="source-TMIDIX.list_to_num_dict" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">list_to_num_dict</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))}</span>
+        
+    <span class="k">return</span> <span class="p">{</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">))}</span>
 </pre></div>
 
   </div>
