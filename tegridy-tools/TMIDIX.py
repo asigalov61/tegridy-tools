@@ -52,7 +52,7 @@ from __future__ import annotations
 
 ###################################################################################
 
-__version__ = "26.9.23" # TMIDIX version
+__version__ = "26.10.19" # TMIDIX version
 
 ###################################################################################
 
@@ -1503,6 +1503,7 @@ import tqdm
 import multiprocessing
 
 import bisect
+from bisect import bisect_left, bisect_right
 
 from itertools import zip_longest
 from itertools import groupby
@@ -21035,6 +21036,207 @@ def chunk_by_size(
 
     return chunks
        
+###################################################################################
+
+def chunk_by_size_with_anchors(
+    items: Sequence[T],
+    chunk_size: int,
+    overlap: int = 0,
+    min_chunk_size: int | None = None,
+    anchor_range: list | None = None,
+) -> List[List[T]]:
+    
+    """
+    Chunking of sequences by size, with optional anchor-aligned boundaries.
+    
+    Split ``items`` into chunks of at most ``chunk_size`` elements where
+    adjacent chunks share ``overlap`` elements and every chunk has at least
+    ``min_chunk_size`` elements.
+
+    If ``anchor_range`` is given as a non-empty collection of token ids, the
+    chunks are additionally *anchor aligned* whenever the input allows it:
+    such a chunk both begins with a token from ``anchor_range`` and ends with
+    the token that immediately precedes a boundary anchor (the next chunk's
+    first element).  Alignment is best effort: the size guarantees below
+    always win when they conflict with alignment.
+
+    Guarantees
+    ----------
+    * Chunks cover the input in order; ``chunk_size`` is a hard maximum.
+    * Every chunk has >= ``min_chunk_size`` elements, except that an input
+      shorter than ``min_chunk_size`` is returned as a single chunk (nothing
+      better is possible).
+    * Adjacent chunks overlap by whole elements and never leave gaps, so the
+      original sequence can be reconstructed exactly (see "Reconstruction").
+    * Without anchors, adjacent chunks overlap by exactly ``overlap``
+      elements, except at the final boundary, where the overlap may be
+      *larger* if that is the only way to keep the last chunks above
+      ``min_chunk_size`` (e.g. 15 items, chunk_size=10, min_chunk_size=8
+      forces one overlapping element).
+    * With anchors, a boundary is anchor aligned whenever a valid aligned cut
+      exists: the later chunk then starts on an anchor, the earlier chunk
+      ends right before an anchor, and their shared region is the shortest
+      run of at least ``overlap`` elements that is delimited that way (so it
+      may be longer than ``overlap`` when the local anchor spacing exceeds
+      it).  Boundaries where no aligned cut fits under ``chunk_size`` (anchor
+      gaps longer than ``chunk_size``), or where an aligned cut would break
+      ``min_chunk_size``, fall back to plain size-based cutting and share
+      exactly ``overlap`` elements.  An aligned cut is only taken when it
+      still consumes at least half a regular step (``(chunk_size - overlap +
+      1) // 2`` new elements); this keeps anchors from producing
+      near-duplicate chunks when they are sparse relative to ``overlap``.
+      The first chunk also necessarily starts where the input starts, whether
+      or not that is an anchor.
+
+    Parameters
+    ----------
+    items:
+        Input sequence (e.g. a tokenized sequence of token ids).
+    chunk_size:
+        Desired (maximum) chunk size, > 0.
+    overlap:
+        Elements shared between adjacent chunks, ``0 <= overlap < chunk_size``.
+    min_chunk_size:
+        Minimum allowed chunk length.  Defaults to ``chunk_size // 2 + 1``.
+    anchor_range:
+        Token ids treated as anchors (e.g. ``[bos_id]``).  ``None`` (the
+        default) or an empty collection disables anchor alignment and the
+        function behaves exactly like the plain size-based chunker.
+
+    Reconstruction
+    --------------
+    Adjacent chunks overlap but never leave gaps, so ``items`` is rebuilt by
+    concatenating the chunks while dropping, from each chunk after the first,
+    the head it shares with the reconstruction built so far:
+
+    * Without anchors, every non-final boundary shares exactly ``overlap``
+      elements.  The final boundary may share *more* if ``min_chunk_size``
+      balancing required it (this can happen even when ``overlap == 0``).
+    * With anchors, for every non-final chunk take the smallest
+      ``j >= overlap`` such that ``chunk[j]`` is in ``anchor_range`` and
+      ``chunk[:j]`` equals the tail of the reconstruction so far (that ``j``
+      is the anchor-delimited shared region of an aligned boundary); if no
+      such ``j`` exists the boundary was not anchor aligned and
+      ``j = overlap``.
+    * For the last chunk, drop the longest head that equals the tail of the
+      reconstruction so far: it comes out as ``overlap`` for a plain final
+      boundary, as the anchor-delimited length for an aligned one, and as the
+      enlarged shared region when ``min_chunk_size`` balancing applied.  On
+      pathologically repetitive inputs these content tests can be ambiguous;
+      the tail equality keeps them self-consistent.
+
+    Raises
+    ------
+    ValueError:
+        If the arguments are inconsistent.
+    """
+    # Validate arguments before any early returns.
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be > 0")
+    if overlap < 0:
+        raise ValueError("overlap must be >= 0")
+    if overlap >= chunk_size:
+        raise ValueError("overlap must be < chunk_size")
+    if min_chunk_size is None:
+        min_chunk_size = chunk_size // 2 + 1
+    if min_chunk_size <= 0:
+        raise ValueError("min_chunk_size must be > 0")
+    if min_chunk_size > chunk_size:
+        raise ValueError("min_chunk_size cannot exceed chunk_size")
+
+    n = len(items)
+    if n == 0:
+        return []
+    if n <= chunk_size:                      # also covers n < min_chunk_size
+        return [list(items)]
+
+    # Anchor positions (sorted).  With no anchors the aligned branch below is
+    # never taken and the loop degenerates to the plain size-based algorithm.
+    anchor_set = set(anchor_range) if anchor_range else None
+    anchors = (
+        [i for i, tok in enumerate(items) if tok in anchor_set]
+        if anchor_set is not None
+        else []
+    )
+
+    step = chunk_size - overlap
+    chunks: List[List[T]] = []
+    start = 0
+
+    while True:
+        remaining = n - start
+
+        # Everything left fits into one final chunk.  The position just past
+        # the input acts as a virtual anchor, so the final chunk trivially
+        # ends right before an "anchor".
+        if remaining <= chunk_size:
+            chunks.append(list(items[start:n]))
+            break
+
+        # Try an anchor-aligned boundary: pick the next chunk's start ``nxt``
+        # (an anchor) as large as possible such that this chunk can end at
+        # ``end`` -- the first anchor at least ``overlap`` elements past
+        # ``nxt`` (with overlap == 0, ``end`` is ``nxt`` itself) -- while
+        # keeping ``end`` within ``chunk_size`` of ``start`` and leaving a
+        # tail of at least ``min_chunk_size`` elements.  ``end`` grows
+        # monotonically with ``nxt``, so the largest feasible ``nxt`` also
+        # gives the largest (fullest) chunk and the smallest overshoot of
+        # ``overlap``; a binary search finds it.
+        if anchors:
+            lo_i = bisect_right(anchors, start)               # nxt > start
+            hi_i = bisect_right(anchors, n - min_chunk_size)  # nxt <= n - min
+            limit = start + chunk_size                        # end <= limit
+            found_start = -1
+            found_end = -1
+            lo, hi = lo_i, hi_i
+            while lo < hi:
+                mid = (lo + hi) // 2
+                cand = anchors[mid]
+                j = bisect_left(anchors, cand + overlap)
+                end = anchors[j] if j < len(anchors) else n
+                if end <= limit:
+                    found_start, found_end = cand, end
+                    lo = mid + 1
+                else:
+                    hi = mid
+            if found_end >= 0 and found_end - start >= min_chunk_size:
+                if found_start - start >= (step + 1) // 2:
+                    chunks.append(list(items[start:found_end]))
+                    start = found_start
+                    continue
+                # The only feasible aligned cut would re-share almost the
+                # whole chunk (anchors too sparse for this overlap): prefer
+                # the size-based cut below.
+
+        # A full chunk would leave a non-empty remainder smaller than
+        # min_chunk_size: split the remainder almost evenly between the
+        # final two chunks instead.
+        if remaining - chunk_size < min_chunk_size:
+            # Extra overlap needed so both final chunks can reach
+            # min_chunk_size; only used if the split is feasible at all,
+            # otherwise keep taking full chunks until it is.
+            need = max(overlap, 2 * min_chunk_size - remaining)
+            if remaining + need <= 2 * chunk_size:
+                first = (remaining + need + 1) // 2          # larger half
+                chunks.append(list(items[start:start + first]))
+                chunks.append(list(items[start + first - need:n]))
+                break
+
+        # Regular full chunk.
+        chunks.append(list(items[start:start + chunk_size]))
+        start += step
+
+    return chunks
+
+###################################################################################
+
+def list_to_num_dict(lst, reverse=False):
+
+    if reverse:
+        return {i: lst[i] for i in range(len(lst))}
+        
+    return {lst[i]: i for i in range(len(lst))}
+
 ###################################################################################
 
 print('Module loaded!')
